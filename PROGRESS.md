@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 2 — Scaffold (config loader + tenant resolver TDD, Drizzle+PGlite harness, workspace file, .env.example). Next step: src/server/config.ts with Zod + tests.
+Now: Phase 3 — core domain + DB. Phase 2 pushed c9409d4 (await CI then tick). Steps: full schema → shared kernel (money, errors, events) → catalog → customers → orders+stock → plans → site-settings → access.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)

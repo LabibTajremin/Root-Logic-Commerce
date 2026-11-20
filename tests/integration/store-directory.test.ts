@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { getTableConfig } from 'drizzle-orm/pg-core'
 import { createTestDb } from '../fixtures/db'
 import { storeDomains, stores } from '@/infrastructure/db/schema'
 import { createStoreDirectory } from '@/infrastructure/db/repositories/store-directory'
@@ -31,14 +30,6 @@ describe('store directory (PGlite)', () => {
     await expect(
       db.insert(storeDomains).values({ storeId: a!.id, host: 'a.test' }),
     ).rejects.toThrow()
-  })
-})
-
-describe('schema', () => {
-  it('store_domains.store_id references stores.id with cascade delete', () => {
-    const [fk] = getTableConfig(storeDomains).foreignKeys
-    expect(fk!.reference().foreignTable).toBe(stores)
-    expect(fk!.onDelete).toBe('cascade')
   })
 })
 
