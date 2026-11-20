@@ -15,6 +15,8 @@ const lastCode = (to: string) => {
     .filter((m) => m.to === to)
   return /code is (\d{6})/.exec(mine.at(-1)!.text)![1]!
 }
+const saved = (page: Page) =>
+  expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const otpToggles = async (page: Page, sms: boolean, email: boolean) => {
   await page.goto('/admin/messages')
   await page.getByLabel('SMS code').setChecked(sms)
@@ -94,4 +96,95 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
     await page.goto('/missing-page')
     await a11y()
   }
+})
+
+test('design editor previews live, warns on low contrast and publishes', async ({ page, a11y }) => {
+  await signedIn(page)
+  await page.goto('/admin/design')
+  await expect(page.getByRole('heading', { level: 1, name: 'Design' })).toBeVisible()
+  await a11y('iframe') // the storefront inside the preview is checked on its own
+  await page.locator('#color-accent').fill('#a8763e')
+  await page.locator('#color-text').fill('#eeeeee')
+  await alert(page, /Low contrast: text/)
+  await page.locator('#color-text').fill('#1e2a1c')
+  await page.getByLabel('Theme').selectOption('ankito')
+  await page.getByLabel('Store name').fill('Ankito')
+  await page.getByLabel('Name font').selectOption('dm-serif-display')
+  await page.getByLabel('Site font').selectOption('dm-sans')
+  await page.locator('#color-button').fill('#3c6430')
+  await page.locator('#color-header').fill('#fbf8f2')
+  await page.getByLabel('Mode').selectOption('dark')
+  await page.getByLabel('Mode').selectOption('light')
+  await page.getByLabel('Light background').selectOption('cream')
+  await page.getByLabel('Dark background').selectOption('black')
+  await page.getByLabel('Let visitors switch light/dark').check()
+  await page.getByLabel('Background pattern').selectOption('p07')
+  await page.getByLabel('Pattern opacity').fill('30')
+  await page.getByLabel('Header opacity').fill('90')
+  await page.getByLabel('Sticky header').uncheck()
+  await page.getByLabel('Card style').selectOption('elevated')
+  await page.getByLabel('Product showcase').selectOption('carousel')
+  await page.getByLabel('Hover effect').selectOption('zoom')
+  await page.getByLabel('Animation').selectOption('smooth')
+  await page.getByLabel('Footer text').fill('Handcrafted in Bangladesh')
+  await page.getByRole('button', { name: 'Desktop' }).click()
+  await page.getByRole('button', { name: 'Mobile' }).click()
+  const preview = page.frameLocator('iframe[title="Live preview — not published yet"]')
+  await expect
+    .poll(() => preview.locator('#rlc-preview').evaluate((e) => e.textContent))
+    .toMatch(/--color-accent:#A8763E/)
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+
+  // A second editor opened earlier is now stale and must not overwrite.
+  const stale = await page.context().newPage()
+  await stale.goto('/admin/design')
+  await page.getByLabel('Footer text').fill('v2')
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await page.waitForLoadState('networkidle')
+  await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+  await stale.getByRole('button', { name: 'Publish' }).click()
+  await expect(
+    stale.getByRole('status').filter({ hasText: 'Settings were changed elsewhere' }),
+  ).toBeVisible()
+  await stale.close()
+  await page.reload()
+  await expect(page.getByLabel('Store name')).toHaveValue('Ankito')
+})
+
+test('SEO, messages, plan, help, promotions and more pages', async ({ page, a11y }) => {
+  await signedIn(page)
+  await page.goto('/admin/seo')
+  await a11y()
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('UA-1')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await alert(page, 'Please check the highlighted fields.')
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('G-7Q2XK1PL0Z')
+  await page.getByLabel('Site title template').fill('%s | Ankito')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await page.reload()
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await expect(page.getByText('SEO Pro audit')).toBeVisible()
+
+  await page.goto('/admin/plan')
+  await a11y()
+  await expect(page.getByTestId('feature-removeBranding')).toContainText('Premium')
+  await expect(page.getByRole('link', { name: 'Unlock — contact Root Logic Lab' })).toHaveAttribute(
+    'href',
+    /^https:\/\/wa\.me\/\d+$/,
+  )
+
+  await page.goto('/admin/help')
+  await page.getByRole('link', { name: 'Create a category' }).click()
+  await expect(page).toHaveURL(/categories/)
+  await page.goto('/admin/promotions')
+  await expect(page.getByText('Banners, posters and promo videos')).toBeVisible()
+  await page.goto('/admin/more')
+  await page.getByRole('link', { name: 'Help center' }).last().click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Help center' })).toBeVisible()
+  await page.goto('/admin/orders?status=PENDING&q=017')
+  await expect(page.getByText('No orders here yet.')).toBeVisible()
 })

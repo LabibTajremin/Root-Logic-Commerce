@@ -30,8 +30,8 @@ All matched files use Prettier code style!
 
  Test Files  20 passed (20)
       Tests  91 passed (91)
-   Start at  16:39:35
-   Duration  27.39s (tests 93%, import 6%, transform 1%)
+   Start at  16:45:44
+   Duration  28.19s (tests 92%, import 7%, worker 1%)
 
 
 ▶ pnpm build
@@ -41,15 +41,18 @@ All matched files use Prettier code style!
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (Turbopack)
-✓ Running next.config.ts took 32ms
+✓ Running next.config.ts took 41ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 3.8s
+✓ Compiled successfully in 4.2s
   Running TypeScript ...
-  Finished TypeScript in 6.6s ...
+  Finished TypeScript in 4.5s ...
   Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/2) ...
-✓ Generating static pages using 3 workers (2/2) in 143ms
+  Generating static pages using 3 workers (0/4) ...
+  Generating static pages using 3 workers (1/4) 
+  Generating static pages using 3 workers (2/4) 
+  Generating static pages using 3 workers (3/4) 
+✓ Generating static pages using 3 workers (4/4) in 109ms
   Finalizing page optimization ...
 
 Route (app)
@@ -80,7 +83,9 @@ Route (app)
 ├ ƒ /checkout
 ├ ƒ /order/[no]
 ├ ƒ /p/[slug]
+├ ƒ /robots.txt
 ├ ƒ /search
+├ ƒ /sitemap.xml
 └ ƒ /track
 
 
@@ -94,16 +99,19 @@ Route (app)
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (webpack)
-✓ Running next.config.ts took 33ms
+✓ Running next.config.ts took 31ms
 
   Creating an optimized production build ...
 ⚠ Production code optimization has been disabled in your project. Read more: https://nextjs.org/docs/messages/minification-disabled
-✓ Compiled successfully in 7.6s
+✓ Compiled successfully in 8.5s
   Running TypeScript ...
-  Finished TypeScript in 2.9s ...
+  Finished TypeScript in 3.3s ...
   Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/2) ...
-✓ Generating static pages using 3 workers (2/2) in 279ms
+  Generating static pages using 3 workers (0/4) ...
+  Generating static pages using 3 workers (1/4) 
+  Generating static pages using 3 workers (2/4) 
+  Generating static pages using 3 workers (3/4) 
+✓ Generating static pages using 3 workers (4/4) in 273ms
   Finalizing page optimization ...
   Collecting build traces ...
 
@@ -135,7 +143,9 @@ Route (app)
 ├ ƒ /checkout
 ├ ƒ /order/[no]
 ├ ƒ /p/[slug]
+├ ƒ /robots.txt
 ├ ƒ /search
+├ ƒ /sitemap.xml
 └ ƒ /track
 
 
@@ -144,47 +154,47 @@ Route (app)
 ▲ Next.js 16.4.6
 - Local:         http://127.0.0.1:3100
 - Network:       http://127.0.0.1:3100
-✓ Ready in 187ms
-✓ Running next.config.ts took 42ms
+✓ Ready in 197ms
+✓ Running next.config.ts took 45ms
 ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
 
 > root-logic-commerce@0.1.0 e2e /home/user/Root-Logic-Commerce
 > playwright test --trace off
 
 
-Running 32 tests using 2 workers
+Running 34 tests using 2 workers
 
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (621ms)
-[2m2026-11-20T16:41:08.310Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (690ms)
+[2m2026-11-20T16:47:22.643Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (750ms)
+  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (779ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
   ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (467ms)
+  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (505ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:10.759Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.5s)
+[2m2026-11-20T16:47:25.150Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.7s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:11.173Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (367ms)
+[2m2026-11-20T16:47:25.558Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (471ms)
+[2m2026-11-20T16:47:25.903Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:11.522Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T16:41:11.868Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T16:41:12.201Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
+[2m2026-11-20T16:47:26.323Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:47:26.672Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.5s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (3.9s)
+  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (3.1s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.5s)
+  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.8s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (2.5s)
+  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (3.1s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (4.2s)
+  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (4.4s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  12 [mobile] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (4.6s)
+  ✓  12 [mobile] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (5.0s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
   ✓  13 [mobile] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages (5.5s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
@@ -192,81 +202,82 @@ Running 32 tests using 2 workers
     at JSON.parse (<anonymous>)
     at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
   ✓  14 [mobile] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (13.7s)
-  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (13.0s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  16 [mobile] › tests/e2e/storefront.spec.ts:221:1 › robots.txt and sitemap.xml use the store origin (1.9s)
+  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (13.4s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (544ms)
+[2m2026-11-20T16:47:56.581Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (472ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:41.216Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (786ms)
+  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (677ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
+  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.3s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (498ms)
+  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (478ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:43.585Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.6s)
+[2m2026-11-20T16:47:59.083Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.8s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:43.931Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (400ms)
+[2m2026-11-20T16:47:59.499Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:47:59.863Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  23 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (487ms)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T16:41:44.299Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T16:41:44.605Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T16:41:44.983Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.2s)
+[2m2026-11-20T16:48:00.283Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:48:00.698Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.7s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (4.0s)
+  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (4.2s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.3s)
+  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.5s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (2.7s)
+  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (2.9s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (4.0s)
+  ✓  27 [desktop] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (3.9s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  27 [desktop] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (4.5s)
+  ✓  28 [desktop] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (4.2s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  28 [desktop] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages (5.8s)
+  ✘  29 [desktop] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages (7.0s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (13.0s)
 [MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
 [checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
     at JSON.parse (<anonymous>)
     at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
-  ✓  29 [desktop] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (13.4s)
-  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (12.7s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  31 [settings] › tests/e2e/settings.spec.ts:32:1 › checkout asks for an SMS, then an email code when the owner turns OTP on (5.5s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✘  32 [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly (7.9s)
+  ✓  32 [desktop] › tests/e2e/storefront.spec.ts:221:1 › robots.txt and sitemap.xml use the store origin (2.0s)
+  ✓  31 [desktop] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (13.1s)
 
 
-  1) [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly ──
+  1) [desktop] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages 
 
-    Error: expect(received).toEqual(expected) // deep equality
+    Error: expect(locator).toBeVisible() failed
 
-    - Expected  - 1
-    + Received  + 3
+    Locator: getByRole('status').filter({ hasText: 'Saved' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
 
-    - Array []
-    + Array [
-    +   "color-contrast: Elements must meet minimum color contrast ratio thresholds @ a[aria-current=\"true\"], h1, #q, .text-xl.font-heading[href$=\"out-settings-mwp7iwf2\"], li:nth-child(1) > article > .p-4.flex-1.gap-2 > .tracking-widest.text-sm, .text-xl.font-heading[href$=\"sale-settings-mwp7iwf2\"], li:nth-child(2) > article > .p-4.flex-1.gap-2 > .tracking-widest.text-sm, .gap-2.flex-col:nth-child(1) > .text-xl.font-heading, nav[aria-label=\"Shop\"] > .font-semibold, nav[aria-label=\"Help\"] > .font-semibold",
-    + ]
+    Call log:
+      - Expect "toBeVisible" getByRole('status').filter({ hasText: 'Saved' }) with timeout 5000ms
+      - waiting for getByRole('status').filter({ hasText: 'Saved' })
 
-       at fixtures.ts:58
 
-      56 |           (v) => `${v.id}: ${v.help} @ ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
-      57 |         ),
-    > 58 |       ).toEqual([])
-         |         ^
-      59 |     })
-      60 |   },
-      61 | })
-        at /home/user/Root-Logic-Commerce/tests/e2e/fixtures.ts:58:9
-        at /home/user/Root-Logic-Commerce/tests/e2e/settings.spec.ts:84:5
+       5 | const uid = () => `${test.info().project.name}-${Date.now().toString(36)}`
+       6 | const saved = (page: Page) =>
+    >  7 |   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+         |                                                                 ^
+       8 | const alert = (page: Page, text: string | RegExp) =>
+       9 |   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
+      10 |
+        at saved (/home/user/Root-Logic-Commerce/tests/e2e/admin-pages.spec.ts:7:65)
+        at /home/user/Root-Logic-Commerce/tests/e2e/admin-pages.spec.ts:236:9
 
-    Error Context: test-results/settings-every-theme-renders-the-storefront-accessibly-settings/error-context.md
+    Error Context: test-results/admin-pages-SEO-messages-plan-help-promotions-and-more-pages-desktop/error-context.md
 
   1 failed
-    [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly ───
-  31 passed (1.4m)
+    [desktop] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages 
+  2 did not run
+  31 passed (1.2m)
  ELIFECYCLE  Command failed with exit code 1.
  ELIFECYCLE  Command failed with exit code 1.
 exit 1
