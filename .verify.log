@@ -30,8 +30,8 @@ All matched files use Prettier code style!
 
  Test Files  27 passed (27)
       Tests  116 passed (116)
-   Start at  20:40:46
-   Duration  33.13s (tests 92%, import 7%, worker 1%)
+   Start at  20:59:39
+   Duration  33.95s (tests 91%, import 8%, worker 1%)
 
 
 ▶ pnpm build
@@ -41,20 +41,20 @@ All matched files use Prettier code style!
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (Turbopack)
-✓ Running next.config.ts took 29ms
+✓ Running next.config.ts took 36ms
 - Experiments (use with caution):
   · serverActions
 
   Creating an optimized production build ...
-✓ Compiled successfully in 777ms
+✓ Compiled successfully in 1506ms
   Running TypeScript ...
-  Finished TypeScript in 3.0s ...
+  Finished TypeScript in 2.9s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/4) ...
   Generating static pages using 3 workers (1/4) 
   Generating static pages using 3 workers (2/4) 
   Generating static pages using 3 workers (3/4) 
-✓ Generating static pages using 3 workers (4/4) in 150ms
+✓ Generating static pages using 3 workers (4/4) in 301ms
   Finalizing page optimization ...
 
 Route (app)
@@ -102,21 +102,21 @@ Route (app)
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (webpack)
-✓ Running next.config.ts took 34ms
+✓ Running next.config.ts took 26ms
 - Experiments (use with caution):
   · serverActions
 
   Creating an optimized production build ...
 ⚠ Production code optimization has been disabled in your project. Read more: https://nextjs.org/docs/messages/minification-disabled
-✓ Compiled successfully in 7.3s
+✓ Compiled successfully in 7.2s
   Running TypeScript ...
-  Finished TypeScript in 2.7s ...
+  Finished TypeScript in 2.8s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/4) ...
   Generating static pages using 3 workers (1/4) 
   Generating static pages using 3 workers (2/4) 
   Generating static pages using 3 workers (3/4) 
-✓ Generating static pages using 3 workers (4/4) in 879ms
+✓ Generating static pages using 3 workers (4/4) in 814ms
   Finalizing page optimization ...
   Collecting build traces ...
 
@@ -161,7 +161,7 @@ Route (app)
 - Local:         http://127.0.0.1:3100
 - Network:       http://127.0.0.1:3100
 ✓ Ready in 130ms
-✓ Running next.config.ts took 42ms
+✓ Running next.config.ts took 37ms
 ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
 
 > root-logic-commerce@0.1.0 e2e /home/user/Root-Logic-Commerce
@@ -170,26 +170,26 @@ Route (app)
 
 Running 35 tests using 2 workers
 
-[2m2026-11-20T20:42:16.942Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (611ms)
-  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (849ms)
-  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
-  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (435ms)
-[2m2026-11-20T20:42:19.367Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.5s)
-[2m2026-11-20T20:42:19.738Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (362ms)
-[2m2026-11-20T20:42:20.113Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T20:42:20.449Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T20:42:20.865Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
+  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (526ms)
+[2m2026-11-20T21:01:09.881Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (768ms)
+  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.0s)
+  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (420ms)
+[2m2026-11-20T21:01:12.009Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.3s)
+[2m2026-11-20T21:01:12.349Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (344ms)
+[2m2026-11-20T21:01:12.682Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T21:01:13.006Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T21:01:13.406Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.2s)
 [admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
-params: true,95ad6e13-ec5c-4916-9ba9-2603037ea6cb,x
+params: true,dd5955cc-0c01-4fb5-8042-4278a843ad87,x
     at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
     at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
     at async act (.next-cov/server/app/admin/(panel)/stock/rlc/src/app/admin/(panel)/act.ts:21:10) {
   query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-  params: [ true, '95ad6e13-ec5c-4916-9ba9-2603037ea6cb', 'x' ],
+  params: [ true, 'dd5955cc-0c01-4fb5-8042-4278a843ad87', 'x' ],
   [cause]: error: invalid input syntax for type uuid: "x"
       at ignore-listed frames {
     length: 133,
@@ -210,41 +210,41 @@ params: true,95ad6e13-ec5c-4916-9ba9-2603037ea6cb,x
     line: '194',
     routine: 'string_to_uuid',
     query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-    params: [ true, '95ad6e13-ec5c-4916-9ba9-2603037ea6cb', 'x' ],
+    params: [ true, 'dd5955cc-0c01-4fb5-8042-4278a843ad87', 'x' ],
     queryOptions: { rowMode: 'object', parsers: [Object] }
   }
 }
-  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:43:1 › categories: add, nest, rename, block cycles, reorder and archive (4.4s)
-  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:88:1 › products: validation, create, edit, reorder and stock adjustments (5.0s)
-  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:147:1 › unknown ids show not found (2.7s)
-  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:164:1 › owner invites staff; staff cannot reach owner-only settings (3.7s)
+  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:40:1 › categories: add, nest, rename, block cycles, reorder and archive (4.3s)
+  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:85:1 › products: validation, create, edit, reorder and stock adjustments (5.1s)
+  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:144:1 › unknown ids show not found (2.7s)
+  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:161:1 › owner invites staff; staff cannot reach owner-only settings (3.8s)
 [checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
     at JSON.parse (<anonymous>)
     at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
-  ✓  13 [mobile] › tests/e2e/storefront.spec.ts:148:1 › cart and checkout edge cases (12.1s)
-  ✓  12 [mobile] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.1s)
-  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:259:1 › robots.txt and sitemap.xml use the store origin (1.9s)
-  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:285:1 › product images: upload checks, Drive links, removal, and the shop shows them (7.0s)
-  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (502ms)
-[2m2026-11-20T20:42:50.572Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (687ms)
+  ✓  13 [mobile] › tests/e2e/storefront.spec.ts:150:1 › cart and checkout edge cases (12.3s)
+  ✓  12 [mobile] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.7s)
+  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:261:1 › robots.txt and sitemap.xml use the store origin (1.9s)
+  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:287:1 › product images: upload checks, Drive links, removal, and the shop shows them (6.9s)
+  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (418ms)
+[2m2026-11-20T21:01:43.532Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (765ms)
   ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
-  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (418ms)
-[2m2026-11-20T20:42:52.846Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.5s)
-[2m2026-11-20T20:42:53.278Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (404ms)
-[2m2026-11-20T20:42:53.581Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T20:42:53.917Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T20:42:54.283Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.3s)
+  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (362ms)
+[2m2026-11-20T21:01:45.875Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.7s)
+[2m2026-11-20T21:01:46.345Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (385ms)
+[2m2026-11-20T21:01:46.700Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T21:01:46.980Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T21:01:47.365Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
 [admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
-params: true,95ad6e13-ec5c-4916-9ba9-2603037ea6cb,x
+params: true,dd5955cc-0c01-4fb5-8042-4278a843ad87,x
     at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
     at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
     at async act (.next-cov/server/app/admin/(panel)/stock/rlc/src/app/admin/(panel)/act.ts:21:10) {
   query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-  params: [ true, '95ad6e13-ec5c-4916-9ba9-2603037ea6cb', 'x' ],
+  params: [ true, 'dd5955cc-0c01-4fb5-8042-4278a843ad87', 'x' ],
   [cause]: error: invalid input syntax for type uuid: "x"
       at ignore-listed frames {
     length: 133,
@@ -265,28 +265,28 @@ params: true,95ad6e13-ec5c-4916-9ba9-2603037ea6cb,x
     line: '194',
     routine: 'string_to_uuid',
     query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-    params: [ true, '95ad6e13-ec5c-4916-9ba9-2603037ea6cb', 'x' ],
+    params: [ true, 'dd5955cc-0c01-4fb5-8042-4278a843ad87', 'x' ],
     queryOptions: { rowMode: 'object', parsers: [Object] }
   }
 }
-  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:43:1 › categories: add, nest, rename, block cycles, reorder and archive (3.7s)
-  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:88:1 › products: validation, create, edit, reorder and stock adjustments (4.7s)
-  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:147:1 › unknown ids show not found (2.5s)
-  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:164:1 › owner invites staff; staff cannot reach owner-only settings (3.8s)
+  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:40:1 › categories: add, nest, rename, block cycles, reorder and archive (4.3s)
+  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:85:1 › products: validation, create, edit, reorder and stock adjustments (5.2s)
+  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:144:1 › unknown ids show not found (2.7s)
+  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:161:1 › owner invites staff; staff cannot reach owner-only settings (4.0s)
 [checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
     at JSON.parse (<anonymous>)
     at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
-  ✓  28 [desktop] › tests/e2e/storefront.spec.ts:148:1 › cart and checkout edge cases (11.4s)
-  ✓  27 [desktop] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.3s)
-  ✓  29 [desktop] › tests/e2e/storefront.spec.ts:259:1 › robots.txt and sitemap.xml use the store origin (1.9s)
-  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:285:1 › product images: upload checks, Drive links, removal, and the shop shows them (6.5s)
+  ✓  28 [desktop] › tests/e2e/storefront.spec.ts:150:1 › cart and checkout edge cases (12.6s)
+  ✓  27 [desktop] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (17.0s)
+  ✓  29 [desktop] › tests/e2e/storefront.spec.ts:261:1 › robots.txt and sitemap.xml use the store origin (2.0s)
+  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:287:1 › product images: upload checks, Drive links, removal, and the shop shows them (7.3s)
   ✓  31 [settings] › tests/e2e/settings.spec.ts:35:1 › checkout asks for an SMS, then an email code when the owner turns OTP on (5.0s)
-  ✓  32 [settings] › tests/e2e/settings.spec.ts:73:1 › every theme renders the storefront accessibly (23.5s)
+  ✓  32 [settings] › tests/e2e/settings.spec.ts:73:1 › every theme renders the storefront accessibly (24.9s)
   ✓  33 [settings] › tests/e2e/settings.spec.ts:104:1 › design editor previews live, warns on low contrast and publishes (3.5s)
   ✓  34 [settings] › tests/e2e/settings.spec.ts:157:1 › SEO, messages, plan, help, promotions and more pages (4.5s)
-  ✓  35 [settings] › tests/e2e/settings.spec.ts:194:1 › SUPER_ADMIN grants and revokes a premium feature; owners only see locks (1.8s)
+  ✓  35 [settings] › tests/e2e/settings.spec.ts:194:1 › SUPER_ADMIN grants and revokes a premium feature; owners only see locks (2.1s)
 
-  35 passed (1.8m)
+  35 passed (1.9m)
 
 ▶ pnpm coverage:merge
 

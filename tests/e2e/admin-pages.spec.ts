@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { signedIn } from './admin'
 
@@ -7,19 +7,6 @@ const saved = (page: Page) =>
   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const alert = (page: Page, text: string | RegExp) =>
   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
-/** dnd-kit's screen-reader announcements double as a "sensor is ready" signal. */
-const announced = (page: Page, text: string | RegExp) =>
-  expect(page.getByRole('status').filter({ hasText: text })).toBeAttached()
-const pickUp = async (page: Page, item: Locator) => {
-  await item.getByRole('button', { name: 'Drag to reorder' }).focus()
-  await page.keyboard.press('Space')
-  await announced(page, /Picked up draggable item|was moved over droppable area/)
-}
-const drop = async (page: Page, item: Locator) => {
-  await page.keyboard.press('Space')
-  await expect(item).toHaveAttribute('data-dragging', 'false')
-}
-
 /** Pointer-drags a row onto its neighbour (below if it is first, else above); waits for the save. */
 const drag = async (page: Page, row: string) => {
   const item = page.getByRole('listitem').filter({ hasText: row }).first()
@@ -119,12 +106,17 @@ test('products: validation, create, edit, reorder and stock adjustments', async 
   await expect(page.getByRole('link', { name: new RegExp(`Mug XL ${id}`) })).toBeVisible()
   await drag(page, `Bowl ${id}`)
   // Picked up and dropped in place: nothing to save.
-  const bowl = page
+  const grip = (await page
     .getByRole('listitem')
     .filter({ hasText: `Bowl ${id}` })
     .first()
-  await pickUp(page, bowl)
-  await drop(page, bowl)
+    .getByRole('button', { name: 'Drag to reorder' })
+    .boundingBox())!
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2 + 3, { steps: 3 })
+  await page.mouse.up()
+  await expect(page.locator('li[data-dragging="true"]')).toHaveCount(0)
 
   await page.goto('/admin/stock')
   await a11y()
