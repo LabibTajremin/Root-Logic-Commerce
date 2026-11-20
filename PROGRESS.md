@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr (page Minimal 2:3). Done: tokens, components, content vars, storefront web+mobile (10), admin web (15 + Dashboard বাংলা). Next: admin mobile x15 (row AM/ y=10000), clone pages to Organic/Attar/Ankito with modes, Cover, design/README.md.
+Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr . Done: tokens (10 modes incl. Attar Aloy), components, content vars, storefront web+mobile, admin web (16), admin mobile batch 1 (8). Next: admin mobile batch 2 (Promotions, Design, Messages, SEO, Users, Plan, Help), clone Minimal page → Organic/Attar/Ankito/Attar Aloy pages with modes, Cover, design/README.md, commit, then Phase 2.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -25,6 +25,7 @@ Preflight: done 2026-11-20
 ## Skipped
 
 ## Decisions
+- Owner asked to design `attar-aloy` (আতর আলোয়) now too: Figma modes 'Attar Aloy · Light/Dark' + page 'Attar Aloy'. Palette light: bg #FDF8F8, soft #F7ECEF, text #2E2A35, accent #B76E8A (dusty rose), button #6B5B8C (plum), radius 22/14, fonts Cormorant Garamond Light + Manrope. Code still built via the Phase 8 skill.
 - PR: https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 (draft, all phases stack here).
 - ankito tokens (from site CSS): bg #fbf8f2, surface #fff, soft #f4eee2, ink #1e2a1c, muted #5f6a5b, line #e7dfcf, brand #3c6430 (hover #2f5026, deep #22381c, tint #edf3e7), accent #a8763e (tint #f6ead8), radius 18/10, fonts DM Serif Display + DM Sans + Hind Siliguri, soft green-tinted shadows.
 - Figma layout (owner): one page per theme (minimal, organic, attar, ankito), each with Storefront + Admin, Web 1440 + Mobile 390; plus Foundations.
