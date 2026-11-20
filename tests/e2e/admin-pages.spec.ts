@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { signedIn } from './admin'
 
@@ -7,23 +7,36 @@ const saved = (page: Page) =>
   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const alert = (page: Page, text: string | RegExp) =>
   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
-/** Keyboard drag: the row must be picked up before arrows move it. */
-const drag = async (page: Page, row: string, key: 'ArrowUp' | 'ArrowDown') => {
-  const item = page.getByRole('listitem').filter({ hasText: row }).first()
+/** Keyboard pick-up: the sensor ignores keys until it has activated, so wait for it. */
+const pickUp = async (page: Page, item: Locator) => {
   await item.getByRole('button', { name: 'Drag to reorder' }).focus()
   await page.keyboard.press('Space')
   await expect(item).toHaveAttribute('data-dragging', 'true')
-  // The sensor ignores arrows until it has measured the rows; retry until the row moves
-  // (the other way too, in case it already sits at that end of the list).
-  const other = key === 'ArrowUp' ? 'ArrowDown' : 'ArrowUp'
-  let tries = 0
+}
+/** Drop, retrying a press the sensor ignored while still measuring. */
+const drop = async (page: Page, item: Locator) =>
+  expect(async () => {
+    await page.keyboard.press('Space')
+    await expect(item).toHaveAttribute('data-dragging', 'false', { timeout: 300 })
+  }).toPass()
+
+/** Moves a row one place (down if it is first in its list, else up) and waits for the save. */
+const drag = async (page: Page, row: string) => {
+  const item = page.getByRole('listitem').filter({ hasText: row }).first()
+  const first = await item.evaluate((li) => li.previousElementSibling === null)
+  await pickUp(page, item)
+  // dnd-kit announces "Draggable item A was moved over droppable area B": wait for B ≠ A.
+  const status = page.getByRole('status').filter({ hasText: 'Draggable item' })
   await expect(async () => {
-    await page.keyboard.press(tries++ % 2 ? other : key)
-    await expect(item).toHaveAttribute('style', /translate3d\(0px, -?[1-9]/, { timeout: 250 })
+    await page.keyboard.press(first ? 'ArrowDown' : 'ArrowUp')
+    const [, a, b] =
+      /item (\S+) was moved over droppable area (\S+)/.exec(
+        (await status.textContent({ timeout: 300 })) ?? '',
+      ) ?? []
+    expect(a && b && a !== b).toBe(true)
   }).toPass()
   const saved = page.waitForResponse((r) => r.request().method() === 'POST')
-  await page.keyboard.press('Space')
-  await expect(item).toHaveAttribute('data-dragging', 'false')
+  await drop(page, item)
   expect((await saved).ok()).toBe(true)
 }
 
@@ -52,7 +65,7 @@ test('categories: add, nest, rename, block cycles, reorder and archive', async (
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('link', { name: `Rice+ ${id}` })).toBeVisible()
 
-  await drag(page, `Oil ${id}`, 'ArrowUp')
+  await drag(page, `Oil ${id}`)
 
   await page.getByRole('link', { name: `Oil ${id}` }).click()
   // A tampered id is an unexpected failure: a retry hint, never a 500.
@@ -107,17 +120,14 @@ test('products: validation, create, edit, reorder and stock adjustments', async 
   await page.getByLabel('Product name').fill(`Mug XL ${id}`)
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('link', { name: new RegExp(`Mug XL ${id}`) })).toBeVisible()
-  await drag(page, `Bowl ${id}`, 'ArrowDown')
+  await drag(page, `Bowl ${id}`)
   // Picked up and dropped in place: nothing to save.
   const bowl = page
     .getByRole('listitem')
     .filter({ hasText: `Bowl ${id}` })
     .first()
-  await bowl.getByRole('button', { name: 'Drag to reorder' }).focus()
-  await page.keyboard.press('Space')
-  await expect(bowl).toHaveAttribute('data-dragging', 'true')
-  await page.keyboard.press('Space')
-  await expect(bowl).toHaveAttribute('data-dragging', 'false')
+  await pickUp(page, bowl)
+  await drop(page, bowl)
 
   await page.goto('/admin/stock')
   await a11y()
