@@ -280,7 +280,7 @@ Indexes for every list/filter in admin; unique `(store_id, slug)`.
 ## §9 Phases (execute in order)
 
 ### Phase 1 — Design in Figma (no approval gate)
-- Use the Figma MCP (write access verified in preflight). HTML fallback in `design/` only if the owner declined Figma during preflight.
+- Use the Figma MCP (write access verified in preflight). If Figma was declined, this phase is skipped (§11 preflight).
 - File "Root Logic Commerce". Pages: **Foundations**, **Storefront – Web (1440)**, **Storefront – Mobile (390)**, **Admin – Web (1440)**, **Admin – Mobile (390)**.
 - Foundations: Figma variables for all tokens in §6 with **modes per theme (minimal/organic/attar) × light/dark**; type scale; spacing (4-pt); components (button, input, card variants, product card variants, badges, help hint, lock badge, nav).
 - Storefront screens: Home, Category, Product detail, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404 — shown in at least 2 themes.
@@ -343,10 +343,10 @@ Started by `scripts/autopilot.sh`, which relaunches Claude Code headless in a lo
 
 Preflight (first session only, before Phase 1) — decide every permission first, get them all from the owner at once, verify, then start. Follow `.claude/skills/automatic-agentic-run/SKILL.md §1`. For this project the list is at least:
 - **GitHub:** push, create/delete branch, Actions read/write (`gh auth login` with `repo` + `workflow`).
-- **Figma (Phase 1):** Figma MCP connected **with write access** — verify by creating and deleting a scratch file/page. Only if the owner explicitly declines Figma in the preflight answer, use the `design/` HTML fallback and log it in Decisions.
+- **Figma (Phase 1):** Figma MCP connected **with write access** — verify by creating and deleting a scratch file/page.
 - **Local tooling:** Node 22, pnpm, Playwright browsers installed.
 - External services (SMTP/SMS/WhatsApp/S3/Drive/GA4/Vercel): **not needed** — tests use fakes; record as "not required".
-Record `Preflight: OK <date>` + the checked list in `PROGRESS.md`.
+**If the owner declines a permission, skip only the work that needs it and do everything else** (e.g. no Figma → skip Phase 1 design, go to Phase 2; no push → local commits only, local gate). Log it under `PROGRESS.md › Skipped`. Record `Preflight: done <date>` + granted/skipped list in `PROGRESS.md`.
 
 Session start (every time):
 1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.
@@ -364,6 +364,6 @@ implement (TDD) → pnpm verify
 - `pnpm verify` = `lint && typecheck && build && test:all-with-merged-coverage` (fails unless merged coverage is 100% on every metric — §8) — define it in Phase 2 together with `.github/workflows/ci.yml` running the same script (Postgres not needed: PGlite).
 - **Checkpoint often:** commit + push WIP at each passing sub-step and update `PROGRESS.md › Now:` (one line: phase, step, next action). A session can be cut off at any moment by the usage limit; at most one step may be lost.
 - **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
-- **BLOCKED rule:** after 6 fix rounds on the same failure, or a missing external credential that blocks the gate, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
+- **BLOCKED rule:** after 6 fix rounds on the same failure, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
 - External services (SMTP, SMS, WhatsApp, S3, Drive, GA4, Figma): code against ports; tests use fakes. Never block a phase on real credentials.
 - After Phase 9 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.

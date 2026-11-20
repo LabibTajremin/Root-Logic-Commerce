@@ -15,9 +15,13 @@ Run all remaining phases of the project with no human in the loop. State lives o
 ## 1. Preflight — all permissions first, then run (once per repo, before phase 1)
 1. **Decide the full list.** Read the spec end to end and list every permission/tool any phase will touch: git push + branch create/delete, `gh` scopes (`repo`, `workflow`), Actions enabled, every MCP/connector named or implied (e.g. **Figma with write access** for design phases, Vercel, Supabase/Neon, Drive, Slack…), CLIs, runtimes, browsers for e2e, env secrets. Mark services that tests replace with fakes as "not required".
 2. **Check each one for real** — a harmless live call, not just "is it installed": `git push --dry-run`, push + delete a `preflight-check` branch, `gh auth status`, `gh workflow list`; for MCPs call a read tool and, where write is needed, create + delete a scratch item (e.g. a Figma test page).
-3. **Ask once.** Interactive: one message with a checklist of everything missing and exactly how to grant it; wait for the user; re-check all items. Repeat until every item is OK or the user explicitly declines one (then record the agreed fallback in `Decisions`). Never ask for permissions again after the run starts.
-4. Headless: anything missing → `BLOCKED: preflight — <full list>` and stop.
-5. Write `Preflight: OK <date>` + the checked list in `PROGRESS.md`. **Only now start phase 1.**
+3. **Ask once.** Interactive: one message with a checklist of everything missing, exactly how to grant each, and what will be skipped if it is not granted. Wait for the answer, re-check. The user may decline any item — that is final for this run. Never ask for permissions again after the run starts.
+4. **Declined (or missing in a headless run) = skip, don't stop.** Do all work that does not need it; do **not** do the work that needs it and do **not** invent a substitute unless the user asked for one. Log each in `PROGRESS.md › Skipped`: `<permission> — skipped: <tasks/phases>`. Effects on the loop:
+   - no push → commit locally only, skip push/CI/merge-to-remote steps; gate = local verify.
+   - no Actions/`gh` → gate = local verify only.
+   - no MCP (e.g. Figma) → skip that phase/task, continue with the next.
+   The 100% quality gate (§2) needs no permission and always applies.
+5. Write `Preflight: done <date>` + checked list (granted / skipped) in `PROGRESS.md`. **Only now start phase 1.**
 
 ## 2. Mandatory quality gate (non-negotiable)
 A phase is green only when **all** hold, locally and in CI:
@@ -49,10 +53,10 @@ implement with TDD → run verify
 - External services: code against ports, tests use fakes; never block on real credentials.
 
 ## 5. BLOCKED rule
-After 6 fix rounds on the same failure, or a missing credential/permission the gate needs: write `BLOCKED: <phase> — <reason> — <what the human must do>` as line 1 of `PROGRESS.md`, commit, push, stop.
+After 6 fix rounds on the same failure: write `BLOCKED: <phase> — <reason> — <what the human must do>` as line 1 of `PROGRESS.md`, commit, push, stop.
 
 ## 6. Finish
-All phases green → `ALL_PHASES_DONE <sha>` as line 1, commit, push, stop. Final report ≤10 lines: phases, coverage, CI link, decisions worth reading.
+All phases green (skipped ones excluded) → `ALL_PHASES_DONE <sha>` as line 1, commit, push (if allowed), stop. Final report ≤10 lines: phases, coverage, CI link, **what was skipped and which permission would unlock it**, decisions worth reading.
 
 ## 7. Token economy
 Read files narrowly (grep → line ranges), edit don't rewrite, run affected tests while iterating and the full gate at phase end, no narration, no restating code, report ≤10 lines per phase.
