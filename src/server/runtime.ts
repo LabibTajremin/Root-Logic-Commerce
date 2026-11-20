@@ -4,7 +4,7 @@ import { openDb } from '@/infrastructure/db/client'
 import { ensureStore, ensureUser } from './bootstrap'
 import { loadConfig } from './config'
 import { createContainer } from './container'
-import { startOutboxWorker } from './outbox-worker'
+import { startWorker } from './worker'
 
 const boot = async () => {
   const config = loadConfig(process.env, storeConfig)
@@ -37,8 +37,11 @@ const boot = async () => {
     db,
     onEventError: (e, t) => console.error(`[event ${t}]`, e),
   })
-  if (config.hostingProfile === 'vps')
-    startOutboxWorker(container.messaging, 30_000, (e) => console.error('[outbox]', e))
+  if (config.hostingProfile === 'vps') {
+    const log = (e: unknown) => console.error('[worker]', e)
+    startWorker(() => container.messaging.processDue(), 30_000, log)
+    startWorker(() => container.insights.purge(), 6 * 3_600_000, log)
+  }
   return { config, db, container, auth: createAuth(db, config.authSecret) }
 }
 

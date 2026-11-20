@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
+import { Analytics } from './analytics'
 import { CartButton, CartDrawer } from './cart-drawer'
 import { storefront } from './storefront'
 
@@ -55,6 +56,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         }}
         banglaDigits={business.banglaDigits}
       />
+      <Analytics ga4={business.ga4MeasurementId} />
     </div>
   )
 }

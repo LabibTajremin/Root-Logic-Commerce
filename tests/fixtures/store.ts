@@ -23,5 +23,6 @@ export const testConfig = (
   },
   settingsKey: 'test-settings-key-test-settings-key',
   messagesTransport: 'log' as const,
+  authSecret: 'test-auth-secret-test-auth-secret-00',
   ...over,
 })

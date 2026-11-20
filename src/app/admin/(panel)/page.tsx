@@ -6,23 +6,28 @@ import { runtime } from '@/server/runtime'
 import { currentLocale, currentStore } from '@/server/request'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
+import { InsightsPanel } from './insights-panel'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
-export default async function Dashboard() {
+type Search = Promise<{ range?: string; from?: string; to?: string; group?: string }>
+
+export default async function Dashboard({ searchParams }: { searchParams: Search }) {
   const [store, locale, { container }] = await Promise.all([
     currentStore(),
     currentLocale(),
     runtime(),
   ])
-  const t = (k: string, v?: Record<string, number>) => translate(locale, k, v)
-  const [pending, month, recent, low, cats, prods] = await Promise.all([
+  const t = (k: string, v?: Record<string, string | number>) => translate(locale, k, v)
+  const [pending, month, recent, low, cats, prods, ga4InAdmin, search] = await Promise.all([
     container.orders.listOrders(store.id, { status: 'PENDING', limit: 1 }),
     container.orders.listOrders(store.id, { from: daysAgo(30), limit: 1 }),
     container.orders.listOrders(store.id, { limit: 5 }),
     container.stock.lowStock(store.id),
     container.catalog.listCategories(store.id),
     container.catalog.listProducts(store.id),
+    container.plans.has(store.id, 'ga4InAdmin'),
+    searchParams,
   ])
   const steps = [
     { label: t('dash.step.category'), done: cats.length > 0, href: '/admin/categories' },
@@ -47,6 +52,13 @@ export default async function Dashboard() {
           </p>
         </Card>
       </div>
+      <InsightsPanel
+        insights={container.insights}
+        storeId={store.id}
+        search={search}
+        ga4InAdmin={ga4InAdmin}
+        t={t}
+      />
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <h2 className="mb-3 font-semibold">{t('dash.recent')}</h2>

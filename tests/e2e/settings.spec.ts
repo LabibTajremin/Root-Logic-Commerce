@@ -206,6 +206,14 @@ test('SUPER_ADMIN grants and revokes a premium feature; owners only see locks', 
   await expect(feature).toContainText('Premium')
   await page.goto('/')
   await expect(page.getByText('Powered by © Root Logic Lab')).toBeVisible()
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-ga4InAdmin').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-ga4InAdmin')).toContainText('Included')
+  await page.goto('/admin')
+  await expect(page.getByText('Included in your plan')).toBeVisible()
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-ga4InAdmin').getByRole('button', { name: 'Revoke' }).click()
+  await expect(page.getByTestId('feature-ga4InAdmin')).toContainText('Premium')
 })
 
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
@@ -267,5 +275,67 @@ test('messages: channels, templates, and the outbox sends order updates via the 
     .getByLabel('Send on this channel')
     .uncheck()
   await page.getByRole('button', { name: 'Save' }).nth(1).click()
+  await saved(page)
+})
+
+test('insights: GA4 ecommerce events, first-party counts and the dashboard ranges', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Stat ${uid()}`
+  await signedIn(page)
+  await page.goto('/admin/seo')
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('G-TEST12345')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await createProduct(page, { name, price: '300', stock: '9' })
+
+  await page.goto(`/search?q=${encodeURIComponent(name)}`)
+  await page.getByRole('link', { name }).first().click()
+  await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const events = await page.evaluate(() =>
+    (window.dataLayer ?? [])
+      .map((a) => (a as unknown[])[0] === 'event' && (a as unknown[])[1])
+      .filter(Boolean),
+  )
+  expect(events).toEqual(
+    expect.arrayContaining(['view_item', 'add_to_cart', 'begin_checkout', 'purchase']),
+  )
+  await expect(
+    page.locator('script[src*="googletagmanager.com/gtag/js?id=G-TEST12345"]'),
+  ).toBeAttached({ timeout: 5000 })
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  expect((await page.request.post('/api/beacon', { data: 'not-a-path' })).status()).toBe(204)
+
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  for (const step of ['Confirm order', 'Start processing', 'Mark shipped', 'Mark delivered']) {
+    await page.getByRole('button', { name: step }).click()
+    await expect(page.getByRole('button', { name: step })).toHaveCount(0)
+  }
+  await page.goto('/admin?range=today')
+  await expect(page.getByTestId('insight-visitors')).not.toHaveText('0')
+  await expect(page.getByTestId('insight-ordersDelivered')).not.toHaveText('0')
+  await expect(page.getByTestId('top-products')).toContainText(name)
+  await a11y()
+  for (const range of ['7d', '12m']) {
+    await page.getByRole('combobox', { name: 'Period' }).selectOption(range)
+    await page.getByRole('button', { name: 'View' }).click()
+    await expect(page).toHaveURL(new RegExp(`range=${range}`))
+  }
+  await page.goto('/admin?range=custom&from=2026-01-10&to=2026-01-01')
+  await expect(page.getByRole('alert').filter({ hasText: 'Those dates don’t work' })).toBeVisible()
+  await page.goto('/admin?range=custom&from=2020-01-01&to=2020-01-03&group=week')
+  await expect(page.getByTestId('insights-range')).toHaveText('2020-01-01 → 2020-01-03')
+  await expect(page.getByText('No sales in this period yet.')).toBeVisible()
+
+  await page.goto('/admin/seo')
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('')
+  await page.getByRole('button', { name: 'Save' }).click()
   await saved(page)
 })

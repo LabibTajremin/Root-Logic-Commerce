@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { GaEvent } from '../../analytics'
 import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
@@ -49,6 +50,14 @@ export default async function ProductPage({ params }: Props) {
         type="application/ld+json"
         // JSON.stringify output with `<` escaped cannot close the script tag.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
+      <GaEvent
+        name="view_item"
+        params={{
+          currency: 'BDT',
+          value: p.price / 100,
+          items: [{ item_id: p.id, item_name: p.name, price: p.price / 100 }],
+        }}
       />
       <ProductGallery name={p.name} images={images} />
       <div className="flex flex-col gap-4">

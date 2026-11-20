@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { startOutboxWorker } from './outbox-worker'
+import { startWorker } from './worker'
 
 afterEach(() => vi.useRealTimers())
 
-describe('outbox worker', () => {
+describe('background worker', () => {
   it('processes on each tick, never overlaps, and reports failures', async () => {
     vi.useFakeTimers()
     let release = () => {}
@@ -12,7 +12,7 @@ describe('outbox worker', () => {
       .mockImplementationOnce(() => new Promise((r) => (release = () => r({ sent: 1, failed: 0 }))))
       .mockRejectedValueOnce(new Error('db down'))
     const onError = vi.fn()
-    const timer = startOutboxWorker({ processDue }, 1000, onError)
+    const timer = startWorker(processDue, 1000, onError)
     await vi.advanceTimersByTimeAsync(1000)
     await vi.advanceTimersByTimeAsync(1000)
     expect(processDue).toHaveBeenCalledTimes(1)

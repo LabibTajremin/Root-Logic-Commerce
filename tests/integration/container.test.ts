@@ -31,6 +31,7 @@ describe('container', () => {
       'access',
       'bus',
       'catalog',
+      'insights',
       'media',
       'messaging',
       'orders',
@@ -112,11 +113,13 @@ describe('container', () => {
       },
       zones,
     )
-    await c.bus.emit('order.confirmed', {
-      storeId: store,
-      orderId: '00000000-0000-4000-8000-000000000000',
-      orderNo: 1,
-    })
+    // Events for an order that no longer exists are ignored by every subscriber.
+    for (const ev of ['order.confirmed', 'order.delivered'] as const)
+      await c.bus.emit(ev, {
+        storeId: store,
+        orderId: '00000000-0000-4000-8000-000000000000',
+        orderNo: 1,
+      })
     expect(await c.messaging.processDue()).toEqual({ sent: 3, failed: 0 })
     const log = readFileSync(file, 'utf8')
     expect(log).toContain(`we got your order #${o.orderNo} (৳560)`)

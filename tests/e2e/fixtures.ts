@@ -33,11 +33,19 @@ export const test = base.extend<Fixtures>({
     await page.setExtraHTTPHeaders({
       'x-forwarded-for': `10.${testInfo.workerIndex % 250}.${testInfo.repeatEachIndex}.${n + 1}`,
     })
+    // Never call Google from tests: gtag.js is answered with an empty script.
+    await page.route('https://www.googletagmanager.com/**', (r) =>
+      r.fulfill({ contentType: 'text/javascript', body: '' }),
+    )
     await page.coverage.startJSCoverage({ resetOnNavigation: false })
     // A full navigation discards the old document's script coverage, so flush first.
     // Tests follow plain (non-Next) links with goto(href) for the same reason.
     const flush = async () => {
       await addBrowserCoverage(await page.coverage.stopJSCoverage())
+      // Never call Google from tests: gtag.js is answered with an empty script.
+      await page.route('https://www.googletagmanager.com/**', (r) =>
+        r.fulfill({ contentType: 'text/javascript', body: '' }),
+      )
       await page.coverage.startJSCoverage({ resetOnNavigation: false })
     }
     const goto = page.goto.bind(page)

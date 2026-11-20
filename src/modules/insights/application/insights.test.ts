@@ -78,6 +78,9 @@ describe('insights', () => {
     expect(
       (await insights.report('s', 'custom', { from: '2026-01-01', to: '2026-01-02' })).series,
     ).toHaveLength(2)
+    const bad = await insights.report('s', 'custom', { from: '2026-02-01', to: '2026-01-01' })
+    expect(bad).toMatchObject({ fellBack: true, range: { from: '2026-02-10', to: '2026-03-11' } })
+    expect(r.fellBack).toBe(false)
   })
 
   it('purges raw views older than 30 days', async () => {

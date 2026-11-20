@@ -1,4 +1,11 @@
-import { dhakaDate, resolveRange, series, summarize, type RangeKey } from '../domain/insights'
+import {
+  dhakaDate,
+  resolveRange,
+  series,
+  summarize,
+  type Range,
+  type RangeKey,
+} from '../domain/insights'
 import type { Counters, InsightsRepo, OrderMoney } from './ports'
 
 type Deps = {
@@ -49,14 +56,22 @@ export const createInsights = ({ repo, hash, money, now }: Deps) => ({
     key: RangeKey,
     custom: { from?: string; to?: string; group?: string } = {},
   ) {
-    const range = resolveRange(key, now(), custom)
+    // A bad custom range falls back to the last 30 days instead of failing the dashboard.
+    let range: Range
+    let fellBack = false
+    try {
+      range = resolveRange(key, now(), custom)
+    } catch {
+      range = resolveRange('30d', now())
+      fellBack = true
+    }
     const start = new Date(`${range.from}T00:00:00+06:00`)
     const end = new Date(Date.parse(`${range.to}T00:00:00+06:00`) + 86_400_000)
     const [rows, top] = await Promise.all([
       repo.days(storeId, range.from, range.to),
       repo.topProducts(storeId, start, end, 5),
     ])
-    return { range, summary: summarize(rows), series: series(rows, range), top }
+    return { range, fellBack, summary: summarize(rows), series: series(rows, range), top }
   },
 
   purge: () => repo.purgeViews(new Date(now().getTime() - 30 * 86_400_000)),
