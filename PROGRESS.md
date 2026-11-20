@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr (page Minimal id 2:3). Done: tokens, components, content vars, storefront web+mobile (10), admin web: Login, Dashboard, Orders, Order detail, Products, Product editor, Categories, Stock. Next: admin web Promotions, Design editor, Messages, SEO, Users, Plan, Help, Dashboard BN; admin mobile x15; clone to Organic/Attar/Ankito; Cover; design/README.md.
+Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr (page Minimal 2:3). Done: tokens, components, content vars, storefront web+mobile (10), admin web (15 + Dashboard বাংলা). Next: admin mobile x15 (row AM/ y=10000), clone pages to Organic/Attar/Ankito with modes, Cover, design/README.md.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
