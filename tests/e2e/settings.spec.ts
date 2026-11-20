@@ -185,6 +185,6 @@ test('SEO, messages, plan, help, promotions and more pages', async ({ page, a11y
   await page.goto('/admin/more')
   await page.getByRole('link', { name: 'Help center' }).last().click()
   await expect(page.getByRole('heading', { level: 1, name: 'Help center' })).toBeVisible()
-  await page.goto('/admin/orders?status=PENDING&q=017')
+  await page.goto('/admin/orders?status=PENDING&q=0199999')
   await expect(page.getByText('No orders here yet.')).toBeVisible()
 })
