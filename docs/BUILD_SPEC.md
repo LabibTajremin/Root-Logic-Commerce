@@ -280,7 +280,7 @@ Indexes for every list/filter in admin; unique `(store_id, slug)`.
 ## §9 Phases (execute in order)
 
 ### Phase 1 — Design in Figma (no approval gate)
-- Use the Figma MCP (write access) if connected; if not, produce the same in `design/` as static HTML/Tailwind prototypes + `design/README.md`, and say so.
+- Use the Figma MCP (write access verified in preflight). HTML fallback in `design/` only if the owner declined Figma during preflight.
 - File "Root Logic Commerce". Pages: **Foundations**, **Storefront – Web (1440)**, **Storefront – Mobile (390)**, **Admin – Web (1440)**, **Admin – Mobile (390)**.
 - Foundations: Figma variables for all tokens in §6 with **modes per theme (minimal/organic/attar) × light/dark**; type scale; spacing (4-pt); components (button, input, card variants, product card variants, badges, help hint, lock badge, nav).
 - Storefront screens: Home, Category, Product detail, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404 — shown in at least 2 themes.
@@ -341,11 +341,12 @@ The skill already exists at `.claude/skills/automatic-agentic-run/` and drove th
 
 Started by `scripts/autopilot.sh`, which relaunches Claude Code headless in a loop until `PROGRESS.md` contains `ALL_PHASES_DONE`, and sleeps/retries when the usage limit is hit. Every session starts with a fresh context, so **state lives only in git + `PROGRESS.md`**.
 
-Preflight (first session only, before Phase 1) — collect every permission up front, once:
-1. Check all at once: `git push --dry-run origin HEAD`, `gh auth status`, creating + pushing a branch (`preflight-check`, then delete it), `gh run list -L1`, `gh workflow list`, Node 22, pnpm.
-2. Interactive session: list **everything** missing in one message and ask the owner to grant it all in one go (e.g. `gh auth login` with `repo` + `workflow` scopes, enable Actions). Don't come back later asking for more git access.
-3. Headless (autopilot) session: if anything is missing → `BLOCKED: preflight — <full list>` and end.
-4. Record `Preflight: OK <date>` in `PROGRESS.md`.
+Preflight (first session only, before Phase 1) — decide every permission first, get them all from the owner at once, verify, then start. Follow `.claude/skills/automatic-agentic-run/SKILL.md §1`. For this project the list is at least:
+- **GitHub:** push, create/delete branch, Actions read/write (`gh auth login` with `repo` + `workflow`).
+- **Figma (Phase 1):** Figma MCP connected **with write access** — verify by creating and deleting a scratch file/page. Only if the owner explicitly declines Figma in the preflight answer, use the `design/` HTML fallback and log it in Decisions.
+- **Local tooling:** Node 22, pnpm, Playwright browsers installed.
+- External services (SMTP/SMS/WhatsApp/S3/Drive/GA4/Vercel): **not needed** — tests use fakes; record as "not required".
+Record `Preflight: OK <date>` + the checked list in `PROGRESS.md`.
 
 Session start (every time):
 1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.

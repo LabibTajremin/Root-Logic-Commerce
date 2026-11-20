@@ -12,11 +12,12 @@ Run all remaining phases of the project with no human in the loop. State lives o
 - `PROGRESS.md` at repo root. Missing → create: first line status, then `Now:` line, phase checklist, `Decisions`.
 - First line of `PROGRESS.md` is the machine-read status: `ALL_PHASES_DONE <sha>` or `BLOCKED: …` or anything else (= running).
 
-## 1. Preflight (once per repo, before phase 1)
-Check everything at once: `git push --dry-run origin HEAD`, `gh auth status` (needs `repo` + `workflow`), create + push + delete a `preflight-check` branch, `gh workflow list`, `gh run list -L1`, runtime + package manager versions.
-- Interactive: report **all** missing items in **one** message and ask the user to grant them together. Never ask for git access again afterwards.
-- Headless: anything missing → `BLOCKED: preflight — <full list>` and stop.
-- Write `Preflight: OK <date>` in `PROGRESS.md`.
+## 1. Preflight — all permissions first, then run (once per repo, before phase 1)
+1. **Decide the full list.** Read the spec end to end and list every permission/tool any phase will touch: git push + branch create/delete, `gh` scopes (`repo`, `workflow`), Actions enabled, every MCP/connector named or implied (e.g. **Figma with write access** for design phases, Vercel, Supabase/Neon, Drive, Slack…), CLIs, runtimes, browsers for e2e, env secrets. Mark services that tests replace with fakes as "not required".
+2. **Check each one for real** — a harmless live call, not just "is it installed": `git push --dry-run`, push + delete a `preflight-check` branch, `gh auth status`, `gh workflow list`; for MCPs call a read tool and, where write is needed, create + delete a scratch item (e.g. a Figma test page).
+3. **Ask once.** Interactive: one message with a checklist of everything missing and exactly how to grant it; wait for the user; re-check all items. Repeat until every item is OK or the user explicitly declines one (then record the agreed fallback in `Decisions`). Never ask for permissions again after the run starts.
+4. Headless: anything missing → `BLOCKED: preflight — <full list>` and stop.
+5. Write `Preflight: OK <date>` + the checked list in `PROGRESS.md`. **Only now start phase 1.**
 
 ## 2. Mandatory quality gate (non-negotiable)
 A phase is green only when **all** hold, locally and in CI:
