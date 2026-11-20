@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
+import { e2eEnv } from '../../scripts/e2e-env.mjs'
 import { signedIn } from './admin'
 import { createProduct, fillCheckout, uid } from './shop'
 
@@ -136,18 +137,17 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
 
-  // A second editor opened earlier is now stale and must not overwrite.
-  const stale = await page.context().newPage()
-  await stale.goto('/admin/design')
-  await page.getByLabel('Footer text').fill('v2')
+  // Someone publishes from another tab: this editor is now stale and must not overwrite.
+  const other = await page.context().newPage()
+  await other.goto('/admin/design')
+  await other.getByLabel('Footer text').fill('v2')
+  await other.getByRole('button', { name: 'Publish' }).click()
+  await expect(other.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+  await other.close()
   await page.getByRole('button', { name: 'Publish' }).click()
-  await page.waitForLoadState('networkidle')
-  await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
-  await stale.getByRole('button', { name: 'Publish' }).click()
   await expect(
-    stale.getByRole('status').filter({ hasText: 'Settings were changed elsewhere' }),
+    page.getByRole('status').filter({ hasText: 'Settings were changed elsewhere' }),
   ).toBeVisible()
-  await stale.close()
   await page.reload()
   await expect(page.getByLabel('Store name')).toHaveValue('Ankito')
 })
@@ -187,4 +187,21 @@ test('SEO, messages, plan, help, promotions and more pages', async ({ page, a11y
   await expect(page.getByRole('heading', { level: 1, name: 'Help center' })).toBeVisible()
   await page.goto('/admin/orders?status=PENDING&q=0199999')
   await expect(page.getByText('No orders here yet.')).toBeVisible()
+})
+
+test('SUPER_ADMIN grants and revokes a premium feature; owners only see locks', async ({
+  page,
+}) => {
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  const feature = page.getByTestId('feature-removeBranding')
+  await feature.getByRole('button', { name: 'Grant' }).click()
+  await expect(feature).toContainText('Included')
+  await page.goto('/')
+  await expect(page.getByText('Powered by © Root Logic Lab')).toHaveCount(0)
+  await page.goto('/admin/plan')
+  await feature.getByRole('button', { name: 'Revoke' }).click()
+  await expect(feature).toContainText('Premium')
+  await page.goto('/')
+  await expect(page.getByText('Powered by © Root Logic Lab')).toBeVisible()
 })

@@ -280,5 +280,7 @@
   "error.otp.invalid": "That code is not right. Please try again.",
   "error.otp.expired": "The code expired. Request a new one.",
   "error.otp.limited": "Too many codes requested. Try again in an hour.",
-  "error.otp.email_required": "Please enter your email — we send the verification code there."
+  "error.otp.email_required": "Please enter your email — we send the verification code there.",
+  "plan.grant": "Grant",
+  "plan.revoke": "Revoke"
 }

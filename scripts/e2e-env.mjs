@@ -7,5 +7,7 @@ export const e2eEnv = {
   BOOTSTRAP_OWNER_PASSWORD: 'owner-pass-123',
   BOOTSTRAP_OWNER_NAME: 'Rahim',
   BOOTSTRAP_HOSTS: '127.0.0.1',
+  BOOTSTRAP_SUPER_EMAIL: 'lab@e2e.test',
+  BOOTSTRAP_SUPER_PASSWORD: 'lab-pass-12345',
   NOTIFY_LOG_FILE: '.e2e/notify.log',
 }

@@ -92,10 +92,23 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   await expect(page.getByTestId('track-status')).toHaveText('Pending')
   await expect(page.getByRole('region', { name: `#${no}` })).toContainText(`${tea} × 2`)
   await a11y()
+  await page.getByRole('link', { name: 'বাং' }).click()
+  await page.getByLabel('অর্ডার নম্বর').fill(no)
+  await page.getByLabel('ফোন নম্বর').fill('01712345678')
+  await page.getByRole('button', { name: 'ট্র্যাক করুন' }).click()
+  await expect(page.getByTestId('track-status')).toHaveText('অপেক্ষমাণ')
+  await page.getByRole('link', { name: 'EN' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Track my order' })).toBeVisible()
 
-  await page.goto(`/admin/orders?q=${no}`)
+  await page.goto('/admin/orders')
   await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
   await expect(page.getByTestId('order-total')).toHaveText('৳1,430')
+  // A tampered status is ignored rather than trusted.
+  const confirm = page.getByRole('button', { name: 'Confirm order' })
+  await confirm.evaluate((b: HTMLButtonElement) => (b.value = 'BOGUS'))
+  await confirm.click()
+  await page.reload()
+  await expect(page.getByTestId('order-events')).not.toContainText('Confirmed')
   await page.getByRole('button', { name: 'Confirm order' }).click()
   await expect(page.getByRole('button', { name: 'Start processing' })).toBeVisible()
   await page.goto(`/p/${slug(tea)}`)
@@ -110,6 +123,11 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   const orderUrl = page.url()
   await page.getByRole('link', { name: 'Print invoice' }).click()
   await expect(page.getByText(`Invoice #${no}`)).toBeVisible()
+  await page.evaluate(() => {
+    window.print = () => document.body.setAttribute('data-printed', '1')
+  })
+  await page.getByRole('button', { name: 'Print invoice' }).click()
+  await expect(page.locator('body')).toHaveAttribute('data-printed', '1')
   await page.goto(orderUrl)
   await page.getByRole('button', { name: 'Cancel order' }).click()
   await expect(page.getByTestId('order-events')).toContainText('Cancelled')
@@ -185,6 +203,17 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await page.getByRole('button', { name: 'Add to cart' }).click()
   await drawer(page).getByRole('link', { name: gone }).click()
   await expect(page.getByRole('heading', { level: 1, name: gone })).toBeVisible()
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await expect(
+    drawer(page)
+      .getByRole('group', { name: `Quantity: ${gone}` })
+      .locator('output'),
+  ).toHaveText('2')
+  await drawer(page)
+    .getByRole('group', { name: `Quantity: ${gone}` })
+    .getByRole('button', { name: '−' })
+    .click()
+  await drawer(page).getByRole('button', { name: 'Continue shopping' }).click()
   await page.getByRole('button', { name: 'Cart 3' }).click()
   await drawer(page).getByRole('link', { name: 'Checkout' }).click()
   await page.waitForURL(/\/checkout$/)
@@ -231,4 +260,15 @@ test('robots.txt and sitemap.xml use the store origin', async ({ page, request }
   expect(xml).toContain('<loc>https://127.0.0.1:3100/</loc>')
   expect(xml).toContain(`<loc>https://127.0.0.1:3100/p/${slug(name)}</loc>`)
   expect(xml).toContain(`<loc>https://127.0.0.1:3100/c/${slug(name)}</loc>`)
+  expect(await (await request.get('/sitemap.xml')).text()).toContain(
+    '<loc>http://127.0.0.1:3100/</loc>',
+  )
+  for (const [q, to] of [
+    ['to=bn', '/admin'],
+    ['to=xx&back=//evil.example', '/admin'],
+    ['to=en&back=/track', '/track'],
+  ]) {
+    const r = await request.get(`/admin/lang?${q}`, { maxRedirects: 0 })
+    expect(r.headers().location).toBe(to)
+  }
 })

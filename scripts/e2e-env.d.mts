@@ -6,4 +6,7 @@ export declare const e2eEnv: {
   BOOTSTRAP_OWNER_PASSWORD: string
   BOOTSTRAP_OWNER_NAME: string
   BOOTSTRAP_HOSTS: string
+  BOOTSTRAP_SUPER_EMAIL: string
+  BOOTSTRAP_SUPER_PASSWORD: string
+  NOTIFY_LOG_FILE: string
 }

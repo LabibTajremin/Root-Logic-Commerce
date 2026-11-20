@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { Icon } from '@/ui/icon'
 import { Badge, Card, LockBadge } from '@/ui/primitives'
 import { runtime } from '@/server/runtime'
+import { ActionForm } from '@/ui/action-form'
 import { adminContext } from '../context'
+import { toggleEntitlement } from './actions'
 
 export const metadata: Metadata = { title: 'Plan' }
 
 export default async function PlanPage() {
-  const [{ plans, store, t }, { config }] = await Promise.all([
-    adminContext('orders.manage'),
+  // Everyone sees the plan; only SUPER_ADMIN (plans.manage) can grant or revoke.
+  const [{ plans, store, allowed, t }, { config }] = await Promise.all([
+    adminContext('plans.manage'),
     runtime(),
   ])
   const features = await plans.features(store.id)
@@ -30,6 +33,18 @@ export default async function PlanPage() {
                 <Badge tone="success">{t('plan.included')}</Badge>
               ) : (
                 <LockBadge label={t('common.premium')} />
+              )}
+              {allowed && (
+                <ActionForm action={toggleEntitlement}>
+                  <input type="hidden" name="id" value={f.id} />
+                  <button
+                    name="op"
+                    value={f.unlocked ? 'revoke' : 'grant'}
+                    className="min-h-11 rounded-control border border-line px-3 text-sm font-semibold"
+                  >
+                    {t(f.unlocked ? 'plan.revoke' : 'plan.grant')}
+                  </button>
+                </ActionForm>
               )}
             </li>
           ))}

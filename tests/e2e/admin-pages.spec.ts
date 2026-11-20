@@ -7,6 +7,17 @@ const saved = (page: Page) =>
   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const alert = (page: Page, text: string | RegExp) =>
   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
+/** Keyboard drag: the row must be picked up before arrows move it. */
+const drag = async (page: Page, row: string, key: 'ArrowUp' | 'ArrowDown') => {
+  const item = page.getByRole('listitem').filter({ hasText: row }).first()
+  await item.getByRole('button', { name: 'Drag to reorder' }).focus()
+  await page.keyboard.press('Space')
+  await expect(item).toHaveAttribute('data-dragging', 'true')
+  await page.keyboard.press(key)
+  await page.keyboard.press('Space')
+  await expect(item).toHaveAttribute('data-dragging', 'false')
+  await page.waitForLoadState('networkidle')
+}
 
 test('categories: add, nest, rename, block cycles, reorder and archive', async ({ page, a11y }) => {
   const id = uid()
@@ -33,17 +44,22 @@ test('categories: add, nest, rename, block cycles, reorder and archive', async (
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('link', { name: `Rice+ ${id}` })).toBeVisible()
 
-  const handle = page
-    .getByRole('listitem')
-    .filter({ hasText: `Oil ${id}` })
-    .getByRole('button', { name: 'Drag to reorder' })
-  await handle.focus()
-  await page.keyboard.press('Space')
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.press('Space')
-  await page.waitForLoadState('networkidle')
+  await drag(page, `Oil ${id}`, 'ArrowUp')
+  await page.reload()
+  const rows = await page.getByRole('listitem').allTextContents()
+  expect(rows.findIndex((r) => r.includes(`Oil ${id}`))).toBeLessThan(
+    rows.findIndex((r) => r.includes(`Rice+ ${id}`)),
+  )
 
   await page.getByRole('link', { name: `Oil ${id}` }).click()
+  // A tampered id is an unexpected failure: a retry hint, never a 500.
+  await page
+    .locator('input[name="id"]')
+    .first()
+    .evaluate((e: HTMLInputElement) => (e.value = 'x'))
+  await page.getByRole('button', { name: 'Archive' }).click()
+  await alert(page, 'Something went wrong. Please try again.')
+  await page.reload()
   await page.getByRole('button', { name: 'Archive' }).click()
   await expect(
     page
@@ -88,14 +104,7 @@ test('products: validation, create, edit, reorder and stock adjustments', async 
   await page.getByLabel('Product name').fill(`Mug XL ${id}`)
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('link', { name: new RegExp(`Mug XL ${id}`) })).toBeVisible()
-  const handle = page
-    .getByRole('listitem')
-    .filter({ hasText: `Bowl ${id}` })
-    .getByRole('button', { name: 'Drag to reorder' })
-  await handle.focus()
-  await page.keyboard.press('Space')
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.press('Space')
+  await drag(page, `Bowl ${id}`, 'ArrowDown')
 
   await page.goto('/admin/stock')
   await a11y()

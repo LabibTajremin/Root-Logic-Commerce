@@ -2,9 +2,10 @@
 
 import { act, type ActionState } from '../act'
 
+// Both are inputs of every category form, so `get` never returns null here.
 const read = (f: FormData) => ({
-  name: String(f.get('name') ?? ''),
-  parentId: String(f.get('parentId') ?? '') || null,
+  name: f.get('name') as string,
+  parentId: (f.get('parentId') as string) || null,
 })
 
 export async function addCategory(_: ActionState, form: FormData) {

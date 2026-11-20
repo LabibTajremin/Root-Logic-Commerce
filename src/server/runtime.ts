@@ -1,7 +1,7 @@
 import storeConfig from '../../store.config'
 import { createAuth } from '@/infrastructure/auth/auth'
 import { openDb } from '@/infrastructure/db/client'
-import { ensureStore } from './bootstrap'
+import { ensureStore, ensureUser } from './bootstrap'
 import { loadConfig } from './config'
 import { createContainer } from './container'
 
@@ -19,6 +19,16 @@ const boot = async () => {
         password: env.BOOTSTRAP_OWNER_PASSWORD,
         name: env.BOOTSTRAP_OWNER_NAME ?? 'Owner',
       },
+    })
+  }
+  // Root Logic Lab's own login: manages plans/entitlements for every store.
+  if (env.BOOTSTRAP_SUPER_EMAIL && env.BOOTSTRAP_SUPER_PASSWORD) {
+    await ensureUser(db, {
+      email: env.BOOTSTRAP_SUPER_EMAIL,
+      password: env.BOOTSTRAP_SUPER_PASSWORD,
+      name: 'Root Logic Lab',
+      role: 'SUPER_ADMIN',
+      storeId: null,
     })
   }
   const container = createContainer({
