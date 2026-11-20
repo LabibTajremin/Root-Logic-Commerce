@@ -22,7 +22,7 @@ const otpToggles = async (page: Page, sms: boolean, email: boolean) => {
   await page.goto('/admin/messages')
   await page.getByLabel('SMS code').setChecked(sms)
   await page.getByLabel('Email code').setChecked(email)
-  await page.getByRole('button', { name: 'Save' }).click()
+  await page.getByRole('button', { name: 'Save' }).first().click()
   await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 }
 const cartWith = async (page: Page, name: string) => {
