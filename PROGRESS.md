@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 1 — waiting for owner to move Figma file m2Lp8fxK2nnbcXB2c9qijG to student plan (Starter = 1 variable mode); then build tokens (theme×light/dark modes), components, per-theme pages
+Now: Phase 1 (paused by owner) — Figma file https://www.figma.com/design/m2Lp8fxK2nnbcXB2c9qijG must sit in a project of the student team (Starter = 1 variable mode; probe: addMode fails). Next: probe modes; build Foundations (1 collection, 8 modes = minimal/organic/attar/ankito × light/dark), components, then one page per theme with Storefront + Admin at Web 1440 + Mobile 390, EN+BN variant; write design/README.md with link.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
