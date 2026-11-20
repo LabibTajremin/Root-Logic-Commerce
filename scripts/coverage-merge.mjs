@@ -12,7 +12,7 @@ const report = new CoverageReport({
   name: 'Root Logic Commerce — merged coverage',
   inputDir,
   outputDir: 'coverage',
-  reports: ['console-summary', 'v8', 'lcovonly'],
+  reports: ['console-details', 'v8', 'lcovonly'],
   // Only our compiled route chunks (browser: static/chunks/app, server: .next-cov/server/app) and
   // unit-test sources; Next's own framework chunks carry source maps with colliding src/ paths.
   entryFilter: (e) =>

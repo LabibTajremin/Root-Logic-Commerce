@@ -1,5 +1,5 @@
 {
-  "id": "3bdfdd4f-2b98-4f0b-8778-80bc6b6922e4",
+  "id": "f11e5a68-8e35-4434-ba13-5869fb2c32d9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2310,6 +2310,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "order_seq": {
+          "name": "order_seq",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1000
         },
         "created_at": {
           "name": "created_at",

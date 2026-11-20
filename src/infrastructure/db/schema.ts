@@ -48,6 +48,8 @@ export const stores = pgTable('stores', {
   slug: text().notNull().unique(),
   name: text().notNull(),
   active: boolean().notNull().default(true),
+  // Row-locked counter → human-friendly order numbers per store without races.
+  orderSeq: integer().notNull().default(1000),
   createdAt: createdAt(),
 })
 

@@ -252,6 +252,7 @@ CREATE TABLE "stores" (
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
+	"order_seq" integer DEFAULT 1000 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "stores_slug_unique" UNIQUE("slug")
 );
