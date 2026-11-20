@@ -85,7 +85,10 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await a11y()
-    await page.getByRole('link', { name: `Sale ${id}` }).first().click()
+    await page
+      .getByRole('link', { name: `Sale ${id}` })
+      .first()
+      .click()
     await expect(page.getByRole('heading', { level: 1, name: `Sale ${id}` })).toBeVisible()
     await a11y()
     await page.goto('/missing-page')
