@@ -263,7 +263,13 @@ Indexes for every list/filter in admin; unique `(store_id, slug)`.
 - **Accessibility:** WCAG 2.2 AA, keyboard nav, labels, contrast warnings in design editor.
 - **i18n:** admin + storefront UI strings EN/BN; Bangla digits optional setting; currency `৳`.
 - **Quality:** ESLint + Prettier + `tsc --noEmit` in CI; no `any`; small functions; named exports.
-- **Testing (TDD):** coverage thresholds enforced in Vitest — **100% lines/branches/functions for `src/modules/**` and `src/infrastructure/**`**; integration tests on PGlite for every repository and use-case touching DB; Playwright e2e on mobile (390×844) + desktop (1440×900) for: login, create category/product with image, place order (with/without OTP), confirm → stock deducted, cancel → restocked, change design → reflected on storefront, premium lock shows CTA, track order.
+- **Testing (TDD) — 100% coverage is MANDATORY, no exceptions:**
+  - Threshold **100% lines, branches, functions, statements over all of `src/**`** (storefront, admin, API routes, server actions, modules, infrastructure, themes, ui). Build fails below 100%.
+  - Coverage is the **merged** result of unit + integration + e2e: Vitest (v8) for unit/integration, Playwright e2e with V8 coverage collected from browser *and* Next server, merged into one report (e.g. monocart-coverage-reports). Gate on the merged report in `pnpm verify` and CI.
+  - Every layer must also have its own tests: unit (domain, utils, components), integration (every repository/use-case on PGlite, every API route & server action), e2e (every page and every user flow in §5, on mobile 390×844 and desktop 1440×900, in every theme, EN + BN).
+  - Mandatory e2e flows (minimum): login per role, create category/sub-category + reorder, create product with upload and with Drive link, place order with/without OTP, confirm → stock deducted, cancel → restocked, insufficient stock, change every Design control → reflected on storefront, premium lock CTA, track order, promo banner/video/embeds, SEO tags & sitemap, analytics counts, storage-quota full message.
+  - Allowed exclusions only: generated files (`registry.gen.ts`, drizzle migrations), pure type files, config files — listed explicitly in the coverage config. **No `v8 ignore` / `istanbul ignore` comments, no `.skip`, no lowered thresholds.** Unreachable code is deleted, not ignored.
+  - Also zero-error gate: no TypeScript errors, no lint warnings, no console errors/warnings and no failed network requests during e2e (fail the test on any), axe a11y violations = 0.
 - **Deploy targets:**
   - Vercel (`HOSTING_PROFILE=vercel`): Neon/Supabase Postgres, media on Google Drive or S3-compatible (R2/S3), Vercel Cron for outbox + stats rollup.
   - Namecheap VPS (`HOSTING_PROFILE=vps`): Node standalone under PM2 (or systemd), Caddy reverse proxy with automatic TLS for all store domains, local Postgres, media on local SSD (§7.2 disk budget), log rotation, nightly `pg_dump` backup (keep 7, compressed) — backups count toward disk budget. Provide `deploy/` with Caddyfile, PM2 ecosystem, setup script, README.
@@ -318,6 +324,7 @@ Write the workflow you just used as a reusable Claude Code skill so the owner ca
 - `description` (trigger line): "Use when the user says 'automatic agentic run', 'automatic run' or 'অটোমেটিক এজেন্টিক রান' — run every remaining phase of the project spec unattended: implement, verify, fix until green, commit, push, CI-gate, merge, next phase, stop when all done."
 - Write it **from what actually worked in this repo** (real commands, real `pnpm verify`, real CI workflow name, real `PROGRESS.md` format, problems you hit) — not by copying §11.
 - Must be repo-agnostic: locate the phased spec (`docs/*SPEC*.md`, `CLAUDE.md`) and `PROGRESS.md`; if the repo has no verify script or CI, set them up first as phase 0.
+- **Non-negotiable in the skill:** a phase is never green unless merged unit + integration + e2e coverage is **100% on lines, branches, functions, statements** over the whole source, with zero type/lint/console/a11y errors (same rules as §8: no ignore comments, no skips, no lowered thresholds). If the target repo lacks this setup, the skill builds it in phase 0 before anything else.
 - Body (≤120 lines, imperative): preflight (collect all git/gh permissions in one message) → resume from `PROGRESS.md › Now:` → per-phase loop (local verify → fix → commit/push → `gh run watch` → fix on red → ff-merge to main → tick) → checkpoint rules → never-cheat-to-green → BLOCKED rule (6 rounds) → `ALL_PHASES_DONE` and stop. Mention `scripts/autopilot.sh` for usage-limit auto-resume and copy that script into the skill folder so other repos can use it.
 - Verify: new session, say "automatic agentic run" on a throwaway branch with a tiny 2-phase dummy spec; confirm it runs both phases end to end, then delete the dummy branch.
 
@@ -357,7 +364,7 @@ implement (TDD) → pnpm verify
             green→ git switch main && git merge --ff-only phase/<n>-… && git push
                    tick phase in PROGRESS.md "phase N done <sha>", commit+push → next phase
 ```
-- `pnpm verify` = `lint && typecheck && test:coverage && build && e2e` — define it in Phase 2 together with `.github/workflows/ci.yml` running the same script (Postgres not needed: PGlite).
+- `pnpm verify` = `lint && typecheck && build && test:all-with-merged-coverage` (fails unless merged coverage is 100% on every metric — §8) — define it in Phase 2 together with `.github/workflows/ci.yml` running the same script (Postgres not needed: PGlite).
 - **Checkpoint often:** commit + push WIP at each passing sub-step and update `PROGRESS.md › Now:` (one line: phase, step, next action). A session can be cut off at any moment by the usage limit; at most one step may be lost.
 - **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
 - **BLOCKED rule:** after 6 fix rounds on the same failure, or a missing external credential that blocks the gate, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
