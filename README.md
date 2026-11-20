@@ -9,7 +9,7 @@ Start the build with Claude Code: `Read docs/BUILD_SPEC.md and start Phase 1.`
 ## Run unattended (all phases, auto commit/push, auto-resume after usage limits)
 Requirements on the machine: `claude` (logged in), `git` with push access, `gh` logged in (`gh auth login`), Node 22 + pnpm.
 ```bash
-git switch main && git pull
+git switch <work-branch> && git pull   # the PR branch; main is never pushed to directly
 tmux new -s build './scripts/autopilot.sh'   # detach: Ctrl-b d · logs: .autopilot/autopilot.log
 ```
 First run interactively once (`claude`, then "Run the §11 preflight") so it asks for any missing git/GitHub access in one go.

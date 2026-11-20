@@ -1,6 +1,6 @@
 ---
 name: automatic-agentic-run
-description: Use when the user says "automatic agentic run", "automatic run" or "অটোমেটিক এজেন্টিক রান" — run every remaining phase of the repo's phased spec unattended - implement, verify with 100% merged coverage, fix until green, commit, push, CI-gate, merge, next phase, stop when all done.
+description: Use when the user says "automatic agentic run", "automatic run" or "অটোমেটিক এজেন্টিক রান" — run every remaining phase of the repo's phased spec unattended - implement, verify with 100% merged coverage, fix until green, commit, push to one PR branch (never main), CI-gate the PR, next phase, stop when all done.
 ---
 
 # Automatic agentic run
@@ -17,7 +17,7 @@ Run all remaining phases of the project with no human in the loop. State lives o
 2. **Check each one for real** — a harmless live call, not just "is it installed": `git push --dry-run`, push + delete a `preflight-check` branch, `gh auth status`, `gh workflow list`; for MCPs call a read tool and, where write is needed, create + delete a scratch item (e.g. a Figma test page).
 3. **Ask once.** Interactive: one message with a checklist of everything missing, exactly how to grant each, and what will be skipped if it is not granted. Wait for the answer, re-check. The user may decline any item — that is final for this run. Never ask for permissions again after the run starts.
 4. **Declined (or missing in a headless run) = skip, don't stop.** Do all work that does not need it; do **not** do the work that needs it and do **not** invent a substitute unless the user asked for one. Log each in `PROGRESS.md › Skipped`: `<permission> — skipped: <tasks/phases>`. Effects on the loop:
-   - no push → commit locally only, skip push/CI/merge-to-remote steps; gate = local verify.
+   - no push → commit locally only, skip push/PR/CI steps; gate = local verify.
    - no Actions/`gh` → gate = local verify only.
    - no MCP (e.g. Figma) → skip that phase/task, continue with the next.
    The 100% quality gate (§2) needs no permission and always applies.
@@ -37,17 +37,22 @@ Never cheat to green: no `.skip`/`.only`, no `istanbul ignore`/`v8 ignore`, no w
 2. Status line `ALL_PHASES_DONE` → report and stop. `BLOCKED` → report the reason and stop. No `Preflight: done` yet → do §1 first.
 3. Resume exactly at `Now:`. Uncommitted work from a cut-off session: run tests, keep what passes, continue.
 
-## 4. Per-phase loop
+## 4. Per-phase loop — PR-based, never push to `main`
+Work branch: the one the session/owner names, else `phase/<n>-<name>`. **Never commit or push directly to `main`.** `main` changes only by the owner merging a PR.
 ```
-git switch -c phase/<n>-<name>            (or continue it)
-implement with TDD → run verify
-  red   → fix → verify                    (repeat)
-  green → commit → push → gh run watch <id> --exit-status
-            red   → gh run view <id> --log-failed → fix → commit → push → watch   (repeat)
-            green → git switch main && git merge --ff-only phase/<n>-<name> && git push
-                    tick phase in PROGRESS.md "phase <n> done <sha>" → commit → push
-→ next phase
+first phase: git switch -c <work-branch> (from main) → push → open PR <work-branch> → main
+             (title "Phases <a>–<b>: …", body = phase log below). CI runs on pull_request + push.
+each phase:  implement with TDD → run verify
+               red   → fix → verify                                  (repeat)
+               green → commit → push → wait for the PR's CI run on that sha
+                         red   → read failed job logs → fix → commit → push → wait   (repeat)
+                         green → tick "phase <n> done <sha>" in PROGRESS.md
+                                 + append the phase section to the PR body → commit → push
+             → next phase on the SAME branch/PR
 ```
+- PR not merged yet → keep stacking later phases on the same branch/PR; one PR may carry many or all phases. If the owner merged it, start a new branch from fresh `main` and a new PR for the remaining phases.
+- PR body = documentation: one `### Phase <n> — <name>` section per finished phase (what was built, how verified: coverage %, CI run link, decisions, skipped items). Keep `PROGRESS.md` and the PR body in sync.
+- The PR's CI must run the **full** gate (§2) — the same checks `main` needs — so a green PR is mergeable as is. Every phase on the PR must stay green; a later phase may never break an earlier one.
 - Checkpoint: after each passing sub-step commit + push and update `Now:` (phase, step, next action). At most one step may be lost to a cutoff.
 - Conventional Commits, small commits, never force-push, never commit secrets.
 - External services: code against ports, tests use fakes; never block on real credentials.
