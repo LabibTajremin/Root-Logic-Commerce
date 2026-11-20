@@ -8,7 +8,7 @@
 ## §0 Agent operating rules (token + code economy) — follow strictly
 
 1. **First action:** create `CLAUDE.md` (≤40 lines) = §0 + §2 stack + §4 folder map + commands. Create `PROGRESS.md` (checklist of §9 phases). Never paste this spec into other files.
-2. **Fully autonomous (§11):** run Phases 1–8 back to back with no human gates. A phase is complete only when local checks **and** GitHub CI are green; then commit, push, tick `PROGRESS.md`, start the next phase. Stop only when all phases are done (or §11 BLOCKED rule).
+2. **Fully autonomous (§11):** run Phases 1–9 back to back with no human gates. A phase is complete only when local checks **and** GitHub CI are green; then commit, push, tick `PROGRESS.md`, start the next phase. Stop only when all phases are done (or §11 BLOCKED rule).
 3. **Read narrowly:** use grep/glob to locate, read only needed line ranges, never re-read a file you just wrote. No repo-wide dumps.
 4. **Edit, don't rewrite:** use targeted edits; never regenerate a whole file to change a few lines.
 5. **Terse output:** no narration, no restating code in chat, no summaries of unchanged files. End-of-phase report ≤10 lines.
@@ -312,6 +312,15 @@ Create a Claude Code project skill so a future session can turn a plain theme de
   5. Done-checklist: registry updated, tests green, theme selectable in admin Design page, screenshot of home + product page on mobile.
 - Verify the skill: in a fresh session, run it once with this description and **keep the result as a shipped theme**: "সুগন্ধির দোকান — modern perfume/fragrance boutique, light mode, soft floral pastels, elegant thin serif headings, airy layout, gentle smooth motion." Theme `id: 'attar-aloy'`, `name: 'আতর আলোয় (Attar Aloy)'`. It must look clearly different from `attar` (which is dark midnight + gold). Confirm it passes all theme tests and is selectable in admin.
 
+### Phase 9 — "automatic agentic run" skill (last; only after Phase 8 is green)
+Write the workflow you just used as a reusable Claude Code skill so the owner can later say **"automatic agentic run"** (or "অটোমেটিক এজেন্টিক রান" / "automatic run") and any session follows it without re-explaining.
+- Path: `.claude/skills/automatic-agentic-run/SKILL.md`, committed. `name: automatic-agentic-run`.
+- `description` (trigger line): "Use when the user says 'automatic agentic run', 'automatic run' or 'অটোমেটিক এজেন্টিক রান' — run every remaining phase of the project spec unattended: implement, verify, fix until green, commit, push, CI-gate, merge, next phase, stop when all done."
+- Write it **from what actually worked in this repo** (real commands, real `pnpm verify`, real CI workflow name, real `PROGRESS.md` format, problems you hit) — not by copying §11.
+- Must be repo-agnostic: locate the phased spec (`docs/*SPEC*.md`, `CLAUDE.md`) and `PROGRESS.md`; if the repo has no verify script or CI, set them up first as phase 0.
+- Body (≤120 lines, imperative): preflight (collect all git/gh permissions in one message) → resume from `PROGRESS.md › Now:` → per-phase loop (local verify → fix → commit/push → `gh run watch` → fix on red → ff-merge to main → tick) → checkpoint rules → never-cheat-to-green → BLOCKED rule (6 rounds) → `ALL_PHASES_DONE` and stop. Mention `scripts/autopilot.sh` for usage-limit auto-resume and copy that script into the skill folder so other repos can use it.
+- Verify: new session, say "automatic agentic run" on a throwaway branch with a tiny 2-phase dummy spec; confirm it runs both phases end to end, then delete the dummy branch.
+
 **Out of scope now:** online payments (port only), customer accounts, multi-currency, marketplace features.
 
 ---
@@ -353,4 +362,4 @@ implement (TDD) → pnpm verify
 - **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
 - **BLOCKED rule:** after 6 fix rounds on the same failure, or a missing external credential that blocks the gate, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
 - External services (SMTP, SMS, WhatsApp, S3, Drive, GA4, Figma): code against ports; tests use fakes. Never block a phase on real credentials.
-- After Phase 8 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.
+- After Phase 9 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.
