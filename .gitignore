@@ -1,0 +1,4 @@
+.autopilot/
+node_modules/
+.env*
+!.env.example
