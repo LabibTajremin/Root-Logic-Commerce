@@ -184,7 +184,7 @@ test('owner invites staff; staff cannot reach owner-only settings', async ({
   await expect(staff.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible()
   await staff.goto('/admin/users')
   await expect(staff.getByText('Only the store owner can manage users.')).toBeVisible()
-  for (const p of ['/admin/design', '/admin/seo', '/admin/messages']) {
+  for (const p of ['/admin/design', '/admin/seo', '/admin/messages', '/admin/promotions']) {
     await staff.goto(p)
     await expect(staff.getByText('Only the store owner can do this.')).toBeVisible()
   }

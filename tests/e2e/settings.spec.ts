@@ -377,7 +377,6 @@ test('promotions: every banner kind, the video lock, embeds that load on tap, an
     await page.getByLabel('Images').setInputFiles([await photo('#123456'), await photo('#654321')])
     await page.getByLabel('Promo message').fill(`New in ${id}`)
     await page.getByLabel('Button text').fill('See all')
-    await page.getByLabel('Button link (e.g. /c/tea or https://…)').fill('/search')
   })
   await add('products', async () => {
     await page.getByLabel(`Pick ${id}`).check()
@@ -401,6 +400,14 @@ test('promotions: every banner kind, the video lock, embeds that load on tap, an
 
   await page.goto('/admin/promotions?kind=video')
   await expect(page.getByText('Premium').first()).toBeVisible()
+  // The lock is enforced on the server too: a tampered form is refused.
+  await page.goto('/admin/promotions?kind=embed')
+  await page.locator('input[name="kind"]').evaluate((e: HTMLInputElement) => (e.value = 'video'))
+  await page.getByLabel('Video link').fill('https://youtu.be/dQw4w9WgXcQ')
+  await page.getByRole('button', { name: 'Add banner' }).click()
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'This is a premium feature' }),
+  ).toBeVisible()
   await page.goto('/admin/plan')
   await page.getByTestId('feature-videoUploads').getByRole('button', { name: 'Grant' }).click()
   await expect(page.getByTestId('feature-videoUploads')).toContainText('Included')

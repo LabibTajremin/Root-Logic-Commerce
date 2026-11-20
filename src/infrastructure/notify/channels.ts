@@ -59,6 +59,7 @@ export const createDeliver = ({
               text: { body: text },
             }),
           })
-    if (!res.ok) throw new Error(`${channel} gateway answered ${res.status}`)
+    if (res.ok) return
+    throw new Error(`${channel} gateway answered ${res.status}`)
   }
 }
