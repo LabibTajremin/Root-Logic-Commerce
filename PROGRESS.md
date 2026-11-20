@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 4 — admin panel. Done (uncommitted→committing): Better Auth (dynamic baseURL), runtime/request helpers, i18n+help EN/BN, UI primitives, login, panel shell, dashboard, e2e env (pglite .e2e/db, bootstrap owner). Next: fixture allow-status console fix, admin pages orders/products/categories/stock/design/users/plan/help/promotions/messages/seo/more, media pipeline.
+Now: Phases 4+5 (one gate). Done: all admin screens, storefront (layout, home, category, product+JSON-LD, search, cart drawer, checkout+OTP, success, track, 404), themes minimal/organic/attar/ankito. Next: close coverage gaps from `pnpm verify`, sitemap/robots + cache tags, then media pipeline (Phase 4 remainder), CI green, tick 4+5, PR body.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -27,6 +27,10 @@ Preflight: done 2026-11-20
 ## Decisions
 - Coverage gate measures each source file in the layer that runs it (Vitest / e2e browser for 'use client' / e2e Next server), every file must be 100%. Merging line ranges across differently compiled bundles misaligned (false gaps) — documented in scripts/coverage-merge.mjs. Coverage builds tag our sources `rlc/src/…` to avoid Next's own `src/` paths. JSON dictionaries excluded as data files.
 - e2e fixture flushes browser coverage before goto/reload (full navigations drop the old document's script coverage); each test uses its own X-Forwarded-For so sign-in rate limits don't leak.
+- e2e projects: mobile → desktop → settings. Store-wide switches (OTP toggles, theme) live in `settings.spec.ts` and run last, serially, so parallel tests never see them flip.
+- Track order is a POST server action (not a GET query) so shoppers' phones never land in URLs/logs. Order success page shows only the number.
+- OTP code is consumed on verify; if the order then fails (e.g. stock), the shopper requests a new code.
+- Switching theme in the design editor merges that theme's defaults (fonts, colors, style); live preview updates CSS variables, slot layout changes show after publish.
 - Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
 - Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
 - Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.

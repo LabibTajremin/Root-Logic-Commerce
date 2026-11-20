@@ -1,0 +1,272 @@
+
+> root-logic-commerce@0.1.0 verify /home/user/Root-Logic-Commerce
+> node scripts/verify.mjs
+
+
+▶ pnpm lint
+
+> root-logic-commerce@0.1.0 lint /home/user/Root-Logic-Commerce
+> eslint . --max-warnings=0 && prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+▶ pnpm typecheck
+
+> root-logic-commerce@0.1.0 typecheck /home/user/Root-Logic-Commerce
+> tsc --noEmit
+
+
+▶ pnpm test:cov
+
+> root-logic-commerce@0.1.0 test:cov /home/user/Root-Logic-Commerce
+> vitest run --coverage
+
+[MCR] Loaded: mcr.config.mjs
+
+ RUN  v5.1.1 /home/user/Root-Logic-Commerce
+      Coverage enabled with monocart
+
+
+ Test Files  20 passed (20)
+      Tests  91 passed (91)
+   Start at  16:39:35
+   Duration  27.39s (tests 93%, import 6%, transform 1%)
+
+
+▶ pnpm build
+
+> root-logic-commerce@0.1.0 build /home/user/Root-Logic-Commerce
+> node scripts/themes-gen.mjs && next build
+
+themes: ankito, attar, minimal, organic
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config.ts took 32ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.8s
+  Running TypeScript ...
+  Finished TypeScript in 6.6s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/2) ...
+✓ Generating static pages using 3 workers (2/2) in 143ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[...missing]
+├ ƒ /admin
+├ ƒ /admin/categories
+├ ƒ /admin/design
+├ ƒ /admin/help
+├ ƒ /admin/lang
+├ ƒ /admin/login
+├ ƒ /admin/messages
+├ ƒ /admin/more
+├ ƒ /admin/orders
+├ ƒ /admin/orders/[id]
+├ ƒ /admin/orders/[id]/invoice
+├ ƒ /admin/plan
+├ ƒ /admin/products
+├ ƒ /admin/products/[id]
+├ ƒ /admin/products/new
+├ ƒ /admin/promotions
+├ ƒ /admin/seo
+├ ƒ /admin/stock
+├ ƒ /admin/users
+├ ƒ /api/auth/[...all]
+├ ƒ /c/[slug]
+├ ƒ /checkout
+├ ƒ /order/[no]
+├ ƒ /p/[slug]
+├ ƒ /search
+└ ƒ /track
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
+
+▶ pnpm build:cov
+
+> root-logic-commerce@0.1.0 build:cov /home/user/Root-Logic-Commerce
+> node scripts/themes-gen.mjs && COVERAGE=1 next build --webpack
+
+themes: ankito, attar, minimal, organic
+▲ Next.js 16.4.6 (webpack)
+✓ Running next.config.ts took 33ms
+
+  Creating an optimized production build ...
+⚠ Production code optimization has been disabled in your project. Read more: https://nextjs.org/docs/messages/minification-disabled
+✓ Compiled successfully in 7.6s
+  Running TypeScript ...
+  Finished TypeScript in 2.9s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/2) ...
+✓ Generating static pages using 3 workers (2/2) in 279ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[...missing]
+├ ƒ /admin
+├ ƒ /admin/categories
+├ ƒ /admin/design
+├ ƒ /admin/help
+├ ƒ /admin/lang
+├ ƒ /admin/login
+├ ƒ /admin/messages
+├ ƒ /admin/more
+├ ƒ /admin/orders
+├ ƒ /admin/orders/[id]
+├ ƒ /admin/orders/[id]/invoice
+├ ƒ /admin/plan
+├ ƒ /admin/products
+├ ƒ /admin/products/[id]
+├ ƒ /admin/products/new
+├ ƒ /admin/promotions
+├ ƒ /admin/seo
+├ ƒ /admin/stock
+├ ƒ /admin/users
+├ ƒ /api/auth/[...all]
+├ ƒ /c/[slug]
+├ ƒ /checkout
+├ ƒ /order/[no]
+├ ƒ /p/[slug]
+├ ƒ /search
+└ ƒ /track
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
+▲ Next.js 16.4.6
+- Local:         http://127.0.0.1:3100
+- Network:       http://127.0.0.1:3100
+✓ Ready in 187ms
+✓ Running next.config.ts took 42ms
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+
+> root-logic-commerce@0.1.0 e2e /home/user/Root-Logic-Commerce
+> playwright test --trace off
+
+
+Running 32 tests using 2 workers
+
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (621ms)
+[2m2026-11-20T16:41:08.310Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (750ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (467ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:10.759Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:11.173Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (367ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:11.522Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:41:11.868Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:41:12.201Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (3.9s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (2.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (4.2s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  12 [mobile] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (4.6s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  13 [mobile] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages (5.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
+  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (13.7s)
+  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (13.0s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (544ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:41.216Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (786ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (498ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:43.585Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.6s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:43.931Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (400ms)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[2m2026-11-20T16:41:44.299Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:41:44.605Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T16:41:44.983Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.2s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:11:1 › categories: add, nest, rename, block cycles, reorder and archive (4.0s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:56:1 › products: validation, create, edit, reorder and stock adjustments (4.3s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:115:1 › unknown ids show not found (2.7s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:132:1 › owner invites staff; staff cannot reach owner-only settings (4.0s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  27 [desktop] › tests/e2e/admin-pages.spec.ts:172:1 › design editor previews live, warns on low contrast and publishes (4.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  28 [desktop] › tests/e2e/admin-pages.spec.ts:226:1 › SEO, messages, plan, help, promotions and more pages (5.8s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+[checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
+  ✓  29 [desktop] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (13.4s)
+  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:122:1 › cart and checkout edge cases (12.7s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓  31 [settings] › tests/e2e/settings.spec.ts:32:1 › checkout asks for an SMS, then an email code when the owner turns OTP on (5.5s)
+[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✘  32 [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly (7.9s)
+
+
+  1) [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly ──
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "color-contrast: Elements must meet minimum color contrast ratio thresholds @ a[aria-current=\"true\"], h1, #q, .text-xl.font-heading[href$=\"out-settings-mwp7iwf2\"], li:nth-child(1) > article > .p-4.flex-1.gap-2 > .tracking-widest.text-sm, .text-xl.font-heading[href$=\"sale-settings-mwp7iwf2\"], li:nth-child(2) > article > .p-4.flex-1.gap-2 > .tracking-widest.text-sm, .gap-2.flex-col:nth-child(1) > .text-xl.font-heading, nav[aria-label=\"Shop\"] > .font-semibold, nav[aria-label=\"Help\"] > .font-semibold",
+    + ]
+
+       at fixtures.ts:58
+
+      56 |           (v) => `${v.id}: ${v.help} @ ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+      57 |         ),
+    > 58 |       ).toEqual([])
+         |         ^
+      59 |     })
+      60 |   },
+      61 | })
+        at /home/user/Root-Logic-Commerce/tests/e2e/fixtures.ts:58:9
+        at /home/user/Root-Logic-Commerce/tests/e2e/settings.spec.ts:84:5
+
+    Error Context: test-results/settings-every-theme-renders-the-storefront-accessibly-settings/error-context.md
+
+  1 failed
+    [settings] › tests/e2e/settings.spec.ts:70:1 › every theme renders the storefront accessibly ───
+  31 passed (1.4m)
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1

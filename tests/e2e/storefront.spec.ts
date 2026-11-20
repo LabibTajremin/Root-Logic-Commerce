@@ -217,3 +217,18 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await page.goto('/track')
   await expect(page.getByLabel('Order number')).toHaveValue('')
 })
+
+test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
+  const name = `Mapped ${uid()}`
+  await signedIn(page)
+  await createCategory(page, name)
+  await createProduct(page, { name, price: '10', stock: '1' })
+  const robots = await (await request.get('/robots.txt')).text()
+  expect(robots).toContain('Disallow: /admin')
+  expect(robots).toMatch(/Sitemap: http:\/\/127\.0\.0\.1:3100\/sitemap\.xml/)
+  const res = await request.get('/sitemap.xml', { headers: { 'x-forwarded-proto': 'https' } })
+  const xml = await res.text()
+  expect(xml).toContain('<loc>https://127.0.0.1:3100/</loc>')
+  expect(xml).toContain(`<loc>https://127.0.0.1:3100/p/${slug(name)}</loc>`)
+  expect(xml).toContain(`<loc>https://127.0.0.1:3100/c/${slug(name)}</loc>`)
+})

@@ -121,7 +121,11 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
     <div className="grid gap-5 lg:grid-cols-[420px_1fr]">
       <div className="flex flex-col gap-5 rounded-card border border-line bg-surface p-5">
         {select('themeId', L.theme!, d.themeId, Object.keys(themes), (themeId) =>
-          setD((x) => mergeDesign(x, themes[themeId]!, { themeId }) as Design),
+          setD((x) => {
+            const next = mergeDesign(x, themes[themeId]!, { themeId }) as Design
+            // A custom text color rarely suits another theme's background: back to auto-contrast.
+            return { ...next, colors: { ...next.colors, text: undefined } }
+          }),
         )}
         <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="brand-name">
           {L.storeName}
