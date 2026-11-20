@@ -249,11 +249,14 @@ test('messages: channels, templates, and the outbox sends order updates via the 
   await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(/পেয়েছি/)
   await page.getByRole('combobox', { name: 'Language' }).selectOption('en')
   await page.getByRole('button', { name: 'View' }).click()
-  await page
-    .getByLabel('SMS / WhatsApp text')
-    .fill('Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}')
+  const custom = 'Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}'
+  await page.getByLabel('SMS / WhatsApp text').fill(custom)
   await page.getByRole('button', { name: 'Save' }).last().click()
-  await saved(page)
+  // Several forms show "Saved" on this page: confirm this one by reloading.
+  await expect(async () => {
+    await page.reload()
+    await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(custom, { timeout: 500 })
+  }).toPass()
 
   await createProduct(page, { name: `Msg ${id}`, price: '200', stock: '5' })
   await cartWith(page, `Msg ${id}`)
