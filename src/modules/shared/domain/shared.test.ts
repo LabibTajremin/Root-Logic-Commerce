@@ -1,5 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createEventBus, daysAgo, DomainError, formatMoney, toBanglaDigits, toMinor } from '..'
+import {
+  createEventBus,
+  daysAgo,
+  DomainError,
+  formatMoney,
+  isDomainError,
+  toBanglaDigits,
+  toMinor,
+} from '..'
 
 describe('money', () => {
   it('converts taka to integer poisha', () => {
@@ -23,6 +31,12 @@ describe('DomainError', () => {
     const e = new DomainError('x.y', { a: 1 })
     expect([e.name, e.code, e.message, e.params]).toEqual(['DomainError', 'x.y', 'x.y', { a: 1 }])
     expect(new DomainError('z').params).toEqual({})
+    expect(isDomainError(e)).toBe(true)
+    expect(isDomainError(Object.assign(new Error('x'), { name: 'DomainError', code: 'c' }))).toBe(
+      true,
+    )
+    expect(isDomainError(new Error('x'))).toBe(false)
+    expect(isDomainError('nope')).toBe(false)
   })
 })
 
@@ -49,5 +63,13 @@ describe('daysAgo', () => {
       '2026-10-31T00:00:00.000Z',
     )
     expect(daysAgo(0).getTime()).toBeLessThanOrEqual(Date.now())
+  })
+})
+
+describe('isUuid', () => {
+  it('accepts uuids only', async () => {
+    const { isUuid } = await import('..')
+    expect(isUuid('00000000-0000-4000-8000-000000000001')).toBe(true)
+    expect(isUuid('abc')).toBe(false)
   })
 })

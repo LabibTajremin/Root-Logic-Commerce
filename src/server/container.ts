@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto'
+import { hashPassword } from 'better-auth/crypto'
 import { createAccess } from '@/modules/access'
 import { createCatalog } from '@/modules/catalog'
 import { createOrders, type OrderEvents } from '@/modules/orders'
@@ -36,7 +37,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     stock: createStock({ repo: createStockRepo(db) }),
     plans: createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements }),
     settings: createSiteSettings({ repo: createSettingsRepo(db) }),
-    access: createAccess({ repo: createUsersRepo(db) }),
+    access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
   }
 }
 

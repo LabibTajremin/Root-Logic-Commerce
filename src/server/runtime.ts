@@ -29,7 +29,10 @@ const boot = async () => {
   return { config, db, container, auth: createAuth(db, config.authSecret) }
 }
 
-let ready: ReturnType<typeof boot> | undefined
+// Next bundles route handlers and pages separately, so a module-level singleton would
+// exist once per bundle (two DB pools — or two diverging PGlite instances). globalThis
+// is shared by the whole Node process.
+const g = globalThis as typeof globalThis & { __rlcRuntime?: ReturnType<typeof boot> }
 
 /** One process-wide runtime (config, DB pool, modules, auth) shared by every store. */
-export const runtime = () => (ready ??= boot())
+export const runtime = () => (g.__rlcRuntime ??= boot())

@@ -8,3 +8,10 @@ export class DomainError extends Error {
     super(code)
   }
 }
+
+// Structural check: Next bundles modules per route, so `instanceof` fails when the
+// error was thrown by the shared runtime created in another bundle.
+export const isDomainError = (e: unknown): e is DomainError =>
+  e instanceof Error &&
+  e.name === 'DomainError' &&
+  typeof (e as { code?: unknown }).code === 'string'

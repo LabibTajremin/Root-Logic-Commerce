@@ -18,7 +18,7 @@ export const SideNav = ({ items }: { items: NavItem[] }) => {
           <Link
             href={i.href}
             aria-current={isActive(path, i.href) ? 'page' : undefined}
-            className="flex min-h-11 items-center gap-3 rounded-control px-3 text-sm aria-[current=page]:bg-accent-tint aria-[current=page]:font-semibold aria-[current=page]:text-accent"
+            className="flex min-h-11 items-center gap-3 rounded-control px-3 text-sm aria-[current=page]:bg-accent-tint aria-[current=page]:font-semibold aria-[current=page]:text-accent-ink"
           >
             <Icon name={i.icon} />
             {i.label}
@@ -39,7 +39,7 @@ export const BottomNav = ({ items }: { items: NavItem[] }) => {
           <Link
             href={i.href}
             aria-current={isActive(path, i.href) ? 'page' : undefined}
-            className="flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] text-muted aria-[current=page]:font-semibold aria-[current=page]:text-accent"
+            className="flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] text-muted aria-[current=page]:font-semibold aria-[current=page]:text-accent-ink"
           >
             <Icon name={i.icon} size={22} />
             {i.label}

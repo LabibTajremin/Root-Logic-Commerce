@@ -12,3 +12,9 @@ export const signIn = async (page: Page, email = owner.email, password = owner.p
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Sign in' }).click()
 }
+
+/** Sign in and wait until the session cookie is set and the dashboard loaded. */
+export const signedIn = async (page: Page, email = owner.email, password = owner.password) => {
+  await signIn(page, email, password)
+  await page.waitForURL(/\/admin$/)
+}

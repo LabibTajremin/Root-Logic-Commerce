@@ -15,8 +15,11 @@ export default defineConfig({
   use: { baseURL, trace: 'off' },
   projects: [
     { name: 'mobile', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } } },
+    // Both projects share one store database; desktop runs after mobile so store-wide
+    // state (design, settings) never races between viewports.
     {
       name: 'desktop',
+      dependencies: ['mobile'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],

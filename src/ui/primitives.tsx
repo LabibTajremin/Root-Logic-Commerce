@@ -79,10 +79,12 @@ export const Card = ({ children, className }: { children: ReactNode; className?:
 )
 
 const TONE = {
-  accent: 'bg-accent-tint text-accent',
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  danger: 'bg-danger/15 text-danger',
+  // Owners pick any accent; darkened text keeps pills readable on light tints.
+  accent: 'bg-accent/10 text-accent-ink',
+  // Tinted pills need darker text than the raw token to stay above WCAG AA.
+  success: 'bg-success/10 text-[color-mix(in_oklab,var(--color-success),black_30%)]',
+  warning: 'bg-warning/10 text-[color-mix(in_oklab,var(--color-warning),black_35%)]',
+  danger: 'bg-danger/10 text-[color-mix(in_oklab,var(--color-danger),black_25%)]',
   neutral: 'bg-soft text-muted',
 } as const
 
@@ -104,7 +106,7 @@ export const Badge = ({
 )
 
 export const LockBadge = ({ label }: { label: string }) => (
-  <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent">
+  <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent-ink">
     <Icon name="lock" size={12} />
     {label}
   </span>

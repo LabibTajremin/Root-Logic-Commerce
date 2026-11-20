@@ -10,7 +10,9 @@ test('unauthenticated admin visits go to sign-in', async ({ page }) => {
 test('wrong password shows an error', async ({ page }) => {
   test.info().annotations.push({ type: 'allow-status', description: '401' })
   await signIn(page, 'owner@e2e.test', 'wrong-password')
-  await expect(page.getByRole('alert').filter({ hasText: 'Wrong email or password.' })).toBeVisible()
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Wrong email or password.' }),
+  ).toBeVisible()
 })
 
 test('owner signs in, sees the dashboard, switches to বাংলা and signs out', async ({
@@ -47,7 +49,7 @@ test('help hint explains a field', async ({ page }) => {
 test('too many wrong tries are rate limited', async ({ page }) => {
   test.info().annotations.push({ type: 'allow-status', description: '401,429' })
   await page.setExtraHTTPHeaders({
-    'x-forwarded-for': `10.9.${test.info().project.name === 'mobile' ? 1 : 2}.${Date.now() % 250}`,
+    'x-forwarded-for': `10.250.${test.info().workerIndex}.${Date.now() % 250}`,
   })
   for (let i = 0; i < 6; i++) await signIn(page, 'owner@e2e.test', `bad-${i}-password`)
   await expect(page.getByRole('alert').filter({ hasText: 'Too many tries' })).toBeVisible()

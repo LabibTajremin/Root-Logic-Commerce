@@ -11,6 +11,8 @@
   --color-line: #e4e4e7;
   --color-accent: #4f46e5;
   --color-accent-tint: #eef2ff;
+  /* Accent as text: darkened so any owner-picked accent stays AA on light surfaces. */
+  --color-accent-ink: color-mix(in oklab, var(--color-accent) 60%, black);
   --color-button: #18181b;
   --color-button-text: #ffffff;
   --color-header: #ffffff;

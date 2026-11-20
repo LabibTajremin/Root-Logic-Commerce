@@ -17,8 +17,13 @@ const nextConfig: NextConfig = {
       output?: { devtoolModuleFilenameTemplate?: (i: { absoluteResourcePath: string }) => string }
     }) => {
       config.devtool = 'source-map'
-      // Absolute paths let the coverage filter tell our src/ apart from Next's own bundled sources.
-      if (config.output) config.output.devtoolModuleFilenameTemplate = (i) => i.absoluteResourcePath
+      // Tag our own sources so coverage never confuses them with Next's (which also has src/…).
+      const src = `${process.cwd()}/src/`
+      if (config.output)
+        config.output.devtoolModuleFilenameTemplate = (i) =>
+          i.absoluteResourcePath.startsWith(src)
+            ? `rlc/src/${i.absoluteResourcePath.slice(src.length)}`
+            : i.absoluteResourcePath
       if (config.optimization) config.optimization.minimize = false
       return config
     },

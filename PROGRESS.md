@@ -25,6 +25,10 @@ Preflight: done 2026-11-20
 ## Skipped
 
 ## Decisions
+- Coverage gate measures each source file in the layer that runs it (Vitest / e2e browser for 'use client' / e2e Next server), every file must be 100%. Merging line ranges across differently compiled bundles misaligned (false gaps) — documented in scripts/coverage-merge.mjs. Coverage builds tag our sources `rlc/src/…` to avoid Next's own `src/` paths. JSON dictionaries excluded as data files.
+- e2e fixture flushes browser coverage before goto/reload (full navigations drop the old document's script coverage); each test uses its own X-Forwarded-For so sign-in rate limits don't leak.
+- Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
+- Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
 - Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.
 - Domain events: `order.placed` + `order.<status>` (confirmed/processing/shipped/delivered/cancelled/returned); subscriber errors are reported, never block the action.
 - `knip` (unused exports) deferred to Phase 7: modules export APIs that later phases consume.
