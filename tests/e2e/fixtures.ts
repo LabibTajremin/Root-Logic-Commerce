@@ -33,9 +33,13 @@ export const test = base.extend<Fixtures>({
     await page.setExtraHTTPHeaders({
       'x-forwarded-for': `10.${testInfo.workerIndex % 250}.${testInfo.repeatEachIndex}.${n + 1}`,
     })
-    // Never call Google from tests: gtag.js is answered with an empty script.
+    // Never call third parties from tests: gtag.js and video embeds get empty answers.
     await page.route('https://www.googletagmanager.com/**', (r) =>
       r.fulfill({ contentType: 'text/javascript', body: '' }),
+    )
+    await page.route(
+      /^https:\/\/(www\.youtube-nocookie\.com|i\.ytimg\.com|www\.facebook\.com|www\.instagram\.com)\//,
+      (r) => r.fulfill({ contentType: 'text/html', body: '<!doctype html><title>embed</title>' }),
     )
     await page.coverage.startJSCoverage({ resetOnNavigation: false })
     // A full navigation discards the old document's script coverage, so flush first.

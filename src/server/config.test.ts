@@ -22,6 +22,7 @@ describe('loadConfig', () => {
     expect(c.storage).toEqual({
       driver: 'local',
       quotaBytes: 2 * 1024 ** 3,
+      videoMaxBytes: 20 * 1024 ** 2,
       minFreeDiskBytes: 2 * 1024 ** 3,
     })
     expect(c.entitlements).toEqual([])

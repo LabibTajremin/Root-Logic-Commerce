@@ -15,8 +15,8 @@ const nextConfig: NextConfig = {
     deviceSizes: [320, 640, 1024, 1600],
     imageSizes: [160],
   },
-  // Product photos are up to 8 MB (spec §7.3).
-  experimental: { serverActions: { bodySizeLimit: '9mb' } },
+  // Photos up to 8 MB, promo videos up to 20 MB (spec §7.3).
+  experimental: { serverActions: { bodySizeLimit: '21mb' } },
   ...(coverage && {
     distDir: '.next-cov',
     productionBrowserSourceMaps: true,

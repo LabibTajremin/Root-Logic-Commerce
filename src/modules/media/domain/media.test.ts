@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { assertUpload, parseDriveLink, sniffImage, variantWidths } from './media'
+import { assertUpload, assertVideo, parseDriveLink, sniffImage, variantWidths } from './media'
 
 const bytes = (...b: number[]) => new Uint8Array([...b, ...new Array(16).fill(0)])
 
@@ -47,5 +47,17 @@ describe('media rules', () => {
     expect(parseDriveLink('not a link')).toBeNull()
     expect(parseDriveLink('https://drive.google.com/drive/my-drive')).toBeNull()
     expect(parseDriveLink('https://drive.google.com/open?id=short')).toBeNull()
+  })
+
+  it('accepts mp4/webm videos within the size cap and the quota', () => {
+    const mp4 = bytes(0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70)
+    const webm = bytes(0x1a, 0x45, 0xdf, 0xa3)
+    expect(assertVideo(mp4, 100, 0, 1000)).toBe('mp4')
+    expect(assertVideo(webm, 100, 0, 1000)).toBe('webm')
+    expect(() => assertVideo(mp4, 10, 0, 1000)).toThrow('media.video_too_large')
+    expect(() => assertVideo(bytes(0x89, 0x50, 0x4e, 0x47), 100, 0, 1000)).toThrow(
+      'media.video_type',
+    )
+    expect(() => assertVideo(mp4, 100, 990, 1000)).toThrow('media.quota_full')
   })
 })

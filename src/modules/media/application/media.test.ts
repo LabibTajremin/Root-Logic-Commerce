@@ -49,6 +49,7 @@ const setup = (quotaBytes = 10_000) => {
       }),
     },
     quotaBytes,
+    videoMaxBytes: 100,
     newId: () => 'uuid',
   })
   return { media, files, links }
@@ -106,5 +107,15 @@ describe('media', () => {
     expect(await media.forProducts('s1', ['p1'])).toEqual([{ productId: 'p1', media: m }])
     await media.detach('s1', 'p1', m.id)
     expect(links).toEqual([])
+  })
+
+  it('stores videos as uploaded and serves them whole', async () => {
+    const { media, files } = setup()
+    const mp4 = new Uint8Array([0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70, 1, 2])
+    const v = await media.uploadVideo('s1', mp4)
+    expect(v).toMatchObject({ kind: 'video', ref: 's1/uuid.mp4', bytes: 10 })
+    expect(await media.read('s1', v.id, 0)).toEqual({ data: mp4, type: 'video/mp4' })
+    files.clear()
+    expect(await media.read('s1', v.id, 0)).toBeNull()
   })
 })

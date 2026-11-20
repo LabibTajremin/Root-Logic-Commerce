@@ -3,6 +3,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { createAccess } from '@/modules/access'
 import { createCatalog } from '@/modules/catalog'
 import { createInsights } from '@/modules/insights'
+import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
@@ -12,6 +13,7 @@ import { createSiteSettings } from '@/modules/site-settings'
 import { createStock } from '@/modules/stock'
 import type { Db } from '@/infrastructure/db/client'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
+import { createBannersRepo } from '@/infrastructure/db/repositories/banners-repo'
 import { createInsightsRepo } from '@/infrastructure/db/repositories/insights-repo'
 import { createMediaRepo } from '@/infrastructure/db/repositories/media-repo'
 import { createDrive } from '@/infrastructure/media/drive'
@@ -111,6 +113,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     bus,
     messaging,
     insights,
+    promotions: createPromotions({ repo: createBannersRepo(db) }),
     secrets,
     stores: createStoreDirectory(db),
     catalog: createCatalog({
@@ -131,6 +134,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
       images: sharpImages,
       drive: createDrive(),
       quotaBytes: config.storage.quotaBytes,
+      videoMaxBytes: config.storage.videoMaxBytes,
       newId: randomUUID,
     }),
     otp: createOtp({

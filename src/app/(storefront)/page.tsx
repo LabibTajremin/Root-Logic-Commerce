@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ProductGrid } from './product-grid'
+import { PromoBanners } from './promo-banners'
 import { storefront } from './storefront'
 
 export default async function HomePage() {
@@ -8,6 +9,7 @@ export default async function HomePage() {
   const products = await catalog.listProducts(store.id, { status: 'active' })
   return (
     <>
+      <PromoBanners />
       <Hero
         store={store}
         title={store.name}

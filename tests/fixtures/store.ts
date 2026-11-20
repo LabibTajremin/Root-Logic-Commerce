@@ -12,7 +12,12 @@ export const testConfig = (
   over: { entitlements?: ('seoPro' | 'removeBranding')[]; notifyLogFile?: string } = {},
 ) => ({
   entitlements: [],
-  storage: { driver: 'local' as const, quotaBytes: 10 * 1024 ** 2, minFreeDiskBytes: 1 },
+  storage: {
+    driver: 'local' as const,
+    quotaBytes: 10 * 1024 ** 2,
+    videoMaxBytes: 1024 ** 2,
+    minFreeDiskBytes: 1,
+  },
   mediaDir: mkdtempSync(join(tmpdir(), 'rlc-media-')),
   store: {
     name: 'Shop',

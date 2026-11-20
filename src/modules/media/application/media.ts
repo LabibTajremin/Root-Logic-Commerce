@@ -1,5 +1,11 @@
 import { DomainError } from '@/modules/shared'
-import { assertUpload, parseDriveLink, variantWidths, type UploadPurpose } from '../domain/media'
+import {
+  assertUpload,
+  assertVideo,
+  parseDriveLink,
+  variantWidths,
+  type UploadPurpose,
+} from '../domain/media'
 import type { DrivePort, ImagePort, MediaRepo, MediaRow, StoragePort } from './ports'
 
 type Deps = {
@@ -8,6 +14,7 @@ type Deps = {
   images: ImagePort
   drive: DrivePort
   quotaBytes: number
+  videoMaxBytes: number
   newId: () => string
 }
 
@@ -18,7 +25,15 @@ const DRIVE_PLACEHOLDER = '#E5E7EB'
 export const servedWidths = (m: Pick<MediaRow, 'kind' | 'width'>) =>
   m.kind === 'upload' ? variantWidths(m.width!) : DRIVE_WIDTHS
 
-export const createMedia = ({ repo, storage, images, drive, quotaBytes, newId }: Deps) => ({
+export const createMedia = ({
+  repo,
+  storage,
+  images,
+  drive,
+  quotaBytes,
+  videoMaxBytes,
+  newId,
+}: Deps) => ({
   async upload(storeId: string, purpose: UploadPurpose, data: Uint8Array) {
     assertUpload(purpose, data, await repo.usedBytes(storeId), quotaBytes)
     const img = await images.process(data, variantWidths)
@@ -30,6 +45,19 @@ export const createMedia = ({ repo, storage, images, drive, quotaBytes, newId }:
       width: img.width,
       bytes: img.variants.reduce((s, v) => s + v.data.byteLength, 0),
       dominantColor: img.dominantColor,
+    })
+  },
+
+  async uploadVideo(storeId: string, data: Uint8Array) {
+    const ext = assertVideo(data, videoMaxBytes, await repo.usedBytes(storeId), quotaBytes)
+    const ref = `${storeId}/${newId()}.${ext}`
+    await storage.put(ref, data)
+    return repo.insert(storeId, {
+      kind: 'video',
+      ref,
+      width: null,
+      bytes: data.byteLength,
+      dominantColor: '#000000',
     })
   },
 
@@ -57,6 +85,10 @@ export const createMedia = ({ repo, storage, images, drive, quotaBytes, newId }:
   async read(storeId: string, id: string, width: number) {
     const m = await repo.get(storeId, id)
     if (!m) return null
+    if (m.kind === 'video') {
+      const data = await storage.get(m.ref)
+      return data && { data, type: `video/${m.ref.split('.').pop()}` }
+    }
     const ws = servedWidths(m)
     const w = ws.find((x) => x >= width) ?? ws.at(-1)!
     if (m.kind === 'gdrive') return drive.fetch(m.ref, w)

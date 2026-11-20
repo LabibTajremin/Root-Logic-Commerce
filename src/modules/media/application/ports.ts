@@ -1,7 +1,7 @@
 export type MediaRow = {
   id: string
-  kind: 'upload' | 'gdrive'
-  /** upload: storage key prefix; gdrive: Drive file id. */
+  kind: 'upload' | 'gdrive' | 'video'
+  /** upload: storage key prefix; gdrive: Drive file id; video: storage key of the file. */
   ref: string
   width: number | null
   bytes: number

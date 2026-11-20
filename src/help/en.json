@@ -31,5 +31,8 @@
   "messages.sms": "Paste your BD SMS gateway's send URL with {{to}}, {{text}}, {{sender}} and {{apiKey}} where its values go. Your gateway's docs show the URL.",
   "messages.whatsapp": "From Meta Business → WhatsApp → API setup. WhatsApp only delivers free-form text within 24 h of the customer's last message.",
   "messages.owner": "New orders are sent here on every channel that is on.",
-  "messages.templates": "Edit what customers receive. Keep SMS short — about 70 Bangla or 160 English characters per SMS."
+  "messages.templates": "Edit what customers receive. Keep SMS short — about 70 Bangla or 160 English characters per SMS.",
+  "promotions.embed": "YouTube: Share → Copy link. Facebook: open the video → ⋯ → Copy link. Instagram: open the reel/post → ⋯ → Copy link. Nothing loads from these sites until a visitor taps play.",
+  "promotions.products": "Uses each product's first photo, your message and a button to the product.",
+  "promotions.poster": "A simple poster: colour or image background, a headline and a button."
 }

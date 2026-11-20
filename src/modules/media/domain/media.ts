@@ -54,3 +54,23 @@ export const parseDriveLink = (input: string) => {
   const id = /\/d\/([\w-]+)/.exec(url.pathname)?.[1] ?? url.searchParams.get('id')
   return id && DRIVE_ID.test(id) ? id : null
 }
+
+// Promo videos are stored as uploaded (no server-side transcoding on a small VPS).
+export const sniffVideo = (b: Uint8Array) => {
+  if (starts(b, [0x66, 0x74, 0x79, 0x70], 4)) return 'mp4'
+  if (starts(b, [0x1a, 0x45, 0xdf, 0xa3])) return 'webm'
+  return null
+}
+
+export const assertVideo = (
+  b: Uint8Array,
+  maxBytes: number,
+  usedBytes: number,
+  quotaBytes: number,
+) => {
+  if (b.byteLength > maxBytes) throw new DomainError('media.video_too_large', { max: maxBytes })
+  const ext = sniffVideo(b)
+  if (!ext) throw new DomainError('media.video_type')
+  if (usedBytes + b.byteLength > quotaBytes) throw new DomainError('media.quota_full')
+  return ext
+}

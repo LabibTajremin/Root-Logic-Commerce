@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { e2eEnv } from '../../scripts/e2e-env.mjs'
 import { signedIn } from './admin'
-import { createProduct, editProduct, fillCheckout, uid, uploadPhoto } from './shop'
+import { createProduct, editProduct, fillCheckout, photo, uid, uploadPhoto } from './shop'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -183,7 +183,7 @@ test('SEO, messages, plan, help, promotions and more pages', async ({ page, a11y
   await page.getByRole('link', { name: 'Create a category' }).click()
   await expect(page).toHaveURL(/categories/)
   await page.goto('/admin/promotions')
-  await expect(page.getByText('Banners, posters and promo videos')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Promotions' })).toBeVisible()
   await page.goto('/admin/more')
   await page.getByRole('link', { name: 'Help center' }).last().click()
   await expect(page.getByRole('heading', { level: 1, name: 'Help center' })).toBeVisible()
@@ -341,4 +341,136 @@ test('insights: GA4 ecommerce events, first-party counts and the dashboard range
   await page.getByLabel('Google Analytics 4 Measurement ID').fill('')
   await page.getByRole('button', { name: 'Save' }).click()
   await saved(page)
+})
+
+test('promotions: every banner kind, the video lock, embeds that load on tap, and video ranges', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '416' })
+  const id = uid()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await createProduct(page, { name: `Pick ${id}`, price: '100', stock: '3' })
+  await editProduct(page, `Pick ${id}`)
+  await uploadPhoto(page)
+  await createProduct(page, { name: `Plain ${id}`, price: '90', stock: '3' })
+  const add = async (kind: string, fill: () => Promise<void>) => {
+    await page.goto(`/admin/promotions?kind=${kind}`)
+    await fill()
+    await page.getByRole('button', { name: 'Add banner' }).click()
+    await saved(page)
+  }
+  await page.goto('/admin/promotions')
+  await expect(page.getByText('No banners yet')).toBeVisible()
+  await a11y()
+  await add('poster', async () => {
+    await page.getByLabel('Headline').fill(`Eid ${id}`)
+    await page.getByLabel('Sub-text').fill('Up to 20% off')
+    await page.getByLabel('Button text').fill('Shop now')
+    await page.getByLabel('Button link (e.g. /c/tea or https://…)').fill('/search')
+  })
+  await add('poster', async () => {
+    await page.getByLabel('Background image (optional)').setInputFiles(await photo('#a8763e'))
+    await page.getByLabel('Headline').fill(`Puja ${id}`)
+  })
+  await add('images', async () => {
+    await page.getByLabel('Images').setInputFiles([await photo('#123456'), await photo('#654321')])
+    await page.getByLabel('Promo message').fill(`New in ${id}`)
+    await page.getByLabel('Button text').fill('See all')
+    await page.getByLabel('Button link (e.g. /c/tea or https://…)').fill('/search')
+  })
+  await add('products', async () => {
+    await page.getByLabel(`Pick ${id}`).check()
+    await page.getByLabel(`Plain ${id}`).check()
+    await page.getByLabel('Promo message').fill(`Picks ${id}`)
+    await page.getByLabel('Button text').fill('Buy')
+  })
+  await add('embed', async () => {
+    await page.getByLabel('Video link').fill('https://youtu.be/dQw4w9WgXcQ')
+    await page.getByLabel('Caption').fill(`Story ${id}`)
+  })
+  await add('embed', async () => {
+    await page.getByLabel('Video link').fill('https://www.instagram.com/reel/Cx1Yz/')
+  })
+  await page.goto('/admin/promotions?kind=embed')
+  await page.getByLabel('Video link').fill('https://vimeo.com/1')
+  await page.getByRole('button', { name: 'Add banner' }).click()
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Please check the highlighted fields.' }),
+  ).toBeVisible()
+
+  await page.goto('/admin/promotions?kind=video')
+  await expect(page.getByText('Premium').first()).toBeVisible()
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-videoUploads').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-videoUploads')).toContainText('Included')
+  const mp4 = Buffer.concat([
+    Buffer.from([0, 0, 0, 0x18]),
+    Buffer.from('ftypisom'),
+    Buffer.alloc(52, 1),
+  ])
+  await add('video', async () => {
+    await page
+      .getByLabel('Video file')
+      .setInputFiles({ name: 'promo.mp4', mimeType: 'video/mp4', buffer: mp4 })
+    await page.getByLabel('Caption').fill(`Watch ${id}`)
+  })
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-videoUploads').getByRole('button', { name: 'Revoke' }).click()
+  await expect(page.getByTestId('feature-videoUploads')).toContainText('Premium')
+
+  await page.goto('/')
+  const promos = page.getByRole('region', { name: 'Promotions' })
+  for (const text of [
+    `Eid ${id}`,
+    `Puja ${id}`,
+    `New in ${id}`,
+    `Picks ${id}`,
+    `Story ${id}`,
+    `Watch ${id}`,
+  ])
+    await expect(promos).toContainText(text)
+  await a11y()
+  await promos.getByRole('button', { name: `Play video: Story ${id}` }).click()
+  await expect(
+    promos.locator('iframe[src^="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"]'),
+  ).toBeAttached()
+  const src = (await promos.locator('video').getAttribute('src'))!
+  const part = await page.request.get(src, { headers: { range: 'bytes=0-3' } })
+  expect(part.status()).toBe(206)
+  expect(part.headers()['content-range']).toBe(`bytes 0-3/${mp4.length}`)
+  expect((await page.request.get(src, { headers: { range: 'bytes=9999-' } })).status()).toBe(416)
+  expect((await page.request.get(src)).status()).toBe(200)
+
+  await page.goto('/admin/promotions')
+  const row = (text: string) => page.getByTestId('banner-row').filter({ hasText: text })
+  await row(`Puja ${id}`).getByRole('button', { name: 'Hide' }).click()
+  await expect(row(`Puja ${id}`)).toContainText('Hidden')
+  await page.goto('/')
+  await expect(page.getByRole('region', { name: 'Promotions' })).not.toContainText(`Puja ${id}`)
+  await page.goto('/admin/promotions')
+  await row(`Puja ${id}`).getByRole('button', { name: 'Show' }).click()
+  await expect(row(`Puja ${id}`)).toContainText('Showing')
+  const grip = (await page
+    .getByRole('listitem')
+    .filter({ hasText: `Puja ${id}` })
+    .getByRole('button', { name: 'Drag to reorder' })
+    .boundingBox())!
+  const first = (await page
+    .getByRole('listitem')
+    .filter({ hasText: `Eid ${id}` })
+    .boundingBox())!
+  const reordered = page.waitForResponse((r) => r.request().method() === 'POST')
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(grip.x + grip.width / 2, first.y + first.height / 2, { steps: 12 })
+  await page.mouse.up()
+  expect((await reordered).ok()).toBe(true)
+  // Leave the home page clean for whatever runs next.
+  while ((await page.getByTestId('banner-row').count()) > 0) {
+    const n = await page.getByTestId('banner-row').count()
+    await page.getByTestId('banner-row').first().getByRole('button', { name: 'Delete' }).click()
+    await expect(page.getByTestId('banner-row')).toHaveCount(n - 1)
+  }
+  await expect(page.getByText('No banners yet')).toBeVisible()
 })

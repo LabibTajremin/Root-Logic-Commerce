@@ -12,9 +12,9 @@ const setup = () => {
       rows.push(b)
       return b
     },
-    update: async (s, id, patch) => {
+    setActive: async (s, id, active) => {
       const b = rows.find((r) => r.storeId === s && r.id === id)
-      return b ? (Object.assign(b, patch), true) : false
+      return b ? ((b.active = active), true) : false
     },
     remove: async (s, id) =>
       void rows.splice(
@@ -50,10 +50,7 @@ describe('promotions', () => {
     expect((await p.active('s')).map((x) => x.id)).toEqual([b.id])
     await p.reorder('s', [b.id, a.id])
     expect((await p.list('s')).map((x) => x.id)).toEqual([b.id, a.id])
-    await p.update('s', a.id, { ...poster, headline: 'Puja' })
-    expect((await p.list('s'))[1]!.data).toMatchObject({ headline: 'Puja' })
     await expect(p.setActive('other', a.id, true)).rejects.toThrow('banner.not_found')
-    await expect(p.update('other', a.id, poster)).rejects.toThrow('banner.not_found')
     await p.remove('s', a.id)
     expect(await p.list('s')).toHaveLength(1)
   })

@@ -37,6 +37,7 @@ describe('container', () => {
       'orders',
       'otp',
       'plans',
+      'promotions',
       'secrets',
       'settings',
       'stock',

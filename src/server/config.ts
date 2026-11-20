@@ -31,6 +31,12 @@ const storeConfigSchema = z.object({
         .int()
         .positive()
         .default(2 * GB),
+      // Promo videos (spec §5.7): 20 MB by default.
+      videoMaxBytes: z
+        .number()
+        .int()
+        .positive()
+        .default(20 * 1024 ** 2),
       minFreeDiskBytes: z
         .number()
         .int()

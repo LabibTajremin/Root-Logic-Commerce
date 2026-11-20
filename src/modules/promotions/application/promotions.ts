@@ -11,10 +11,8 @@ export const createPromotions = ({ repo }: { repo: BannersRepo }) => {
     active: async (storeId: string) => (await repo.list(storeId)).filter((b) => b.active),
     create: async (storeId: string, input: unknown) =>
       repo.insert(storeId, validate(bannerData, input)),
-    update: async (storeId: string, id: string, input: unknown) =>
-      found(await repo.update(storeId, id, { data: validate(bannerData, input) })),
     setActive: async (storeId: string, id: string, active: boolean) =>
-      found(await repo.update(storeId, id, { active })),
+      found(await repo.setActive(storeId, id, active)),
     remove: (storeId: string, id: string) => repo.remove(storeId, id),
     reorder: (storeId: string, ids: string[]) => repo.setOrder(storeId, ids),
   }

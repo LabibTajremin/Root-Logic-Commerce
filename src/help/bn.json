@@ -31,5 +31,8 @@
   "messages.sms": "আপনার SMS গেটওয়ের সেন্ড URL দিন; যেখানে মান বসবে সেখানে {{to}}, {{text}}, {{sender}}, {{apiKey}} লিখুন।",
   "messages.whatsapp": "Meta Business → WhatsApp → API setup থেকে নিন। ক্রেতার শেষ মেসেজের ২৪ ঘণ্টার মধ্যে সাধারণ লেখা পাঠানো যায়।",
   "messages.owner": "চালু থাকা প্রতিটি মাধ্যমে নতুন অর্ডারের খবর এখানে যাবে।",
-  "messages.templates": "ক্রেতারা কী পাবেন তা লিখুন। SMS ছোট রাখুন — বাংলায় প্রায় ৭০ অক্ষর।"
+  "messages.templates": "ক্রেতারা কী পাবেন তা লিখুন। SMS ছোট রাখুন — বাংলায় প্রায় ৭০ অক্ষর।",
+  "promotions.embed": "YouTube: Share → Copy link। Facebook: ভিডিও খুলে ⋯ → Copy link। Instagram: রিল/পোস্ট খুলে ⋯ → Copy link। ভিজিটর প্লে না চাপা পর্যন্ত এসব সাইট থেকে কিছু লোড হয় না।",
+  "promotions.products": "প্রতিটি পণ্যের প্রথম ছবি, আপনার মেসেজ ও পণ্যের বাটন ব্যবহার করে।",
+  "promotions.poster": "সাধারণ পোস্টার: রং বা ছবির পটভূমি, শিরোনাম ও একটি বাটন।"
 }

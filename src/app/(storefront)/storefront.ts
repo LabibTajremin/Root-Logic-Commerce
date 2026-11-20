@@ -59,5 +59,6 @@ export const storefront = cache(async () => {
     catalog: container.catalog,
     orders: container.orders,
     otp: container.otp,
+    promotions: container.promotions,
   }
 })
