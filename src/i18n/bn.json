@@ -216,5 +216,6 @@
   "design.mobile": "মোবাইল",
   "design.desktop": "ডেস্কটপ",
   "design.lowContrast": "কম কনট্রাস্ট: {{list}} পড়তে কষ্ট হতে পারে (WCAG AA এর নিচে)।",
-  "design.published": "প্রকাশিত হয়েছে"
+  "design.published": "প্রকাশিত হয়েছে",
+  "error.unexpected": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।"
 }

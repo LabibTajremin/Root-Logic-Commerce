@@ -20,8 +20,9 @@ export const act = async (
     authorize(ctx.actor, permission, ctx.store.id)
     to = await run(ctx)
   } catch (e) {
-    if (isDomainError(e)) return { error: ctx.t(`error.${e.code}`) }
-    throw e
+    // Never a 500 for the owner: unknown failures are logged and shown as a retry hint.
+    if (!isDomainError(e)) console.error('[admin action]', e)
+    return { error: ctx.t(isDomainError(e) ? `error.${e.code}` : 'error.unexpected') }
   }
   revalidatePath('/admin', 'layout')
   if (to) redirect(to)

@@ -7,7 +7,7 @@ export async function adjustStock(_: ActionState, form: FormData) {
     await stock.adjustStock(
       store.id,
       String(form.get('productId')),
-      { delta: Number(form.get('delta')), note: String(form.get('note') ?? '') },
+      { delta: Number(form.get('delta')), note: form.get('note') as string },
       actor!.id,
     )
   })

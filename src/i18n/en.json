@@ -216,5 +216,6 @@
   "design.mobile": "Mobile",
   "design.desktop": "Desktop",
   "design.lowContrast": "Low contrast: {{list}} may be hard to read (below WCAG AA).",
-  "design.published": "Published"
+  "design.published": "Published",
+  "error.unexpected": "Something went wrong. Please try again."
 }

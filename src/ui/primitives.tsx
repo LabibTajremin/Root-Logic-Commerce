@@ -51,10 +51,9 @@ type FieldProps = {
   label: string
   help: string
   helpLabel: string
-  error?: string
 } & ComponentProps<'input'>
 
-export const Field = ({ id, label, help, helpLabel, error, className, ...input }: FieldProps) => (
+export const Field = ({ id, label, help, helpLabel, className, ...input }: FieldProps) => (
   <div className={cx('flex flex-col gap-1.5', className)}>
     <div className="flex items-center gap-1">
       <label htmlFor={id} className="text-sm font-semibold">
@@ -64,11 +63,9 @@ export const Field = ({ id, label, help, helpLabel, error, className, ...input }
     </div>
     <input
       id={id}
-      aria-invalid={error ? true : undefined}
-      className="min-h-11 rounded-control border border-line bg-surface px-3 text-base outline-accent aria-invalid:border-danger"
+      className="min-h-11 rounded-control border border-line bg-surface px-3 text-base outline-accent"
       {...input}
     />
-    {error && <p className="text-sm text-danger">{error}</p>}
   </div>
 )
 

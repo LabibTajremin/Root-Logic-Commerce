@@ -27,8 +27,8 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
 
   // Same-origin preview: write the CSS variables straight into the storefront iframe.
   const paint = () => {
-    const doc = frame.current?.contentDocument
-    if (!doc?.head) return
+    // Same-origin iframe: a document (about:blank before load) always exists.
+    const doc = frame.current!.contentDocument!
     const tag =
       doc.getElementById('rlc-preview') ??
       doc.head.appendChild(Object.assign(doc.createElement('style'), { id: 'rlc-preview' }))

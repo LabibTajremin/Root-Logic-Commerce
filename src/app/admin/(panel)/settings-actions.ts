@@ -12,9 +12,9 @@ export async function saveBusiness(_: ActionState, form: FormData) {
       ...(has('seo.titleTemplate') && {
         seo: {
           titleTemplate: String(form.get('seo.titleTemplate')),
-          metaDescription: String(form.get('seo.metaDescription') ?? ''),
+          metaDescription: form.get('seo.metaDescription') as string,
         },
-        ga4MeasurementId: String(form.get('ga4MeasurementId') ?? '') || null,
+        ga4MeasurementId: (form.get('ga4MeasurementId') as string) || null,
       }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },
