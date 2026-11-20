@@ -7,36 +7,33 @@ const saved = (page: Page) =>
   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const alert = (page: Page, text: string | RegExp) =>
   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
-/** Keyboard pick-up: the sensor ignores keys until it has activated, so wait for it. */
+/** dnd-kit's screen-reader announcements double as a "sensor is ready" signal. */
+const announced = (page: Page, text: string | RegExp) =>
+  expect(page.getByRole('status').filter({ hasText: text })).toBeAttached()
 const pickUp = async (page: Page, item: Locator) => {
   await item.getByRole('button', { name: 'Drag to reorder' }).focus()
   await page.keyboard.press('Space')
-  await expect(item).toHaveAttribute('data-dragging', 'true')
+  await announced(page, /Picked up draggable item|was moved over droppable area/)
 }
-/** Drop, retrying a press the sensor ignored while still measuring. */
-const drop = async (page: Page, item: Locator) =>
-  expect(async () => {
-    await page.keyboard.press('Space')
-    await expect(item).toHaveAttribute('data-dragging', 'false', { timeout: 300 })
-  }).toPass()
+const drop = async (page: Page, item: Locator) => {
+  await page.keyboard.press('Space')
+  await expect(item).toHaveAttribute('data-dragging', 'false')
+}
 
-/** Moves a row one place (down if it is first in its list, else up) and waits for the save. */
+/** Pointer-drags a row onto its neighbour (below if it is first, else above); waits for the save. */
 const drag = async (page: Page, row: string) => {
   const item = page.getByRole('listitem').filter({ hasText: row }).first()
   const first = await item.evaluate((li) => li.previousElementSibling === null)
-  await pickUp(page, item)
-  // dnd-kit announces "Draggable item A was moved over droppable area B": wait for B ≠ A.
-  const status = page.getByRole('status').filter({ hasText: 'Draggable item' })
-  await expect(async () => {
-    await page.keyboard.press(first ? 'ArrowDown' : 'ArrowUp')
-    const [, a, b] =
-      /item (\S+) was moved over droppable area (\S+)/.exec(
-        (await status.textContent({ timeout: 300 })) ?? '',
-      ) ?? []
-    expect(a && b && a !== b).toBe(true)
-  }).toPass()
+  const target = item.locator(
+    first ? 'xpath=following-sibling::li[1]' : 'xpath=preceding-sibling::li[1]',
+  )
+  const from = (await item.getByRole('button', { name: 'Drag to reorder' }).boundingBox())!
+  const to = (await target.boundingBox())!
   const saved = page.waitForResponse((r) => r.request().method() === 'POST')
-  await drop(page, item)
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(from.x + from.width / 2, to.y + to.height / 2, { steps: 12 })
+  await page.mouse.up()
   expect((await saved).ok()).toBe(true)
 }
 
