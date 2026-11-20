@@ -50,19 +50,28 @@ const save = (next: CartLine[]) => {
 
 export const cart = {
   add(item: Item) {
-    const cur = snapshot()
-    const i = cur.findIndex((l) => l.id === item.id)
+    // Append a zero line, bump whichever line matches first (the existing one, else the
+    // new one), then drop the unused zero line: order is kept, no special cases.
+    const next = [...snapshot(), { ...item, qty: 0 }]
+    const i = next.findIndex((l) => l.id === item.id)
     save(
-      i < 0
-        ? [...cur, { ...item, qty: 1 }]
-        : cur.with(i, { ...cur[i]!, qty: Math.min(99, cur[i]!.qty + 1) }),
+      next.with(i, { ...next[i]!, qty: Math.min(99, next[i]!.qty + 1) }).filter((l) => l.qty > 0),
     )
   },
-  // Only called for a line shown in the drawer, so the id is always in the cart.
+  // Only called for lines shown in the drawer, so the id is always in the cart.
   setQty(id: string, qty: number) {
     const cur = snapshot()
     const i = cur.findIndex((l) => l.id === id)
-    save(qty < 1 ? cur.toSpliced(i, 1) : cur.with(i, { ...cur[i]!, qty: Math.min(99, qty) }))
+    save(cur.with(i, { ...cur[i]!, qty: Math.max(1, Math.min(99, qty)) }))
+  },
+  remove(id: string) {
+    const cur = snapshot()
+    save(
+      cur.toSpliced(
+        cur.findIndex((l) => l.id === id),
+        1,
+      ),
+    )
   },
   clear: () => save(EMPTY),
 }
@@ -165,6 +174,7 @@ export const CartDrawer = ({
                       type="button"
                       aria-label="−"
                       onClick={() => cart.setQty(l.id, l.qty - 1)}
+                      disabled={l.qty <= 1}
                       className="inline-flex size-11 items-center justify-center rounded-control border border-line"
                     >
                       <Icon name="minus" size={16} />
@@ -180,7 +190,7 @@ export const CartDrawer = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => cart.setQty(l.id, 0)}
+                      onClick={() => cart.remove(l.id)}
                       className="ml-auto min-h-11 px-2 text-sm text-muted underline"
                     >
                       {L.remove}

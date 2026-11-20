@@ -10,7 +10,8 @@ const readProduct = (f: FormData) => ({
   name: field(f, 'name'),
   slug: field(f, 'slug') || undefined,
   description: field(f, 'description'),
-  price: minor(field(f, 'price')) ?? Number.NaN,
+  // The field is required; a blank tampered value stays null and fails validation.
+  price: minor(field(f, 'price')) as number,
   compareAtPrice: minor(field(f, 'compareAtPrice')),
   costPrice: minor(field(f, 'costPrice')) ?? 0,
   stock: Number(field(f, 'stock')),

@@ -9,19 +9,16 @@ export const browserCoverageOptions = {
 
 const report = new CoverageReport({ ...browserCoverageOptions, reports: ['raw'] })
 
-let batch = 0
-
 export const addBrowserCoverage = async (entries: V8CoverageEntry[]) => {
-  // Same script URL appears per test and again after reloads; entries sharing a URL
-  // are not summed, so make each unique — the merge then sums them per source file.
-  const tag = `${process.pid}-${batch++}`
+  // Same URL across flushes merges per script (V8-aware). Within one flush a URL can
+  // repeat (a script loaded twice); only those repeats get a suffix so none is dropped.
   const seen = new Map<string, number>()
-  const unique = entries
+  const ours = entries
     .filter((e) => e.url.includes('/_next/static/'))
     .map((e) => {
       const n = seen.get(e.url) ?? 0
       seen.set(e.url, n + 1)
-      return { ...e, url: `${e.url}#${tag}-${n}` }
+      return n ? { ...e, url: `${e.url}#${n}` } : e
     })
-  if (unique.length) await report.add(unique)
+  if (ours.length) await report.add(ours)
 }
