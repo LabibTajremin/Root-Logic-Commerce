@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { AddToCart, OrderNow } from '../../cart'
+import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 

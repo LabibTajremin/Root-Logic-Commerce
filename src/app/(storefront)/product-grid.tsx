@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Product } from '@/modules/catalog'
-import { AddToCart } from './cart'
+import { AddToCart } from './cart-buttons'
 import { storefront } from './storefront'
 
 export const ProductGrid = async ({ products }: { products: Product[] }) => {

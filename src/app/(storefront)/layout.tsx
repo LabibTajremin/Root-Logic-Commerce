@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
-import { CartButton, CartDrawer } from './cart'
+import { CartButton, CartDrawer } from './cart-drawer'
 import { storefront } from './storefront'
 
 export const generateMetadata = async (): Promise<Metadata> => {

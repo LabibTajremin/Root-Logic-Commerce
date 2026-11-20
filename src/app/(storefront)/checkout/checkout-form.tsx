@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
 import { formatMoney } from '@/modules/shared'
-import { cart, useCart } from '../cart'
+import { cart, useCart } from '../cart-store'
 import { placeOrder } from './actions'
 
 type Zone = { id: string; label: string; charge: number }
