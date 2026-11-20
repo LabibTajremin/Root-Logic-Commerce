@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 1 (paused by owner) — Figma file https://www.figma.com/design/m2Lp8fxK2nnbcXB2c9qijG must sit in a project of the student team (Starter = 1 variable mode; probe: addMode fails). Next: probe modes; build Foundations (1 collection, 8 modes = minimal/organic/attar/ankito × light/dark), components, then one page per theme with Storefront + Admin at Web 1440 + Mobile 390, EN+BN variant; write design/README.md with link.
+Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr : tokens+components+content vars done; Minimal storefront web+mobile (10 screens) done. Next: admin web+mobile on Minimal page, then clone to Organic/Attar/Ankito pages with modes, Cover, design/README.md.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
