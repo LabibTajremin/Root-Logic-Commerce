@@ -21,6 +21,10 @@ const KEYS = [
   'total',
   'empty',
   'guest',
+  'otpTitle',
+  'otpSent',
+  'otpCode',
+  'verify',
 ]
 
 export default async function CheckoutPage() {

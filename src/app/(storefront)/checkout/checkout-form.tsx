@@ -47,6 +47,7 @@ export const CheckoutForm = ({
   const router = useRouter()
   const [zoneId, setZoneId] = useState(zones[0]!.id)
   const [error, setError] = useState('')
+  const [otpTo, setOtpTo] = useState('')
   const [pending, start] = useTransition()
   const money = (m: number) => formatMoney(m, { banglaDigits })
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
@@ -68,6 +69,7 @@ export const CheckoutForm = ({
     start(async () => {
       const r = await placeOrder(form)
       if ('error' in r) return setError(r.error)
+      if ('otp' in r) return (setError(''), setOtpTo(r.otp))
       router.push(`/order/${r.orderNo}`)
       cart.clear()
     })
@@ -161,6 +163,21 @@ export const CheckoutForm = ({
           name="items"
           value={JSON.stringify(items.map((l) => ({ productId: l.id, quantity: l.qty })))}
         />
+        {otpTo && (
+          <div className="flex flex-col gap-2 rounded-control bg-soft p-3">
+            <p className="font-semibold">{L.otpTitle}</p>
+            <p className="text-sm">{L.otpSent!.replace('{{to}}', otpTo)}</p>
+            <Input
+              id="code"
+              label={L.otpCode}
+              required
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxLength={6}
+            />
+          </div>
+        )}
         {error && (
           <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">
             {error}
@@ -170,7 +187,7 @@ export const CheckoutForm = ({
           disabled={pending}
           className="inline-flex min-h-12 items-center justify-center rounded-control bg-button px-4 font-semibold text-button-text disabled:opacity-60"
         >
-          {L.place}
+          {otpTo ? L.verify : L.place}
         </button>
         <p className="text-xs text-muted">{L.guest}</p>
       </aside>

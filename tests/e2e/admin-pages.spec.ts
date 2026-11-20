@@ -240,13 +240,6 @@ test('SEO, messages, plan, help, promotions and more pages', async ({ page, a11y
   await saved(page)
   await expect(page.getByText('SEO Pro audit')).toBeVisible()
 
-  await page.goto('/admin/messages')
-  await page.getByLabel('SMS code').check()
-  await page.getByRole('button', { name: 'Save' }).click()
-  await saved(page)
-  await page.reload()
-  await expect(page.getByLabel('SMS code')).toBeChecked()
-
   await page.goto('/admin/plan')
   await a11y()
   await expect(page.getByTestId('feature-removeBranding')).toContainText('Premium')

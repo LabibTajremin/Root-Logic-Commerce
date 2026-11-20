@@ -7,4 +7,5 @@ export const e2eEnv = {
   BOOTSTRAP_OWNER_PASSWORD: 'owner-pass-123',
   BOOTSTRAP_OWNER_NAME: 'Rahim',
   BOOTSTRAP_HOSTS: '127.0.0.1',
+  NOTIFY_LOG_FILE: '.e2e/notify.log',
 }

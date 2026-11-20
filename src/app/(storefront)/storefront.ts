@@ -44,5 +44,6 @@ export const storefront = cache(async () => {
     allCategories: live,
     catalog: container.catalog,
     orders: container.orders,
+    otp: container.otp,
   }
 })

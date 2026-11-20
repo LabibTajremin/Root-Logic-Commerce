@@ -14,12 +14,25 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: { baseURL, trace: 'off' },
   projects: [
-    { name: 'mobile', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } } },
+    {
+      name: 'mobile',
+      testIgnore: /settings\.spec/,
+      use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } },
+    },
     // Both projects share one store database; desktop runs after mobile so store-wide
     // state (design, settings) never races between viewports.
     {
       name: 'desktop',
       dependencies: ['mobile'],
+      testIgnore: /settings\.spec/,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    // Store-wide switches (OTP, theme) change what every other test sees: run them last, alone.
+    {
+      name: 'settings',
+      dependencies: ['desktop'],
+      testMatch: /settings\.spec/,
+      fullyParallel: false,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],

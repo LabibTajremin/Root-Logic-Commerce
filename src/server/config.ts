@@ -52,6 +52,8 @@ const envSchema = z.object({
   DEFAULT_STORE_SLUG: z.string().min(1).optional(),
   STORAGE_DRIVER: storageDriver.optional(),
   SETTINGS_KEY: z.string().min(32).optional(),
+  // Messages are written here instead of sent (dev/e2e); unset logs them to stdout.
+  NOTIFY_LOG_FILE: z.string().min(1).optional(),
 })
 
 export type StoreConfigInput = z.input<typeof storeConfigSchema>
@@ -87,6 +89,7 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     databaseUrl: e.data.DATABASE_URL,
     authSecret: e.data.AUTH_SECRET,
     settingsKey: e.data.SETTINGS_KEY,
+    notifyLogFile: e.data.NOTIFY_LOG_FILE,
     hostingProfile: e.data.HOSTING_PROFILE,
     storeMode: e.data.STORE_MODE,
     defaultStoreSlug: e.data.DEFAULT_STORE_SLUG ?? f.data.store.slug,

@@ -1,22 +1,32 @@
 'use server'
 
+import { otpTarget } from '@/modules/messages'
 import { isDomainError } from '@/modules/shared'
 import { storefront } from '../storefront'
 
-export type PlaceResult = { error: string } | { orderNo: number }
+export type PlaceResult = { error: string } | { otp: string } | { orderNo: number }
 
 const optional = (v: string) => v.trim() || null
 
 export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
-  const { orders, store, business, t } = await storefront()
-  const f = (k: string) => String(form.get(k))
+  const { orders, otp, store, business, t } = await storefront()
+  const f = (k: string) => String(form.get(k) ?? '')
   try {
+    const email = optional(f('email'))
+    // With a verification channel on, the first submit only sends the code.
+    const check = otpTarget(business.otp, { phone: f('phone'), email })
+    if (check) {
+      const code = optional(f('code'))
+      if (!code)
+        return { otp: await otp.request(store.id, check.channel, check.target, store.name) }
+      await otp.verify(store.id, check.target, code)
+    }
     const order = await orders.placeOrder(
       store.id,
       {
         name: f('name'),
         phone: f('phone'),
-        email: optional(f('email')),
+        email,
         district: f('district'),
         area: f('area'),
         address: f('address'),

@@ -5,5 +5,5 @@ export const themeIds = ['minimal'] as const
 
 // Dynamic imports: each route only loads the theme it renders.
 export const themeLoaders: Record<string, () => Promise<Theme>> = {
-  minimal: () => import('./minimal').then((m) => m.theme),
+  'minimal': () => import('./minimal').then((m) => m.theme),
 }
