@@ -23,7 +23,13 @@ const report = new CoverageReport({
   sourceFilter: (p) => p.startsWith('src/') && !p.endsWith('.css') && existsSync(p),
   all: {
     dir: ['./src'],
-    filter: { '**/*.d.ts': false, '**/*.test.*': false, '**/*.css': false, '**/*': true },
+    filter: {
+      '**/*.d.ts': false,
+      '**/*.test.*': false,
+      '**/*.css': false,
+      '**/migrations/**': false,
+      '**/*': true,
+    },
   },
 })
 
