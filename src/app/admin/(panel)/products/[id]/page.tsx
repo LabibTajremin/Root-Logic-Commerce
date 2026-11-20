@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { isUuid } from '@/modules/shared'
 import { adminContext } from '../../context'
 import { ProductForm } from '../product-form'
+import { ProductImages } from './product-images'
 
 export const metadata: Metadata = { title: 'Edit product' }
 
@@ -20,6 +21,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
         categories={await catalog.listCategories(store.id)}
         locale={locale}
       />
+      <ProductImages productId={product.id} />
     </>
   )
 }

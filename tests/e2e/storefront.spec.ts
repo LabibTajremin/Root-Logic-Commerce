@@ -1,7 +1,15 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { signedIn } from './admin'
-import { createCategory, createProduct, fillCheckout, slug, uid } from './shop'
+import {
+  createCategory,
+  createProduct,
+  editProduct,
+  fillCheckout,
+  slug,
+  uid,
+  uploadPhoto,
+} from './shop'
 
 const drawer = (page: Page) => page.getByRole('dialog', { name: 'Cart' })
 const alert = (page: Page, text: string | RegExp) =>
@@ -162,7 +170,7 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await drawer(page).getByRole('button', { name: 'Cancel' }).click()
 
   await page.goto(`/search?q=${encodeURIComponent(id)}`)
-  await expect(page.getByRole('status')).toHaveText(`3 results for “${id}”`)
+  await expect(page.getByRole('status')).toHaveText(`Found 3 for “${id}”`)
   await expect(page.getByText('Sold out').first()).toBeVisible()
   await a11y()
   await page.goto(`/p/${slug(`Sold ${id}`)}`)
@@ -270,5 +278,65 @@ test('robots.txt and sitemap.xml use the store origin', async ({ page, request }
   ]) {
     const r = await request.get(`/admin/lang?${q}`, { maxRedirects: 0 })
     expect(r.headers().location).toBe(to)
+  }
+})
+
+test('product images: upload checks, Drive links, removal, and the shop shows them', async ({
+  page,
+  a11y,
+}) => {
+  // The fake Drive file has no thumbnail: its proxy answers 404 and the placeholder shows.
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  const name = `Photo ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '450', stock: '3' })
+  await editProduct(page, name)
+  await expect(page.getByText('No images yet')).toBeVisible()
+  await expect(page.getByTestId('storage-usage')).toContainText('Storage used:')
+  await a11y()
+  const pick = (file: { name: string; mimeType: string; buffer: Buffer }) =>
+    page.getByLabel('Choose a photo').setInputFiles(file)
+  await pick({
+    name: 'virus.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('<svg onload=alert(1)>'),
+  })
+  await page.getByRole('button', { name: 'Upload image' }).click()
+  await alert(page, 'Please choose a JPG, PNG, WebP or GIF photo.')
+  await pick({
+    name: 'huge.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.alloc(8 * 1024 * 1024 + 10, 0xff),
+  })
+  await page.getByRole('button', { name: 'Upload image' }).click()
+  await alert(page, 'That file is too large.')
+  await uploadPhoto(page)
+  await uploadPhoto(page, '#a8763e')
+  await page.getByLabel('…or paste a Google Drive link').fill('https://example.com/not-drive')
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  await alert(page, 'That doesn’t look like a Google Drive file link.')
+  await page
+    .getByLabel('…or paste a Google Drive link')
+    .fill('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view?usp=sharing')
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
+  const images = page.getByTestId('product-images').getByRole('listitem')
+  await expect(images).toHaveCount(3)
+  await images.nth(2).getByRole('button', { name: 'Remove image' }).click()
+  await expect(images).toHaveCount(2)
+
+  await page.goto(`/p/${slug(name)}`)
+  const gallery = page.locator('article img')
+  await expect(gallery).toHaveCount(2)
+  await expect(gallery.first()).toHaveJSProperty('complete', true)
+  expect(await gallery.first().evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0)
+  expect(JSON.parse(await ld(page)).image).toHaveLength(2)
+  await a11y()
+  await page.goto(`/search?q=${encodeURIComponent(name)}`)
+  await expect(page.locator('main li img')).toHaveCount(1)
+  for (const url of [
+    '/api/media/nope/320',
+    '/api/media/00000000-0000-4000-8000-000000000000/320',
+  ]) {
+    expect((await page.request.get(url)).status()).toBe(404)
   }
 })

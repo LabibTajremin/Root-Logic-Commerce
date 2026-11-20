@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { e2eEnv } from '../../scripts/e2e-env.mjs'
 import { signedIn } from './admin'
-import { createProduct, fillCheckout, uid } from './shop'
+import { createProduct, editProduct, fillCheckout, uid, uploadPhoto } from './shop'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -75,6 +75,8 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
   const id = uid()
   await signedIn(page)
   await createProduct(page, { name: `Sale ${id}`, price: '100', compareAt: '150', stock: '4' })
+  await editProduct(page, `Sale ${id}`)
+  await uploadPhoto(page)
   await createProduct(page, { name: `Out ${id}`, price: '100', stock: '0' })
   for (const theme of ['organic', 'attar', 'ankito', 'minimal']) {
     await page.goto('/admin/design')

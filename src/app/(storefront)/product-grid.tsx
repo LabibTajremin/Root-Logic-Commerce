@@ -4,7 +4,7 @@ import { AddToCart } from './cart'
 import { storefront } from './storefront'
 
 export const ProductGrid = async ({ products }: { products: Product[] }) => {
-  const { theme, design, view, t } = await storefront()
+  const { theme, design, view, imagesOf, t } = await storefront()
   const { ProductCard, EmptyState } = theme.slots
   if (products.length === 0)
     return (
@@ -19,6 +19,7 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
         }
       />
     )
+  const images = await imagesOf(products)
   return (
     <ul
       data-showcase={design.style.showcase}
@@ -27,7 +28,7 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
       {products.map((p) => (
         <li key={p.id}>
           <ProductCard
-            product={view(p)}
+            product={view(p, images.get(p.id)!)}
             labels={{ sale: t('shop.sale'), soldOut: t('shop.soldOut') }}
             action={
               <AddToCart

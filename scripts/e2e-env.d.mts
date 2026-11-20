@@ -9,4 +9,5 @@ export declare const e2eEnv: {
   BOOTSTRAP_SUPER_EMAIL: string
   BOOTSTRAP_SUPER_PASSWORD: string
   NOTIFY_LOG_FILE: string
+  MEDIA_DIR: string
 }

@@ -6,7 +6,7 @@ import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createLogNotifier } from '@/infrastructure/notify/log-notifier'
 import { createContainer } from '@/server/container'
 import { createTestDb } from '../fixtures/db'
-import { seedStore } from '../fixtures/store'
+import { seedStore, testConfig } from '../fixtures/store'
 
 describe('otp repo', () => {
   it('counts, finds the latest, bumps and consumes per store + target', async () => {
@@ -54,7 +54,7 @@ describe('log notifier', () => {
     const db = await createTestDb()
     const file = join(mkdtempSync(join(tmpdir(), 'rlc-')), 'n.log')
     const c = createContainer({
-      config: { entitlements: [], notifyLogFile: file },
+      config: testConfig({ notifyLogFile: file }),
       db,
       onEventError: () => {},
     })

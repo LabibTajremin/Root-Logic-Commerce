@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import sharp from 'sharp'
 import { test } from './fixtures'
 
 export const uid = () => `${test.info().project.name}-${Date.now().toString(36)}`
@@ -48,4 +49,27 @@ export const fillCheckout = async (page: Page, phone = '01712345678') => {
   await page.getByLabel('District').fill('Dhaka')
   await page.getByLabel('Area / Thana').fill('Mirpur')
   await page.getByLabel('Full address').fill('House 12, Road 3')
+}
+
+/** A real JPEG, generated so no binary fixture lives in the repo. */
+export const photo = async (color = '#3c6430') => ({
+  name: 'photo.jpg',
+  mimeType: 'image/jpeg',
+  buffer: await sharp({ create: { width: 1200, height: 1200, channels: 3, background: color } })
+    .jpeg()
+    .toBuffer(),
+})
+
+/** Opens the product's editor from the list (owner signed in). */
+export const editProduct = async (page: Page, name: string) => {
+  await page.goto('/admin/products')
+  await page.getByRole('link', { name: new RegExp(name) }).click()
+  await expect(page.getByRole('heading', { name: 'Edit product' })).toBeVisible()
+}
+
+export const uploadPhoto = async (page: Page, color?: string) => {
+  const count = await page.getByTestId('product-images').getByRole('listitem').count()
+  await page.getByLabel('Choose a photo').setInputFiles(await photo(color))
+  await page.getByRole('button', { name: 'Upload image' }).click()
+  await expect(page.getByTestId('product-images').getByRole('listitem')).toHaveCount(count + 1)
 }

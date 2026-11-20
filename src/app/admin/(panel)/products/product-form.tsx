@@ -60,10 +60,6 @@ export const ProductForm = ({
             />
           </div>
         </Card>
-        <Card className="flex flex-col gap-2">
-          <h2 className="font-semibold">{t('products.media')}</h2>
-          <p className="text-sm text-muted">{t('products.mediaHint')}</p>
-        </Card>
         <Card className="flex flex-col gap-4">
           {f('seoTitle', 'field.seoTitle', {
             defaultValue: product?.seoTitle ?? '',

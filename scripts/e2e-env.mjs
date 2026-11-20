@@ -10,4 +10,5 @@ export const e2eEnv = {
   BOOTSTRAP_SUPER_EMAIL: 'lab@e2e.test',
   BOOTSTRAP_SUPER_PASSWORD: 'lab-pass-12345',
   NOTIFY_LOG_FILE: '.e2e/notify.log',
+  MEDIA_DIR: '.e2e/media',
 }

@@ -54,6 +54,8 @@ const envSchema = z.object({
   SETTINGS_KEY: z.string().min(32).optional(),
   // Messages are written here instead of sent (dev/e2e); unset logs them to stdout.
   NOTIFY_LOG_FILE: z.string().min(1).optional(),
+  // Local media root (VPS: /var/lib/rlc/media, served by Caddy under /media/*).
+  MEDIA_DIR: z.string().min(1).default('.media'),
 })
 
 export type StoreConfigInput = z.input<typeof storeConfigSchema>
@@ -90,6 +92,7 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     authSecret: e.data.AUTH_SECRET,
     settingsKey: e.data.SETTINGS_KEY,
     notifyLogFile: e.data.NOTIFY_LOG_FILE,
+    mediaDir: e.data.MEDIA_DIR,
     hostingProfile: e.data.HOSTING_PROFILE,
     storeMode: e.data.STORE_MODE,
     defaultStoreSlug: e.data.DEFAULT_STORE_SLUG ?? f.data.store.slug,

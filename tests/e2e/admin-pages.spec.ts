@@ -13,9 +13,12 @@ const drag = async (page: Page, row: string, key: 'ArrowUp' | 'ArrowDown') => {
   await item.getByRole('button', { name: 'Drag to reorder' }).focus()
   await page.keyboard.press('Space')
   await expect(item).toHaveAttribute('data-dragging', 'true')
-  // The sensor ignores arrows until it has measured the rows; retry until the row moves.
+  // The sensor ignores arrows until it has measured the rows; retry until the row moves
+  // (the other way too, in case it already sits at that end of the list).
+  const other = key === 'ArrowUp' ? 'ArrowDown' : 'ArrowUp'
+  let tries = 0
   await expect(async () => {
-    await page.keyboard.press(key)
+    await page.keyboard.press(tries++ % 2 ? other : key)
     await expect(item).toHaveAttribute('style', /translate3d\(0px, -?[1-9]/, { timeout: 250 })
   }).toPass()
   const saved = page.waitForResponse((r) => r.request().method() === 'POST')

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
@@ -51,8 +52,12 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
   <article className="rlc-card flex h-full flex-col overflow-hidden rounded-card bg-surface shadow-[0_10px_30px_-18px_rgb(34_56_28/0.45)]">
     {/* Duplicate of the title link: hidden from AT and tab order to avoid a nameless link. */}
     <Link href={`/p/${product.slug}`} aria-hidden tabIndex={-1} className="relative block">
-      <span className="rlc-media flex aspect-square items-center justify-center bg-soft font-heading text-5xl text-muted">
-        {initial(product.name)}
+      <span className="rlc-media relative flex aspect-square items-center justify-center bg-soft font-heading text-5xl text-muted">
+        {product.image ? (
+          <ProductImage image={product.image} sizes="(min-width: 768px) 25vw, 50vw" />
+        ) : (
+          initial(product.name)
+        )}
       </span>
       {product.compareAt && (
         <span className="absolute left-3 top-3 rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold">

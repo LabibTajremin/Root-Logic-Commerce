@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // WASM Postgres and native image codecs must load from node_modules, not the bundle.
   serverExternalPackages: ['@electric-sql/pglite', 'sharp'],
+  // Images are pre-sized WebP variants served by /api/media (no runtime optimizer needed).
+  images: {
+    loader: 'custom',
+    loaderFile: './src/ui/media-loader.ts',
+    deviceSizes: [320, 640, 1024, 1600],
+    imageSizes: [160],
+  },
+  // Product photos are up to 8 MB (spec §7.3).
+  experimental: { serverActions: { bodySizeLimit: '9mb' } },
   ...(coverage && {
     distDir: '.next-cov',
     productionBrowserSourceMaps: true,

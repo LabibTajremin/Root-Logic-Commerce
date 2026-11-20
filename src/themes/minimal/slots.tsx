@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
@@ -76,9 +77,13 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
       {/* Fixed 1:1 box: any upload size fits without shifting the layout. */}
       <span
         aria-hidden
-        className="rlc-media flex aspect-square items-center justify-center bg-soft font-heading text-5xl text-muted"
+        className="rlc-media relative flex aspect-square items-center justify-center bg-soft font-heading text-5xl text-muted"
       >
-        {initial(product.name)}
+        {product.image ? (
+          <ProductImage image={product.image} sizes="(min-width: 768px) 25vw, 50vw" />
+        ) : (
+          initial(product.name)
+        )}
       </span>
       {product.compareAt && (
         <span className="absolute left-3 top-3 rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold">
@@ -101,14 +106,33 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
   </article>
 )
 
-export const ProductGallery: Slots['ProductGallery'] = ({ name }) => (
-  <div
-    aria-hidden
-    className="rlc-media flex aspect-square items-center justify-center rounded-card bg-soft font-heading text-8xl text-muted"
-  >
-    {initial(name)}
-  </div>
-)
+export const ProductGallery: Slots['ProductGallery'] = ({ name, images }) =>
+  images.length === 0 ? (
+    <div
+      aria-hidden
+      className="rlc-media flex aspect-square items-center justify-center rounded-card bg-soft font-heading text-8xl text-muted"
+    >
+      {initial(name)}
+    </div>
+  ) : (
+    <div className="flex flex-col gap-3">
+      <div className="relative aspect-square overflow-hidden rounded-card bg-soft">
+        <ProductImage image={images[0]!} sizes="(min-width: 768px) 50vw, 100vw" priority />
+      </div>
+      {images.length > 1 && (
+        <ul className="grid grid-cols-4 gap-2">
+          {images.slice(1).map((i) => (
+            <li
+              key={i.src}
+              className="relative aspect-square overflow-hidden rounded-control bg-soft"
+            >
+              <ProductImage image={i} sizes="160px" />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
 
 export const CategoryNav: Slots['CategoryNav'] = ({ categories, active, allLabel }) => (
   <nav aria-label={allLabel} className="-mx-4 flex gap-2 overflow-x-auto px-4">

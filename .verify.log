@@ -30,8 +30,8 @@ All matched files use Prettier code style!
 
  Test Files  24 passed (24)
       Tests  102 passed (102)
-   Start at  16:58:53
-   Duration  33.61s (tests 92%, import 7%)
+   Start at  17:14:34
+   Duration  35.84s (tests 92%, import 7%, worker 1%)
 
 
 ▶ pnpm build
@@ -41,18 +41,18 @@ All matched files use Prettier code style!
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (Turbopack)
-✓ Running next.config.ts took 25ms
+✓ Running next.config.ts took 33ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.0s
+✓ Compiled successfully in 836ms
   Running TypeScript ...
-  Finished TypeScript in 6.3s ...
+  Finished TypeScript in 3.6s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/4) ...
   Generating static pages using 3 workers (1/4) 
   Generating static pages using 3 workers (2/4) 
   Generating static pages using 3 workers (3/4) 
-✓ Generating static pages using 3 workers (4/4) in 122ms
+✓ Generating static pages using 3 workers (4/4) in 143ms
   Finalizing page optimization ...
 
 Route (app)
@@ -99,19 +99,19 @@ Route (app)
 
 themes: ankito, attar, minimal, organic
 ▲ Next.js 16.4.6 (webpack)
-✓ Running next.config.ts took 35ms
+✓ Running next.config.ts took 34ms
 
   Creating an optimized production build ...
 ⚠ Production code optimization has been disabled in your project. Read more: https://nextjs.org/docs/messages/minification-disabled
-✓ Compiled successfully in 9.5s
+✓ Compiled successfully in 10.2s
   Running TypeScript ...
-  Finished TypeScript in 6.0s ...
+  Finished TypeScript in 3.8s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/4) ...
   Generating static pages using 3 workers (1/4) 
   Generating static pages using 3 workers (2/4) 
   Generating static pages using 3 workers (3/4) 
-✓ Generating static pages using 3 workers (4/4) in 294ms
+✓ Generating static pages using 3 workers (4/4) in 333ms
   Finalizing page optimization ...
   Collecting build traces ...
 
@@ -154,8 +154,8 @@ Route (app)
 ▲ Next.js 16.4.6
 - Local:         http://127.0.0.1:3100
 - Network:       http://127.0.0.1:3100
-✓ Ready in 181ms
-✓ Running next.config.ts took 51ms
+✓ Ready in 196ms
+✓ Running next.config.ts took 47ms
 ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
 
 > root-logic-commerce@0.1.0 e2e /home/user/Root-Logic-Commerce
@@ -164,169 +164,66 @@ Route (app)
 
 Running 33 tests using 2 workers
 
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (552ms)
-[2m2026-11-20T17:00:38.993Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (850ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (477ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:00:41.392Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.5s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:00:41.777Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (405ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:00:42.080Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T17:00:42.423Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T17:00:42.809Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (740ms)
+[2m2026-11-20T17:16:19.414Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (963ms)
+  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.3s)
+  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (503ms)
+[2m2026-11-20T17:16:22.023Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.7s)
+[2m2026-11-20T17:16:22.434Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (485ms)
+[2m2026-11-20T17:16:22.821Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T17:16:23.140Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T17:16:23.519Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
   ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
-params: true,44f853f5-f653-4490-be54-eace926e1af7,x
-    at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
-    at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
-    at async act (.next-cov/server/app/admin/(panel)/users/rlc/src/app/admin/(panel)/act.ts:21:10) {
-  query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-  params: [ true, '44f853f5-f653-4490-be54-eace926e1af7', 'x' ],
-  [cause]: error: invalid input syntax for type uuid: "x"
-      at ignore-listed frames {
-    length: 133,
-    severity: 'ERROR',
-    code: '22P02',
-    detail: undefined,
-    hint: undefined,
-    position: undefined,
-    internalPosition: undefined,
-    internalQuery: undefined,
-    where: "unnamed portal parameter $3 = '...'",
-    schema: undefined,
-    table: undefined,
-    column: undefined,
-    dataType: undefined,
-    constraint: undefined,
-    file: 'uuid.c',
-    line: '194',
-    routine: 'string_to_uuid',
-    query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-    params: [ true, '44f853f5-f653-4490-be54-eace926e1af7', 'x' ],
-    queryOptions: { rowMode: 'object', parsers: [Object] }
-  }
-}
-  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:22:1 › categories: add, nest, rename, block cycles, reorder and archive (6.0s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:72:1 › products: validation, create, edit, reorder and stock adjustments (5.7s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:124:1 › unknown ids show not found (2.6s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:141:1 › owner invites staff; staff cannot reach owner-only settings (3.7s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
+  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:72:1 › products: validation, create, edit, reorder and stock adjustments (4.6s)
+  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:134:1 › unknown ids show not found (2.6s)
+  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:151:1 › owner invites staff; staff cannot reach owner-only settings (3.5s)
+  ✓  12 [mobile] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.7s)
+  ✘   8 [mobile] › tests/e2e/admin-pages.spec.ts:27:1 › categories: add, nest, rename, block cycles, reorder and archive (28.9s)
+  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:250:1 › robots.txt and sitemap.xml use the store origin (2.1s)
 [checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
     at JSON.parse (<anonymous>)
     at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
-  ✓  13 [mobile] › tests/e2e/storefront.spec.ts:140:1 › cart and checkout edge cases (12.3s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  12 [mobile] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (16.1s)
-  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:250:1 › robots.txt and sitemap.xml use the store origin (1.9s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  15 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (443ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:01:08.171Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (758ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:36:1 › signed-in users skip the sign-in page and the help popover opens (1.2s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:43:1 › help hint explains a field (487ms)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:01:10.691Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (2.9s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:01:11.045Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:58:1 › language link ignores unknown languages and foreign redirects (472ms)
-[2m2026-11-20T17:01:11.404Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[2m2026-11-20T17:01:11.762Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-[2m2026-11-20T17:01:12.135Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
-  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:49:1 › too many wrong tries are rate limited (2.4s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
-params: true,44f853f5-f653-4490-be54-eace926e1af7,x
-    at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
-    at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
-    at async act (.next-cov/server/app/admin/(panel)/users/rlc/src/app/admin/(panel)/act.ts:21:10) {
-  query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-  params: [ true, '44f853f5-f653-4490-be54-eace926e1af7', 'x' ],
-  [cause]: error: invalid input syntax for type uuid: "x"
-      at ignore-listed frames {
-    length: 133,
-    severity: 'ERROR',
-    code: '22P02',
-    detail: undefined,
-    hint: undefined,
-    position: undefined,
-    internalPosition: undefined,
-    internalQuery: undefined,
-    where: "unnamed portal parameter $3 = '...'",
-    schema: undefined,
-    table: undefined,
-    column: undefined,
-    dataType: undefined,
-    constraint: undefined,
-    file: 'uuid.c',
-    line: '194',
-    routine: 'string_to_uuid',
-    query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
-    params: [ true, '44f853f5-f653-4490-be54-eace926e1af7', 'x' ],
-    queryOptions: { rowMode: 'object', parsers: [Object] }
-  }
-}
-  ✓  22 [desktop] › tests/e2e/admin-pages.spec.ts:22:1 › categories: add, nest, rename, block cycles, reorder and archive (5.0s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:72:1 › products: validation, create, edit, reorder and stock adjustments (5.4s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:124:1 › unknown ids show not found (2.7s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:141:1 › owner invites staff; staff cannot reach owner-only settings (3.9s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-[checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
-    at JSON.parse (<anonymous>)
-    at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
-  ✓  27 [desktop] › tests/e2e/storefront.spec.ts:140:1 › cart and checkout edge cases (12.7s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  26 [desktop] › tests/e2e/storefront.spec.ts:17:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.8s)
-  ✓  28 [desktop] › tests/e2e/storefront.spec.ts:250:1 › robots.txt and sitemap.xml use the store origin (1.6s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  29 [settings] › tests/e2e/settings.spec.ts:35:1 › checkout asks for an SMS, then an email code when the owner turns OTP on (5.8s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  30 [settings] › tests/e2e/settings.spec.ts:73:1 › every theme renders the storefront accessibly (25.1s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  31 [settings] › tests/e2e/settings.spec.ts:102:1 › design editor previews live, warns on low contrast and publishes (3.9s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  32 [settings] › tests/e2e/settings.spec.ts:155:1 › SEO, messages, plan, help, promotions and more pages (5.5s)
-[MCR] e2e-browser: The added coverage data must be Array(V8) or Object(Istanbul)
-  ✓  33 [settings] › tests/e2e/settings.spec.ts:192:1 › SUPER_ADMIN grants and revokes a premium feature; owners only see locks (2.2s)
+  ✓  13 [mobile] › tests/e2e/storefront.spec.ts:140:1 › cart and checkout edge cases (13.5s)
 
-  33 passed (1.7m)
 
-▶ pnpm coverage:merge
+  1) [mobile] › tests/e2e/admin-pages.spec.ts:27:1 › categories: add, nest, rename, block cycles, reorder and archive 
 
-> root-logic-commerce@0.1.0 coverage:merge /home/user/Root-Logic-Commerce
-> node scripts/coverage-merge.mjs
+    Error: expect(locator).toHaveAttribute(expected) failed
 
-Coverage: 121/128 source files at 100%
-Below 100%:
-  src/app/(storefront)/cart.tsx (browser): lines 99.51%, branches 88.89%, functions 96.77%
-  src/app/(storefront)/checkout/checkout-form.tsx (browser): lines 99.47%, functions 91.67%
-  src/app/(storefront)/origin.ts (server): lines 80%, branches 50%
-  src/app/(storefront)/track/track-form.tsx (browser): lines 65.93%, branches 50%, functions 50%
-  src/app/admin/(panel)/categories/actions.ts (server): lines 86.96%, functions 71.43%, statements 86.67%
-  src/app/admin/(panel)/products/actions.ts (server): lines 87.1%, branches 94.44%, functions 71.43%, statements 86.67%
-  src/ui/sortable-list.tsx (browser): lines 90.8%, branches 80%, functions 58.33%, statements 81.25%
+    Locator: getByRole('listitem').filter({ hasText: 'Oil mobile-mwp8qpsc' }).first()
+    Expected pattern: /translate3d\(0px, -?[1-9]/
+    Received string:  "margin-left: 0px; transition: transform 200ms; transform: translate3d(0px, 0px, 0px);"
+    Timeout: 250ms
+
+    Call log:
+      - Expect "toHaveAttribute" getByRole('listitem').filter({ hasText: 'Oil mobile-mwp8qpsc' }).first() with timeout 250ms
+      - waiting for getByRole('listitem').filter({ hasText: 'Oil mobile-mwp8qpsc' }).first()
+        6 × locator resolved to <li data-dragging="true" class="flex min-h-14 items-center gap-2 rounded-card border border-line bg-surface p-2 data-[dragging=true]:shadow-lg">…</li>
+          - unexpected value "margin-left: 0px; transition: transform 200ms; transform: translate3d(0px, 0px, 0px);"
+
+
+    Call Log:
+    - Test timeout of 30000ms exceeded
+
+      18 |     await page.keyboard.press(key)
+      19 |     await expect(item).toHaveAttribute('style', /translate3d\(0px, -?[1-9]/, { timeout: 250 })
+    > 20 |   }).toPass()
+         |      ^
+      21 |   const saved = page.waitForResponse((r) => r.request().method() === 'POST')
+      22 |   await page.keyboard.press('Space')
+      23 |   await expect(item).toHaveAttribute('data-dragging', 'false')
+        at drag (/home/user/Root-Logic-Commerce/tests/e2e/admin-pages.spec.ts:20:6)
+        at /home/user/Root-Logic-Commerce/tests/e2e/admin-pages.spec.ts:52:3
+
+    Error Context: test-results/admin-pages-categories-add-a1f3d--cycles-reorder-and-archive-mobile/error-context.md
+
+  1 failed
+    [mobile] › tests/e2e/admin-pages.spec.ts:27:1 › categories: add, nest, rename, block cycles, reorder and archive 
+  19 did not run
+  13 passed (48.4s)
  ELIFECYCLE  Command failed with exit code 1.
  ELIFECYCLE  Command failed with exit code 1.
 exit 1

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase()
@@ -37,8 +38,12 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
       tabIndex={-1}
       className="relative block overflow-hidden rounded-card"
     >
-      <span className="rlc-media flex aspect-[4/5] items-center justify-center bg-soft font-heading text-5xl text-muted">
-        {initial(product.name)}
+      <span className="rlc-media relative flex aspect-[4/5] items-center justify-center bg-soft font-heading text-5xl text-muted">
+        {product.image ? (
+          <ProductImage image={product.image} sizes="(min-width: 768px) 25vw, 50vw" />
+        ) : (
+          initial(product.name)
+        )}
       </span>
       {product.compareAt && (
         <span className="absolute right-2 top-2 rounded-full bg-button px-2.5 py-0.5 text-xs font-semibold text-button-text">

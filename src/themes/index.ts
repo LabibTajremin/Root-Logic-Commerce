@@ -14,6 +14,7 @@ export { themeIds }
 export {
   themeCss,
   type CategoryView,
+  type ImageView,
   type Palette,
   type ProductView,
   type StoreView,

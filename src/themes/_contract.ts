@@ -12,6 +12,8 @@ export type Palette = {
 
 export type StoreView = { name: string; slug: string }
 export type CategoryView = { name: string; slug: string }
+/** `src` is the media base URL; the image loader appends the width. */
+export type ImageView = { src: string; color: string }
 export type ProductView = {
   id: string
   name: string
@@ -19,6 +21,7 @@ export type ProductView = {
   price: string
   compareAt: string | null
   inStock: boolean
+  image: ImageView | null
 }
 
 export type Slots = {
@@ -36,7 +39,7 @@ export type Slots = {
     action: ReactNode
     labels: { sale: string; soldOut: string }
   }>
-  ProductGallery: ComponentType<{ name: string }>
+  ProductGallery: ComponentType<{ name: string; images: ImageView[] }>
   CategoryNav: ComponentType<{ categories: CategoryView[]; active?: string; allLabel: string }>
   EmptyState: ComponentType<{ title: string; body: string; action?: ReactNode; level: 1 | 2 }>
 }

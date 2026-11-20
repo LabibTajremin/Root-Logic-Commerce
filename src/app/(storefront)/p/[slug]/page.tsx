@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AddToCart, OrderNow } from '../../cart'
+import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -20,9 +21,11 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
 export default async function ProductPage({ params }: Props) {
   const p = await product((await params).slug)
-  const { theme, view, t, allCategories } = await storefront()
+  const { theme, view, imagesOf, t, allCategories } = await storefront()
   const { ProductGallery } = theme.slots
-  const v = view(p)
+  const images = (await imagesOf([p])).get(p.id)!
+  const v = view(p, images)
+  const base = await origin()
   const item = { id: p.id, slug: p.slug, name: p.name, price: p.price }
   const cat = allCategories.find((c) => c.id === p.categoryId)
   const jsonLd = {
@@ -32,6 +35,7 @@ export default async function ProductPage({ params }: Props) {
     description: p.description,
     sku: p.sku ?? undefined,
     category: cat?.name,
+    image: images.map((i) => `${base}${i.src}/1024`),
     offers: {
       '@type': 'Offer',
       priceCurrency: 'BDT',
@@ -46,7 +50,7 @@ export default async function ProductPage({ params }: Props) {
         // JSON.stringify output with `<` escaped cannot close the script tag.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <ProductGallery name={p.name} />
+      <ProductGallery name={p.name} images={images} />
       <div className="flex flex-col gap-4">
         <h1 className="font-heading text-3xl md:text-4xl">{p.name}</h1>
         <p className="flex items-baseline gap-3 text-2xl font-semibold">
