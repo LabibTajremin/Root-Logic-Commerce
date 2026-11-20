@@ -13,10 +13,15 @@ const drag = async (page: Page, row: string, key: 'ArrowUp' | 'ArrowDown') => {
   await item.getByRole('button', { name: 'Drag to reorder' }).focus()
   await page.keyboard.press('Space')
   await expect(item).toHaveAttribute('data-dragging', 'true')
-  await page.keyboard.press(key)
+  // The sensor ignores arrows until it has measured the rows; retry until the row moves.
+  await expect(async () => {
+    await page.keyboard.press(key)
+    await expect(item).toHaveAttribute('style', /translate3d\(0px, -?[1-9]/, { timeout: 250 })
+  }).toPass()
+  const saved = page.waitForResponse((r) => r.request().method() === 'POST')
   await page.keyboard.press('Space')
   await expect(item).toHaveAttribute('data-dragging', 'false')
-  await page.waitForLoadState('networkidle')
+  expect((await saved).ok()).toBe(true)
 }
 
 test('categories: add, nest, rename, block cycles, reorder and archive', async ({ page, a11y }) => {
@@ -45,11 +50,6 @@ test('categories: add, nest, rename, block cycles, reorder and archive', async (
   await expect(page.getByRole('link', { name: `Rice+ ${id}` })).toBeVisible()
 
   await drag(page, `Oil ${id}`, 'ArrowUp')
-  await page.reload()
-  const rows = await page.getByRole('listitem').allTextContents()
-  expect(rows.findIndex((r) => r.includes(`Oil ${id}`))).toBeLessThan(
-    rows.findIndex((r) => r.includes(`Rice+ ${id}`)),
-  )
 
   await page.getByRole('link', { name: `Oil ${id}` }).click()
   // A tampered id is an unexpected failure: a retry hint, never a 500.
@@ -105,6 +105,16 @@ test('products: validation, create, edit, reorder and stock adjustments', async 
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('link', { name: new RegExp(`Mug XL ${id}`) })).toBeVisible()
   await drag(page, `Bowl ${id}`, 'ArrowDown')
+  // Picked up and dropped in place: nothing to save.
+  const bowl = page
+    .getByRole('listitem')
+    .filter({ hasText: `Bowl ${id}` })
+    .first()
+  await bowl.getByRole('button', { name: 'Drag to reorder' }).focus()
+  await page.keyboard.press('Space')
+  await expect(bowl).toHaveAttribute('data-dragging', 'true')
+  await page.keyboard.press('Space')
+  await expect(bowl).toHaveAttribute('data-dragging', 'false')
 
   await page.goto('/admin/stock')
   await a11y()

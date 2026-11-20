@@ -35,6 +35,7 @@ export const test = base.extend<Fixtures>({
     })
     await page.coverage.startJSCoverage({ resetOnNavigation: false })
     // A full navigation discards the old document's script coverage, so flush first.
+    // Tests follow plain (non-Next) links with goto(href) for the same reason.
     const flush = async () => {
       await addBrowserCoverage(await page.coverage.stopJSCoverage())
       await page.coverage.startJSCoverage({ resetOnNavigation: false })

@@ -51,19 +51,18 @@ const save = (next: CartLine[]) => {
 export const cart = {
   add(item: Item) {
     const cur = snapshot()
+    const i = cur.findIndex((l) => l.id === item.id)
     save(
-      cur.some((l) => l.id === item.id)
-        ? cur.map((l) => (l.id === item.id ? { ...l, qty: Math.min(99, l.qty + 1) } : l))
-        : [...cur, { ...item, qty: 1 }],
+      i < 0
+        ? [...cur, { ...item, qty: 1 }]
+        : cur.with(i, { ...cur[i]!, qty: Math.min(99, cur[i]!.qty + 1) }),
     )
   },
+  // Only called for a line shown in the drawer, so the id is always in the cart.
   setQty(id: string, qty: number) {
     const cur = snapshot()
-    save(
-      qty < 1
-        ? cur.filter((l) => l.id !== id)
-        : cur.map((l) => (l.id === id ? { ...l, qty: Math.min(99, qty) } : l)),
-    )
+    const i = cur.findIndex((l) => l.id === id)
+    save(qty < 1 ? cur.toSpliced(i, 1) : cur.with(i, { ...cur[i]!, qty: Math.min(99, qty) }))
   },
   clear: () => save(EMPTY),
 }

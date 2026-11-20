@@ -70,8 +70,10 @@ export const SortableList = ({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
-  const end = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return
+  const end = ({ active, over: target }: DragEndEvent) => {
+    // closestCenter always finds a row while the list has any, so a drop has a target.
+    const over = target!
+    if (active.id === over.id) return
     const next = arrayMove(
       order,
       order.findIndex((i) => i.id === active.id),

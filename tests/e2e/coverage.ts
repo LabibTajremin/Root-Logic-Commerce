@@ -23,5 +23,5 @@ export const addBrowserCoverage = async (entries: V8CoverageEntry[]) => {
       seen.set(e.url, n + 1)
       return { ...e, url: `${e.url}#${tag}-${n}` }
     })
-  await report.add(unique)
+  if (unique.length) await report.add(unique)
 }
