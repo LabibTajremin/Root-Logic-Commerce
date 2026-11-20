@@ -7,6 +7,7 @@
 // compiled bundles (Vitest, server chunks, browser chunks) misaligns and is not reliable.
 import { CoverageReport } from 'monocart-coverage-reports'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
 const METRICS = ['lines', 'branches', 'functions', 'statements']
@@ -96,6 +97,9 @@ for (const p of sources) {
 console.log(`Coverage: ${sources.length - problems.length}/${sources.length} source files at 100%`)
 if (problems.length) {
   console.error(`Below 100%:\n  ${problems.join('\n  ')}`)
+  // Exact gaps (lines, branches, functions) for the failing files, so CI logs say what to fix.
+  for (const p of problems.map((x) => x.split(/ \(|:/)[0]))
+    spawnSync('node', ['scripts/coverage-gaps.mjs', p.replace(/^src\//, '')], { stdio: 'inherit' })
   process.exit(1)
 }
 console.log('Coverage: 100% lines, branches, functions, statements for every source file')

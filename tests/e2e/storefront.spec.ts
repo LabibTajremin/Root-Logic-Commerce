@@ -77,6 +77,8 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
 
   await page.goto(`/p/${slug(honey)}`)
   expect(await ld(page)).not.toContain('"sku"')
+  // Hydrated first: a click before that would fall back to a full page load.
+  await page.waitForLoadState('networkidle')
   await page.getByRole('button', { name: 'Order now' }).click()
   await page.waitForURL(/\/checkout$/)
   await expect(page.getByTestId('checkout-total')).toHaveText('৳1,360')

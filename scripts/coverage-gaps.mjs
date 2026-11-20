@@ -10,9 +10,11 @@ for (const layer of ['unit', 'browser', 'server']) {
     if (!sf || (only && !sf.includes(only))) continue
     const lines = [...rec.matchAll(/^DA:(\d+),0$/gm)].map((m) => m[1])
     const br = [...rec.matchAll(/^BRDA:(\d+),\d+,\d+,(0|-)$/gm)].map((m) => m[1])
-    if (lines.length || br.length)
+    const fnLine = new Map([...rec.matchAll(/^FN:(\d+),(.*)$/gm)].map((m) => [m[2], m[1]]))
+    const fns = [...rec.matchAll(/^FNDA:0,(.*)$/gm)].map((m) => `${m[1]}@${fnLine.get(m[1])}`)
+    if (lines.length || br.length || fns.length)
       console.log(
-        `${layer} ${sf.replace(/.*rlc\//, '')}  lines:${lines.join(',')}  branches@${[...new Set(br)].join(',')}`,
+        `${layer} ${sf.replace(/.*rlc\//, '')}  lines:${lines.join(',')}  branches@${[...new Set(br)].join(',')}  functions:${fns.join(',')}`,
       )
   }
 }
