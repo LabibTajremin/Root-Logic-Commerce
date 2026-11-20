@@ -20,7 +20,8 @@ const report = new CoverageReport({
     (e.url.includes('/chunks/app/') ||
       e.url.includes('.next-cov/server/app/') ||
       e.url.includes(srcRoot)),
-  sourceFilter: (p) => p.startsWith('src/') && !p.endsWith('.css') && existsSync(p),
+  sourceFilter: (p) =>
+    p.startsWith('src/') && !p.endsWith('.css') && !p.includes('.test.') && existsSync(p),
   all: {
     dir: ['./src'],
     filter: {
@@ -28,6 +29,8 @@ const report = new CoverageReport({
       '**/*.test.*': false,
       '**/*.css': false,
       '**/migrations/**': false,
+      // pure type files (no runtime code)
+      '**/ports.ts': false,
       '**/*': true,
     },
   },

@@ -3,7 +3,7 @@ import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
 import * as schema from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 
-const tables = Object.values(schema).filter((v): v is PgTable => v instanceof PgTable)
+const tables: PgTable[] = Object.values(schema).filter((v) => v instanceof PgTable)
 
 describe('schema', () => {
   it('every foreign key points at a table of this schema', () => {
