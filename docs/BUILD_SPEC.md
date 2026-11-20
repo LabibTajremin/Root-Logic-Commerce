@@ -329,6 +329,12 @@ Create a Claude Code project skill so a future session can turn a plain theme de
 
 Started by `scripts/autopilot.sh`, which relaunches Claude Code headless in a loop until `PROGRESS.md` contains `ALL_PHASES_DONE`, and sleeps/retries when the usage limit is hit. Every session starts with a fresh context, so **state lives only in git + `PROGRESS.md`**.
 
+Preflight (first session only, before Phase 1) — collect every permission up front, once:
+1. Check all at once: `git push --dry-run origin HEAD`, `gh auth status`, creating + pushing a branch (`preflight-check`, then delete it), `gh run list -L1`, `gh workflow list`, Node 22, pnpm.
+2. Interactive session: list **everything** missing in one message and ask the owner to grant it all in one go (e.g. `gh auth login` with `repo` + `workflow` scopes, enable Actions). Don't come back later asking for more git access.
+3. Headless (autopilot) session: if anything is missing → `BLOCKED: preflight — <full list>` and end.
+4. Record `Preflight: OK <date>` in `PROGRESS.md`.
+
 Session start (every time):
 1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.
 2. If on a phase branch with uncommitted changes from a cut-off session: run tests, keep what passes, continue.
