@@ -1,0 +1,11 @@
+legacy
+pnpm-lock.yaml
+.next
+.next-cov
+coverage
+.coverage
+test-results
+docs
+*.md
+.claude
+.github

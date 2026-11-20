@@ -1,0 +1,26 @@
+import type { NextConfig } from 'next'
+
+// COVERAGE=1 builds a separate, source-mapped bundle so e2e V8 coverage maps back to src/.
+const coverage = process.env.COVERAGE === '1'
+
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  poweredByHeader: false,
+  ...(coverage && {
+    distDir: '.next-cov',
+    productionBrowserSourceMaps: true,
+    webpack: (config: {
+      devtool?: string
+      optimization?: { minimize?: boolean }
+      output?: { devtoolModuleFilenameTemplate?: (i: { absoluteResourcePath: string }) => string }
+    }) => {
+      config.devtool = 'source-map'
+      // Absolute paths let the coverage filter tell our src/ apart from Next's own bundled sources.
+      if (config.output) config.output.devtoolModuleFilenameTemplate = (i) => i.absoluteResourcePath
+      if (config.optimization) config.optimization.minimize = false
+      return config
+    },
+  }),
+}
+
+export default nextConfig
