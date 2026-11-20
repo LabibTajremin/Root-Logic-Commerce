@@ -1,13 +1,13 @@
 RUNNING
-Now: Phases 4+5 green locally (dfb2bb7, verify 141/141 files at 100%); waiting on CI, then tick both and add PR sections. Next: Phase 6 (messages outbox + channels, insights, promotions).
+Now: Phase 6 — messages (outbox + email/SMS/WhatsApp adapters, templates), insights (beacon, daily_stats, dashboard metrics, GA4), promotions (banners, posters, video, embeds).
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
 - [x] Phase 1 — Design (Figma) — https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr · see design/README.md
 - [x] Phase 2 — Scaffold — phase 2 done c9409d4 (CI green with phase 3 at f547015)
 - [x] Phase 3 — Core domain + DB — phase 3 done f547015 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions — green)
-- [ ] Phase 4 — Admin panel
-- [ ] Phase 5 — Storefront + themes
+- [x] Phase 4 — Admin panel — phase 4 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green, gated with phase 5)
+- [x] Phase 5 — Storefront + themes — phase 5 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green)
 - [ ] Phase 6 — Messages, insights, promotions
 - [ ] Phase 7 — Hardening & deploy
 - [ ] Phase 8 — Theme-builder skill
