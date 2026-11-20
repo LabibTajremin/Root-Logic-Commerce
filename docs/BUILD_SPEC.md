@@ -318,15 +318,11 @@ Create a Claude Code project skill so a future session can turn a plain theme de
   5. Done-checklist: registry updated, tests green, theme selectable in admin Design page, screenshot of home + product page on mobile.
 - Verify the skill: in a fresh session, run it once with this description and **keep the result as a shipped theme**: "সুগন্ধির দোকান — modern perfume/fragrance boutique, light mode, soft floral pastels, elegant thin serif headings, airy layout, gentle smooth motion." Theme `id: 'attar-aloy'`, `name: 'আতর আলোয় (Attar Aloy)'`. It must look clearly different from `attar` (which is dark midnight + gold). Confirm it passes all theme tests and is selectable in admin.
 
-### Phase 9 — "automatic agentic run" skill (last; only after Phase 8 is green)
-Write the workflow you just used as a reusable Claude Code skill so the owner can later say **"automatic agentic run"** (or "অটোমেটিক এজেন্টিক রান" / "automatic run") and any session follows it without re-explaining.
-- Path: `.claude/skills/automatic-agentic-run/SKILL.md`, committed. `name: automatic-agentic-run`.
-- `description` (trigger line): "Use when the user says 'automatic agentic run', 'automatic run' or 'অটোমেটিক এজেন্টিক রান' — run every remaining phase of the project spec unattended: implement, verify, fix until green, commit, push, CI-gate, merge, next phase, stop when all done."
-- Write it **from what actually worked in this repo** (real commands, real `pnpm verify`, real CI workflow name, real `PROGRESS.md` format, problems you hit) — not by copying §11.
-- Must be repo-agnostic: locate the phased spec (`docs/*SPEC*.md`, `CLAUDE.md`) and `PROGRESS.md`; if the repo has no verify script or CI, set them up first as phase 0.
-- **Non-negotiable in the skill:** a phase is never green unless merged unit + integration + e2e coverage is **100% on lines, branches, functions, statements** over the whole source, with zero type/lint/console/a11y errors (same rules as §8: no ignore comments, no skips, no lowered thresholds). If the target repo lacks this setup, the skill builds it in phase 0 before anything else.
-- Body (≤120 lines, imperative): preflight (collect all git/gh permissions in one message) → resume from `PROGRESS.md › Now:` → per-phase loop (local verify → fix → commit/push → `gh run watch` → fix on red → ff-merge to main → tick) → checkpoint rules → never-cheat-to-green → BLOCKED rule (6 rounds) → `ALL_PHASES_DONE` and stop. Mention `scripts/autopilot.sh` for usage-limit auto-resume and copy that script into the skill folder so other repos can use it.
-- Verify: new session, say "automatic agentic run" on a throwaway branch with a tiny 2-phase dummy spec; confirm it runs both phases end to end, then delete the dummy branch.
+### Phase 9 — Update the "automatic agentic run" skill from experience (last)
+The skill already exists at `.claude/skills/automatic-agentic-run/` and drove this build. Now improve it with what actually happened:
+- Read `PROGRESS.md › Decisions`, BLOCKED history, CI failures and fix rounds. Update the skill with real commands (`pnpm verify`, CI workflow name, coverage-merge setup), pitfalls hit and how they were fixed, and anything that wasted tokens. Keep it repo-agnostic and ≤120 lines; keep §2 quality gate unchanged or stricter.
+- Sync `autopilot.sh` in the skill folder with `scripts/autopilot.sh`.
+- Write `docs/SKILL_FEEDBACK.md` (≤30 lines): what changed in the skill and why — the owner uses it to update the copy saved in their Claude account.
 
 **Out of scope now:** online payments (port only), customer accounts, multi-currency, marketplace features.
 

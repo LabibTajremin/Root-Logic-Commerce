@@ -7,7 +7,7 @@ cd "$(git rev-parse --show-toplevel)"
 LIMIT_WAIT=${LIMIT_WAIT:-900}   # seconds to sleep when the usage limit is hit
 MAX_RUNS=${MAX_RUNS:-300}       # safety net against an endless loop
 LOG_DIR=.autopilot; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/autopilot.log"
-PROMPT='Autopilot run. Follow docs/BUILD_SPEC.md §0 and §11 exactly. Read PROGRESS.md, resume at the "Now:" line (or start Phase 1 if it does not exist). Work until the session ends; never ask questions.'
+PROMPT='automatic agentic run. Follow .claude/skills/automatic-agentic-run/SKILL.md and docs/BUILD_SPEC.md. Never ask questions.'
 
 first_line() { head -n1 PROGRESS.md 2>/dev/null; }
 log() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
