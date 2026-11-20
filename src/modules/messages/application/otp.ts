@@ -7,11 +7,11 @@ import {
   OTP_WINDOW_MS,
   type OtpChannel,
 } from '../domain/otp'
-import type { OtpRepo, Send } from './ports'
+import type { Deliver, OtpRepo } from './ports'
 
 type Deps = {
   repo: OtpRepo
-  send: Send
+  send: Deliver
   hash: (s: string) => string
   code: () => string
   now: () => Date
@@ -32,7 +32,7 @@ export const createOtp = ({ repo, send, hash, code, now }: Deps) => {
         codeHash: digest(storeId, target, c),
         expiresAt: new Date(t + OTP_TTL_MS),
       })
-      await send(channel, target, `${storeName}: your code is ${c} / আপনার কোড ${c}`)
+      await send(storeId, channel, target, `${storeName}: your code is ${c} / আপনার কোড ${c}`)
       return maskTarget(target)
     },
 

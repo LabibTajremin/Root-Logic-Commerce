@@ -14,5 +14,14 @@ export const testConfig = (
   entitlements: [],
   storage: { driver: 'local' as const, quotaBytes: 10 * 1024 ** 2, minFreeDiskBytes: 1 },
   mediaDir: mkdtempSync(join(tmpdir(), 'rlc-media-')),
+  store: {
+    name: 'Shop',
+    slug: 'shop',
+    theme: 'minimal',
+    locale: 'en' as const,
+    currency: 'BDT' as const,
+  },
+  settingsKey: 'test-settings-key-test-settings-key',
+  messagesTransport: 'log' as const,
   ...over,
 })

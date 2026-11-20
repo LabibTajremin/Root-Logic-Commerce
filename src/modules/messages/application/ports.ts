@@ -18,7 +18,7 @@ export type OtpRepo = {
   consume(id: string): Promise<void>
 }
 
-export type Send = (channel: OtpChannel, to: string, text: string) => Promise<void>
+export type Send = (channel: OtpChannel | 'whatsapp', to: string, text: string) => Promise<void>
 
 export type OutboxChannel = 'email' | 'sms' | 'whatsapp'
 export type OutboxRow = {

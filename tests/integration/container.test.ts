@@ -1,3 +1,6 @@
+import { mkdtempSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import sharp from 'sharp'
 import { describe, expect, it, vi } from 'vitest'
 import { createMediaRepo } from '@/infrastructure/db/repositories/media-repo'
@@ -29,9 +32,11 @@ describe('container', () => {
       'bus',
       'catalog',
       'media',
+      'messaging',
       'orders',
       'otp',
       'plans',
+      'secrets',
       'settings',
       'stock',
       'stores',
@@ -61,5 +66,61 @@ describe('container', () => {
       dominantColor: '#000000',
     })
     expect(await c.media.read(store, row.id, 320)).toBeNull()
+  })
+
+  it('queues order messages on the enabled channels and delivers them from the outbox', async () => {
+    const db = await createTestDb()
+    const file = join(mkdtempSync(join(tmpdir(), 'rlc-')), 'n.log')
+    const c = createContainer({
+      config: testConfig({ notifyLogFile: file }),
+      db,
+      onEventError: () => {},
+    })
+    const store = await seedStore(db)
+    const { business, version } = await c.settings.get(store, { storeName: 'Shop' })
+    await c.settings.saveBusiness(
+      store,
+      {
+        ...business,
+        messages: {
+          ...business.messages,
+          ownerEmail: 'owner@x.test',
+          sms: { ...business.messages.sms, enabled: true },
+          email: { ...business.messages.email, enabled: true },
+        },
+      },
+      version,
+    )
+    const p = await c.catalog.createProduct(store, {
+      name: 'Tea',
+      price: 50000,
+      stock: 5,
+      status: 'active',
+    })
+    const zones = (await c.settings.get(store, { storeName: 'Shop' })).business.deliveryZones
+    const o = await c.orders.placeOrder(
+      store,
+      {
+        name: 'Rahim',
+        phone: '01712345678',
+        email: 'r@x.test',
+        address: 'House 1',
+        area: 'Mirpur',
+        district: 'Dhaka',
+        zoneId: zones[0]!.id,
+        items: [{ productId: p.id, quantity: 1 }],
+      },
+      zones,
+    )
+    await c.bus.emit('order.confirmed', {
+      storeId: store,
+      orderId: '00000000-0000-4000-8000-000000000000',
+      orderNo: 1,
+    })
+    expect(await c.messaging.processDue()).toEqual({ sent: 3, failed: 0 })
+    const log = readFileSync(file, 'utf8')
+    expect(log).toContain(`we got your order #${o.orderNo} (৳560)`)
+    expect(log).toContain('"to":"r@x.test"')
+    expect(log).toContain('"to":"owner@x.test"')
   })
 })

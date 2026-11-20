@@ -10,4 +10,7 @@ export declare const e2eEnv: {
   BOOTSTRAP_SUPER_PASSWORD: string
   NOTIFY_LOG_FILE: string
   MEDIA_DIR: string
+  MESSAGES_TRANSPORT: string
+  SETTINGS_KEY: string
+  CRON_SECRET: string
 }

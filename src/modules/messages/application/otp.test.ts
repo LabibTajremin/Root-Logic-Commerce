@@ -35,7 +35,7 @@ const setup = () => {
   const sent: string[] = []
   const otp = createOtp({
     repo: f.repo,
-    send: async (_c, to, text) => void sent.push(`${to}|${text}`),
+    send: async (_s, _c, to, text) => void sent.push(`${to}|${text}`),
     hash: (s) => `h(${s})`,
     code: () => '123456',
     now: f.now,

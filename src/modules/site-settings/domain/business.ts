@@ -24,6 +24,39 @@ export const businessSchema = z.object({
     ]),
   lowStockThreshold: z.number().int().nonnegative().default(5),
   banglaDigits: z.boolean().default(false),
+  // Channel settings; password/apiKey/token are stored sealed (AES-GCM, SETTINGS_KEY).
+  messages: z
+    .object({
+      ownerPhone: z.string().max(20).default(''),
+      ownerEmail: z.email().or(z.literal('')).default(''),
+      email: z
+        .object({
+          enabled: z.boolean().default(false),
+          host: z.string().max(200).default(''),
+          port: z.number().int().min(1).max(65535).default(587),
+          user: z.string().max(200).default(''),
+          password: z.string().max(2000).default(''),
+          from: z.string().max(200).default(''),
+        })
+        .prefault({}),
+      sms: z
+        .object({
+          enabled: z.boolean().default(false),
+          // Gateway URL with {{to}}, {{text}}, {{sender}} and {{apiKey}} placeholders (BD gateways differ).
+          url: z.url().startsWith('https://').or(z.literal('')).default(''),
+          apiKey: z.string().max(2000).default(''),
+          sender: z.string().max(40).default(''),
+        })
+        .prefault({}),
+      whatsapp: z
+        .object({
+          enabled: z.boolean().default(false),
+          phoneNumberId: z.string().regex(/^\d*$/).max(30).default(''),
+          token: z.string().max(4000).default(''),
+        })
+        .prefault({}),
+    })
+    .prefault({}),
   otp: z
     .object({ email: z.boolean().default(false), sms: z.boolean().default(false) })
     .prefault({}),

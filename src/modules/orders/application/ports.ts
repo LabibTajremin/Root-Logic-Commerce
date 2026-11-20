@@ -51,6 +51,7 @@ export type OrderDetail = OrderSummary & {
   paymentMethod: string
   paymentStatus: string
   stockDeducted: boolean
+  customerEmail: string | null
   items: (Omit<OrderLine, 'productId'> & { productId: string | null })[]
   events: OrderEvent[]
 }

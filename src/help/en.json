@@ -26,5 +26,10 @@
   "seo.template": "%s is replaced by the page name, e.g. “Mug | Dokan”.",
   "seo.description": "Short summary shown on Google. Up to 170 characters.",
   "seo.ga4": "GA4 → Admin → Data streams → your site → Measurement ID (starts with G-).",
-  "messages.otp": "When on, customers confirm their phone with a code before the order is placed."
+  "messages.otp": "When on, customers confirm their phone with a code before the order is placed.",
+  "messages.email": "Your email provider's SMTP details (Gmail, Zoho, your host). Use an app password, not your login password.",
+  "messages.sms": "Paste your BD SMS gateway's send URL with {{to}}, {{text}}, {{sender}} and {{apiKey}} where its values go. Your gateway's docs show the URL.",
+  "messages.whatsapp": "From Meta Business → WhatsApp → API setup. WhatsApp only delivers free-form text within 24 h of the customer's last message.",
+  "messages.owner": "New orders are sent here on every channel that is on.",
+  "messages.templates": "Edit what customers receive. Keep SMS short — about 70 Bangla or 160 English characters per SMS."
 }

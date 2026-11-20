@@ -56,6 +56,10 @@ const envSchema = z.object({
   NOTIFY_LOG_FILE: z.string().min(1).optional(),
   // Local media root (VPS: /var/lib/rlc/media, served by Caddy under /media/*).
   MEDIA_DIR: z.string().min(1).default('.media'),
+  // 'log' writes messages to NOTIFY_LOG_FILE (or stdout) instead of sending them (dev/e2e).
+  MESSAGES_TRANSPORT: z.enum(['live', 'log']).default('live'),
+  // Bearer token Vercel Cron (or any scheduler) sends to /api/cron/outbox.
+  CRON_SECRET: z.string().min(16).optional(),
 })
 
 export type StoreConfigInput = z.input<typeof storeConfigSchema>
@@ -93,6 +97,8 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     settingsKey: e.data.SETTINGS_KEY,
     notifyLogFile: e.data.NOTIFY_LOG_FILE,
     mediaDir: e.data.MEDIA_DIR,
+    messagesTransport: e.data.MESSAGES_TRANSPORT,
+    cronSecret: e.data.CRON_SECRET,
     hostingProfile: e.data.HOSTING_PROFILE,
     storeMode: e.data.STORE_MODE,
     defaultStoreSlug: e.data.DEFAULT_STORE_SLUG ?? f.data.store.slug,

@@ -30,7 +30,11 @@ const detail = {
 
 export const createOrdersRepo = (db: Db): OrdersRepo => {
   const load = async (where: SQL): Promise<OrderDetail | null> => {
-    const [o] = await db.select(detail).from(orders).where(where)
+    const [o] = await db
+      .select({ ...detail, customerEmail: customers.email })
+      .from(orders)
+      .leftJoin(customers, eq(customers.id, orders.customerId))
+      .where(where)
     if (!o) return null
     const items = await db
       .select({

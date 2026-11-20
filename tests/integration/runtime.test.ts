@@ -7,6 +7,8 @@ import { runtime } from '@/server/runtime'
 
 const g = globalThis as { __rlcRuntime?: unknown }
 const KEYS = [
+  'HOSTING_PROFILE',
+  'STORAGE_DRIVER',
   'BOOTSTRAP_OWNER_EMAIL',
   'BOOTSTRAP_OWNER_PASSWORD',
   'BOOTSTRAP_OWNER_NAME',
@@ -74,5 +76,10 @@ describe('runtime', () => {
     })
     expect(logins).toEqual([{ role: 'OWNER', name: 'Rahim' }])
     expect(await rt.container.stores.findByHost('b.test')).toMatchObject({ slug: 'my-store' })
+  })
+
+  it('skips the in-process outbox worker on the vercel profile (cron route instead)', async () => {
+    const { rt } = await boot({ HOSTING_PROFILE: 'vercel', STORAGE_DRIVER: 's3' })
+    expect(rt.config.hostingProfile).toBe('vercel')
   })
 })

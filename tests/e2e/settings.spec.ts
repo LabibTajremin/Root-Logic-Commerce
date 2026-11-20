@@ -207,3 +207,65 @@ test('SUPER_ADMIN grants and revokes a premium feature; owners only see locks', 
   await page.goto('/')
   await expect(page.getByText('Powered by © Root Logic Lab')).toBeVisible()
 })
+
+test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '401' })
+  const id = uid()
+  await signedIn(page)
+  await page.goto('/admin/messages')
+  await page.getByLabel('Owner phone (SMS/WhatsApp)').fill('01811111111')
+  await page.getByRole('group', { name: 'SMS gateway' }).getByLabel('Send on this channel').check()
+  await page
+    .getByLabel('Gateway URL')
+    .fill('https://sms.example/send?to={{to}}&text={{text}}&key={{apiKey}}')
+  await page.getByLabel('API key').fill('secret-key-1')
+  await page.getByRole('button', { name: 'Save' }).nth(1).click()
+  await saved(page)
+  await page.reload()
+  await expect(page.getByLabel('API key')).toHaveAttribute(
+    'placeholder',
+    'Saved — leave blank to keep it',
+  )
+  await expect(page.getByLabel('API key')).toHaveValue('')
+  await page.getByLabel('Sender ID / mask').fill('SHOP')
+  await page.getByRole('button', { name: 'Save' }).nth(1).click()
+  await saved(page)
+  await a11y()
+
+  await page.getByRole('combobox', { name: 'When' }).selectOption('order.placed')
+  await page.getByRole('combobox', { name: 'Language' }).selectOption('en')
+  await page.getByRole('button', { name: 'View' }).click()
+  await page
+    .getByLabel('SMS / WhatsApp text')
+    .fill('Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}')
+  await page.getByRole('button', { name: 'Save' }).last().click()
+  await saved(page)
+
+  await createProduct(page, { name: `Msg ${id}`, price: '200', stock: '5' })
+  await cartWith(page, `Msg ${id}`)
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+
+  expect((await page.request.get('/api/cron/outbox')).status()).toBe(401)
+  const run = await page.request.get('/api/cron/outbox', {
+    headers: { authorization: `Bearer ${e2eEnv.CRON_SECRET}` },
+  })
+  expect(await run.json()).toMatchObject({ failed: 0 })
+  const log = readFileSync('.e2e/notify.log', 'utf8')
+  expect(log).toContain(`Thanks! Order #${no} (৳260) is in.`)
+  expect(log).toContain(`New order #${no}`)
+  await page.goto('/admin/messages')
+  await expect(page.getByTestId('outbox')).toContainText(`Order #${no}`)
+  await expect(page.getByTestId('outbox').getByText('Sent').first()).toBeVisible()
+  await page
+    .getByRole('group', { name: 'SMS gateway' })
+    .getByLabel('Send on this channel')
+    .uncheck()
+  await page.getByRole('button', { name: 'Save' }).nth(1).click()
+  await saved(page)
+})
