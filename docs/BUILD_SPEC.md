@@ -8,7 +8,7 @@
 ## §0 Agent operating rules (token + code economy) — follow strictly
 
 1. **First action:** create `CLAUDE.md` (≤40 lines) = §0 + §2 stack + §4 folder map + commands. Create `PROGRESS.md` (checklist of §9 phases). Never paste this spec into other files.
-2. **Phase gates (Phases 1–8, §9):** finish a phase → tests green → commit → tick `PROGRESS.md` → next. **Hard stop after Phase 1 (design)** and wait for human approval.
+2. **Fully autonomous (§11):** run Phases 1–8 back to back with no human gates. A phase is complete only when local checks **and** GitHub CI are green; then commit, push, tick `PROGRESS.md`, start the next phase. Stop only when all phases are done (or §11 BLOCKED rule).
 3. **Read narrowly:** use grep/glob to locate, read only needed line ranges, never re-read a file you just wrote. No repo-wide dumps.
 4. **Edit, don't rewrite:** use targeted edits; never regenerate a whole file to change a few lines.
 5. **Terse output:** no narration, no restating code in chat, no summaries of unchanged files. End-of-phase report ≤10 lines.
@@ -17,9 +17,9 @@
 8. **Dependencies:** each new dep must justify itself (size + need). Prefer platform/CSS over libraries. Check bundle impact.
 9. **Tests:** TDD — write failing test → implement → refactor. Run only affected tests while iterating (`vitest related`), full suite at phase end. Never declare done without a green run.
 10. **Subagents:** only for isolated, parallelizable work (e.g., building 3 themes). Give them the exact § numbers, not the whole spec.
-11. **When unsure:** pick the simplest option consistent with this spec, note it in `PROGRESS.md › Decisions` (one line), continue. Ask only for irreversible choices.
+11. **When unsure:** pick the simplest option consistent with this spec, note it in `PROGRESS.md › Decisions` (one line), continue. Never ask the human — there is no one watching.
 12. **Legacy reference:** `legacy/` holds curated code + ADRs from an earlier build. Read `legacy/README.md` once; then open only the files it maps to your current phase. Exclude `legacy/` from tsconfig, lint, tests, coverage, build. Delete it at end of Phase 7.
-13. **Git:** work in the repo provided by the owner. Branch per phase `phase/<n>-<name>`, Conventional Commits, small commits. Never commit secrets; ship `.env.example`.
+13. **Git:** work in the repo provided by the owner. Branch per phase `phase/<n>-<name>`, Conventional Commits, small commits, push after every commit. Never commit secrets; ship `.env.example`.
 
 ---
 
@@ -273,13 +273,13 @@ Indexes for every list/filter in admin; unique `(store_id, slug)`.
 
 ## §9 Phases (execute in order)
 
-### Phase 1 — Design in Figma → **STOP for approval**
+### Phase 1 — Design in Figma (no approval gate)
 - Use the Figma MCP (write access) if connected; if not, produce the same in `design/` as static HTML/Tailwind prototypes + `design/README.md`, and say so.
 - File "Root Logic Commerce". Pages: **Foundations**, **Storefront – Web (1440)**, **Storefront – Mobile (390)**, **Admin – Web (1440)**, **Admin – Mobile (390)**.
 - Foundations: Figma variables for all tokens in §6 with **modes per theme (minimal/organic/attar) × light/dark**; type scale; spacing (4-pt); components (button, input, card variants, product card variants, badges, help hint, lock badge, nav).
 - Storefront screens: Home, Category, Product detail, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404 — shown in at least 2 themes.
 - Admin screens: Login, Dashboard, Orders list, Order detail, Products list, Product editor (with media upload hints), Categories (drag tree), Stock, Promotions, **Design editor with live preview**, Messages settings, SEO & Analytics, Users & roles, Plan/Premium (locks), Help center. Show EN and বাংলা variants of one screen.
-- Report: link + ≤10-line summary. **Wait.**
+- Commit design artifacts (`design/`, plus the Figma link in `design/README.md`), then continue to Phase 2 — code must follow the design.
 
 ### Phase 2 — Scaffold
 Repo setup per §2/§4, workspace file, CI (lint, typecheck, test, build), Drizzle + PGlite test harness, config loader + tenant resolver (TDD), `.env.example`, `CLAUDE.md`, `PROGRESS.md`.
@@ -317,7 +317,34 @@ Create a Claude Code project skill so a future session can turn a plain theme de
 ---
 
 ## §10 Definition of done (each phase)
-- [ ] `pnpm lint && pnpm typecheck && pnpm test && pnpm build` green
+- [ ] `pnpm verify` green locally (lint, typecheck, unit+integration with coverage gate, build, e2e)
+- [ ] GitHub Actions CI green for the pushed commit (`gh run watch`)
 - [ ] Coverage thresholds met; new e2e flows pass on mobile + desktop
 - [ ] No unused deps/exports (`knip`), no TODOs left without a `PROGRESS.md` entry
 - [ ] `PROGRESS.md` ticked, decisions logged, committed on phase branch
+
+---
+
+## §11 Autopilot (unattended run)
+
+Started by `scripts/autopilot.sh`, which relaunches Claude Code headless in a loop until `PROGRESS.md` contains `ALL_PHASES_DONE`, and sleeps/retries when the usage limit is hit. Every session starts with a fresh context, so **state lives only in git + `PROGRESS.md`**.
+
+Session start (every time):
+1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.
+2. If on a phase branch with uncommitted changes from a cut-off session: run tests, keep what passes, continue.
+
+Per-phase loop:
+```
+implement (TDD) → pnpm verify
+  red  → fix → pnpm verify            (repeat)
+  green→ commit → git push → gh run watch <run-id> --exit-status
+            red  → gh run view <run-id> --log-failed → fix → commit → push → watch (repeat)
+            green→ git switch main && git merge --ff-only phase/<n>-… && git push
+                   tick phase in PROGRESS.md "phase N done <sha>", commit+push → next phase
+```
+- `pnpm verify` = `lint && typecheck && test:coverage && build && e2e` — define it in Phase 2 together with `.github/workflows/ci.yml` running the same script (Postgres not needed: PGlite).
+- **Checkpoint often:** commit + push WIP at each passing sub-step and update `PROGRESS.md › Now:` (one line: phase, step, next action). A session can be cut off at any moment by the usage limit; at most one step may be lost.
+- **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
+- **BLOCKED rule:** after 6 fix rounds on the same failure, or a missing external credential that blocks the gate, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
+- External services (SMTP, SMS, WhatsApp, S3, Drive, GA4, Figma): code against ports; tests use fakes. Never block a phase on real credentials.
+- After Phase 8 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.
