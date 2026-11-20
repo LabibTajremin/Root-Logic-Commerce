@@ -126,4 +126,58 @@ describe('container', () => {
     expect(log).toContain('"to":"r@x.test"')
     expect(log).toContain('"to":"owner@x.test"')
   })
+
+  it('counts views and delivered revenue, and sends live messages through the store’s channels', async () => {
+    const db = await createTestDb()
+    const c = createContainer({
+      config: { ...testConfig(), messagesTransport: 'live' },
+      db,
+      onEventError: () => {},
+    })
+    const store = await seedStore(db)
+    await c.insights.track(store, { ip: '1.1.1.1', ua: 'Mozilla/5.0', path: '/' })
+    const p = await c.catalog.createProduct(store, {
+      name: 'Tea',
+      price: 50000,
+      costPrice: 20000,
+      stock: 5,
+      status: 'active',
+    })
+    const zones = [{ id: 'z', label: 'Z', charge: 0 }]
+    const o = await c.orders.placeOrder(
+      store,
+      {
+        name: 'Rahim',
+        phone: '01712345678',
+        address: 'House 1',
+        area: 'Mirpur',
+        district: 'Dhaka',
+        zoneId: 'z',
+        items: [{ productId: p.id, quantity: 2 }],
+      },
+      zones,
+    )
+    for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] as const)
+      await c.orders.changeStatus(store, o.id, s, null)
+    const r = await c.insights.report(store, 'today')
+    expect(r.summary).toMatchObject({
+      visitors: 1,
+      pageViews: 1,
+      ordersPlaced: 1,
+      ordersDelivered: 1,
+      revenue: 100000,
+      cost: 40000,
+    })
+    // Live SMS without a configured gateway fails, so the OTP request reports it.
+    const { business, version } = await c.settings.get(store, { storeName: 'Shop' })
+    await c.settings.saveBusiness(
+      store,
+      {
+        ...business,
+        messages: { ...business.messages, sms: { ...business.messages.sms, enabled: true } },
+      },
+      version,
+    )
+    await expect(c.otp.request(store, 'sms', '01712345678', 'Shop')).rejects.toThrow()
+  })
 })

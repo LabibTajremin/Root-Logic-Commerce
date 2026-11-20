@@ -27,13 +27,13 @@ export const Analytics = ({ ga4 }: { ga4: string | null }) => {
     const boot = document.createElement('script')
     boot.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${JSON.stringify(ga4)})`
     document.head.append(boot)
-    const t = setTimeout(() => {
+    // Runs once per page load (the layout never unmounts), so no cleanup is needed.
+    setTimeout(() => {
       const s = document.createElement('script')
       s.async = true
       s.src = `https://www.googletagmanager.com/gtag/js?id=${ga4}`
       document.head.append(s)
     }, 2000)
-    return () => clearTimeout(t)
   }, [ga4])
   return null
 }

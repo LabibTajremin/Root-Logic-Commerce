@@ -244,6 +244,9 @@ test('messages: channels, templates, and the outbox sends order updates via the 
   await a11y()
 
   await page.getByRole('combobox', { name: 'When' }).selectOption('order.placed')
+  await page.getByRole('combobox', { name: 'Language' }).selectOption('bn')
+  await page.getByRole('button', { name: 'View' }).click()
+  await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(/পেয়েছি/)
   await page.getByRole('combobox', { name: 'Language' }).selectOption('en')
   await page.getByRole('button', { name: 'View' }).click()
   await page

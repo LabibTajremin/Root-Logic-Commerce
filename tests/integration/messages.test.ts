@@ -65,7 +65,7 @@ describe('channel delivery', () => {
       },
       sms: {
         enabled: true,
-        url: 'https://sms.example/send?to={{to}}&msg={{text}}&key={{apiKey}}&from={{sender}}',
+        url: 'https://sms.example/send?to={{to}}&msg={{text}}&key={{apiKey}}&from={{sender}}&x={{unknown}}',
         apiKey: box.seal('K 1'),
         sender: 'SHOP',
       },
@@ -105,7 +105,7 @@ describe('channel delivery', () => {
     })
     await deliver('s', 'sms', '01712345678', 'হ্যালো & hi')
     expect(calls[0]![0]).toBe(
-      `https://sms.example/send?to=01712345678&msg=${encodeURIComponent('হ্যালো & hi')}&key=K%201&from=SHOP`,
+      `https://sms.example/send?to=01712345678&msg=${encodeURIComponent('হ্যালো & hi')}&key=K%201&from=SHOP&x=`,
     )
     await deliver('s', 'whatsapp', '01712345678', 'Hi')
     expect(calls[1]![0]).toBe('https://graph.facebook.com/v21.0/123/messages')
