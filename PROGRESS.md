@@ -1,9 +1,9 @@
 RUNNING
-Now: Phase 1 — Figma https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr : ALL theme pages done (Minimal 2:3, Organic 2:4, Attar 2:5, Ankito 2:6, Attar Aloy 21:2; each 51 screens + alt-mode Home). Next: Cover page, design/README.md, tick Phase 1, PR body, then Phase 2.
+Now: Phase 2 — Scaffold (config loader + tenant resolver TDD, Drizzle+PGlite harness, workspace file, .env.example). Next step: src/server/config.ts with Zod + tests.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
-- [ ] Phase 1 — Design (Figma)
+- [x] Phase 1 — Design (Figma) — https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr · see design/README.md
 - [ ] Phase 2 — Scaffold
 - [ ] Phase 3 — Core domain + DB
 - [ ] Phase 4 — Admin panel
