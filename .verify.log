@@ -12,3 +12,322 @@ Checking formatting...
 All matched files use Prettier code style!
 
 ▶ pnpm typecheck
+
+> root-logic-commerce@0.1.0 typecheck /home/user/Root-Logic-Commerce
+> tsc --noEmit
+
+
+▶ pnpm test:cov
+
+> root-logic-commerce@0.1.0 test:cov /home/user/Root-Logic-Commerce
+> vitest run --coverage
+
+[MCR] Loaded: mcr.config.mjs
+
+ RUN  v5.1.1 /home/user/Root-Logic-Commerce
+      Coverage enabled with monocart
+
+
+ Test Files  37 passed (37)
+      Tests  150 passed (150)
+   Start at  22:16:11
+   Duration  39.00s (tests 91%, import 8%, worker 1%)
+
+
+▶ pnpm build
+
+> root-logic-commerce@0.1.0 build /home/user/Root-Logic-Commerce
+> node scripts/themes-gen.mjs && next build
+
+themes: ankito, attar, minimal, organic
+▲ Next.js 16.4.6 (Turbopack)
+✓ Running next.config.ts took 26ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 732ms
+  Running TypeScript ...
+  Finished TypeScript in 2.8s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/6) ...
+  Generating static pages using 3 workers (1/6) 
+  Generating static pages using 3 workers (2/6) 
+  Generating static pages using 3 workers (4/6) 
+✓ Generating static pages using 3 workers (6/6) in 136ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[...missing]
+├ ƒ /admin
+├ ƒ /admin/categories
+├ ƒ /admin/design
+├ ƒ /admin/help
+├ ƒ /admin/lang
+├ ƒ /admin/login
+├ ƒ /admin/messages
+├ ƒ /admin/more
+├ ƒ /admin/orders
+├ ƒ /admin/orders/[id]
+├ ƒ /admin/orders/[id]/invoice
+├ ƒ /admin/plan
+├ ƒ /admin/products
+├ ƒ /admin/products/[id]
+├ ƒ /admin/products/new
+├ ƒ /admin/promotions
+├ ƒ /admin/seo
+├ ƒ /admin/stock
+├ ƒ /admin/users
+├ ƒ /api/auth/[...all]
+├ ƒ /api/beacon
+├ ƒ /api/cron/outbox
+├ ƒ /api/media/[id]/[w]
+├ ƒ /c/[slug]
+├ ƒ /checkout
+├ ƒ /order/[no]
+├ ƒ /p/[slug]
+├ ƒ /robots.txt
+├ ƒ /search
+├ ƒ /sitemap.xml
+└ ƒ /track
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
+
+▶ pnpm build:cov
+
+> root-logic-commerce@0.1.0 build:cov /home/user/Root-Logic-Commerce
+> node scripts/themes-gen.mjs && COVERAGE=1 next build --webpack
+
+themes: ankito, attar, minimal, organic
+▲ Next.js 16.4.6 (webpack)
+✓ Running next.config.ts took 29ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+⚠ Production code optimization has been disabled in your project. Read more: https://nextjs.org/docs/messages/minification-disabled
+✓ Compiled successfully in 8.7s
+  Running TypeScript ...
+  Finished TypeScript in 2.6s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/6) ...
+  Generating static pages using 3 workers (1/6) 
+  Generating static pages using 3 workers (2/6) 
+  Generating static pages using 3 workers (4/6) 
+✓ Generating static pages using 3 workers (6/6) in 1089ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[...missing]
+├ ƒ /admin
+├ ƒ /admin/categories
+├ ƒ /admin/design
+├ ƒ /admin/help
+├ ƒ /admin/lang
+├ ƒ /admin/login
+├ ƒ /admin/messages
+├ ƒ /admin/more
+├ ƒ /admin/orders
+├ ƒ /admin/orders/[id]
+├ ƒ /admin/orders/[id]/invoice
+├ ƒ /admin/plan
+├ ƒ /admin/products
+├ ƒ /admin/products/[id]
+├ ƒ /admin/products/new
+├ ƒ /admin/promotions
+├ ƒ /admin/seo
+├ ƒ /admin/stock
+├ ƒ /admin/users
+├ ƒ /api/auth/[...all]
+├ ƒ /api/beacon
+├ ƒ /api/cron/outbox
+├ ƒ /api/media/[id]/[w]
+├ ƒ /c/[slug]
+├ ƒ /checkout
+├ ƒ /order/[no]
+├ ƒ /p/[slug]
+├ ƒ /robots.txt
+├ ƒ /search
+├ ƒ /sitemap.xml
+└ ƒ /track
+
+
+ƒ  (Dynamic)  server-rendered on demand
+
+▲ Next.js 16.4.6
+- Local:         http://127.0.0.1:3100
+- Network:       http://127.0.0.1:3100
+✓ Ready in 127ms
+✓ Running next.config.ts took 35ms
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+
+> root-logic-commerce@0.1.0 e2e /home/user/Root-Logic-Commerce
+> playwright test --trace off
+
+
+Running 38 tests using 2 workers
+
+  ✓   1 [mobile] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (546ms)
+[2m2026-11-20T22:17:44.596Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   2 [mobile] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (730ms)
+  ✓   4 [mobile] › tests/e2e/admin-auth.spec.ts:40:1 › signed-in users skip the sign-in page and the help popover opens (1.1s)
+  ✓   5 [mobile] › tests/e2e/admin-auth.spec.ts:47:1 › help hint explains a field (419ms)
+[2m2026-11-20T22:17:46.767Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:17:47.138Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:17:47.450Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:17:47.833Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   3 [mobile] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (3.3s)
+  ✓   7 [mobile] › tests/e2e/admin-auth.spec.ts:62:1 › language link ignores unknown languages and foreign redirects (344ms)
+[2m2026-11-20T22:17:48.251Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓   6 [mobile] › tests/e2e/admin-auth.spec.ts:53:1 › too many wrong tries are rate limited (2.4s)
+[admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
+params: true,ec6b53a7-fee2-4185-9342-6ef88accc754,x
+    at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
+    at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
+    at async act (.next-cov/server/app/admin/(panel)/promotions/rlc/src/app/admin/(panel)/act.ts:21:10) {
+  query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
+  params: [ true, 'ec6b53a7-fee2-4185-9342-6ef88accc754', 'x' ],
+  [cause]: error: invalid input syntax for type uuid: "x"
+      at ignore-listed frames {
+    length: 133,
+    severity: 'ERROR',
+    code: '22P02',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: "unnamed portal parameter $3 = '...'",
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'uuid.c',
+    line: '194',
+    routine: 'string_to_uuid',
+    query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
+    params: [ true, 'ec6b53a7-fee2-4185-9342-6ef88accc754', 'x' ],
+    queryOptions: { rowMode: 'object', parsers: [Object] }
+  }
+}
+  ✓   8 [mobile] › tests/e2e/admin-pages.spec.ts:27:1 › categories: add, nest, rename, block cycles, reorder and archive (4.2s)
+  ✓   9 [mobile] › tests/e2e/admin-pages.spec.ts:72:1 › products: validation, create, edit, reorder and stock adjustments (5.2s)
+  ✓  10 [mobile] › tests/e2e/admin-pages.spec.ts:137:1 › unknown ids show not found (3.1s)
+  ✓  11 [mobile] › tests/e2e/admin-pages.spec.ts:154:1 › owner invites staff; staff cannot reach owner-only settings (3.9s)
+[checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
+  ✓  13 [mobile] › tests/e2e/storefront.spec.ts:150:1 › cart and checkout edge cases (12.8s)
+  ✓  12 [mobile] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (15.8s)
+  ✓  14 [mobile] › tests/e2e/storefront.spec.ts:261:1 › robots.txt and sitemap.xml use the store origin (1.9s)
+  ✓  15 [mobile] › tests/e2e/storefront.spec.ts:287:1 › product images: upload checks, Drive links, removal, and the shop shows them (6.3s)
+  ✓  17 [desktop] › tests/e2e/admin-auth.spec.ts:4:1 › unauthenticated admin visits go to sign-in (421ms)
+[2m2026-11-20T22:18:18.896Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  16 [desktop] › tests/e2e/admin-auth.spec.ts:10:1 › wrong password shows an error (599ms)
+  ✓  19 [desktop] › tests/e2e/admin-auth.spec.ts:40:1 › signed-in users skip the sign-in page and the help popover opens (1.1s)
+  ✓  20 [desktop] › tests/e2e/admin-auth.spec.ts:47:1 › help hint explains a field (330ms)
+[2m2026-11-20T22:18:20.966Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:18:21.520Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:18:21.818Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+[2m2026-11-20T22:18:22.202Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  18 [desktop] › tests/e2e/admin-auth.spec.ts:18:1 › owner signs in, sees the dashboard, switches to বাংলা and signs out (3.7s)
+[2m2026-11-20T22:18:22.605Z[0m [33mWARN[0m [1m[Better Auth]:[0m Invalid password
+  ✓  22 [desktop] › tests/e2e/admin-auth.spec.ts:62:1 › language link ignores unknown languages and foreign redirects (409ms)
+  ✓  21 [desktop] › tests/e2e/admin-auth.spec.ts:53:1 › too many wrong tries are rate limited (2.6s)
+[admin action] Error: Failed query: update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)
+params: true,ec6b53a7-fee2-4185-9342-6ef88accc754,x
+    at async Object.updateCategory (.next-cov/server/chunks/rlc/src/infrastructure/db/repositories/catalog-repo.ts:70:5)
+    at async (.next-cov/server/app/admin/(panel)/categories/rlc/src/app/admin/(panel)/categories/actions.ts:21:30)
+    at async act (.next-cov/server/app/admin/(panel)/promotions/rlc/src/app/admin/(panel)/act.ts:21:10) {
+  query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
+  params: [ true, 'ec6b53a7-fee2-4185-9342-6ef88accc754', 'x' ],
+  [cause]: error: invalid input syntax for type uuid: "x"
+      at ignore-listed frames {
+    length: 133,
+    severity: 'ERROR',
+    code: '22P02',
+    detail: undefined,
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: "unnamed portal parameter $3 = '...'",
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'uuid.c',
+    line: '194',
+    routine: 'string_to_uuid',
+    query: 'update "categories" set "archived" = $1 where ("categories"."store_id" = $2 and "categories"."id" = $3)',
+    params: [ true, 'ec6b53a7-fee2-4185-9342-6ef88accc754', 'x' ],
+    queryOptions: { rowMode: 'object', parsers: [Object] }
+  }
+}
+  ✓  23 [desktop] › tests/e2e/admin-pages.spec.ts:27:1 › categories: add, nest, rename, block cycles, reorder and archive (3.8s)
+  ✓  24 [desktop] › tests/e2e/admin-pages.spec.ts:72:1 › products: validation, create, edit, reorder and stock adjustments (4.8s)
+  ✓  25 [desktop] › tests/e2e/admin-pages.spec.ts:137:1 › unknown ids show not found (3.0s)
+  ✓  26 [desktop] › tests/e2e/admin-pages.spec.ts:154:1 › owner invites staff; staff cannot reach owner-only settings (3.8s)
+[checkout] SyntaxError: Unexpected token 'o', "nope" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at placeOrder (.next-cov/server/app/(storefront)/checkout/rlc/src/app/(storefront)/checkout/actions.ts:35:21)
+  ✓  28 [desktop] › tests/e2e/storefront.spec.ts:150:1 › cart and checkout edge cases (14.3s)
+  ✓  27 [desktop] › tests/e2e/storefront.spec.ts:25:1 › shopper browses, carts, checks out and tracks; owner confirms then cancels (17.3s)
+  ✓  29 [desktop] › tests/e2e/storefront.spec.ts:261:1 › robots.txt and sitemap.xml use the store origin (2.1s)
+  ✓  30 [desktop] › tests/e2e/storefront.spec.ts:287:1 › product images: upload checks, Drive links, removal, and the shop shows them (6.7s)
+  ✓  31 [settings] › tests/e2e/settings.spec.ts:35:1 › checkout asks for an SMS, then an email code when the owner turns OTP on (5.6s)
+  ✓  32 [settings] › tests/e2e/settings.spec.ts:73:1 › every theme renders the storefront accessibly (25.2s)
+  ✓  33 [settings] › tests/e2e/settings.spec.ts:104:1 › design editor previews live, warns on low contrast and publishes (3.8s)
+  ✓  34 [settings] › tests/e2e/settings.spec.ts:157:1 › SEO, messages, plan, help, promotions and more pages (4.7s)
+  ✓  35 [settings] › tests/e2e/settings.spec.ts:194:1 › SUPER_ADMIN grants and revokes a premium feature; owners only see locks (3.3s)
+  ✘  36 [settings] › tests/e2e/settings.spec.ts:219:1 › messages: channels, templates, and the outbox sends order updates via the cron route (29.2s)
+  -  37 [settings] › tests/e2e/settings.spec.ts:287:1 › insights: GA4 ecommerce events, first-party counts and the dashboard ranges
+  -  38 [settings] › tests/e2e/settings.spec.ts:349:1 › promotions: every banner kind, the video lock, embeds that load on tap, and video ranges
+
+
+  1) [settings] › tests/e2e/settings.spec.ts:219:1 › messages: channels, templates, and the outbox sends order updates via the cron route 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('SMS / WhatsApp text')
+    Expected: "Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}"
+    Received: "Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}{{store}}: we got your order #{{orderNo}} ({{total}}). We will call to confirm."
+    Timeout:  500ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('SMS / WhatsApp text') with timeout 500ms
+      - waiting for getByLabel('SMS / WhatsApp text')
+        6 × locator resolved to <textarea rows="2" required="" id="sms.body" name="sms.body" maxlength="1000" class="rounded-control border border-line bg-surface p-3">Thanks! Order #{{orderNo}} ({{total}}) is in. — {…</textarea>
+          - unexpected value "Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}{{store}}: we got your order #{{orderNo}} ({{total}}). We will call to confirm."
+
+
+    Call Log:
+    - Test timeout of 30000ms exceeded
+
+      257 |     await page.reload()
+      258 |     await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(custom, { timeout: 500 })
+    > 259 |   }).toPass()
+          |      ^
+      260 |
+      261 |   await createProduct(page, { name: `Msg ${id}`, price: '200', stock: '5' })
+      262 |   await cartWith(page, `Msg ${id}`)
+        at /home/user/Root-Logic-Commerce/tests/e2e/settings.spec.ts:259:6
+
+    Error Context: test-results/settings-messages-channels-fef4c--updates-via-the-cron-route-settings/error-context.md
+
+  1 failed
+    [settings] › tests/e2e/settings.spec.ts:219:1 › messages: channels, templates, and the outbox sends order updates via the cron route 
+  2 did not run
+  35 passed (2.4m)
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.
+exit 1

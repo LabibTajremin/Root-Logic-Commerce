@@ -246,9 +246,13 @@ test('messages: channels, templates, and the outbox sends order updates via the 
   await page.getByRole('combobox', { name: 'When' }).selectOption('order.placed')
   await page.getByRole('combobox', { name: 'Language' }).selectOption('bn')
   await page.getByRole('button', { name: 'View' }).click()
+  await page.waitForURL(/lang=bn/)
   await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(/পেয়েছি/)
   await page.getByRole('combobox', { name: 'Language' }).selectOption('en')
   await page.getByRole('button', { name: 'View' }).click()
+  await page.waitForURL(/lang=en/)
+  await expect(page.getByLabel('SMS / WhatsApp text')).toHaveValue(/We will call to confirm/)
+  await page.waitForLoadState('networkidle')
   const custom = 'Thanks! Order #{{orderNo}} ({{total}}) is in. — {{store}}'
   await page.getByLabel('SMS / WhatsApp text').fill(custom)
   await page.getByRole('button', { name: 'Save' }).last().click()
