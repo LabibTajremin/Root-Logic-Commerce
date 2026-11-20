@@ -23,10 +23,14 @@ test('owner signs in, sees the dashboard, switches to বাংলা and signs 
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible()
   await expect(page.getByTestId('kpi-pending')).toHaveText('0')
   await a11y()
-  await page.getByRole('link', { name: 'বাং' }).first().click()
+  // Plain links (full page loads): followed with goto so coverage is flushed first.
+  const follow = async (name: string) =>
+    page.goto((await page.getByRole('link', { name }).first().getAttribute('href'))!)
+  await follow('বাং')
   await expect(page.getByRole('heading', { level: 1, name: 'ড্যাশবোর্ড' })).toBeVisible()
-  await page.getByRole('link', { name: 'EN' }).first().click()
+  await follow('EN')
   await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible()
+  await page.waitForLoadState('networkidle') // hydrated: the sign-out button has its handler
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page).toHaveURL(/\/admin\/login$/)
   await page.goto('/admin/login')
