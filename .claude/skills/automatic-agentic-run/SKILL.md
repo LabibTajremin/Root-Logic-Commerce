@@ -34,7 +34,7 @@ Never cheat to green: no `.skip`/`.only`, no `istanbul ignore`/`v8 ignore`, no w
 
 ## 3. Session start (every session)
 1. `git status`, `git log -3`, read the top of `PROGRESS.md`.
-2. Status line `ALL_PHASES_DONE` → report and stop. `BLOCKED` → report the reason and stop.
+2. Status line `ALL_PHASES_DONE` → report and stop. `BLOCKED` → report the reason and stop. No `Preflight: done` yet → do §1 first.
 3. Resume exactly at `Now:`. Uncommitted work from a cut-off session: run tests, keep what passes, continue.
 
 ## 4. Per-phase loop
