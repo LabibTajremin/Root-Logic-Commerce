@@ -48,9 +48,13 @@ export type Theme = {
   preview: string
   defaults: DeepPartial<Design>
   palette: { light: Palette; dark: Palette }
+  radius: { card: number; control: number }
   /** Any slot left out falls back to the minimal theme's. */
   slots: Partial<Slots>
 }
 
-export const paletteCss = (p: Palette) =>
-  `:root{--color-surface:${p.surface};--color-soft:${p.soft};--color-muted:${p.muted};--color-line:${p.line};--color-accent-tint:${p.accentTint}}`
+/** The theme's own tokens for the store's light/dark mode (brand colors come from the Design). */
+export const themeCss = (t: Pick<Theme, 'palette' | 'radius'>, mode: 'light' | 'dark') => {
+  const p = t.palette[mode]
+  return `:root{--color-surface:${p.surface};--color-soft:${p.soft};--color-muted:${p.muted};--color-line:${p.line};--color-accent-tint:${p.accentTint};--radius-card:${t.radius.card}px;--radius-control:${t.radius.control}px}`
+}

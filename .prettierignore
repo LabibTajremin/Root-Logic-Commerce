@@ -10,3 +10,4 @@ docs
 .claude
 .github
 src/infrastructure/db/migrations
+src/themes/registry.gen.ts

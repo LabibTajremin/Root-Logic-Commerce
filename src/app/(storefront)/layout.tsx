@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { toCssVars } from '@/modules/site-settings'
-import { paletteCss } from '@/themes'
+import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
 import { CartButton, CartDrawer } from './cart'
 import { storefront } from './storefront'
@@ -27,7 +27,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       data-sticky={String(d.header.sticky)}
       className="flex min-h-dvh flex-col"
     >
-      <style>{paletteCss(theme.palette[d.mode.base]) + toCssVars(d)}</style>
+      <style>{themeCss(theme, d.mode.base) + toCssVars(d)}</style>
       <Header
         store={store}
         categories={categories}

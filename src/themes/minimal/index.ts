@@ -28,5 +28,6 @@ export const theme: Theme = {
       accentTint: '#1E1B4B',
     },
   },
+  radius: { card: 12, control: 10 },
   slots: { Header, Footer, Hero, ProductCard, ProductGallery, CategoryNav, EmptyState },
 }

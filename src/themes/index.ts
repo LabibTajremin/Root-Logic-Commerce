@@ -12,7 +12,7 @@ export const loadTheme = async (id: string): Promise<ResolvedTheme> => {
 
 export { themeIds }
 export {
-  paletteCss,
+  themeCss,
   type CategoryView,
   type Palette,
   type ProductView,

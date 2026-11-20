@@ -4,14 +4,22 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import {
   contrastWarnings,
   fontIds,
+  mergeDesign,
   patternIds,
   toCssVars,
+  type DeepPartial,
   type Design,
 } from '@/modules/site-settings'
 import { Icon } from '@/ui/icon'
 import { publishDesign } from './actions'
 
-type Props = { initial: Design; version: number; themes: string[]; labels: Record<string, string> }
+type Props = {
+  initial: Design
+  version: number
+  /** Theme id → its default fonts/colors/style, applied when the owner switches theme. */
+  themes: Record<string, DeepPartial<Design>>
+  labels: Record<string, string>
+}
 
 const sel = 'min-h-11 w-full rounded-control border border-line bg-surface px-3'
 
@@ -112,8 +120,8 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
   return (
     <div className="grid gap-5 lg:grid-cols-[420px_1fr]">
       <div className="flex flex-col gap-5 rounded-card border border-line bg-surface p-5">
-        {select('themeId', L.theme!, d.themeId, themes, (themeId) =>
-          setD((x) => ({ ...x, themeId })),
+        {select('themeId', L.theme!, d.themeId, Object.keys(themes), (themeId) =>
+          setD((x) => mergeDesign(x, themes[themeId]!, { themeId }) as Design),
         )}
         <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="brand-name">
           {L.storeName}
