@@ -225,6 +225,7 @@ describe('listing and tracking', () => {
     })
     expect(await orders.trackOrder(store, orderNo, '01812345678')).toBeNull()
     expect(await orders.trackOrder(store, orderNo, 'nope')).toBeNull()
+    expect(await orders.trackOrder(store, Number.NaN, '+8801712345678')).toBeNull()
   })
 })
 

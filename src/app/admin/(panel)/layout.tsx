@@ -1,12 +1,12 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { translate } from '@/i18n'
 import { isAllowed } from '@/modules/access'
 import { toCssVars } from '@/modules/site-settings'
-import { runtime } from '@/server/runtime'
-import { currentActor, currentLocale, currentStore } from '@/server/request'
+import { currentActor, currentLocale, currentSettings, currentStore } from '@/server/request'
 import { Icon } from '@/ui/icon'
-import { LangToggle } from '../lang-toggle'
+import { LangToggle } from '@/ui/lang-toggle'
 import { BottomNav, SideNav, type NavItem } from './nav'
 import { SignOut } from './sign-out'
 
@@ -18,8 +18,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   ])
   // Role AND tenant: a user of another store is treated as signed out here.
   if (!actor || !isAllowed(actor, 'orders.manage', store.id)) redirect('/admin/login')
-  const { container } = await runtime()
-  const { design } = await container.settings.get(store.id, { storeName: store.slug })
+  const { design } = await currentSettings()
   const t = (k: string) => translate(locale, k)
   const all: NavItem[] = [
     { href: '/admin', label: t('nav.dashboard'), icon: 'chart' },
@@ -47,12 +46,12 @@ export default async function PanelLayout({ children }: { children: ReactNode })
       {/* Admin wears the owner's brand: accent + fonts from the store design. */}
       <style>{toCssVars(design)}</style>
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-line bg-surface p-4 lg:flex">
-        <a href="/admin" className="flex items-center gap-2 px-2 py-1 font-heading text-lg">
+        <Link href="/admin" className="flex items-center gap-2 px-2 py-1 font-heading text-lg">
           <span className="inline-flex size-8 items-center justify-center rounded-control bg-button text-button-text">
             <Icon name="store" size={18} />
           </span>
           {design.brand.name}
-        </a>
+        </Link>
         <nav aria-label="Admin">
           <SideNav items={all} />
         </nav>

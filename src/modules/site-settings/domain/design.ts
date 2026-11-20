@@ -111,8 +111,9 @@ export const toCssVars = (d: Design) => {
     '--color-button-text': readableOn(d.colors.button),
     '--color-header': d.colors.header,
     '--color-header-text': readableOn(d.colors.header),
-    '--font-heading': `var(--font-${d.brand.nameFont})`,
-    '--font-body': `var(--font-${d.brand.siteFont})`,
+    // Bangla glyphs fall back to Hind Siliguri whatever Latin font is chosen.
+    '--font-heading': `var(--font-${d.brand.nameFont}),var(--font-hind-siliguri),serif`,
+    '--font-body': `var(--font-${d.brand.siteFont}),var(--font-hind-siliguri),sans-serif`,
     '--pattern-opacity': String(d.background.patternOpacity / 100),
     '--header-opacity': String(d.header.opacity / 100),
   }

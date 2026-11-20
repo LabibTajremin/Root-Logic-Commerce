@@ -10,6 +10,9 @@ for (const layer of ['unit', 'browser', 'server']) {
     if (!sf || (only && !sf.includes(only))) continue
     const lines = [...rec.matchAll(/^DA:(\d+),0$/gm)].map((m) => m[1])
     const br = [...rec.matchAll(/^BRDA:(\d+),\d+,\d+,(0|-)$/gm)].map((m) => m[1])
-    if (lines.length || br.length) console.log(`${layer} ${sf.replace(/.*rlc\//, '')}  lines:${lines.join(',')}  branches@${[...new Set(br)].join(',')}`)
+    if (lines.length || br.length)
+      console.log(
+        `${layer} ${sf.replace(/.*rlc\//, '')}  lines:${lines.join(',')}  branches@${[...new Set(br)].join(',')}`,
+      )
   }
 }

@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { helpText } from '@/help'
 import { translate } from '@/i18n'
 import { currentActor, currentLocale, currentStore } from '@/server/request'
-import { LangToggle } from '../lang-toggle'
+import { LangToggle } from '@/ui/lang-toggle'
 import { LoginForm } from './login-form'
 
 export const metadata: Metadata = { title: 'Sign in', robots: { index: false } }

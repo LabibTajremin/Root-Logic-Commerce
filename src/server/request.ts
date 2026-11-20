@@ -4,6 +4,7 @@ import { cache } from 'react'
 import { isLocale, type Locale } from '@/i18n'
 import type { Actor, Role } from '@/modules/access'
 import { runtime } from './runtime'
+import { loadTheme } from '@/themes'
 import { resolveStore } from './tenant'
 
 export const currentStore = cache(async () => {
@@ -28,4 +29,11 @@ export const currentActor = cache(async (): Promise<Actor | null> => {
 export const currentLocale = cache(async (): Promise<Locale> => {
   const lang = (await cookies()).get('lang')?.value
   return isLocale(lang) ? lang : (await runtime()).config.store.locale
+})
+
+// Every reader seeds with the same defaults, so whichever page runs first doesn't matter.
+export const currentSettings = cache(async () => {
+  const [store, { container, config }] = await Promise.all([currentStore(), runtime()])
+  const seed = await loadTheme(config.store.theme)
+  return container.settings.get(store.id, { storeName: config.store.name, design: seed.defaults })
 })

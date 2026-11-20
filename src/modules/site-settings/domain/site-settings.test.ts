@@ -64,7 +64,7 @@ describe('design', () => {
     expect(css).toContain('--color-bg:#0B1020')
     expect(css).toContain('--color-text:#FFFFFF')
     expect(css).toContain('--color-button-text:#FFFFFF')
-    expect(css).toContain('--font-heading:var(--font-fraunces)')
+    expect(css).toContain('--font-heading:var(--font-fraunces),var(--font-hind-siliguri),serif')
     expect(css).toContain('--header-opacity:0.92')
     const cream = toCssVars(
       mergeDesign(baseDesign, { mode: { light: 'cream' }, colors: { text: '#1E2A1C' } }) as Design,

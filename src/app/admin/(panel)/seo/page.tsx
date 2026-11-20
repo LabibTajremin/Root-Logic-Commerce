@@ -4,14 +4,15 @@ import { ActionForm } from '@/ui/action-form'
 import { Button, Card, Field, LockBadge } from '@/ui/primitives'
 import { adminContext } from '../context'
 import { saveBusiness } from '../settings-actions'
+import { currentSettings } from '@/server/request'
 
 export const metadata: Metadata = { title: 'SEO & Analytics' }
 
 export default async function SeoPage() {
-  const { settings, plans, store, allowed, locale, t } = await adminContext('settings.manage')
+  const { plans, store, allowed, locale, t } = await adminContext('settings.manage')
   if (!allowed) return <p className="text-muted">{t('error.access.denied')}</p>
   const [{ business, version }, features] = await Promise.all([
-    settings.get(store.id, { storeName: store.slug }),
+    currentSettings(),
     plans.features(store.id),
   ])
   const locked = features.filter((f) => !f.unlocked).map((f) => f.id)

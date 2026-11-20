@@ -4,13 +4,14 @@ import { ActionForm } from '@/ui/action-form'
 import { Button, Card, HelpHint } from '@/ui/primitives'
 import { adminContext } from '../context'
 import { saveBusiness } from '../settings-actions'
+import { currentSettings } from '@/server/request'
 
 export const metadata: Metadata = { title: 'Messages' }
 
 export default async function MessagesPage() {
-  const { settings, store, allowed, locale, t } = await adminContext('settings.manage')
+  const { allowed, locale, t } = await adminContext('settings.manage')
   if (!allowed) return <p className="text-muted">{t('error.access.denied')}</p>
-  const { business, version } = await settings.get(store.id, { storeName: store.slug })
+  const { business, version } = await currentSettings()
   return (
     <>
       <h1 className="font-heading text-3xl">{t('messages.title')}</h1>

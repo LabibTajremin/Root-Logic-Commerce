@@ -85,7 +85,9 @@ export const createOrders = ({ repo, bus }: Deps) => ({
   // Public tracking needs order number + the phone it was placed with.
   trackOrder(storeId: string, orderNo: number, phone: string) {
     const p = normalizeBdPhone(phone)
-    return p ? repo.findForTracking(storeId, orderNo, p) : Promise.resolve(null)
+    return p && Number.isSafeInteger(orderNo)
+      ? repo.findForTracking(storeId, orderNo, p)
+      : Promise.resolve(null)
   },
 })
 

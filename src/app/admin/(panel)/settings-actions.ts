@@ -1,11 +1,12 @@
 'use server'
 
 import { act, type ActionState } from './act'
+import { currentSettings } from '@/server/request'
 
 /** Merges a partial business-settings patch from a form into the saved settings (version-locked). */
 export async function saveBusiness(_: ActionState, form: FormData) {
   return act('settings.manage', async ({ settings, store }) => {
-    const current = await settings.get(store.id, { storeName: store.slug })
+    const current = await currentSettings()
     const has = (k: string) => form.get(k) !== null
     const next = {
       ...current.business,
