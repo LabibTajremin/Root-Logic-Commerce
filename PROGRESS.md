@@ -24,6 +24,8 @@ Preflight: done 2026-11-20
 
 ## Skipped
 - S3 and Google Drive *upload* storage adapters (no credentials; S3 needs SigV4 client). Configured but unavailable drivers fail uploads with a friendly message; Drive *links* work. Planned for Phase 7 (needed for the Vercel profile).
+- GA4 *data inside admin* (premium ga4InAdmin) needs a Google service account per store; the dashboard shows the lock / "Root Logic Lab will connect it" note. gtag + ecommerce events on the storefront are done.
+- Video duration cap: size cap (20 MB, configurable) is enforced; duration needs container parsing (mp4/webm) — help text asks for ≤30 s.
 - Blurhash placeholders: dominant colour is stored and shown instead (smaller, no extra dep).
 
 ## Decisions
@@ -37,6 +39,9 @@ Preflight: done 2026-11-20
 - Keyboard-drag e2e waits for dnd-kit's announcement of a different target before dropping (fast presses were ignored on mobile).
 - SUPER_ADMIN login is seeded from BOOTSTRAP_SUPER_EMAIL/PASSWORD; only it can grant/revoke entitlements (plan page).
 - Media: next/image with a custom loader → /api/media/[id]/[w] (nearest stored WebP variant, immutable cache). Uploads limited by bytes sniffing, per-purpose size, per-store quota and a free-disk guard.
+- Messages: order events only *queue* (outbox, dedupe key per order/event/channel/recipient); sending is the cron route (Vercel, Bearer CRON_SECRET) or an in-process worker (VPS). MESSAGES_TRANSPORT=log records instead of sending (dev/e2e). Channel secrets are sealed with AES-GCM (SETTINGS_KEY) and write-only in the UI. OTP codes use the same channels.
+- Insights: visitor = HMAC(authSecret, store+ip+UA+Dhaka day); daily_stats upserts per view/event; revenue = subtotal counted on DELIVERED, reversed on RETURNED; raw page_views purged after 30 days.
+- Promotions: embeds are youtube-nocookie / FB / IG players behind a tap-to-load facade; e2e stubs third-party hosts (gtag, embeds) in the fixture.
 - Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
 - Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
 - Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.
