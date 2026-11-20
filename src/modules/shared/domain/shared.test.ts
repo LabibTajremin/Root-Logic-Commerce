@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createEventBus, DomainError, formatMoney, toBanglaDigits, toMinor } from '..'
+import { createEventBus, daysAgo, DomainError, formatMoney, toBanglaDigits, toMinor } from '..'
 
 describe('money', () => {
   it('converts taka to integer poisha', () => {
@@ -40,5 +40,14 @@ describe('event bus', () => {
     await bus.emit('other', null)
     expect(seen).toEqual(['a1', 'c1'])
     expect(onError).toHaveBeenCalledWith(expect.any(Error), 'order.confirmed')
+  })
+})
+
+describe('daysAgo', () => {
+  it('subtracts whole days', () => {
+    expect(daysAgo(30, new Date('2026-11-30T00:00:00Z')).toISOString()).toBe(
+      '2026-10-31T00:00:00.000Z',
+    )
+    expect(daysAgo(0).getTime()).toBeLessThanOrEqual(Date.now())
   })
 })

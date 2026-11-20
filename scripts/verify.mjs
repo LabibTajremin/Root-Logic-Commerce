@@ -2,6 +2,7 @@
 // coverage build + e2e (with server V8 coverage), merged 100% coverage check.
 import { spawn, spawnSync } from 'node:child_process'
 import { rmSync } from 'node:fs'
+import { e2eEnv } from './e2e-env.mjs'
 import { setTimeout as wait } from 'node:timers/promises'
 
 const run = (cmd, env = {}) => {
@@ -12,6 +13,7 @@ const run = (cmd, env = {}) => {
 
 rmSync('.coverage', { recursive: true, force: true })
 rmSync('coverage', { recursive: true, force: true })
+rmSync('.e2e', { recursive: true, force: true })
 run('pnpm lint')
 run('pnpm typecheck')
 run('pnpm test:cov')
@@ -21,7 +23,7 @@ run('pnpm build:cov')
 const port = process.env.E2E_PORT ?? '3100'
 const server = spawn('pnpm', ['next', 'start', '-p', port, '-H', '127.0.0.1'], {
   stdio: 'inherit',
-  env: { ...process.env, COVERAGE: '1', NODE_V8_COVERAGE: '.coverage/server-v8' },
+  env: { ...process.env, ...e2eEnv, COVERAGE: '1', NODE_V8_COVERAGE: '.coverage/server-v8' },
   detached: true,
 })
 const stop = async () => {

@@ -39,3 +39,18 @@ describe('createDb', () => {
     expect(typeof db.select).toBe('function')
   })
 })
+
+describe('openDb', () => {
+  it('opens an in-memory or on-disk PGlite with migrations applied', async () => {
+    const { openDb } = await import('@/infrastructure/db/client')
+    const { rmSync } = await import('node:fs')
+    const dir = `.e2e/test-${process.pid}`
+    for (const url of ['pglite:memory', `pglite:${dir}`]) {
+      const db = await openDb(url)
+      await db.insert(stores).values({ slug: 's', name: 'S' })
+      expect(await createStoreDirectory(db).findBySlug('s')).toMatchObject({ slug: 's' })
+    }
+    rmSync(dir, { recursive: true, force: true })
+    expect(typeof (await openDb('postgres://u:p@127.0.0.1:1/none')).select).toBe('function')
+  })
+})

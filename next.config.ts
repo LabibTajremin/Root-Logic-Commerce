@@ -6,6 +6,8 @@ const coverage = process.env.COVERAGE === '1'
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  // WASM Postgres and native image codecs must load from node_modules, not the bundle.
+  serverExternalPackages: ['@electric-sql/pglite', 'sharp'],
   ...(coverage && {
     distDir: '.next-cov',
     productionBrowserSourceMaps: true,

@@ -1,11 +1,11 @@
 RUNNING
-Now: Phase 3 complete locally (plans, site-settings, access, container added); waiting for CI on PR, then tick 2+3 and start Phase 4 (admin panel: Better Auth login, admin shell, screens, help EN/BN, media pipeline, design editor).
+Now: Phase 4 — admin panel. Done (uncommitted→committing): Better Auth (dynamic baseURL), runtime/request helpers, i18n+help EN/BN, UI primitives, login, panel shell, dashboard, e2e env (pglite .e2e/db, bootstrap owner). Next: fixture allow-status console fix, admin pages orders/products/categories/stock/design/users/plan/help/promotions/messages/seo/more, media pipeline.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
 - [x] Phase 1 — Design (Figma) — https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr · see design/README.md
-- [ ] Phase 2 — Scaffold
-- [ ] Phase 3 — Core domain + DB
+- [x] Phase 2 — Scaffold — phase 2 done c9409d4 (CI green with phase 3 at f547015)
+- [x] Phase 3 — Core domain + DB — phase 3 done f547015 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions — green)
 - [ ] Phase 4 — Admin panel
 - [ ] Phase 5 — Storefront + themes
 - [ ] Phase 6 — Messages, insights, promotions

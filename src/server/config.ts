@@ -43,7 +43,9 @@ const storeConfigSchema = z.object({
 })
 
 const envSchema = z.object({
-  DATABASE_URL: z.url(),
+  DATABASE_URL: z
+    .string()
+    .regex(/^(postgres(ql)?:\/\/|pglite:)/, 'expected postgres:// or pglite:<dir>'),
   AUTH_SECRET: z.string().min(32),
   HOSTING_PROFILE: z.enum(['vercel', 'vps']).default('vps'),
   STORE_MODE: z.enum(['single', 'multi']).default('single'),

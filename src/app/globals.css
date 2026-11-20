@@ -1,1 +1,40 @@
 @import 'tailwindcss';
+
+/* Theme tokens (Figma "Theme" collection). Defaults = minimal/light; the store's
+   design (site_settings) overrides them at runtime via an inline :root rule. */
+@theme {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-soft: #f4f4f5;
+  --color-text: #18181b;
+  --color-muted: #52525b;
+  --color-line: #e4e4e7;
+  --color-accent: #4f46e5;
+  --color-accent-tint: #eef2ff;
+  --color-button: #18181b;
+  --color-button-text: #ffffff;
+  --color-header: #ffffff;
+  --color-header-text: #18181b;
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #b45309;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --font-heading: ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

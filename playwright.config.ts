@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { e2eEnv } from './scripts/e2e-env.mjs'
 
 const port = Number(process.env.E2E_PORT ?? 3100)
 export const baseURL = `http://127.0.0.1:${port}`
@@ -21,7 +22,7 @@ export default defineConfig({
   ],
   webServer: {
     command: `pnpm next start .  -p ${port} -H 127.0.0.1`,
-    env: { COVERAGE: '1' },
+    env: { ...e2eEnv, COVERAGE: '1' },
     url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,
