@@ -35,7 +35,11 @@ export const orderStatusEnum = pgEnum('order_status', [
   'RETURNED',
 ])
 export const paymentStatusEnum = pgEnum('payment_status', ['unpaid', 'paid', 'refunded'])
-export const stockReasonEnum = pgEnum('stock_reason', ['order_confirmed', 'order_restocked', 'manual'])
+export const stockReasonEnum = pgEnum('stock_reason', [
+  'order_confirmed',
+  'order_restocked',
+  'manual',
+])
 export const outboxStatusEnum = pgEnum('outbox_status', ['pending', 'sent', 'failed'])
 export const channelEnum = pgEnum('channel', ['email', 'sms', 'whatsapp'])
 
@@ -157,7 +161,10 @@ export const media = pgTable(
     orphanedAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
   },
-  (t) => [index('media_store_id_idx').on(t.storeId), index('media_orphaned_at_idx').on(t.orphanedAt)],
+  (t) => [
+    index('media_store_id_idx').on(t.storeId),
+    index('media_orphaned_at_idx').on(t.orphanedAt),
+  ],
 )
 
 export const categories = pgTable(
