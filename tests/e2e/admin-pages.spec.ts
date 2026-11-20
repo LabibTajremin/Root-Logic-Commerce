@@ -77,6 +77,7 @@ test('products: validation, create, edit, reorder and stock adjustments', async 
   await signedIn(page)
   await page.goto('/admin/products')
   await page.getByRole('link', { name: 'Add product' }).click()
+  await expect(page).toHaveTitle(/New product/)
   await a11y()
   await page.getByLabel('Product name').fill(`Mug ${id}`)
   await page.getByLabel('Price (৳)', { exact: true }).fill('850')
