@@ -1,15 +1,8 @@
 import { z } from 'zod'
+import { entitlementIds } from '@/modules/plans'
 
 const GB = 1024 ** 3
 
-export const entitlementIds = [
-  'removeBranding',
-  'ga4InAdmin',
-  'seoPro',
-  'customDomain',
-  'extraThemes',
-  'videoUploads',
-] as const
 const storageDriver = z.enum(['local', 's3', 'gdrive'])
 
 const storeConfigSchema = z.object({

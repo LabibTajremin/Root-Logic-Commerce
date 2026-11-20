@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 3 — core domain + DB. Phase 2 pushed c9409d4 (await CI then tick). Steps: full schema → shared kernel (money, errors, events) → catalog → customers → orders+stock → plans → site-settings → access.
+Now: Phase 3 complete locally (plans, site-settings, access, container added); waiting for CI on PR, then tick 2+3 and start Phase 4 (admin panel: Better Auth login, admin shell, screens, help EN/BN, media pipeline, design editor).
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -25,6 +25,9 @@ Preflight: done 2026-11-20
 ## Skipped
 
 ## Decisions
+- Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.
+- Domain events: `order.placed` + `order.<status>` (confirmed/processing/shipped/delivered/cancelled/returned); subscriber errors are reported, never block the action.
+- `knip` (unused exports) deferred to Phase 7: modules export APIs that later phases consume.
 - Owner asked to design `attar-aloy` (আতর আলোয়) now too: Figma modes 'Attar Aloy · Light/Dark' + page 'Attar Aloy'. Palette light: bg #FDF8F8, soft #F7ECEF, text #2E2A35, accent #B76E8A (dusty rose), button #6B5B8C (plum), radius 22/14, fonts Cormorant Garamond Light + Manrope. Code still built via the Phase 8 skill.
 - PR: https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 (draft, all phases stack here).
 - ankito tokens (from site CSS): bg #fbf8f2, surface #fff, soft #f4eee2, ink #1e2a1c, muted #5f6a5b, line #e7dfcf, brand #3c6430 (hover #2f5026, deep #22381c, tint #edf3e7), accent #a8763e (tint #f6ead8), radius 18/10, fonts DM Serif Display + DM Sans + Hind Siliguri, soft green-tinted shadows.
