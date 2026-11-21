@@ -28,7 +28,7 @@ A phase is green only when **all** hold, locally and in CI:
 - Merged unit + integration + e2e coverage = **100% lines, branches, functions, statements** over the whole source tree. e2e coverage collected from browser and server (V8) and merged with unit/integration (e.g. monocart-coverage-reports). Exclusions only for generated, migration, pure-type and config files, listed explicitly in coverage config.
 - Zero TypeScript errors, zero lint warnings, zero a11y (axe) violations, zero console errors/warnings and zero failed network requests during e2e.
 - Build succeeds.
-If the repo lacks this setup (single `verify` script + CI workflow running the same script), build it as **phase 0** before anything else.
+If the repo lacks this setup (single `verify` script + CI workflow running the same script), build it as **phase 0** before anything else. Proven order: lint → typecheck → unit/integration with coverage → prod build (+ Lighthouse if required) → coverage build → start server with `NODE_V8_COVERAGE` → e2e → merge → per-file 100% check that **prints the exact uncovered lines/branches/functions** on failure (CI logs must say what to fix).
 
 Never cheat to green: no `.skip`/`.only`, no `istanbul ignore`/`v8 ignore`, no weakened assertions, no lowered thresholds, no disabled lint rules or CI steps. Unreachable code is deleted. If a test is genuinely wrong, fix it and log why in `Decisions`.
 
@@ -57,14 +57,24 @@ each phase:  implement with TDD → run verify
 - Conventional Commits, small commits, never force-push, never commit secrets.
 - External services: code against ports, tests use fakes; never block on real credentials.
 
-## 5. BLOCKED rule
+## 5. Pitfalls already paid for (apply up front)
+- **Coverage plumbing:** a separate coverage build (own dist dir, source maps, minify off, own sources tagged with a unique path prefix so framework `src/` paths never collide). Measure each file in the layer that runs it (unit / browser / server) rather than merging line ranges across differently compiled bundles.
+- **Browser V8 is lost on full page loads:** flush coverage before `goto`/`reload`; in tests follow plain (non-SPA) links with `goto(href)`. Keep the same script URL across flushes so the tool merges V8 per script. A client module copied into several chunks can lose branch counts — split client modules so each chunk only carries code it runs; write tiny client stores branch-free.
+- **Server singletons:** frameworks bundle routes separately → module singletons duplicate (two DB pools/instances). Keep the runtime on `globalThis`; detect domain errors structurally, not with `instanceof`.
+- **Flaky e2e = real causes, never retries:** clicks right after a full load can beat hydration (wait for `networkidle` or a hydration signal); React form actions reset fields after submit; streamed `<title>` arrives late (wait before axe); keyboard drag-and-drop is racy — use pointer drags and wait for the save response; several "Saved" notices on one page → confirm by reload.
+- **Shared e2e state:** tests that flip store-wide settings run last, serially, in their own project; give each test its own client IP/data ids; stub every third-party host in the fixture so "no failed requests" stays meaningful.
+- **CI is slower than local:** expect timing races to show only in CI; read just the tail of failed job logs; PR concurrency cancels older runs — wait for the run on the latest sha.
+- **Long gates:** run `verify` in the background and draft the next step in a scratch dir; don't add new source files while a run is in its e2e/merge stage (the gate enumerates the tree).
+- **Measurements that wobble** (Lighthouse): warm up, run 3×, gate on the median — never lower the bar.
+
+## 6. BLOCKED rule
 After 6 fix rounds on the same failure: write `BLOCKED: <phase> — <reason> — <what the human must do>` as line 1 of `PROGRESS.md`, commit, push, stop.
 
-## 6. Finish
+## 7. Finish
 All phases green (skipped ones excluded) → `ALL_PHASES_DONE <sha>` as line 1, commit, push (if allowed), stop. Final report ≤10 lines: phases, coverage, CI link, **what was skipped and which permission would unlock it**, decisions worth reading.
 
-## 7. Token economy
+## 8. Token economy
 Read files narrowly (grep → line ranges), edit don't rewrite, run affected tests while iterating and the full gate at phase end, no narration, no restating code, report ≤10 lines per phase.
 
-## 8. Usage-limit auto-resume
+## 9. Usage-limit auto-resume
 For fully unattended runs, use `scripts/autopilot.sh` (copy it into the repo if missing): it relaunches `claude -p "automatic agentic run"` until line 1 is `ALL_PHASES_DONE` or `BLOCKED`, sleeping and retrying when the usage limit is hit. Run it inside tmux on a dedicated machine/VPS (it uses `--dangerously-skip-permissions`).
