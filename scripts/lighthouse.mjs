@@ -25,30 +25,39 @@ for (let i = 0; i < 120; i++) {
   await wait(500)
 }
 
+// Like Lighthouse CI: warm the server, run each page 3 times, gate on the median score.
+for (const path of PAGES) await fetch(`http://127.0.0.1:${port}${path}`)
+const RUNS = 3
 const failures = []
 for (const [i, path] of PAGES.entries()) {
-  const out = `${dir}/report-${i}.json`
-  spawnSync(
-    'pnpm',
-    [
-      'dlx',
-      'lighthouse@12.8.2',
-      `http://127.0.0.1:${port}${path}`,
-      '--quiet',
-      '--output=json',
-      `--output-path=${out}`,
-      '--only-categories=performance,accessibility,best-practices,seo',
-      '--chrome-flags=--headless=new --no-sandbox',
-    ],
-    { stdio: 'inherit', env: { ...process.env, CHROME_PATH: chromium.executablePath() } },
-  )
-  const r = JSON.parse(readFileSync(out, 'utf8'))
+  const runs = []
+  for (let n = 0; n < RUNS; n++) {
+    const out = `${dir}/report-${i}-${n}.json`
+    spawnSync(
+      'pnpm',
+      [
+        'dlx',
+        'lighthouse@12.8.2',
+        `http://127.0.0.1:${port}${path}`,
+        '--quiet',
+        '--output=json',
+        `--output-path=${out}`,
+        '--only-categories=performance,accessibility,best-practices,seo',
+        '--chrome-flags=--headless=new --no-sandbox',
+      ],
+      { stdio: 'inherit', env: { ...process.env, CHROME_PATH: chromium.executablePath() } },
+    )
+    runs.push(JSON.parse(readFileSync(out, 'utf8')).categories)
+  }
   const scores = Object.fromEntries(
-    Object.entries(r.categories).map(([k, v]) => [k, Math.round(v.score * 100)]),
+    Object.keys(runs[0]).map((k) => {
+      const all = runs.map((r) => Math.round(r[k].score * 100)).sort((a, b) => a - b)
+      return [k, all[Math.floor(RUNS / 2)]]
+    }),
   )
-  console.log(`lighthouse ${path}`, scores)
-  for (const [k, s] of Object.entries(scores))
-    if (s < MIN) failures.push(`${path} ${k} ${s} < ${MIN}`)
+  console.log(`lighthouse ${path} (median of ${RUNS})`, scores)
+  for (const [k, v] of Object.entries(scores))
+    if (v < MIN) failures.push(`${path} ${k} ${v} < ${MIN}`)
 }
 try {
   process.kill(-server.pid, 'SIGINT')

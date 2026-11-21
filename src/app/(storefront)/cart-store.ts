@@ -1,20 +1,8 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
-import { z } from 'zod'
-
-// No eval-based fast paths in the browser: the CSP forbids 'unsafe-eval'.
-z.config({ jitless: true })
-
 const KEY = 'rlc-cart'
-const lineSchema = z.object({
-  id: z.uuid(),
-  slug: z.string(),
-  name: z.string(),
-  price: z.number().int().nonnegative(),
-  qty: z.number().int().min(1).max(99),
-})
-export type CartLine = z.infer<typeof lineSchema>
+export type CartLine = { id: string; slug: string; name: string; price: number; qty: number }
 export type Item = Omit<CartLine, 'qty'>
 
 const EMPTY: CartLine[] = []
@@ -22,10 +10,11 @@ const listeners = new Set<() => void>()
 let raw = ''
 let lines = EMPTY
 
-// A tampered or outdated cart in storage is dropped instead of breaking the page.
+// Storage that isn't a JSON array (tampered, outdated) throws here and is dropped. Line
+// contents need no checking in the browser: checkout re-validates every id and quantity.
 const parse = (r: string) => {
   try {
-    return z.array(lineSchema).parse(JSON.parse(r))
+    return (JSON.parse(r) as CartLine[]).slice()
   } catch {
     return EMPTY
   }
