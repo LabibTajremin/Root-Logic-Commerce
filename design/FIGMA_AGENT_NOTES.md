@@ -58,3 +58,7 @@ const FIXI=(i)=>{const mf=i.mainComponent&&i.mainComponent.fills[0];if(mf&&mf.op
 const NEST=async(root)=>{for(const i of root.findAllWithCriteria({types:['INSTANCE']})){for(const n of [i,...i.findAll(x=>'fills' in x)]){if(!Array.isArray(n.fills)||n.fills.length!==1||n.fills[0].type!=='SOLID'||n.fills[0].opacity!==1)continue;const src=n===i?i.mainComponent:await figma.getNodeByIdAsync(n.id.split(';').pop());if(src&&src.fills&&src.fills[0]&&src.fills[0].opacity<1){const c=JSON.parse(JSON.stringify(n.fills[0]));c.opacity=src.fills[0].opacity;n.fills=[c];}}}};
 // end of script: FLUSH(); await NEST(frame);
 ```
+
+## Screen builder (Phase 10)
+`design/figma-screen-builder.js` = prelude + data-driven admin/public screen builder used for Core design screens. Paste it at the top of a `use_figma` call, then define `S=[{n,t,s,a,b:[blocks]}]` and call `adminWeb(spec, section)` / `adminMob(spec, section)`; finish with `await FINAL(frames)` (re-applies chip tints + nested instance tints). Blocks: stats, filter, table [cols,rows], cards, form, list, chart, note, empty, steps, kv, photo, title, two [[left],[right],ratio]. Cell syntax: `!ok:text` chip, `@img:key|text`, `*bold`, `$accent`.
+Sections: Core web public `81:4742`, web admin `81:4743`, mobile public `81:4744`, mobile admin `81:4745`. Illustrations: `illus/<key>` rects in Assets.
