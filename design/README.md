@@ -12,6 +12,15 @@
 Storefront: Home, Category, Product, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404.
 Admin: Login, Dashboard, Orders, Order detail, Products, Product editor (upload hints), Categories (drag tree), Stock, Promotions, Design editor (live preview), Messages, SEO & Analytics, Users & roles, Plan (locks), Help center.
 
+## v2 pages (Phase 10 — BUILD_SPEC_V2, awaiting owner approval)
+Demo photography: 14 generated, unbranded product photos (attar, panjabi, saree, honey/ghee, tea, earbuds, speaker, sneakers, watch, skincare, cookware, baby, hero lifestyle, try-on portrait) on page **v2 · Assets**.
+| Page | Content |
+|---|---|
+| v2 · Foundations | Token-bound components: buttons/order paths (B2, C19 বাংলা CTA), badges, urgency line, rating, 15 status chips, fraud pill, courier badge, payment chips, Pro lock · product card v2, variant picker + multi-select (A1/A16), FBT (A8), sticky buy bar, trust strip + certificate modal (B6), help bubble (B9), mini-cart (B15), announcement (B1), coupon (C2), district/thana + auto zone (C4/C17), share location (C5), social-proof toast (B7), bottom nav (B10), reel card (B4) · AI chat panel, chat-to-order confirm, try-on states incl. quota reached, popup (B8), ⌘K, bulk bar, order row + drawer (F12), AI confirm-before-apply (I5), AI usage meter (I7) |
+| v2 · Storefront | Web 1440: Home (all B5 blocks), Category (A11), Product (story order), Checkout v2, Thank-you v2, Landing A (story, Organic) + B (bold offer, Minimal dark, exit-intent), Flash sale, Wishlist, CMS page · Mobile 390: Home, Product (sticky bar), Checkout, AI chat + try-on, popup + toast · Theme variants: Attar Aloy dark (Home, Product, Checkout web + mobile), Organic light (Home web + mobile, Category) |
+| v2 · Layout gallery | J2 gallery (8 niche layouts, Pro lock), preview banner, J3 switch dialog |
+| v2 · Admin | Shell components (Simple/Pro grouped sidebar, top bar with ⌘K, AI, New order, notifications, dark mode) · Web: Dashboard, Orders (+drawer, bulk bar), New order, Incomplete, Courier settings / dashboard / parcel scan, Coupons, Reviews, Design v2 (J1 tabs + live preview), Landing editor, Features (J5), AI Knowledge (EN + বাংলা), AI usage, Do it with AI, Tracking (H1–H3), Activity log (undo), Customers, Expenses, Profit calculator, Auto-assign · Dark: Dashboard, Orders · Mobile: Dashboard (Simple), Orders (EN + বাংলা), New order |
+
 ## Tokens → code (`site_settings.design` → CSS custom properties on `<html>`)
 Collection **Theme** (modes: `<Theme> · Light|Dark`), CSS names in each variable's WEB code syntax:
 - Colors `--color-{bg,surface,soft,text,muted,line,accent,accent-tint,button,button-text,header,header-text,success,danger,warning}`

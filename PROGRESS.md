@@ -1,5 +1,5 @@
-ALL_PHASES_DONE 6ffd887
-Now: all phases done — PR https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 ready for the owner to review and merge.
+BLOCKED: v2 Phase 10 (Figma redesign) done — waiting for owner approval before Phase 11 (BUILD_SPEC_V2 §0.1)
+Now: v1 phases 0–9 done (ALL_PHASES_DONE 6ffd887); v2 Phase 10 design ready for review: https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr (pages v2 · …). Next: Phase 11 — Foundations.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -12,6 +12,11 @@ Now: all phases done — PR https://github.com/LabibTajremin/Root-Logic-Commerce
 - [x] Phase 7 — Hardening & deploy — phase 7 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green)
 - [x] Phase 8 — Theme-builder skill — phase 8 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green; theme attar-aloy shipped)
 - [x] Phase 9 — Update automatic-agentic-run skill — phase 9 done 21bc2f8 (docs/SKILL_FEEDBACK.md)
+
+## v2 phases (docs/BUILD_SPEC_V2.md)
+- [x] Phase 10 — Figma redesign (v2 pages + demo photos; see design/README.md) — STOP for owner approval
+- [ ] Phase 11 — Foundations · [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth · [ ] 18 Optional · [ ] 19 Hardening
+- Also done before v2: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
 
 ## Preflight
 - git push to `claude/vibrant-cannon-wwnfb9`: granted (verified dry-run)
