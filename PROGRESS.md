@@ -1,5 +1,5 @@
-BLOCKED: v2 Phase 10 (Figma redesign) done — waiting for owner approval before Phase 11 (BUILD_SPEC_V2 §0.1)
-Now: v1 phases 0–9 done (ALL_PHASES_DONE 6ffd887); v2 Phase 10 design ready for review: https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr (pages v2 · …). Next: Phase 11 — Foundations.
+IN_PROGRESS: Phase 10 (merged design redo) — spec docs/BUILD_SPEC.md (v1+v2 merged)
+Now: Phase 10 — rebuild Figma to the 9-page structure (BUILD_SPEC §9 Phase 10): clean-up first, then Foundation components, Core design (all screens), 5 theme pages (major screens), Docs. Then Phases 11–19 back to back, no approval stop.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -13,10 +13,11 @@ Now: v1 phases 0–9 done (ALL_PHASES_DONE 6ffd887); v2 Phase 10 design ready fo
 - [x] Phase 8 — Theme-builder skill — phase 8 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green; theme attar-aloy shipped)
 - [x] Phase 9 — Update automatic-agentic-run skill — phase 9 done 21bc2f8 (docs/SKILL_FEEDBACK.md)
 
-## v2 phases (docs/BUILD_SPEC_V2.md)
-- [x] Phase 10 — Figma redesign (v2 pages + demo photos; see design/README.md) — STOP for owner approval
-- [ ] Phase 11 — Foundations · [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth · [ ] 18 Optional · [ ] 19 Hardening
-- Also done before v2: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
+## Phases 10–19 (docs/BUILD_SPEC.md §9, no approval stop)
+- [ ] Phase 10 — Single merged Figma design (9-page rule; first attempt rejected: no reel cover-flow, missing admin screens, v1/v2 pages duplicated)
+- [ ] Phase 11 — Foundations · [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
+- Feature IDs done (§13): —
+- Also done earlier: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
 
 ## Preflight
 - git push to `claude/vibrant-cannon-wwnfb9`: granted (verified dry-run)

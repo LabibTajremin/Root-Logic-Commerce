@@ -1,6 +1,6 @@
 # Competitor analysis & feature gap — Root Logic Commerce
 
-> Agent: build from `docs/BUILD_SPEC_V2.md` (authoritative, same IDs). Read this file only for §4 (design brief) in Phase 10.
+> Agent: build from `docs/BUILD_SPEC.md` (authoritative, same IDs). Read this file only for §4 (design brief) in Phase 10.
 
 Source: the competitor's 46-min recorded class "Class 2 Part 2" (Biz Care IT demo shop `new.demo.bizcareit.com` + a client store `blackrace.com.bd`), reviewed frame-by-frame (one frame per 3 s, 240 distinct screens) plus the Bangla narration transcript (`docs/competitor/transcript.md`). Owner's brief: handwritten note, 2026-11-21.
 Timestamps `mm:ss` point into that video.
@@ -134,7 +134,7 @@ The transcript is noisy (see its header); these are the points that come through
 
 ## 3. Full gap list (everything the competitor has that we don't) + owner's new asks
 
-IDs are used by `docs/BUILD_SPEC_V2.md` (it also adds A16, B15, C17–C21, F11, F12, J8 from §2.8 — see the spec for the full acceptance list). Priority: **P0** = sales-critical in BD f-commerce, build first · **P1** = strong differentiator · **P2** = later.
+IDs are used by `docs/BUILD_SPEC.md` (it also adds A16, B15, C17–C21, F11, F12, J8 from §2.8 — see the spec for the full acceptance list). Priority: **P0** = sales-critical in BD f-commerce, build first · **P1** = strong differentiator · **P2** = later.
 
 ### A. Catalog & product page
 | ID | Feature | Pri | Plan |
@@ -297,4 +297,4 @@ IDs are used by `docs/BUILD_SPEC_V2.md` (it also adds A16, B15, C17–C21, F11, 
 - Paid AI chatbot + image chatbot: admin must be able to **upload the information the chatbot learns from** → I1 + admin "AI Knowledge" page.
 - Image-generation chatbot: **limit so the free tier is never exceeded**; paid version later when customers are satisfied → I3 + I7 (hard caps, fail-closed).
 - Personalised theme per customer **stays** → §4.1.
-- New build instruction: **redesign Figma first, then integrate all features** → `docs/BUILD_SPEC_V2.md`.
+- New build instruction: **redesign Figma first, then integrate all features** → `docs/BUILD_SPEC.md`.

@@ -1,6 +1,7 @@
 # BUILD_SPEC — Root Logic Commerce (configurable e-commerce for small businesses)
 
-> Agent: this file is the single source of truth. Read it once, fully. Then work phase by phase.
+> Agent: this file is the single source of truth (v1 + v2 merged). Read it once; then jump to the § / feature ID you need.
+> Notation (§12–§14): `→` then/produces · `|` or · `!` must · `opt` owner toggle · `[Pro]` paid entitlement · `[AI]` metered. Each bullet = acceptance criterion with ≥ 1 test.
 > Do not re-read it whole; jump to the § you need. Owner: Root Logic Lab.
 
 ---
@@ -8,17 +9,17 @@
 ## §0 Agent operating rules (token + code economy) — follow strictly
 
 1. **First action:** create `CLAUDE.md` (≤40 lines) = §0 + §2 stack + §4 folder map + commands. Create `PROGRESS.md` (checklist of §9 phases). Never paste this spec into other files.
-2. **Fully autonomous (§11):** run Phases 1–9 back to back with no human gates. A phase is complete only when local checks **and** GitHub CI are green; then commit, push, tick `PROGRESS.md`, start the next phase. Stop only when all phases are done (or §11 BLOCKED rule).
+2. **Fully autonomous (§11):** run all remaining phases (§9) back to back with no human gates. A phase is complete only when local checks **and** GitHub CI are green; then commit, push, tick `PROGRESS.md`, start the next phase. Stop only when all phases are done (or §11 BLOCKED rule).
 3. **Read narrowly:** use grep/glob to locate, read only needed line ranges, never re-read a file you just wrote. No repo-wide dumps.
 4. **Edit, don't rewrite:** use targeted edits; never regenerate a whole file to change a few lines.
 5. **Terse output:** no narration, no restating code in chat, no summaries of unchanged files. End-of-phase report ≤10 lines.
-6. **No speculative code:** build only what §5–§8 require. No unused abstractions, no dead code, no placeholder files.
+6. **No speculative code:** build only what §5–§8 and §12–§14 require. No unused abstractions, no dead code, no placeholder files.
 7. **Comments:** only non-obvious *why*. Never *what*. No banner comments, no JSDoc on obvious functions.
 8. **Dependencies:** each new dep must justify itself (size + need). Prefer platform/CSS over libraries. Check bundle impact.
 9. **Tests:** TDD — write failing test → implement → refactor. Run only affected tests while iterating (`vitest related`), full suite at phase end. Never declare done without a green run.
 10. **Subagents:** only for isolated, parallelizable work (e.g., building 3 themes). Give them the exact § numbers, not the whole spec.
 11. **When unsure:** pick the simplest option consistent with this spec, note it in `PROGRESS.md › Decisions` (one line), continue. Never ask the human — there is no one watching.
-12. **Legacy reference:** `legacy/` holds curated code + ADRs from an earlier build. Read `legacy/README.md` once; then open only the files it maps to your current phase. Exclude `legacy/` from tsconfig, lint, tests, coverage, build. Delete it at end of Phase 7.
+12. **Evidence, not spec:** `docs/COMPETITOR_GAP_REPORT.md` (read only its §4 design brief, in Phase 10) and `docs/competitor/transcript.md` (don't read).
 13. **Git:** work in the repo provided by the owner. One work branch with an open PR to `main` (never push to `main` directly; phases stack on that PR), Conventional Commits, small commits, push after every commit. Never commit secrets; ship `.env.example`.
 
 ---
@@ -279,52 +280,61 @@ Indexes for every list/filter in admin; unique `(store_id, slug)`.
 
 ## §9 Phases (execute in order)
 
-### Phase 1 — Design in Figma (no approval gate)
-- Use the Figma MCP (write access verified in preflight). If Figma was declined, this phase is skipped (§11 preflight).
-- File "Root Logic Commerce". Pages: **Foundations**, **Storefront – Web (1440)**, **Storefront – Mobile (390)**, **Admin – Web (1440)**, **Admin – Mobile (390)**.
-- Foundations: Figma variables for all tokens in §6 with **modes per theme (minimal/organic/attar) × light/dark**; type scale; spacing (4-pt); components (button, input, card variants, product card variants, badges, help hint, lock badge, nav).
-- Storefront screens: Home, Category, Product detail, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404 — shown in at least 2 themes.
-- Admin screens: Login, Dashboard, Orders list, Order detail, Products list, Product editor (with media upload hints), Categories (drag tree), Stock, Promotions, **Design editor with live preview**, Messages settings, SEO & Analytics, Users & roles, Plan/Premium (locks), Help center. Show EN and বাংলা variants of one screen.
-- Commit design artifacts (`design/`, plus the Figma link in `design/README.md`), then continue to Phase 2 — code must follow the design.
+Phases 1–9 (v1 build: scaffold → domain → admin → storefront + 5 themes → messages/insights/promotions → hardening/deploy → `new-theme` skill → autopilot skill) are **done** (PR #2, `ALL_PHASES_DONE 6ffd887`). Their acceptance lives in §5–§8 and stays binding; don't redo them — extend them. Remaining phases run **back to back with no approval stop**: the owner reviews the finished result and fixes afterwards.
 
-### Phase 2 — Scaffold
-Repo setup per §2/§4, workspace file, CI (lint, typecheck, test, build), Drizzle + PGlite test harness, config loader + tenant resolver (TDD), `.env.example`, `CLAUDE.md`, `PROGRESS.md`.
+### Phase 10 — Single merged Figma design (redo)
+File `https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr`. One design covering **everything in §5 + §13** (one product, one design). Brief: `docs/COMPETITOR_GAP_REPORT.md` §4 only.
 
-### Phase 3 — Core domain + DB (TDD)
-Schema + migrations; modules `access`, `catalog`, `orders`, `stock`, `customers`, `plans`, `site-settings` domain + use-cases + repositories. Event bus.
+**Page structure — exactly these 9 Figma pages, in this order, nothing else:**
+| # | Page | Content |
+|---|---|---|
+| 1 | Cover | Product name, theme overview cards, page index, version/date |
+| 2 | Foundation | Variables (tokens §6 × modes: 5 themes × light/dark), type scale (EN + বাংলা pairing per theme), 4-pt spacing, radii, icons, demo photo assets, **all components** (§10.1 list) with variants/states |
+| 3 | Core design | **Every** screen (§10.2 list), default theme `minimal` light, real content, EN (+ বাংলা variants where listed). Four sections: **Web 1440 › Public site**, **Web 1440 › Admin site**, **Mobile 390 › Public site**, **Mobile 390 › Admin site** |
+| 4 | Theme · Minimal | Major screens (§10.3) re-themed via variable mode; same 4 sections |
+| 5 | Theme · Organic | same |
+| 6 | Theme · Attar | same (dark midnight + gold) |
+| 7 | Theme · Ankito | same |
+| 8 | Theme · Attar Aloy | same (light blush/rose) |
+| 9 | Docs | How to read the file, token → CSS-variable map, component usage notes, section registry ↔ frames map, feature-ID ↔ frame index, changelog |
 
-### Phase 4 — Admin panel
-All admin screens from Phase 1, help hints EN/BN, media pipeline + storage adapters, design editor with live preview.
+- **Clean-up first:** move anything reusable from existing pages (`Minimal`, `Organic`, `Attar`, `Ankito`, `Attar Aloy`, `v2 · Foundations`, `v2 · Storefront`, `v2 · Layout gallery`, `v2 · Admin`, `v2 · Assets`) into the 9 pages above, then **delete every page and stray frame not in the table** (no duplicates, no "v2" prefixes, no scratch). Assets → Foundation › Assets.
+- Each section: frames on a grid, named `<Area>/<Screen>[/<state>]` (e.g. `Public/Product/sticky-bar`), left→right in user-flow order, section title label. Frames use components + variables only (no detached styles).
+- Theme pages differ only by variable mode (+ theme-specific slot layouts); never redraw by hand.
+- Real imagery (Foundation › Assets); no placeholder circles/grey boxes.
 
-### Phase 5 — Storefront + themes
-Theme contract, registry generator, 3 themes, all public pages, cart/checkout/OTP/track, SEO.
+**10.1 Components (Foundation):** button set + order-path group (Add to cart, Order now, WhatsApp, Call; বাংলা CTA), input/select/textarea/checkbox/radio/toggle/slider (all states), badge tones, lock badge + unlock CTA, help hint (EN/BN), status chips (all 15 statuses), payment chip, fraud pill, courier badge, rating stars, urgency line, product card (4 styles × toggles), variant picker (chips, swatches, multi-select "Selected" list), FBT list, bundle/combo card, **reel card + reel carousel + reel overlay player**, trust strip + certificate modal, help bubble (collapsed/expanded), mini-cart pill, announcement bar, hero slide, bottom nav, sticky buy bar, coupon field, district/thana picker + auto-zone chip, location share, social-proof toast, popups (welcome, product promo, exit-intent), countdown, AI chat panel (chips, product cards, cart-added, order summary confirm, try-on progress/result, quota reached), admin shell (Simple/Pro sidebar, top bar: ⌘K, AI, New order, bell, dark), ⌘K palette, data table + order row (F12) + drawer, bulk-action bar, filter bar, stat tile, chart, empty state, toast, confirm dialog, AI confirm-before-apply card, usage meter, upload field with size hint, live-preview frame (mobile/desktop toggle).
 
-### Phase 6 — Messages, insights, promotions
-Outbox + 3 channel adapters, templates, dashboard metrics, beacon, GA4, promo banners/posters/video/embeds.
+**Reel carousel (B4) — must match the reference shown in the competitor video (home section "Result You Can See, Confidence You Can Feel", 02:06 / 30:24 / 30:15):** horizontal **cover-flow**: centre card largest and fully opaque, neighbours progressively smaller and faded (≈7 visible desktop, 3 mobile), vertical 9:16 cards with rounded corners, caption at top, mute/sound icon, play icon on centre, bottom "Shop now" pill with linked product thumbnail; swipe/drag + arrows; centre auto-plays muted; tap → full overlay player with linked products' Order now. Show it on: Foundation (component + states), Core design (Home web + mobile, Product page, Landing page, overlay player, admin Reels manager: add by upload or FB/IG/TikTok/YT link, cover, caption, products, sort), and the Home screen of every theme page.
 
-### Phase 7 — Hardening & deploy
-Full e2e matrix, coverage gate, Lighthouse CI, security headers, load check on VPS-sized container (limit 1 CPU / RAM of Spark plan), `deploy/` scripts, Vercel config, final README (setup in 10 steps, EN). Final report.
+**10.2 Core design — all screens.**
+*Public (web + mobile):* Home (every B5 block incl. reels carousel, combos, flash sale, trust strip, screenshot reviews, brands, budget bands, FB follow, newsletter) · Category/listing (A11 filters, sort, grid toggle, breadcrumbs) · Search (+ empty) · Product (A1–A12, A16, B2 sticky bar, B4 reels, size-chart modal, review form) · Cart drawer · Checkout (C1 restore, C2, C4/C17, C5, C6, C18, C19, OTP step) · OTP · Order success / Thank-you (C10, upsell popup) · Track order (+ result) · Wishlist · Flash sale · Brand page · Combo page · Landing pages (≥ 2 designs, pack offers, exit-intent) · CMS page (J8) · Blog list/post · Review submit · Back-in-stock / pre-order states · AI chat + chat-to-order + try-on flow · Popups + toast · Layout preview banner · 404 · Offline/error.
+*Admin (web + mobile):* Login · First-login checklist · Dashboard (stats incl. profit, courier cost, incomplete, by-courier) · Orders list (all statuses, F12 row, bulk bar) · Order drawer/detail · New/manual order · Incomplete orders · Invoice + packing slip designs · Returns/exchange · Products list · Product editor (variants, badges, specs/how-to/FAQ/benefits, size chart, SEO, media hints, reels link) · CSV import · Categories (drag tree) · Brands · Size charts · Reviews moderation + screenshot reviews · Stock · Combos · Coupons · Flash sales · Popups · Reels manager · Promotions/banners · Landing-page list + editor · Customers CRM + profile · Follow-ups · Courier settings · Courier dashboard · Parcel scan (hand-over + returns) · Fraud/blocklist report · Messages settings + templates · Campaigns · Re-order reminders · Review requests · Design editor (every J1 tab with live preview) · Layout gallery + switch dialog · Language texts · CMS pages · SEO · Tracking (H1–H3) · Feature toggles · Plan/premium locks · Users & roles · Auto-assign + staff report · Activity log · Notifications · ⌘K · Expenses · Profit calculator (+ history/compare) · Reports · Backups · Payments settings · AI Knowledge · AI usage & limits · Do it with AI (+ voice) · POS · Purchases/suppliers · Office/HR (attendance, worker profile, payroll) · Affiliates · Help center (+ video guides) · Settings. **বাংলা variants:** Dashboard, Orders, Checkout, AI Knowledge.
 
-### Phase 8 — Theme-builder skill (only after Phase 7 is green)
-Create a Claude Code project skill so a future session can turn a plain theme description (EN or বাংলা, e.g. "rice shop, warm earthy, rustic serif, paddy-field feel") into a new working theme folder.
-- Path: `.claude/skills/new-theme/SKILL.md` (+ `reference.md` if needed). Committed to the repo.
-- Frontmatter `description`: one line, e.g. "Create a new storefront theme in src/themes from a description of a business niche or look."
-- Write it **from the final code, not from this spec** — exact file paths, the real `Theme` contract, real token/CSS-variable names, slot list + props, pattern/font ids, `themes:gen` command, test commands. If code and spec differ, code wins.
-- Body (≤150 lines, imperative, token-lean):
-  1. Inputs to extract from the description: niche, mood, light/dark default, colors (accent/button/header/text), name + site font from the curated list, pattern + opacity, card/showcase/hover/motion style. Ask at most one question only if niche or mood is missing.
-  2. Steps: copy `src/themes/minimal` as skeleton → set `id/name/niche/defaults` → override only slots that need a different layout (fall back to minimal otherwise) → add preview image → `pnpm themes:gen` → run theme contract test + a11y + mobile/desktop e2e smoke → contrast check AA.
-  3. Rules: tokens only (no hard-coded colors/fonts), RSC only, no new deps, fixed-ratio image boxes, respect `prefers-reduced-motion`, keep JS budget (§8).
-  4. One short worked example (the `organic` theme's manifest) as the pattern to imitate.
-  5. Done-checklist: registry updated, tests green, theme selectable in admin Design page, screenshot of home + product page on mobile.
-- Verify the skill: in a fresh session, run it once with this description and **keep the result as a shipped theme**: "সুগন্ধির দোকান — modern perfume/fragrance boutique, light mode, soft floral pastels, elegant thin serif headings, airy layout, gentle smooth motion." Theme `id: 'attar-aloy'`, `name: 'আতর আলোয় (Attar Aloy)'`. It must look clearly different from `attar` (which is dark midnight + gold). Confirm it passes all theme tests and is selectable in admin.
+**10.3 Major screens (theme pages):** Public: Home (with reels carousel), Category, Product, Cart drawer, Checkout, Thank-you, Landing page · Admin: Login, Dashboard, Orders + drawer, Product editor, Design editor. Each in web + mobile; Home also in the theme's alternate light/dark mode.
 
-### Phase 9 — Update the "automatic agentic run" skill from experience (last)
-The skill already exists at `.claude/skills/automatic-agentic-run/` and drove this build. Now improve it with what actually happened:
-- Read `PROGRESS.md › Decisions`, BLOCKED history, CI failures and fix rounds. Update the skill with real commands (`pnpm verify`, CI workflow name, coverage-merge setup), pitfalls hit and how they were fixed, and anything that wasted tokens. Keep it repo-agnostic and ≤120 lines; keep §2 quality gate unchanged or stricter.
-- Sync `autopilot.sh` in the skill folder with `scripts/autopilot.sh`.
-- Write `docs/SKILL_FEEDBACK.md` (≤30 lines): what changed in the skill and why — the owner uses it to update the copy saved in their Claude account.
+Then update `design/README.md` (page table, token map, frame index by feature ID); continue to Phase 11 without waiting.
 
-**Out of scope now:** online payments (port only), customer accounts, multi-currency, marketplace features.
+### Phase 11 — Foundations
+J5, entitlements for all paid IDs, sections registry + layout, J2, J3, J1, J4, J8, admin shell (§12.2) + F1 + F2 + F3, B1, B3, B9, B10, B15, existing-build gaps (§13 end).
+### Phase 12 — Catalog
+A1, A16, A2–A8, A10–A12, A15, B5 (+ B6, B12), product page per §13.
+### Phase 13 — Checkout & orders
+C1–C7, C10, C12–C19, C21, D1, D3, D4, D5, F4, F12, B2.
+### Phase 14 — Courier
+E1–E5, D2.
+### Phase 15 — Marketing
+H1, H2, H3, H10, H5, A9, B4, B7, B8, B11, B13.
+### Phase 16 — AI
+I7 first, then I1, I2, I6, I5, I3 (§14); record ImageGen provider in Decisions.
+### Phase 17 — Growth & business
+G1, G2, G3, G6, F5, F6, F7, H6, H7, H8, C8, C9, C11, A13, A14.
+### Phase 18 — Extended modules
+G4, G5, F8, F9, F10, F11, H4, H9, B14, I4, J6, J7.
+### Phase 19 — Hardening & docs
+e2e mobile + desktop for every new flow, Lighthouse with all home blocks on, Spark-size load check, security review (webhooks, uploads, AI prompt injection, blocklist bypass), BN/EN help for every field, README, update `new-theme` and `automatic-agentic-run` skills (sections/layouts, lessons), `docs/SKILL_FEEDBACK.md`. Final report.
+
+**Out of scope:** customer accounts (wishlist is device-local), multi-currency, marketplace.
 
 ---
 
@@ -333,7 +343,11 @@ The skill already exists at `.claude/skills/automatic-agentic-run/` and drove th
 - [ ] GitHub Actions CI green for the pushed commit (`gh run watch`)
 - [ ] Coverage thresholds met; new e2e flows pass on mobile + desktop
 - [ ] No unused deps/exports (`knip`), no TODOs left without a `PROGRESS.md` entry
-- [ ] `PROGRESS.md` ticked, decisions logged, committed on phase branch
+- [ ] `PROGRESS.md` ticked (phase + feature IDs), decisions logged, committed on the work branch
+- [ ] Theme/layout switch never loses data; demo rows never in reports/feeds/analytics.
+- [ ] Every paid feature shows lock state; every external call faked in tests, timed out, idempotent; webhooks signature-verified.
+- [ ] AI caps proven under concurrency; cache hit verified; refusal + quota UX e2e with fakes.
+- [ ] Each ID in §13 has ≥ 1 test and is ticked in PROGRESS.md; nothing in §13 silently skipped — if dropped, log why in Decisions.
 
 ---
 
@@ -341,12 +355,12 @@ The skill already exists at `.claude/skills/automatic-agentic-run/` and drove th
 
 Started by `scripts/autopilot.sh`, which relaunches Claude Code headless in a loop until `PROGRESS.md` contains `ALL_PHASES_DONE`, and sleeps/retries when the usage limit is hit. Every session starts with a fresh context, so **state lives only in git + `PROGRESS.md`**.
 
-Preflight (first session only, before Phase 1) — decide every permission first, get them all from the owner at once, verify, then start. Follow `.claude/skills/automatic-agentic-run/SKILL.md §1`. For this project the list is at least:
+Preflight (first session of a run, before its first phase) — decide every permission first, get them all from the owner at once, verify, then start. Follow `.claude/skills/automatic-agentic-run/SKILL.md §1`. For this project the list is at least:
 - **GitHub:** push, create/delete branch, Actions read/write (`gh auth login` with `repo` + `workflow`).
-- **Figma (Phase 1):** Figma MCP connected **with write access** — verify by creating and deleting a scratch file/page.
+- **Figma (Phase 10):** Figma MCP connected **with write access** — verify by creating and deleting a scratch file/page.
 - **Local tooling:** Node 22, pnpm, Playwright browsers installed.
 - External services (SMTP/SMS/WhatsApp/S3/Drive/GA4/Vercel): **not needed** — tests use fakes; record as "not required".
-**If the owner declines a permission, skip only the work that needs it and do everything else** (e.g. no Figma → skip Phase 1 design, go to Phase 2; no push → local commits only, local gate). Log it under `PROGRESS.md › Skipped`. Record `Preflight: done <date>` + granted/skipped list in `PROGRESS.md`.
+**If the owner declines a permission, skip only the work that needs it and do everything else** (e.g. no Figma → skip Phase 10, go to Phase 11; no push → local commits only, local gate). Log it under `PROGRESS.md › Skipped`. Record `Preflight: done <date>` + granted/skipped list in `PROGRESS.md`.
 
 Session start (every time):
 1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.
@@ -367,4 +381,184 @@ implement (TDD) → pnpm verify
 - **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
 - **BLOCKED rule:** after 6 fix rounds on the same failure, write `BLOCKED: <phase> — <reason> — <what the human must do>` as the first line of `PROGRESS.md`, commit, push, and end the session. The autopilot script stops on `BLOCKED`.
 - External services (SMTP, SMS, WhatsApp, S3, Drive, GA4, Figma): code against ports; tests use fakes. Never block a phase on real credentials.
-- After Phase 9 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.
+- After Phase 19 is green: write `ALL_PHASES_DONE <sha>` as the first line of `PROGRESS.md`, commit, push, end.
+
+---
+
+## §12 Extension rules, concepts, data, ports
+
+### 12.1 Rules (add to §0)
+
+1. **Personal themes stay.** New UI = token-only sections/slots; works in all 5 themes × light/dark × EN/বাংলা × 390/1440.
+2. **Original design** — build the capability, never copy competitor layout/copy/colours/assets.
+3. **Every module switchable** (`store_features`) + entitlement-gated if paid (§5.10: visible, lock badge, unlock CTA).
+4. **External services behind ports**, fake adapters in tests, no network in `pnpm verify`; per-store creds AES-GCM (§6); every call has timeout + retry/backoff via outbox where it sends.
+5. **Perf unchanged with all home blocks on** (Lighthouse mobile ≥ 95, initial JS ≤ 90 KB gz). Heavy widgets (reels, maps, chat, FB, 3rd-party players) load on tap/idle; their CSP hosts only when the block is on.
+6. **Money/limits atomic** (`UPDATE … WHERE remaining >= n RETURNING`), fail closed: stock, coupons, gift cards, points, AI quotas.
+7. **Help everywhere** (§5.9): each new field → `<HelpHint>` EN/BN, empty state, upload size hint, confirm on destructive.
+8. Commit scope cites IDs: `feat(orders): incomplete orders (C1)`. Tick IDs in `PROGRESS.md` as done.
+9. **Before each phase**: grep code for the IDs it lists; skip what exists, note it.
+
+### 12.2 Concepts
+
+- **Theme vs Layout.** Theme = tokens + slots (exists). Layout preset = ordered sections for home/product/checkout per niche: general, fashion, gadget, grocery/organic, cosmetics, kitchen, perfume/attar, clothing/panjabi, baby, electronics, watch. Any layout × any theme.
+- **Sections registry** `src/sections/<id>/{schema.ts,render.tsx,admin.tsx,sample.ts}`: Zod settings, RSC renderer (tokens only), admin form, sample data. Page = `[{sectionId, settings, enabled}]` in `site_settings.layout` (jsonb, versioned). Used by home, product page, landing pages.
+- **Demo packs** `src/demo/<niche>/` (JSON + royalty-free images, licence noted) → preview + switch. Demo rows `is_demo=true`, excluded from reports/analytics/feeds/sitemap.
+- **Preview mode**: signed cookie, owner-only, banner "Only you see this — Use this | Exit preview".
+- **Admin shell**: *Simple* (Orders, Products, Stock, Messages, Design, Reports, Help, Settings) | *Pro* (all), grouped nav, ⌘K, AI button, New order, notifications, dark mode.
+
+### 12.3 Data model additions (to §7.4)
+3NF, `store_id` + index, money minor units, unique `(store_id, slug|code)` where named.
+`store_features` · `brands` · `product_options`, `product_variants`(option values, price, compare_at, cost, stock, sku, media_id, sort) · `product_badges` · product jsonb (Zod): `specs[]`, `faqs[]`, `howTo[]`, `benefits[]`, `sizeChartId` · `size_charts` · `reviews`(product, order?, rating, text, media[], status, source web|screenshot|import) · `related_products` · `bundles`, `bundle_items` · `wishlists`(device) · `pages` (CMS) ·
+`coupons`, `coupon_redemptions` · `shipping_rules` · `geo_districts`, `geo_thanas` (seed) · `checkout_drafts` · orders +: `source`, `second_phone`, `email`, `note`, `gift_wrap`, `gps_url`, `gps_accuracy_m`, `ip`, `isp`, `device_id`, `assigned_to`, `courier`, `tracking_id`, `courier_status`, `paid_amount`, `payment_ref`, `deleted_at`, `scheduled_for` · `status_rules` · `blocklist`(ip|device|phone) · `fraud_checks` ·
+`courier_accounts`, `courier_shipments`, `courier_events`, `parcel_handovers`(+items) · `activity_log`(actor, actor_ip, entity, action, before, after, undo_of) · `notifications` · `follow_ups` · `customer_notes`, `customer_tags` · `expenses` · `profit_calcs` · `landing_pages` · `popups` · `flash_sales` · `reels`(source upload|facebook|instagram|tiktok|youtube, url, media_id, cover_id, caption, sort) + `reel_products` · `campaigns`, `campaign_messages` · `reminders` · `gift_cards` + ledger · `reward_ledger` · `pixel_events` (CAPI outbox) · `ai_knowledge_docs`, `ai_knowledge_chunks` (tsvector + pg_trgm) · `ai_conversations`, `ai_messages` · `ai_usage`(store, feature, period, units, in/out tokens, cost_micros) · `ai_quotas` · `ai_actions` · later: `suppliers`, `purchase_orders`, `pos_shifts`, `staff_*`.
+
+### 12.4 Ports (adapters behind interfaces, fakes in tests)
+| Port | First adapters | Must |
+|---|---|---|
+| `CourierPort` | Steadfast, Pathao, RedX; later CarryBee, eCourier | create parcel, label/tracking id, fetch status, verify webhook; map courier status → order status table |
+| `FraudCheckPort` | courier-history provider (pick at Phase 14, log in Decisions) | phone → {total, delivered, returned, %}; cache 24 h |
+| `TrackingPort` | Meta CAPI, TikTok Events API | from domain events via `pixel_events` outbox; shared `event_id` with browser; SHA-256 normalised phone/email; retries |
+| `PaymentPort` (exists) | bKash, Nagad, SSLCommerz (later EPS, UddoktaPay) | init, verify webhook, refund; partial/advance |
+| `LlmPort` | Anthropic `@anthropic-ai/sdk` | §14 |
+| `ImageGenPort` | pick at Phase 16 (Claude can't generate images) | §14 quota |
+| `SpeechPort` | pick when I4/F11 built | BN speech→text |
+| `GeoPort` | seeded BD districts/thanas | offline |
+
+---
+
+## §13 Feature catalogue (ID · priority · plan · acceptance) — extends §5
+P0 = sales-critical, P1 = differentiator, P2 = later.
+
+### A Catalog & product page
+- **A1 Variants** P0 — options (size, colour, custom) → variant matrix; per-variant price/compare/cost/stock/SKU/image; image switches on pick; out-of-stock chips disabled; §5.4 stock rules per variant (deduct on CONFIRMED, atomic).
+- **A16 Multi-variant pick** P0 — shopper selects several combos (e.g. White·M ×1, Maroon·L ×2) → "Selected" list with qty steppers + remove + total → one add-to-cart/Order now.
+- **A2 Brands** P1 — CRUD + logo; filter; product field; brand page.
+- **A3 Badges** P0 — custom badge per product (text, tone) + auto "Save N%" from compare-at; shown on card + page.
+- **A4 Urgency** P0 — "N left" when stock ≤ threshold (opt), "N sold" from delivered+confirmed (opt), rating + review count.
+- **A5 Size chart** P1 — reusable charts (table editor) linked to product/category → "See size chart" modal.
+- **A6 Content tabs** P0 — Details (rich text), Specifications grid, How to use (numbered steps), FAQ accordion (FAQPage JSON-LD), Key benefits checklist, Why buy checklist; empty tabs hidden.
+- **A7 Reviews** P0 — shopper review after delivery (link via order no.+phone), stars/text/photos, moderation queue, owner reply; **screenshot reviews** (owner uploads WhatsApp/Messenger screenshots, carousel "What customers say"); AggregateRating JSON-LD only from real reviews.
+- **A8 Related + Frequently bought together** P0 — manual or auto (same category / co-purchased); FBT checkbox list with running total → "Add selected to cart".
+- **A9 Combos** P1 [Pro] — bundle of products/variants, bundle price, "N% less", stock = min of items, adds all lines; combos block + page.
+- **A10 Wishlist** P1 — device-local, header count, page; move to cart.
+- **A11 Listing UX** P0 — filters (price range, brand, variant options, in stock), sort (new, price ↑↓, best selling), per-page, grid 2/3/4 toggle, breadcrumbs (+ BreadcrumbList JSON-LD — **gap in existing build, fix**).
+- **A12 Gallery/share** P0 — thumbs (position opt), zoom on hover (desktop), swipe + arrows, fit cover|contain opt, share (FB, WhatsApp, Messenger, copy link), qty stepper.
+- **A13 Pre-order** P2 [Pro] — orderable at 0 stock, ETA text, separate status tag.
+- **A14 Back-in-stock** P2 [Pro] — "notify me" phone capture → SMS/WhatsApp via outbox on restock.
+- **A15 CSV import/export** P1 — products + variants + stock; dry-run preview with row errors; images by URL/Drive link.
+
+### B Storefront conversion
+- **B1 Announcement bar** P0 — multiple messages, marquee or rotate, colours, link, close (opt), reduced-motion = static.
+- **B2 Order paths** P0 — buttons Add to cart, Order now (skip cart → checkout), WhatsApp order (prefilled msg: product, variant, qty, link), Call to order (tel:); owner toggles + drag order; **mobile sticky buy bar** (price, cart icon, Order now) opt.
+- **B3 Hero slider** P0 — N slides (image desktop/mobile, headline, sub, price "From ৳X", CTA, product link), autoplay interval, CSS transitions only (fade|slide), LCP image priority, dots/arrows.
+- **B4 Reels carousel** P1 [Pro] — sources: upload mp4/webm, **Facebook Reel, Instagram Reel, TikTok, YouTube Shorts URL** (extend §5.7 parser; reject private/unknown with help); cover required for FB/IG (thumbnails need Meta token); caption, linked products, sort → cover-flow carousel exactly as designed in Phase 10 (centre card large, neighbours smaller + faded; CSS scroll-snap + transforms, no lib) → tap opens overlay player (upload: native, muted autoplay only in view; others: official player loaded on tap) + linked products' Order now; sections: home, product page (reels of that product), landing.
+- **B5 Home section builder** P0 — drag order, on/off, counts per section; blocks: slider, categories (image tiles), editor's picks, per-category rows (+ "View all" / "Shop X →"), brands, budget bands (B12), reels, combos, flash sale, screenshot reviews, trust strip (B6), FB page follow, newsletter (B13), custom HTML-free rich text, image banner, video.
+- **B6 Trust strip** P0 — "Verified business": trade licence, TIN, BIN, e-Commerce DBID, warranty/replacement policy; each with number + certificate image → modal viewer; on home, product, checkout, thank-you, footer.
+- **B7 Social proof toast** P1 [Pro] — from real confirmed orders only (first name + area + product + time ago), frequency cap, off on checkout, dismiss remembered.
+- **B8 Popups** P1 [Pro] — types: welcome/offer, product promo (product card, price, discount, free delivery, Buy | Not now), exit-intent (landing/checkout: "Your order isn't finished"), newsletter; rules: pages, delay/scroll/exit, once per N days, mobile/desktop.
+- **B9 Help bubble** P0 — one floating button → WhatsApp, Messenger, Call, AI chat (if on); position opt; replaces scattered floating buttons; plus back-to-top.
+- **B10 Mobile bottom nav** P0 — Track, Wishlist, Home, Menu, Account/Cart; items opt.
+- **B15 Floating mini-cart** P1 — count + total pill (desktop side / mobile bar) → opens cart drawer.
+- **B11 Flash sale** P1 [Pro] — start/end, products + sale price/%, stock cap, countdown on card/page/header button, `/flash-sale` page, auto-revert.
+- **B12 Shop by budget** P2 — owner-defined price bands → filtered listing.
+- **B13 Newsletter/phone capture** P2 — consent text; to customers with tag.
+- **B14 Blog** P2 [Pro] — posts, categories, SEO, product links.
+- **J8 CMS pages** P0 — About, Return policy, Privacy, Terms, Contact (+ custom); rich text; footer links; seeded EN/BN templates.
+
+### C Checkout & orders
+- **C1 Incomplete orders** P0 — debounced draft save once a valid BD phone is typed (consent line under form) → `checkout_drafts`; "What you typed is still here" restore on return; admin "Incomplete" tab with call/WhatsApp, convert to order, auto-assign (F6); purge after 30 days; never counted as orders/revenue.
+- **C2 Coupons** P0 — %, fixed, free shipping; min subtotal, product/category scope, start/end, total + per-phone limits, auto-apply opt; atomic redemption; checkout field "Have a code?".
+- **C3 Free-shipping rules** P1 — by subtotal, product, zone; shown as progress hint in cart.
+- **C4 District/thana** P1 — address mode opt: free text + zone radio | district→thana pickers (searchable, BN/EN); per-district/zone charge table; **C17 auto zone detect** from typed address (e.g. "Dhaka" → Inside Dhaka) with visible chip; hint to include thana/upazila.
+- **C5 Share location** P1 — optional GPS (permission prompt on tap only) → Maps link + accuracy shown in admin.
+- **C6 Extra fields** P0 — second phone, email (opt / required opt), delivery note, preferred time, gift wrap opt; section titles opt.
+- **C7 Limits** P1 — min/max qty per product, min/max order value.
+- **C8 Gift cards** P2 [Pro] — issue/sell, code, balance ledger, redeem at checkout, partial use.
+- **C9 Reward points** P2 [Pro] — earn on DELIVERED, redeem rate, expiry, reversal on return.
+- **C10 Thank-you builder** P1 — texts (heading, sub, message), colours, buttons: Back home, Print invoice, WhatsApp confirm; upsell popup (B8); trust strip.
+- **C11 Online payment** P1 [Pro] — bKash, Nagad, SSLCommerz via PaymentPort; full or advance (e.g. delivery charge) then COD remainder; webhook-verified; `paid_amount`, `payment_ref`, Paid/Unpaid/Due chip.
+- **C12 Manual order** P0 — admin "New order" (phone/WhatsApp/shop orders): product search, variants, customer lookup by phone, zone, discount, source.
+- **C13 Statuses** P0 — add ON_HOLD, SCHEDULED (`scheduled_for`), COURIER_HOLD, PARTIAL_DELIVERED, RETURNING, RETURN_RECEIVED, RETURN_MISSING + soft-delete Trash; domain transition table; stock rules: restock on RETURN_RECEIVED (not RETURNING), partial delivery restocks undelivered lines.
+- **C21 Status rules** P1 — e.g. RETURNING > N days unscanned → RETURN_MISSING; SCHEDULED due → PENDING + notify; cron, logged as actor `system`.
+- **C14 Returns/exchange** P1 — request, reason, items, exchange order link, refund record.
+- **C15 Source** P0 — web, landing, chat, voice, POS, manual, import; filter + tag on row.
+- **C16 Invoices** P1 — ≥ 3 designs, logo, BN/EN, bulk print, packing slip with order barcode/QR, 80 mm thermal option.
+- **C18 Checkout cart edit** P0 — qty/remove lines in checkout (confirm on remove), totals live.
+- **C19 Checkout CTA** P0 — localized big button ("এখনই অর্ডার করুন"), processing state, trust lines under it, double-submit guard.
+
+### D Order guard & fraud
+- **D1 Duplicates** P0 — same phone (+ similar product) within N h → flag "Possible duplicate of #x (status, age)" on row; opt block.
+- **D2 Courier score** P0 [Pro] — FraudCheckPort % per phone on row + drawer (total/delivered/returned); threshold → hold/OTP-required rule opt.
+- **D3 Blocklist** P0 — block/unblock IP, device id (first-party cookie + fingerprint-free id), phone from drawer; blocked → friendly refusal; log.
+- **D4 Rate limits** P0 — orders per phone/IP/device per window (opt values).
+- **D5 Report** P1 — blocked attempts, flagged orders, top risky numbers.
+
+### E Courier & fulfilment [Pro]
+- **E1 Integrations** P0 — per-store courier accounts (API keys encrypted), default courier, pickup store; send single/bulk → tracking id + label; COD amount = due.
+- **E2 Sync** P0 — webhook + cron poll → `courier_events` → mapped order status (Shipped, Delivered, Partial, Returning, Courier hold); raw courier status shown on row.
+- **E3 Courier dashboard** P1 — per courier: sent, on the way, delivered, returned, success %, avg days; date/product filters.
+- **E4 Parcel scan** P1 — hand-over session: choose courier, rider name/phone, scan box barcodes (camera `BarcodeDetector` + manual input; scanner gun = keyboard) → printable hand-over receipt for signatures; returns scan session → RETURN_RECEIVED; "what came back / what didn't" report.
+- **E5 Reconciliation** P1 — courier charge + COD collected per shipment, payout tracking, courier cost on dashboard.
+
+### F Admin productivity & team
+- **F1 ⌘K** P1 — search menus, orders (no./phone), products, customers.
+- **F2 Real-time** P0 — new-order toast (SSE/poll), sound opt, notification centre grouped by kind, mark read.
+- **F3 Activity log** P0 — every admin/system mutation: actor, IP, time, before→after diff; filter chips by action with counts, date/time range, actor, search; per-order History; **Undo this change** where reversible; retention 30 days opt.
+- **F4 Bulk actions** P0 — select rows → status, assign, print invoices/slips, send to courier (per courier), sync status, delete (trash), AI confirm (I5).
+- **F5 Follow-ups** P1 — reminder on order/customer (date, note), badge count, list.
+- **F6 Auto-assign** P1 [Pro] — rules per status (Incomplete, Pending): ticked staff, round-robin by fewest today, sticky per customer, skip inactive; paid-online orders excluded; "today so far" table; staff report (orders, open, confirmed, shipped, delivered, returned, cancelled, delivered value, confirm rate, delivery success).
+- **F7 CRM** P1 — customer list (orders, LTV, last order, return rate, courier score), tags, notes, block, WhatsApp/call.
+- **F8 Admin dark mode** P2.
+- **F9 Office/HR** P2 [Pro add-on] — staff roles, attendance in/out + breaks + late, lost-time calc, leave/requests/advances approvals, daily reports, targets, salary/payroll + deductions, worker profile month view.
+- **F10 Auto-calling** P2 [Pro] — IVR confirm provider port; result sets status.
+- **F12 Order row** P0 — compact row: invoice no. + copy, date, source tag, customer + WhatsApp/call/copy, address, products (variant, qty, SKU), status + who set it, fraud %, amount, ship cost, courier + tracking, payment chip, duplicate flag, note; row icons edit/print/history/delete; drawer: status, editable date, second phone, IP/ISP/device + block, "N orders from this device", address edit, GPS map link, payment info, previous orders.
+
+### G Money & reports
+- **G1 Expenses** P1 — categories (ads, packaging, salary, rent, other), recurring, attach receipt → dashboard net profit.
+- **G2 Profit calculator** P1 — inputs: product, category, cost/unit, price/unit, marketing cost/order, fixed cost/unit, target delivered units → required orders (auto), call-cancel %, return %, delivery income/unit, return loss/unit, note → outputs: net operating profit, margin, ROI, effective CPA, profit/unit, sales performance, revenue + expense breakdown, verdict badge (loss zone…excellent); save, history, compare 2–3.
+- **G3 Reports** P1 [Pro] — sales, product, category, customer, staff, courier, slow-moving stock (no sale in N days), stock value; CSV export; daily summary via WhatsApp/email at set time.
+- **G4 Purchases/suppliers** P2 [Pro] — PO → receive → stock in + cost update; supplier dues/payments.
+- **G5 POS** P2 [Pro] — shift open (opening cash)/close (count), barcode/SKU scan, product grid, discount, Cash/bKash/Nagad/Rocket/Card/Bank, amount received → change, customer phone opt, receipt print, source=POS, stock deducted immediately.
+- **G6 Backups UI** P1 — VPS: list nightly dumps, download, on-demand backup; Vercel: provider instructions.
+
+### H Marketing & tracking
+- **H1 Meta** P0 — Pixel ID; **who sends events**: this website (browser + CAPI, same event_id) | GTM + server events | GTM only; **Purchase trigger**: placed | confirmed (default, suggested) | delivered, with BN/EN explanation; online-paid orders fire on payment; CAPI token (warning if missing → falls back to placed); test event code; domain verification meta tag; multiple pixels; events ViewContent, AddToCart, InitiateCheckout, Purchase, Search, Contact, Lead.
+- **H2 TikTok** P1 — pixel + Events API, same trigger options.
+- **H3 Tags** P0 — GTM container id (+ downloadable container JSON with our dataLayer events), GA4 (+ extra properties), Microsoft Clarity, Search Console verification; CSP per enabled tool; GA4 off if GTM sends it (warn double count).
+- **H4 Pixel event report** P2 [Pro] — sent/failed per event/day, last errors.
+- **H5 Landing pages** P0 [Pro] — list with visitors/orders/conversion, search, design filter, hide; URL prefix opt (e.g. `/offer/`); create: pick product (or variants/packs) + design (≥ 6 token-based designs) → auto-filled; blocks (each show/hide, reorder): hero headline/sub, video, price + countdown, **pack offers** (1/2/3/4 pcs with tiers), problem→solution, why us, comparison table (us vs others), benefits, gallery, certificates, reviews/screenshots, delivery & size chart, FAQ, guarantee, inline checkout (C rules apply), exit-intent popup, sticky order bar, site header/footer opt; inline click-to-edit live preview; copy & edit; AI rewrite (I6).
+- **H6 Campaigns** P1 [Pro] — segment (tags, last order, product bought, area) → SMS/Email/WhatsApp template → schedule → outbox; opt-out; cost estimate.
+- **H7 Re-order reminders** P1 [Pro] — per product "remind after N days" → message with reorder link; stats: running out now, within 7 days, sent, opened, reordered.
+- **H8 Review requests** P1 [Pro] — after DELIVERED + N days → link to A7 form.
+- **H9 Affiliates** P2 [Pro] — links, commission, payouts.
+- **H10 Product feed** P1 — Facebook/Google catalog XML/CSV per store, variants as items, demo excluded.
+
+### I AI [AI] — see §14 for rules
+I1 shop chatbot + owner knowledge · I2 chat-to-order · I3 image try-on (hard caps) · I4 Bangla voice order (P2) · I5 admin "Do it with AI" · I6 copy helpers · I7 usage & limits page (P0, first) · F11 voice input for I5 (P2).
+
+### J Design & platform
+- **J1 Section design editor** P0 — tabs, each with live preview (mobile/desktop) + autosave + "Saved" toast: Header (logo size desktop/mobile, favicon, shop name, announcement B1, menu letter case/size, search colours), Menu, Footer (≥ 2 presets, colours, call/WhatsApp card, logo, columns, payment logos, app badge), Product card (design presets, toggles rating/sold/badge/buttons/wishlist/second image on hover, colours), Floating buttons (B9), Product page (A12 gallery opts, **mobile section order drag**, sticky bar, **button visibility + order** B2), Language texts (J4), Checkout (C4 address mode, C6 fields, titles, language), Thank-you (C10), SEO & sharing, Layout (products per row per breakpoint 5/4/3/2, picture shape 1:1|4:5|3:4, per-page counts, related count, page width, currency sign), Mobile menu (B10). Every value has a sensible default from theme.
+- **J2 Layout gallery** P0 — card per niche layout (picture + description) → full-site live preview (cookie) → "Use this layout".
+- **J3 Switch dialog** P1 — shows counts (yours vs demo): Take mine with me | Hide mine, show demo (nothing deleted) | Keep both | Start fresh (confirm twice); reversible except fresh.
+- **J4 Language texts** P1 — override every storefront string EN/BN; Bangla digits opt.
+- **J5 Feature toggles** P0 — one page listing modules with on/off + lock state.
+- **J6 PWA** P2 → branded Android TWA [Pro].
+- **J7 Video guides** P2 — per help topic, YouTube facade.
+
+### Gaps in the existing build (Phase 11)
+BreadcrumbList JSON-LD; Google Drive *uploads* (or record "links only" as final); GA4 in admin [Pro]; video duration cap; blurhash (or record dominant-colour decision as final).
+
+---
+
+## §14 AI services (I1–I7, F11)
+- **Models** (claude-api skill, cached 2026-11): `AI_CHAT_MODEL` default `claude-opus-5-5` (owner may set `claude-haiku-5-5` for cost — owner's call, log it). Opus 5.5: thinking can't be disabled → `output_config.effort: "low"` for chat, `"medium"` for I5; no assistant prefill; forced `tool_choice` any/tool → 400, use `auto` + `strict: true`; always check `stop_reason` (`refusal`, `max_tokens`) before reading content; enable `betas: ["server-side-fallback-2026-07-01"]` + `fallbacks: "default"`; stream replies; typed SDK errors, no string matching.
+- **Caching**: order tools → frozen system (persona, rules) → knowledge block `cache_control` → messages; nothing volatile before last breakpoint; integration test asserts `cache_read_input_tokens > 0` on 2nd call (recorded fixture).
+- **I1 Chatbot** — admin **AI → Knowledge**: upload PDF/TXT/MD or paste text (policies, FAQ, care, delivery), status, tokens, enable/disable, delete, size cap per plan. Context = catalog tools + store settings + knowledge (small → whole text cached; large → top chunks via FTS/trgm; pgvector only if measured). PDFs may go as `document` blocks with `citations: {enabled: true}` → show source titles (not with structured outputs). Tools (store id from server, never model): `search_products`, `get_product`, `get_delivery_info`, `track_order(no, phone)`, `add_to_cart`, `start_order`. UI: bubble panel, BN/EN auto, quick-reply chips (delivery charge? size? COD?), product cards with Order now + "How will it look on me?" (I3), cross-sell suggestions, typing state, human handoff (WhatsApp/Messenger). Safety: user text + knowledge = data; never reveal costs, other customers, other stores; refuse off-topic politely.
+- **I2 Chat-to-order** — bot adds items, asks name → phone → address → zone, shows summary, shopper taps **Confirm** (real button, model never places orders) → normal order, `source=chat`, guards/OTP apply.
+- **I3 Try-on** — consent → upload selfie/room photo → ImageGenPort with product image → "AI preview" label, wait message (~30–40 s) with progress; photos EXIF-stripped, private, deleted ≤ 24 h, never reused. **Caps never exceeded**: per-store monthly (default 20), per-visitor daily (default 2), global `AI_GLOBAL_MONTHLY_BUDGET_USD`; reserve unit atomically before call, refund on provider error, fail closed with BN/EN message; owner sees usage + upgrade CTA; `aiImagePro` raises caps. Concurrency test proves no overshoot.
+- **I4 Voice order** (P2) — "Just talk, we order": SpeechPort BN → LLM extracts name/phone/address/zone → fills checkout fields for shopper to confirm; audio kept with order only if consented.
+- **I5 Do it with AI** — Messages API + SDK tool runner (`client.beta.messages.toolRunner` + `betaZodTool`) in-app (tools hit tenant use-cases; Managed Agents noted as alternative in Decisions). Read tools: sales today/range, best sellers, stock alerts, staff/courier performance, daily report. Write tools only create `ai_actions` proposals → "Check before it is done" card (what changes, rows, messages to be sent) → owner Confirm runs the normal use-case → activity log + undo. Respects caller role. Answers render tables. F11: mic input via SpeechPort.
+- **I6 Copy helpers** — product description, SEO, landing copy "write another way", BN↔EN; one call each, low effort.
+- **I7 Usage & limits** — per feature/month: calls, tokens, images, est. cost, caps, bars, upgrade CTA. Entitlements `aiChat`, `aiImage`, `aiImagePro`, `aiAdmin`, `aiVoice`.
+- **Tests**: fakes everywhere; quota 100 % covered; opt-in live smoke script outside `pnpm verify` prints cost.

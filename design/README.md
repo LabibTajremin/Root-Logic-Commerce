@@ -12,7 +12,7 @@
 Storefront: Home, Category, Product, Cart drawer, Checkout, OTP, Order success, Track order, Search, 404.
 Admin: Login, Dashboard, Orders, Order detail, Products, Product editor (upload hints), Categories (drag tree), Stock, Promotions, Design editor (live preview), Messages, SEO & Analytics, Users & roles, Plan (locks), Help center.
 
-## v2 pages (Phase 10 — BUILD_SPEC_V2, awaiting owner approval)
+## Previous Phase 10 attempt (superseded — rebuilt to the 9-page rule in BUILD_SPEC.md §9 Phase 10; this section will be replaced)
 Demo photography: 14 generated, unbranded product photos (attar, panjabi, saree, honey/ghee, tea, earbuds, speaker, sneakers, watch, skincare, cookware, baby, hero lifestyle, try-on portrait) on page **v2 · Assets**.
 | Page | Content |
 |---|---|
