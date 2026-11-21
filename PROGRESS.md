@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 10 (merged design redo) — spec docs/BUILD_SPEC.md (v1+v2 merged)
-Now: Phase 10 redo in progress. DONE: Figma restructured to the 9 pages (v2 pages deleted; components + admin shell moved to Foundation; 83 screens moved to Core design in 4 sections, renamed <Area>/<Screen>, reset to Minimal light, tints re-applied); Foundation › Assets section with 14 product photos + new owner, packing, hands-attar, shop-interior, parcel-tag, rider, kantha and kraft-leaf textures. NEXT: textures handloom/smoke-gold/florals/paper + per-theme realistic hero photos (owner asked: realistic images on every theme page) → moodboard → missing §10.1 components (reel cover-flow + overlay, inputs, table, stat tile, chart, empty state, dialogs, stickers, price tag, seal, dividers) → redo Core Home/Product/Landing to the quality bar + missing §10.2 screens → 5 theme pages → Cover + Docs → design/README.md → Phase 11.
+Now: Phase 10 redo — step 1 DONE (textures handloom/smoke-gold/florals/paper + per-theme hero/mood photos `photo/<theme>-hero|mood`, Foundation › Assets). NEXT: moodboard → missing §10.1 components (reel cover-flow + overlay first) → Core Home/Product/Landing redo + missing §10.2 screens + বাংলা variants → 5 theme pages → Cover + Docs → design/README.md → Phase 11.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -20,6 +20,7 @@ Now: Phase 10 redo in progress. DONE: Figma restructured to the 9 pages (v2 page
 - Also done earlier: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
 
 ## Preflight
+- Preflight (handoff 2026-11-22): git push dry-run ok; GitHub MCP reads PR #2 + 5 CI jobs; Figma MCP edit (account TariQ Hub) — create/delete scratch node ok
 - git push to `claude/vibrant-cannon-wwnfb9`: granted (verified dry-run)
 - GitHub Actions read (MCP): granted; `gh` CLI: not available (search only) → CI read via GitHub MCP
 - Node 22.23 / pnpm 10.28 / Playwright + Chromium: granted
