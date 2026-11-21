@@ -9,13 +9,7 @@ export default async function HomePage() {
   const { store, design, layout } = ctx
   return (
     <>
-      <JsonLd
-        data={organizationLd(
-          await origin(),
-          store.name,
-          design.footer.socials.map((s) => s.url),
-        )}
-      />
+      <JsonLd data={organizationLd(await origin(), store.name, design.footer.socials)} />
       <Sections sections={resolveSections(layout.home)} ctx={ctx} />
     </>
   )

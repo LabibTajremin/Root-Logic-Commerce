@@ -11,12 +11,12 @@ export const breadcrumbLd = (base: string, items: { name: string; path: string }
   })),
 })
 
-export const organizationLd = (base: string, name: string, sameAs: string[]) => ({
+export const organizationLd = (base: string, name: string, socials: { url: string }[]) => ({
   '@context': context,
   '@type': 'Organization',
   name,
   url: base,
-  ...(sameAs.length > 0 && { sameAs }),
+  ...(socials.length > 0 && { sameAs: socials.map((s) => s.url) }),
 })
 
 // JSON.stringify output with `<` escaped cannot close the script tag.

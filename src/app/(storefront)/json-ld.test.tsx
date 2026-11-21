@@ -26,7 +26,9 @@ describe('storefront JSON-LD', () => {
       name: 'Ankito',
       url: 'https://shop.test',
     })
-    expect(organizationLd('https://shop.test', 'Ankito', ['https://fb.com/a'])).toMatchObject({
+    expect(
+      organizationLd('https://shop.test', 'Ankito', [{ url: 'https://fb.com/a' }]),
+    ).toMatchObject({
       sameAs: ['https://fb.com/a'],
     })
   })
