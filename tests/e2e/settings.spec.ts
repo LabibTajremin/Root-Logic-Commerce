@@ -237,6 +237,7 @@ test('features: owner switches modules; paid ones stay locked until SUPER_ADMIN 
     /^https:\/\/wa\.me\/\d+$/,
   )
 
+  await page.context().clearCookies()
   await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
   await page.goto('/admin/plan')
   await page.getByTestId('feature-reels').getByRole('button', { name: 'Grant' }).click()
