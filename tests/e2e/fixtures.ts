@@ -62,6 +62,8 @@ export const test = base.extend<Fixtures>({
   },
   a11y: async ({ page }, provide) => {
     await provide(async (exclude) => {
+      // Next streams <title> in after the body: don't audit a page that's still arriving.
+      await expect(page).toHaveTitle(/\S/)
       const axe = new AxeBuilder({ page })
       const { violations } = await (exclude ? axe.exclude(exclude) : axe).analyze()
       expect(
