@@ -221,6 +221,7 @@ test('features: owner switches modules; paid ones stay locked until SUPER_ADMIN 
   page,
   a11y,
 }) => {
+  await signedIn(page)
   await page.goto('/admin/features')
   await expect(page.getByRole('heading', { level: 1, name: 'Features' })).toBeVisible()
   await a11y()
