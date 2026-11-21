@@ -1,5 +1,5 @@
-IN_PROGRESS: Phase 10 (merged design redo) — spec docs/BUILD_SPEC.md (v1+v2 merged)
-Now: Phase 10 redo — DONE: assets + 6 illustrations, moodboard, reels, component library, Core design complete (Home/Product/Landing rebuilt; all §10.2 screens web+mobile public+admin incl. বাংলা Dashboard/Orders/Checkout/AI Knowledge; illustrated 404/offline/empty-cart/search/thank-you). NEXT: 5 theme pages (major screens + illustrated states, per-theme hero/texture/composition) → Cover + Docs (quality checklist) → design/README.md → PR body → Phase 11.
+IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
+Now: Phase 10 DONE (Figma 9 pages; design/README.md). NEXT: Phase 11 — install deps, baseline pnpm verify, then J5 feature toggles + entitlements (TDD) → sections registry + layout → J2/J3 → J1 → J4 → J8 → admin shell (F1/F2/F3) → B1/B3/B9/B10/B15 → v1 gaps.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -14,7 +14,7 @@ Now: Phase 10 redo — DONE: assets + 6 illustrations, moodboard, reels, compone
 - [x] Phase 9 — Update automatic-agentic-run skill — phase 9 done 21bc2f8 (docs/SKILL_FEEDBACK.md)
 
 ## Phases 10–19 (docs/BUILD_SPEC.md §9, no approval stop)
-- [ ] Phase 10 — Single merged Figma design (9-page rule; first attempt rejected: no reel cover-flow, missing admin screens, v1/v2 pages duplicated)
+- [x] Phase 10 — Single merged Figma design — done (Figma 1NGfJz6PU8rxZ5pHgIcrsr; 187 Core screens + 5 theme pages; design/README.md) (9-page rule; first attempt rejected: no reel cover-flow, missing admin screens, v1/v2 pages duplicated)
 - [ ] Phase 11 — Foundations · [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
 - Feature IDs done (§13): —
 - Also done earlier: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
