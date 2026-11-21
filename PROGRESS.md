@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 10 (merged design redo) — spec docs/BUILD_SPEC.md (v1+v2 merged)
-Now: Phase 10 — rebuild Figma to the 9-page structure (BUILD_SPEC §9 Phase 10): clean-up first, then Foundation components, Core design (all screens), 5 theme pages (major screens), Docs. Then Phases 11–19 back to back, no approval stop.
+Now: Phase 10 redo in progress. DONE: Figma restructured to the 9 pages (v2 pages deleted; components + admin shell moved to Foundation; 83 screens moved to Core design in 4 sections, renamed <Area>/<Screen>, reset to Minimal light, tints re-applied); Foundation › Assets section with 14 product photos + new owner, packing, hands-attar, shop-interior, parcel-tag, rider, kantha and kraft-leaf textures. NEXT: textures handloom/smoke-gold/florals/paper + per-theme realistic hero photos (owner asked: realistic images on every theme page) → moodboard → missing §10.1 components (reel cover-flow + overlay, inputs, table, stat tile, chart, empty state, dialogs, stickers, price tag, seal, dividers) → redo Core Home/Product/Landing to the quality bar + missing §10.2 screens → 5 theme pages → Cover + Docs → design/README.md → Phase 11.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
