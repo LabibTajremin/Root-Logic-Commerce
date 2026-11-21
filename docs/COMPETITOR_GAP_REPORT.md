@@ -89,6 +89,28 @@ Legend — **Have** = already in our code (PR #2) · **Gap** = missing · **Plan
 - **Settings/integrations**: GTM + GA4 (+ extra properties), **Microsoft Clarity**, Search Console verification, **Meta Pixel + Conversions API** (choose when "Purchase" fires: placed/confirmed/delivered; multiple pixels), **TikTok Events API**, **courier fraud check (Hoorin)**, **auto-calling (ManyDial)**, SMS, admin login security, SMTP; Tracking setup guide; Add-ons marketplace; System update; Videos & guides; **Branded Android app**.
 - Slide "50+ features" (00:00, 03:39, 45:06): Shoppable video reels, AI chat order, Bangla voice order, Welcome/offer popups, Parcel barcode scanning, Follow-up reminder, Automatic data backup, Pixel event report, Coupons/flash sales/offers, Gift cards, Reward points, SMS/Email/WhatsApp campaigns, Automated review collection, Back-in-stock & pre-orders, Affiliate & blog, Slow-moving stock report, Purchase & supplier management, Worker management, Branded Android apps, One-click demo store setup, Fast site, Mobile responsive, Marketing-friendly, Easy checkout, Incomplete-order system, Order guard, Order OTP, IP block, Min/max order limit, Clarity heatmap, Multiple landing pages, Server-side pixel & GTM + GA4, auto SMS notification, Auto call, Easy admin, Fraud check, Auto/manual order assign, Activity log, Auto courier send, Invoice print, Multiple invoice designs, Return management, Courier performance tracking.
 
+### 2.7 What the narration adds (selling points the presenter stresses)
+The transcript is noisy (see its header); these are the points that come through clearly, with timestamps:
+- **Popup shows the latest product** to every visitor (01:13–01:30).
+- **Trade licence / certificates on the site build trust** (02:31).
+- **Try-on**: "আমাকে কেমন লাগবে?" — the bot asks for a photo and takes a while to generate (06:49–07:34). The audience reaction (10:32) says this was the stand-out feature.
+- **Chat collects name, phone and address** and places the order (08:24–09:30).
+- **GPS share gives the rider the full address and house** (10:00).
+- **Incomplete orders recover ad spend**: paid traffic lands on the page, and shoppers who leave mid-checkout are still captured for a call (15:04, 16:07–16:39).
+- **OTP on order** stops fake orders (17:52).
+- **Use On hold / Scheduled instead of cancelling** orders you couldn't reach yet (19:15–19:45).
+- **One click to Pathao/Steadfast**; courier hold, returns and partial delivery are tracked (20:15–21:46).
+- **Fake orders**: block device/IP; the courier success ratio shows risky phones (23:23–23:53).
+- **Run everything from the phone** (24:55).
+- **Design without a developer**, including the checkout layout; full-site theme preview (26:23–29:45).
+- **A landing page sells one product end-to-end** and is edited by drag-and-drop (30:48–31:22).
+- **Profit calculator walkthrough**: cost ৳231, price ৳990, cancel/return % and courier terms decide real profit (32:39–35:39).
+- **AI writes the daily report and answers questions** (36:47).
+- **Staff and courier performance**: who sells best, which courier delivers best (37:26–37:38).
+- **Auto-assign incomplete orders to staff**; the activity log shows who deleted what (38:40–39:46).
+- **Office management** for staff productivity and salary (40:16–42:06).
+- **Pixel training** (43:53–44:38): if Purchase fires on fake orders, Facebook learns the wrong audience. Fire it on confirmation so ads target real buyers → H1.
+
 ---
 
 ## 3. Full gap list (everything the competitor has that we don't) + owner's new asks
