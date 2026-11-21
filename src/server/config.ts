@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { entitlementIds } from '@/modules/plans'
+import type { S3Config } from '@/infrastructure/storage/s3-storage'
 
 const GB = 1024 ** 3
 
@@ -66,6 +67,12 @@ const envSchema = z.object({
   MESSAGES_TRANSPORT: z.enum(['live', 'log']).default('live'),
   // Bearer token Vercel Cron (or any scheduler) sends to /api/cron/outbox.
   CRON_SECRET: z.string().min(16).optional(),
+  // S3-compatible media storage (AWS S3, Cloudflare R2, MinIO) when STORAGE_DRIVER=s3.
+  S3_ENDPOINT: z.url().optional(),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().min(1).default('auto'),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 })
 
 export type StoreConfigInput = z.input<typeof storeConfigSchema>
@@ -92,6 +99,19 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     throw new ConfigError(`Invalid configuration:\n${lines.join('\n')}`)
   }
   const storage = { ...f.data.storage, driver: e.data.STORAGE_DRIVER ?? f.data.storage.driver }
+  const s3 = {
+    endpoint: e.data.S3_ENDPOINT,
+    bucket: e.data.S3_BUCKET,
+    region: e.data.S3_REGION,
+    accessKeyId: e.data.S3_ACCESS_KEY_ID,
+    secretAccessKey: e.data.S3_SECRET_ACCESS_KEY,
+  }
+  const s3Missing = Object.entries(s3).filter(([, v]) => !v)
+  if (storage.driver === 's3' && s3Missing.length > 0) {
+    throw new ConfigError(
+      `STORAGE_DRIVER=s3 needs S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY (missing: ${s3Missing.map(([k]) => k).join(', ')}).`,
+    )
+  }
   if (e.data.HOSTING_PROFILE === 'vercel' && storage.driver === 'local') {
     throw new ConfigError(
       'Local disk storage is not available on Vercel (no persistent disk). Set STORAGE_DRIVER=s3 or gdrive.',
@@ -103,6 +123,8 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     settingsKey: e.data.SETTINGS_KEY,
     notifyLogFile: e.data.NOTIFY_LOG_FILE,
     mediaDir: e.data.MEDIA_DIR,
+    // Complete whenever the driver is s3 (checked above).
+    s3: s3 as S3Config,
     messagesTransport: e.data.MESSAGES_TRANSPORT,
     cronSecret: e.data.CRON_SECRET,
     hostingProfile: e.data.HOSTING_PROFILE,

@@ -50,7 +50,7 @@ describe('container', () => {
     const db = await createTestDb()
     const base = testConfig()
     const c = createContainer({
-      config: { ...base, storage: { ...base.storage, driver: 's3' } },
+      config: { ...base, storage: { ...base.storage, driver: 'gdrive' } },
       db,
       onEventError: () => {},
     })

@@ -19,6 +19,7 @@ import { createMediaRepo } from '@/infrastructure/db/repositories/media-repo'
 import { createDrive } from '@/infrastructure/media/drive'
 import { sharpImages } from '@/infrastructure/media/sharp-images'
 import { createLocalStorage } from '@/infrastructure/storage/local-storage'
+import { createS3Storage } from '@/infrastructure/storage/s3-storage'
 import { unavailableStorage } from '@/infrastructure/storage/unavailable'
 import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
@@ -38,6 +39,7 @@ type Deps = {
     | 'entitlements'
     | 'storage'
     | 'mediaDir'
+    | 's3'
     | 'store'
     | 'settingsKey'
     | 'messagesTransport'
@@ -132,10 +134,11 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
     media: createMedia({
       repo: createMediaRepo(db),
-      storage:
-        config.storage.driver === 'local'
-          ? createLocalStorage(config.mediaDir, config.storage.minFreeDiskBytes)
-          : unavailableStorage(config.storage.driver),
+      storage: {
+        local: () => createLocalStorage(config.mediaDir, config.storage.minFreeDiskBytes),
+        s3: () => createS3Storage(config.s3),
+        gdrive: () => unavailableStorage('gdrive'),
+      }[config.storage.driver](),
       images: sharpImages,
       drive: createDrive(),
       quotaBytes: config.storage.quotaBytes,

@@ -10,6 +10,13 @@ const file = defineStoreConfig({
   rootLogicLab: { whatsapp: '+8801700000000' },
 })
 
+const S3 = {
+  S3_ENDPOINT: 'https://r2.example',
+  S3_BUCKET: 'media',
+  S3_ACCESS_KEY_ID: 'AK',
+  S3_SECRET_ACCESS_KEY: 'SK',
+}
+
 describe('loadConfig', () => {
   it('applies defaults when only required values are given', () => {
     const c = loadConfig(env, file)
@@ -38,6 +45,7 @@ describe('loadConfig', () => {
         DEFAULT_STORE_SLUG: 'other',
         STORAGE_DRIVER: 's3',
         SETTINGS_KEY: 'k'.repeat(32),
+        ...S3,
       },
       { ...file, storage: { driver: 'gdrive' }, entitlements: ['removeBranding'] },
     )
@@ -48,7 +56,20 @@ describe('loadConfig', () => {
       settingsKey: 'k'.repeat(32),
     })
     expect(c.storage.driver).toBe('s3')
+    expect(c.s3).toEqual({
+      endpoint: 'https://r2.example',
+      bucket: 'media',
+      region: 'auto',
+      accessKeyId: 'AK',
+      secretAccessKey: 'SK',
+    })
     expect(c.entitlements).toEqual(['removeBranding'])
+  })
+
+  it('needs every S3 setting when the driver is s3', () => {
+    expect(() => loadConfig({ ...env, STORAGE_DRIVER: 's3', S3_BUCKET: 'media' }, file)).toThrow(
+      /missing: endpoint, accessKeyId, secretAccessKey/,
+    )
   })
 
   it('rejects local storage on the vercel profile with a readable message', () => {

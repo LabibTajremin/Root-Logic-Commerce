@@ -28,6 +28,13 @@ export const testConfig = (
   },
   settingsKey: 'test-settings-key-test-settings-key',
   messagesTransport: 'log' as const,
+  s3: {
+    endpoint: 'https://s3.example',
+    bucket: 'b',
+    region: 'auto',
+    accessKeyId: 'k',
+    secretAccessKey: 's',
+  },
   authSecret: 'test-auth-secret-test-auth-secret-00',
   ...over,
 })

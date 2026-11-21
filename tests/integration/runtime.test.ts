@@ -9,6 +9,10 @@ const g = globalThis as { __rlcRuntime?: unknown }
 const KEYS = [
   'HOSTING_PROFILE',
   'STORAGE_DRIVER',
+  'S3_ENDPOINT',
+  'S3_BUCKET',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
   'BOOTSTRAP_OWNER_EMAIL',
   'BOOTSTRAP_OWNER_PASSWORD',
   'BOOTSTRAP_OWNER_NAME',
@@ -79,7 +83,14 @@ describe('runtime', () => {
   })
 
   it('skips the in-process outbox worker on the vercel profile (cron route instead)', async () => {
-    const { rt } = await boot({ HOSTING_PROFILE: 'vercel', STORAGE_DRIVER: 's3' })
+    const { rt } = await boot({
+      HOSTING_PROFILE: 'vercel',
+      STORAGE_DRIVER: 's3',
+      S3_ENDPOINT: 'https://r2.example',
+      S3_BUCKET: 'media',
+      S3_ACCESS_KEY_ID: 'AK',
+      S3_SECRET_ACCESS_KEY: 'SK',
+    })
     expect(rt.config.hostingProfile).toBe('vercel')
   })
 })
