@@ -71,6 +71,7 @@ test('checkout asks for an SMS, then an email code when the owner turns OTP on',
 })
 
 test('every theme renders the storefront accessibly', async ({ page, a11y }) => {
+  test.setTimeout(120_000) // every theme × four pages, each audited by axe
   test.info().annotations.push({ type: 'allow-status', description: '404' })
   const id = uid()
   await signedIn(page)
@@ -78,7 +79,7 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
   await editProduct(page, `Sale ${id}`)
   await uploadPhoto(page)
   await createProduct(page, { name: `Out ${id}`, price: '100', stock: '0' })
-  for (const theme of ['organic', 'attar', 'ankito', 'minimal']) {
+  for (const theme of ['organic', 'attar', 'ankito', 'attar-aloy', 'minimal']) {
     await page.goto('/admin/design')
     await page.getByLabel('Theme').selectOption(theme)
     await page.getByRole('button', { name: 'Publish' }).click()

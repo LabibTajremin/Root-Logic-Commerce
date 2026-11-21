@@ -54,6 +54,7 @@ Namecheap Spark-class VPS (1 vCPU / 2 GB) fits: app ≤ ~450 MB worst case (PM2 
 - Lighthouse gate (scripts/lighthouse.mjs, part of verify): /, /search, /search?q — all ≥ 95 on mobile (measured 96–97 perf, 100 a11y/BP/SEO). Checkout/track/order are noindex on purpose and excluded from the SEO bar.
 - knip (dead code) reviewed once: findings were public-API re-exports used by tests, path-referenced fonts and config files; removed the one truly unused dependency (@testing-library/react). Not wired into the gate (needs per-file config to avoid false positives).
 - legacy/ deleted at the end of Phase 7 (spec §0.12).
+- Phase 8: `.claude/skills/new-theme/SKILL.md` written from the final code; applied in this session (not a separate fresh session) to the spec's description → shipped theme `attar-aloy` (light, rose/plum, Cormorant Light + Manrope, airy, centred). It is in the every-theme e2e (axe, both viewports) and selectable in Admin → Design.
 - Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
 - Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
 - Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.
