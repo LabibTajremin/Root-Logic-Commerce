@@ -1,5 +1,6 @@
 # Root Logic Commerce — agent notes
 Spec: `docs/BUILD_SPEC.md` (read the § you need, not all). Progress/state: `PROGRESS.md` (line 1 = status, `Now:` = resume point).
+Next (v2, not started): `docs/BUILD_SPEC_V2.md` — Figma redesign first, then features; gap list `docs/COMPETITOR_GAP_REPORT.md`.
 Unattended runs: `.claude/skills/automatic-agentic-run/SKILL.md`.
 
 ## Rules (spec §0, short)
