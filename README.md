@@ -31,7 +31,8 @@ design: [`design/README.md`](design/README.md).
 8. Edit `store.config.ts`: store name, slug, default theme and language.
 9. `pnpm dev`, then open http://localhost:3000 (shop) and http://localhost:3000/admin (admin).
 10. Before every push, run `pnpm verify`: lint, types, tests, build, Lighthouse, e2e and the 100%
-    coverage gate. CI runs exactly the same.
+    coverage gate. CI runs exactly the same, plus separate lint, unit, integration and e2e jobs
+    so a failure shows which layer broke.
 
 ## Deploy
 
@@ -65,7 +66,9 @@ Measured footprint: 132 MB idle, 192 MB under load, 104 req/s on one CPU (see `P
 | `pnpm dev` | Development server |
 | `pnpm verify` | The full quality gate (same as CI) |
 | `pnpm test` · `pnpm vitest related <file>` | Fast unit/integration loop |
-| `pnpm e2e` | Playwright (needs `pnpm build:cov` and a running server; see `scripts/e2e-serve.sh`) |
+| `pnpm test:unit` · `pnpm test:integration` | One layer only (`src/**` or `tests/integration/**`) |
+| `pnpm test:e2e` | Coverage build, start the server, run Playwright, stop the server |
+| `pnpm e2e` | Playwright against an already running server (see `scripts/e2e-serve.sh`) |
 | `pnpm db:migrate` | Apply migrations to `DATABASE_URL` |
 | `pnpm themes:gen` | Re-register theme folders after adding one under `src/themes/` |
 | `pnpm lighthouse` | Lighthouse gate on the production build |

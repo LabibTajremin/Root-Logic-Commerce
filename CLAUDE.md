@@ -21,7 +21,7 @@ Next.js 16 App Router (TS strict, `output: standalone`) · PostgreSQL 16 + Drizz
 
 ## Commands
 - `pnpm verify` — THE gate (lint+prettier, typecheck, unit+integration coverage, build, coverage build + e2e, merged 100% coverage). CI runs the same.
-- `pnpm test` / `pnpm vitest related <file>` — fast loop · `pnpm e2e` — Playwright (needs `pnpm build:cov` + server)
+- `pnpm test` / `pnpm vitest related <file>` — fast loop · `pnpm test:unit` / `test:integration` / `test:e2e` — one layer (CI jobs of the same names) · `pnpm e2e` — Playwright only (needs `pnpm build:cov` + server)
 - `pnpm coverage:merge` — merge `.coverage/{unit,browser,server-v8}` → `coverage/`
 
 ## Coverage mechanics
