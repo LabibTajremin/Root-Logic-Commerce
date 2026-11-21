@@ -1,0 +1,68 @@
+ALL_PHASES_DONE 6ffd887
+Now: all phases done — PR https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 ready for the owner to review and merge.
+
+## Phases
+- [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
+- [x] Phase 1 — Design (Figma) — https://www.figma.com/design/1NGfJz6PU8rxZ5pHgIcrsr · see design/README.md
+- [x] Phase 2 — Scaffold — phase 2 done c9409d4 (CI green with phase 3 at f547015)
+- [x] Phase 3 — Core domain + DB — phase 3 done f547015 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions — green)
+- [x] Phase 4 — Admin panel — phase 4 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green, gated with phase 5)
+- [x] Phase 5 — Storefront + themes — phase 5 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green)
+- [x] Phase 6 — Messages, insights, promotions — phase 6 done 3bbb01d (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44851341080 — green)
+- [x] Phase 7 — Hardening & deploy — phase 7 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green)
+- [x] Phase 8 — Theme-builder skill — phase 8 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green; theme attar-aloy shipped)
+- [x] Phase 9 — Update automatic-agentic-run skill — phase 9 done 21bc2f8 (docs/SKILL_FEEDBACK.md)
+
+## Preflight
+- git push to `claude/vibrant-cannon-wwnfb9`: granted (verified dry-run)
+- GitHub Actions read (MCP): granted; `gh` CLI: not available (search only) → CI read via GitHub MCP
+- Node 22.23 / pnpm 10.28 / Playwright + Chromium: granted
+- Figma MCP (write): granted — file https://www.figma.com/design/m2Lp8fxK2nnbcXB2c9qijG (created on Starter team; student plan key rejected by create_new_file; owner moving it)
+- SMTP/SMS/WhatsApp/S3/Drive/GA4/Vercel: not required (fakes)
+
+Preflight: done 2026-11-20
+
+## Footprint check (spec §8)
+Production standalone build pinned to 1 CPU (`taskset -c 0`, `--max-old-space-size=256`), real Postgres 16 (`shared_buffers=128MB`), migrated with `pnpm db:migrate`:
+- idle RSS **132 MB**; after 20 s of 20 concurrent clients (home, search, track, 404): **192 MB** (budget ≤ 300 MB)
+- **104 req/s**, p50 178 ms, p95 299 ms, 0 errors
+Namecheap Spark-class VPS (1 vCPU / 2 GB) fits: app ≤ ~450 MB worst case (PM2 restarts above), Postgres small, Caddy ~30 MB. Measured 2026-11-21.
+
+## Skipped
+- S3 and Google Drive *upload* storage adapters (no credentials; S3 needs SigV4 client). Configured but unavailable drivers fail uploads with a friendly message; Drive *links* work. Planned for Phase 7 (needed for the Vercel profile).
+- GA4 *data inside admin* (premium ga4InAdmin) needs a Google service account per store; the dashboard shows the lock / "Root Logic Lab will connect it" note. gtag + ecommerce events on the storefront are done.
+- Video duration cap: size cap (20 MB, configurable) is enforced; duration needs container parsing (mp4/webm) — help text asks for ≤30 s.
+- Blurhash placeholders: dominant colour is stored and shown instead (smaller, no extra dep).
+
+## Decisions
+- Coverage gate measures each source file in the layer that runs it (Vitest / e2e browser for 'use client' / e2e Next server), every file must be 100%. Merging line ranges across differently compiled bundles misaligned (false gaps) — documented in scripts/coverage-merge.mjs. Coverage builds tag our sources `rlc/src/…` to avoid Next's own `src/` paths. JSON dictionaries excluded as data files.
+- e2e fixture flushes browser coverage before goto/reload (full navigations drop the old document's script coverage); each test uses its own X-Forwarded-For so sign-in rate limits don't leak.
+- e2e projects: mobile → desktop → settings. Store-wide switches (OTP toggles, theme) live in `settings.spec.ts` and run last, serially, so parallel tests never see them flip.
+- Track order is a POST server action (not a GET query) so shoppers' phones never land in URLs/logs. Order success page shows only the number.
+- OTP code is consumed on verify; if the order then fails (e.g. stock), the shopper requests a new code.
+- Switching theme in the design editor merges that theme's defaults (fonts, colors, style); live preview updates CSS variables, slot layout changes show after publish.
+- Browser coverage: flushes keep the script URL so monocart merges V8 per script; copies of a module in several chunks don't sum branch counts reliably, so the cart store is written branch-free.
+- Keyboard-drag e2e waits for dnd-kit's announcement of a different target before dropping (fast presses were ignored on mobile).
+- SUPER_ADMIN login is seeded from BOOTSTRAP_SUPER_EMAIL/PASSWORD; only it can grant/revoke entitlements (plan page).
+- Media: next/image with a custom loader → /api/media/[id]/[w] (nearest stored WebP variant, immutable cache). Uploads limited by bytes sniffing, per-purpose size, per-store quota and a free-disk guard.
+- Messages: order events only *queue* (outbox, dedupe key per order/event/channel/recipient); sending is the cron route (Vercel, Bearer CRON_SECRET) or an in-process worker (VPS). MESSAGES_TRANSPORT=log records instead of sending (dev/e2e). Channel secrets are sealed with AES-GCM (SETTINGS_KEY) and write-only in the UI. OTP codes use the same channels.
+- Insights: visitor = HMAC(authSecret, store+ip+UA+Dhaka day); daily_stats upserts per view/event; revenue = subtotal counted on DELIVERED, reversed on RETURNED; raw page_views purged after 30 days.
+- Promotions: embeds are youtube-nocookie / FB / IG players behind a tap-to-load facade; e2e stubs third-party hosts (gtag, embeds) in the fixture.
+- Security: CSP + nosniff/Referrer/Permissions/X-Frame headers on every route (HSTS outside the e2e build); 'unsafe-inline' scripts are needed for Next's streamed payload and the GA snippet; zod runs jitless in the browser so no 'unsafe-eval'. Checkout (10/10 min) and tracking (20/10 min) are rate-limited per store + IP in process memory.
+- Media on Vercel: S3-compatible adapter (aws4fetch SigV4, path-style; R2/S3/MinIO); STORAGE_DRIVER=s3 requires all S3_* env at boot. Drive *uploads* stay unavailable (links work).
+- Media is served by the app (/api/media, immutable cache) rather than Caddy reading the disk directly: URLs carry media ids, not file paths, so access stays per-store; Caddy/CDN cache the immutable responses.
+- Lighthouse gate (scripts/lighthouse.mjs, part of verify): /, /search, /search?q — all ≥ 95 on mobile (measured 96–97 perf, 100 a11y/BP/SEO). Checkout/track/order are noindex on purpose and excluded from the SEO bar.
+- knip (dead code) reviewed once: findings were public-API re-exports used by tests, path-referenced fonts and config files; removed the one truly unused dependency (@testing-library/react). Not wired into the gate (needs per-file config to avoid false positives).
+- legacy/ deleted at the end of Phase 7 (spec §0.12).
+- Phase 8: `.claude/skills/new-theme/SKILL.md` written from the final code; applied in this session (not a separate fresh session) to the spec's description → shipped theme `attar-aloy` (light, rose/plum, Cormorant Light + Manrope, airy, centred). It is in the every-theme e2e (axe, both viewports) and selectable in Admin → Design.
+- Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
+- Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
+- Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.
+- Domain events: `order.placed` + `order.<status>` (confirmed/processing/shipped/delivered/cancelled/returned); subscriber errors are reported, never block the action.
+- `knip` (unused exports) deferred to Phase 7: modules export APIs that later phases consume.
+- Owner asked to design `attar-aloy` (আতর আলোয়) now too: Figma modes 'Attar Aloy · Light/Dark' + page 'Attar Aloy'. Palette light: bg #FDF8F8, soft #F7ECEF, text #2E2A35, accent #B76E8A (dusty rose), button #6B5B8C (plum), radius 22/14, fonts Cormorant Garamond Light + Manrope. Code still built via the Phase 8 skill.
+- PR: https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 (draft, all phases stack here).
+- ankito tokens (from site CSS): bg #fbf8f2, surface #fff, soft #f4eee2, ink #1e2a1c, muted #5f6a5b, line #e7dfcf, brand #3c6430 (hover #2f5026, deep #22381c, tint #edf3e7), accent #a8763e (tint #f6ead8), radius 18/10, fonts DM Serif Display + DM Sans + Hind Siliguri, soft green-tinted shadows.
+- Figma layout (owner): one page per theme (minimal, organic, attar, ankito), each with Storefront + Admin, Web 1440 + Mobile 390; plus Foundations.
+- Extra theme requested by owner: `ankito` (based on owner's own site https://ankito-run.vercel.app/) — design in Phase 1, build in Phase 5.
+- Git flow (owner): one work branch `claude/vibrant-cannon-wwnfb9` + one PR → main; phases stack on it; never push to main.

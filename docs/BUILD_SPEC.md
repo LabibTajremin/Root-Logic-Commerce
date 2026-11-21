@@ -19,7 +19,7 @@
 10. **Subagents:** only for isolated, parallelizable work (e.g., building 3 themes). Give them the exact § numbers, not the whole spec.
 11. **When unsure:** pick the simplest option consistent with this spec, note it in `PROGRESS.md › Decisions` (one line), continue. Never ask the human — there is no one watching.
 12. **Legacy reference:** `legacy/` holds curated code + ADRs from an earlier build. Read `legacy/README.md` once; then open only the files it maps to your current phase. Exclude `legacy/` from tsconfig, lint, tests, coverage, build. Delete it at end of Phase 7.
-13. **Git:** work in the repo provided by the owner. Branch per phase `phase/<n>-<name>`, Conventional Commits, small commits, push after every commit. Never commit secrets; ship `.env.example`.
+13. **Git:** work in the repo provided by the owner. One work branch with an open PR to `main` (never push to `main` directly; phases stack on that PR), Conventional Commits, small commits, push after every commit. Never commit secrets; ship `.env.example`.
 
 ---
 
@@ -352,15 +352,16 @@ Session start (every time):
 1. `git status` / `git log -3`, read `PROGRESS.md` (top section only). Resume exactly at the `Now:` line. Don't redo finished work.
 2. If on a phase branch with uncommitted changes from a cut-off session: run tests, keep what passes, continue.
 
-Per-phase loop:
+Per-phase loop (PR-based — **never commit/push to `main`**; follow `.claude/skills/automatic-agentic-run/SKILL.md §4`):
 ```
+one work branch + one PR → main (opened at the first phase; CI runs on the PR)
 implement (TDD) → pnpm verify
   red  → fix → pnpm verify            (repeat)
-  green→ commit → git push → gh run watch <run-id> --exit-status
-            red  → gh run view <run-id> --log-failed → fix → commit → push → watch (repeat)
-            green→ git switch main && git merge --ff-only phase/<n>-… && git push
-                   tick phase in PROGRESS.md "phase N done <sha>", commit+push → next phase
+  green→ commit → git push → wait for the PR's CI run on that sha
+            red  → read failed job logs → fix → commit → push → wait (repeat)
+            green→ tick phase in PROGRESS.md "phase N done <sha>" + add a "### Phase N" section to the PR body → commit+push → next phase on the same PR
 ```
+- PR not merged → keep stacking phases on it (one PR may carry all phases). Owner merges when ready; if merged, continue on a new branch + new PR from fresh `main`.
 - `pnpm verify` = `lint && typecheck && build && test:all-with-merged-coverage` (fails unless merged coverage is 100% on every metric — §8) — define it in Phase 2 together with `.github/workflows/ci.yml` running the same script (Postgres not needed: PGlite).
 - **Checkpoint often:** commit + push WIP at each passing sub-step and update `PROGRESS.md › Now:` (one line: phase, step, next action). A session can be cut off at any moment by the usage limit; at most one step may be lost.
 - **Never cheat to green:** do not skip, delete, `.only`, weaken assertions, or lower coverage thresholds; do not disable lint rules or CI steps. Fix the code (or the test, if the test is genuinely wrong — log why in Decisions).
