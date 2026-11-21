@@ -8,10 +8,11 @@ import { CartButton, CartDrawer } from './cart-drawer'
 import { storefront } from './storefront'
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const { store, business } = await storefront()
+  const { store, business, t } = await storefront()
   return {
     title: { default: store.name, template: business.seo.titleTemplate },
-    description: business.seo.metaDescription || undefined,
+    description:
+      business.seo.metaDescription || `${store.name} — ${t('shop.delivery')}. ${t('shop.cod')}`,
   }
 }
 

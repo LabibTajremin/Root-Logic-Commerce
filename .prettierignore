@@ -11,3 +11,4 @@ docs
 .github
 src/infrastructure/db/migrations
 src/themes/registry.gen.ts
+.lh/

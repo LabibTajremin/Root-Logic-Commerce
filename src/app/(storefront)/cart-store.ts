@@ -3,6 +3,9 @@
 import { useSyncExternalStore } from 'react'
 import { z } from 'zod'
 
+// No eval-based fast paths in the browser: the CSP forbids 'unsafe-eval'.
+z.config({ jitless: true })
+
 const KEY = 'rlc-cart'
 const lineSchema = z.object({
   id: z.uuid(),

@@ -1,5 +1,5 @@
 // Single quality gate used locally and in CI: lint, typecheck, unit+integration, build,
-// coverage build + e2e (with server V8 coverage), merged 100% coverage check.
+// Lighthouse (≥95 mobile), coverage build + e2e (with server V8 coverage), merged 100% coverage check.
 import { spawn, spawnSync } from 'node:child_process'
 import { rmSync } from 'node:fs'
 import { e2eEnv } from './e2e-env.mjs'
@@ -18,6 +18,7 @@ run('pnpm lint')
 run('pnpm typecheck')
 run('pnpm test:cov')
 run('pnpm build')
+run('pnpm lighthouse')
 run('pnpm build:cov')
 
 const port = process.env.E2E_PORT ?? '3100'
