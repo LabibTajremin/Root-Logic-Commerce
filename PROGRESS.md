@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 6 — messages (outbox + email/SMS/WhatsApp adapters, templates), insights (beacon, daily_stats, dashboard metrics, GA4), promotions (banners, posters, video, embeds).
+Now: Phase 7 — hardening & deploy. Done: security headers/CSP (local). Next: checkout/track rate limits, S3 adapter, deploy/ (Caddy, PM2, setup, backups), vercel.json cron, Lighthouse CI, load check, README, knip, delete legacy/.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -8,7 +8,7 @@ Now: Phase 6 — messages (outbox + email/SMS/WhatsApp adapters, templates), ins
 - [x] Phase 3 — Core domain + DB — phase 3 done f547015 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions — green)
 - [x] Phase 4 — Admin panel — phase 4 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green, gated with phase 5)
 - [x] Phase 5 — Storefront + themes — phase 5 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green)
-- [ ] Phase 6 — Messages, insights, promotions
+- [x] Phase 6 — Messages, insights, promotions — phase 6 done 3bbb01d (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44851341080 — green)
 - [ ] Phase 7 — Hardening & deploy
 - [ ] Phase 8 — Theme-builder skill
 - [ ] Phase 9 — Update automatic-agentic-run skill

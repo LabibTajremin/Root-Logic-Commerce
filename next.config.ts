@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { securityHeaders } from './src/server/security-headers'
 
 // COVERAGE=1 builds a separate, source-mapped bundle so e2e V8 coverage maps back to src/.
 const coverage = process.env.COVERAGE === '1'
@@ -6,6 +7,8 @@ const coverage = process.env.COVERAGE === '1'
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  // Browsers ignore HSTS over plain http, so only the coverage (e2e) build leaves it out.
+  headers: async () => [{ source: '/:path*', headers: securityHeaders(!coverage) }],
   // WASM Postgres and native image codecs must load from node_modules, not the bundle.
   serverExternalPackages: ['@electric-sql/pglite', 'sharp'],
   // Images are pre-sized WebP variants served by /api/media (no runtime optimizer needed).
