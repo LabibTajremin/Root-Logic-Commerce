@@ -1,5 +1,7 @@
 # Competitor analysis & feature gap — Root Logic Commerce
 
+> Agent: build from `docs/BUILD_SPEC_V2.md` (authoritative, same IDs). Read this file only for §4 (design brief) in Phase 10.
+
 Source: the competitor's 46-min recorded class "Class 2 Part 2" (Biz Care IT demo shop `new.demo.bizcareit.com` + a client store `blackrace.com.bd`), reviewed frame-by-frame (one frame per 3 s, 240 distinct screens) plus the Bangla narration transcript (`docs/competitor/transcript.md`). Owner's brief: handwritten note, 2026-11-21.
 Timestamps `mm:ss` point into that video.
 
@@ -111,11 +113,28 @@ The transcript is noisy (see its header); these are the points that come through
 - **Office management** for staff productivity and salary (40:16–42:06).
 - **Pixel training** (43:53–44:38): if Purchase fires on fake orders, Facebook learns the wrong audience. Fire it on confirmation so ads target real buyers → H1.
 
+### 2.8 Details found on second pass (frames with small changes)
+- Client store `blackrace.com.bd`: Add to cart · Buy now · Order on WhatsApp · Call for order; "See size chart"; floating cart pill with count + total (→ B15).
+- Multi-variant pick: choosing White·M and more adds a "Selected" list with qty each and total (→ A16).
+- Checkout: auto-detected zone chip under the address ("ঢাকা — ঢাকার ভিতর") (→ C17); remove-line confirm; big Bangla CTA "এখনই অর্ডার করুন" + "Processing…" + trust lines (→ C18, C19).
+- AI chat: quick-reply chips ("ডেলিভারি চার্জ কত?"), product cards with "অর্ডার করুন" / "আমাকে কেমন লাগবে?", cross-sell, "✓ added to cart", then asks name and phone (→ I1, I2).
+- Orders: notes like "Gift wrap please" and "Office address — deliver on weekday", bKash payment ref, raw courier status (in_review, partial_delivered), staff name under status (→ C6, F12).
+- Activity log: "Returning for 9 days and not scanned back → auto Return Missing after 5 days" — an automatic status rule (→ C21); filter chips by action with counts; system actor; 30-day retention.
+- Order drawer: editable order date, ISP, "7 orders from this device · 1 number", GPS "within about 36 m".
+- "Do it with AI": microphone input, answers as tables (→ F11, I5).
+- Settings → Meta: "who sends events" (this website / GTM + server / GTM only), domain verification, test event code, more pixels, CAPI-token warning; GTM tab: downloadable GTM setup file, extra GA4 properties (→ H1, H3).
+- Front Page → Manage Page Data: About, Return policy, Privacy, Terms, Contact (→ J8; we have none).
+- Landing pages: URL prefix setting (`/offer/`), filter by design, hidden flag.
+- Home: product promo popup over the slider (Buy | Not now) (→ B8).
+- Profit calculator: note, save, "Saved at", expense breakdown, verdict badge (→ G2).
+- Office: roles (Social media manager, Order executive, Delivery coordinator, Customer care, Packing & dispatch), salary, "Not in yet" (→ F9).
+- **Our own v1 gap:** BreadcrumbList JSON-LD (v1 §5.11) is not implemented.
+
 ---
 
 ## 3. Full gap list (everything the competitor has that we don't) + owner's new asks
 
-IDs are used by `docs/BUILD_SPEC_V2.md`. Priority: **P0** = sales-critical in BD f-commerce, build first · **P1** = strong differentiator · **P2** = later.
+IDs are used by `docs/BUILD_SPEC_V2.md` (it also adds A16, B15, C17–C21, F11, F12, J8 from §2.8 — see the spec for the full acceptance list). Priority: **P0** = sales-critical in BD f-commerce, build first · **P1** = strong differentiator · **P2** = later.
 
 ### A. Catalog & product page
 | ID | Feature | Pri | Plan |
