@@ -142,7 +142,7 @@ IDs are used by `docs/BUILD_SPEC_V2.md`. Priority: **P0** = sales-critical in BD
 | B1 | Announcement marquee bar | P0 | Free |
 | B2 | Order Now (buy-now) + **WhatsApp order** + **Call to order** buttons; configurable/sortable; mobile sticky buy bar | P0 | Free |
 | B3 | Hero slider (multi-slide, timed; CSS transitions only) | P0 | Free |
-| B4 | **Shoppable video reels** (vertical, tap-to-load, product link) | P1 | Pro |
+| B4 | **Shoppable video reels carousel** (vertical 9:16, swipe/cover-flow): sources = uploaded mp4/webm **and Facebook Reels / Instagram Reels links** (also TikTok, YouTube Shorts); each reel links to products ("Shop now"); tap-to-load player; on home, product page and landing pages | P1 | Pro |
 | B5 | Home **section builder** (order, on/off, counts): categories, editor's picks, per-category rows, brands, budget bands, reels, combos, testimonials, trust badges, FB follow, newsletter | P0 | Free (some blocks Pro) |
 | B6 | **Trust badges + certificate viewer** (trade licence, TIN, BIN, DBID) | P0 | Free |
 | B7 | **Social-proof popup** (recent purchases, real data only) | P1 | Pro |
