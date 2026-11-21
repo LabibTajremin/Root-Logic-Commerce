@@ -32,6 +32,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
     { href: '/admin/seo', label: t('nav.seo'), icon: 'trend' },
     { href: '/admin/users', label: t('nav.users'), icon: 'users' },
     { href: '/admin/layouts', label: t('nav.layouts'), icon: 'home' },
+    { href: '/admin/texts', label: t('nav.texts'), icon: 'edit' },
     { href: '/admin/features', label: t('nav.features'), icon: 'layers' },
     { href: '/admin/plan', label: t('nav.plan'), icon: 'star' },
     { href: '/admin/help', label: t('nav.help'), icon: 'help' },

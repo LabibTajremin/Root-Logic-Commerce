@@ -4,7 +4,7 @@ import bnHelp from '@/help/bn.json'
 import enHelp from '@/help/en.json'
 import bn from './bn.json'
 import en from './en.json'
-import { isLocale, translate } from '.'
+import { isLocale, storefrontKeys, translate } from '.'
 
 describe('i18n', () => {
   it('translates, interpolates and falls back to English then the key', () => {
@@ -14,6 +14,12 @@ describe('i18n', () => {
     expect(translate('en', 'admin.signIn')).toBe('Sign in')
     expect(isLocale('bn')).toBe(true)
     expect(isLocale('fr')).toBe(false)
+  })
+  it("prefers the owner's own wording for storefront strings", () => {
+    expect(translate('en', 'shop.cart', undefined, { 'shop.cart': 'Bag' })).toBe('Bag')
+    expect(translate('bn', 'shop.cart', undefined, {})).toBe(translate('bn', 'shop.cart'))
+    expect(storefrontKeys).toContain('shop.cart')
+    expect(storefrontKeys.every((k) => k.startsWith('shop.'))).toBe(true)
   })
   it('interpolates variables', () => {
     expect(translate('en', 'Hello {{name}} {{missing}}', { name: 'Rahim' })).toBe('Hello Rahim ')

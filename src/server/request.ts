@@ -28,7 +28,9 @@ export const currentActor = cache(async (): Promise<Actor | null> => {
 
 export const currentLocale = cache(async (): Promise<Locale> => {
   const lang = (await cookies()).get('lang')?.value
-  return isLocale(lang) ? lang : (await runtime()).config.store.locale
+  if (isLocale(lang)) return lang
+  const [{ business }, { config }] = await Promise.all([currentSettings(), runtime()])
+  return business.language.default ?? config.store.locale
 })
 
 // Every reader seeds with the same defaults, so whichever page runs first doesn't matter.

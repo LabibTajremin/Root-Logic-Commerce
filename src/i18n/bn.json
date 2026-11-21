@@ -322,7 +322,7 @@
   "messages.language": "ভাষা",
   "messages.short": "SMS / WhatsApp লেখা",
   "messages.emailBody": "ইমেইলের লেখা",
-  "messages.vars": "{{orderNo}}, {{name}}, {{total}}, {{phone}} ও {{store}} ব্যবহার করতে পারেন।",
+  "messages.vars": "{{orderNo}}, {{{name}}}, {{total}}, {{phone}} ও {{store}} ব্যবহার করতে পারেন।",
   "messages.sendThis": "এই মেসেজ পাঠান",
   "messages.recent": "সাম্প্রতিক মেসেজ",
   "messages.none": "এখনো কোনো মেসেজ পাঠানো হয়নি।",
@@ -473,7 +473,7 @@
   "layouts.preview": "প্রিভিউ",
   "layouts.use": "এই লেআউট ব্যবহার করুন",
   "layouts.exitPreview": "প্রিভিউ বন্ধ করুন",
-  "layouts.previewBanner": "শুধু আপনি দেখছেন: {name} লেআউটের প্রিভিউ।",
+  "layouts.previewBanner": "শুধু আপনি দেখছেন: {{name}} লেআউটের প্রিভিউ।",
   "layouts.preset.general": "সাধারণ দোকান",
   "layouts.preset.fashion": "ফ্যাশন",
   "layouts.preset.gadget": "গ্যাজেট",
@@ -486,5 +486,14 @@
   "sections.hero": "স্বাগত ছবি",
   "sections.category-nav": "ক্যাটাগরি",
   "sections.product-grid": "পণ্য",
-  "error.layouts.unknown": "এই লেআউটটি নেই।"
+  "error.layouts.unknown": "এই লেআউটটি নেই।",
+  "nav.texts": "ভাষার লেখা",
+  "texts.title": "ভাষার লেখা",
+  "texts.intro": "ক্রেতারা যে কোনো লেখা দেখেন তা ইংরেজি ও বাংলায় বদলান। ডিফল্ট রাখতে ঘর খালি রাখুন।",
+  "texts.wording": "দোকানের লেখা",
+  "texts.banglaDigits": "দাম বাংলা সংখ্যায় দেখান (৳১,২০০)",
+  "texts.lang.en": "ইংরেজি",
+  "texts.lang.bn": "বাংলা",
+  "texts.language": "দোকানের ভাষা",
+  "texts.switcher": "ক্রেতারা ইংরেজি ও বাংলার মধ্যে বদলাতে পারবেন"
 }

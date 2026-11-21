@@ -23,7 +23,8 @@ export const storefront = cache(async () => {
     container.catalog.listCategories(store.id),
     container.plans.has(store.id, 'removeBranding'),
   ])
-  const t = (k: string, v?: Record<string, string | number>) => translate(locale, k, v)
+  const t = (k: string, v?: Record<string, string | number>) =>
+    translate(locale, k, v, business.texts[locale])
   const money = (minor: number) => formatMoney(minor, { banglaDigits: business.banglaDigits })
   const image = (m: MediaRow): ImageView => ({ src: `/api/media/${m.id}`, color: m.dominantColor })
   /** Every product's images in order, for the given products. */

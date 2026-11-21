@@ -61,7 +61,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         categories={categories}
         actions={
           <>
-            <LangToggle locale={locale} />
+            {business.language.switcher && <LangToggle locale={locale} />}
             <CartButton label={t('shop.cart')} />
           </>
         }

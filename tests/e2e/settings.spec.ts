@@ -296,6 +296,46 @@ test('layouts: owner previews a niche layout privately, then switches the home p
   await expect(page.getByTestId('layout-general')).toContainText('In use')
 })
 
+test('language texts: owner picks the shop language, rewords labels and turns on Bangla digits', async ({
+  page,
+  a11y,
+}) => {
+  const save = async () => {
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  await signedIn(page)
+  await page.goto('/admin/texts')
+  await expect(page.getByRole('heading', { level: 1, name: 'Language texts' })).toBeVisible()
+  await a11y()
+  const cart = page.getByTestId('text-shop.cart')
+  await cart.getByRole('textbox').nth(1).fill('ঝুড়ি')
+  await page.getByLabel('Bangla', { exact: true }).check()
+  await page.getByLabel('Let shoppers switch between English and Bangla').uncheck()
+  await page.getByLabel(/Bangla digits/).check()
+  await save()
+
+  await page.context().clearCookies()
+  await page.goto('/')
+  await expect(page.getByRole('button', { name: /^ঝুড়ি/ })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Language' })).toHaveCount(0)
+  await a11y()
+
+  // The shop now opens in Bangla; pick English like an owner would before signing in.
+  await page.goto('/admin/lang?to=en&back=/admin/login')
+  await signedIn(page)
+  await page.goto('/admin/texts')
+  await page.getByTestId('text-shop.cart').getByRole('textbox').nth(1).fill('')
+  await page.getByLabel('English', { exact: true }).check()
+  await page.getByLabel('Let shoppers switch between English and Bangla').check()
+  await page.getByLabel(/Bangla digits/).uncheck()
+  await save()
+  await page.context().clearCookies()
+  await page.goto('/')
+  await expect(page.getByRole('button', { name: /^Cart/ })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Language' })).toBeVisible()
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

@@ -66,6 +66,24 @@ export const businessSchema = z.object({
       metaDescription: z.string().max(170).default(''),
     })
     .prefault({}),
+  // Shop language when the visitor has not picked one (null = the deploy's store.locale).
+  language: z
+    .object({
+      default: z.enum(['en', 'bn']).nullable().default(null),
+      switcher: z.boolean().default(true),
+    })
+    .prefault({}),
+  // Owner wording per language for storefront strings (J4); keys are i18n `shop.*` keys.
+  texts: z
+    .object({
+      en: z
+        .record(z.string().regex(/^shop\.[\w.]+$/), z.string().trim().min(1).max(300))
+        .default({}),
+      bn: z
+        .record(z.string().regex(/^shop\.[\w.]+$/), z.string().trim().min(1).max(300))
+        .default({}),
+    })
+    .prefault({}),
   ga4MeasurementId: z
     .string()
     .regex(/^G-[A-Z0-9]{4,}$/)

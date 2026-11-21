@@ -322,7 +322,7 @@
   "messages.language": "Language",
   "messages.short": "SMS / WhatsApp text",
   "messages.emailBody": "Email text",
-  "messages.vars": "You can use {{orderNo}}, {{name}}, {{total}}, {{phone}} and {{store}}.",
+  "messages.vars": "You can use {{orderNo}}, {{{name}}}, {{total}}, {{phone}} and {{store}}.",
   "messages.sendThis": "Send this message",
   "messages.recent": "Recent messages",
   "messages.none": "No messages sent yet.",
@@ -473,7 +473,7 @@
   "layouts.preview": "Preview",
   "layouts.use": "Use this layout",
   "layouts.exitPreview": "Exit preview",
-  "layouts.previewBanner": "Only you see this: previewing the {name} layout.",
+  "layouts.previewBanner": "Only you see this: previewing the {{name}} layout.",
   "layouts.preset.general": "General store",
   "layouts.preset.fashion": "Fashion",
   "layouts.preset.gadget": "Gadgets",
@@ -486,5 +486,14 @@
   "sections.hero": "Welcome picture",
   "sections.category-nav": "Categories",
   "sections.product-grid": "Products",
-  "error.layouts.unknown": "That layout does not exist."
+  "error.layouts.unknown": "That layout does not exist.",
+  "nav.texts": "Language texts",
+  "texts.title": "Language texts",
+  "texts.intro": "Change any word your shoppers see, in English and Bangla. Leave a box empty to keep the default.",
+  "texts.wording": "Shop wording",
+  "texts.banglaDigits": "Show prices with Bangla digits (৳১,২০০)",
+  "texts.lang.en": "English",
+  "texts.lang.bn": "Bangla",
+  "texts.language": "Shop language",
+  "texts.switcher": "Let shoppers switch between English and Bangla"
 }

@@ -1,5 +1,6 @@
 'use server'
 
+import { locales, storefrontKeys } from '@/i18n'
 import { act, type ActionState } from './act'
 import { currentSettings } from '@/server/request'
 
@@ -16,6 +17,25 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           metaDescription: form.get('seo.metaDescription') as string,
         },
         ga4MeasurementId: (form.get('ga4MeasurementId') as string) || null,
+      }),
+      ...(has('texts') && {
+        banglaDigits: form.get('banglaDigits') === 'on',
+        language: {
+          default: form.get('language.default'),
+          switcher: form.get('language.switcher') === 'on',
+        },
+        // Blank means "use the default wording", so only filled-in fields are kept.
+        texts: Object.fromEntries(
+          locales.map((l) => [
+            l,
+            Object.fromEntries(
+              storefrontKeys.flatMap((k) => {
+                const v = String(form.get(`${l}:${k}`)).trim()
+                return v ? [[k, v]] : []
+              }),
+            ),
+          ]),
+        ),
       }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },

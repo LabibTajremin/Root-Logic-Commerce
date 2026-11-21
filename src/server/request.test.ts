@@ -53,11 +53,18 @@ describe('request helpers', () => {
     expect(await currentActor()).toEqual({ id: 'l', role: 'SUPER_ADMIN', storeId: null })
   })
 
-  it('takes the language from the cookie, else the store default', async () => {
+  it("takes the language from the cookie, else the owner's choice, else the deploy default", async () => {
+    rt.container.stores.findByHost.mockResolvedValue(store)
+    const owner = (d: string | null) =>
+      rt.container.settings.get.mockResolvedValueOnce({ business: { language: { default: d } } })
+    owner(null)
     expect(await currentLocale()).toBe('bn')
-    req.lang = 'en'
+    owner('en')
     expect(await currentLocale()).toBe('en')
+    req.lang = 'bn'
+    expect(await currentLocale()).toBe('bn')
     req.lang = 'fr'
+    owner(null)
     expect(await currentLocale()).toBe('bn')
   })
 

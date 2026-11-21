@@ -34,5 +34,8 @@
   "messages.templates": "Edit what customers receive. Keep SMS short — about 70 Bangla or 160 English characters per SMS.",
   "promotions.embed": "YouTube: Share → Copy link. Facebook: open the video → ⋯ → Copy link. Instagram: open the reel/post → ⋯ → Copy link. Nothing loads from these sites until a visitor taps play.",
   "promotions.products": "Uses each product's first photo, your message and a button to the product.",
-  "promotions.poster": "A simple poster: colour or image background, a headline and a button."
+  "promotions.poster": "A simple poster: colour or image background, a headline and a button.",
+  "texts.banglaDigits": "Prices and counts in the shop use ০১২৩ instead of 0123.",
+  "texts.wording": "Each row is one label in the shop. The grey text is the current default; type to replace it. You may type Bangla in the English column too.",
+  "texts.language": "The language a shopper sees first. Your own product text, FAQs and pages show exactly as you typed them — in Bangla or English — whichever language is picked."
 }
