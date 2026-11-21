@@ -1,6 +1,6 @@
 # Root Logic Commerce — agent notes
 Spec: `docs/BUILD_SPEC.md` (read the § you need, not all). Progress/state: `PROGRESS.md` (line 1 = status, `Now:` = resume point).
-Unattended runs: `.claude/skills/automatic-agentic-run/SKILL.md`. Legacy reference only: `legacy/` (never import/lint/test).
+Unattended runs: `.claude/skills/automatic-agentic-run/SKILL.md`.
 
 ## Rules (spec §0, short)
 - Read narrowly (grep → line ranges); edit, don't rewrite; terse output; no speculative code.

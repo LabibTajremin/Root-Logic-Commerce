@@ -1,5 +1,5 @@
 RUNNING
-Now: Phase 7 — hardening & deploy. Done: security headers/CSP (local). Next: checkout/track rate limits, S3 adapter, deploy/ (Caddy, PM2, setup, backups), vercel.json cron, Lighthouse CI, load check, README, knip, delete legacy/.
+Now: Phase 7 — hardening & deploy: CSP, rate limits, S3, deploy/, vercel.json, load check, Lighthouse gate, README, legacy removed. Running the full gate, then CI; then Phase 8 (new-theme skill → attar-aloy).
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -48,6 +48,12 @@ Namecheap Spark-class VPS (1 vCPU / 2 GB) fits: app ≤ ~450 MB worst case (PM2 
 - Messages: order events only *queue* (outbox, dedupe key per order/event/channel/recipient); sending is the cron route (Vercel, Bearer CRON_SECRET) or an in-process worker (VPS). MESSAGES_TRANSPORT=log records instead of sending (dev/e2e). Channel secrets are sealed with AES-GCM (SETTINGS_KEY) and write-only in the UI. OTP codes use the same channels.
 - Insights: visitor = HMAC(authSecret, store+ip+UA+Dhaka day); daily_stats upserts per view/event; revenue = subtotal counted on DELIVERED, reversed on RETURNED; raw page_views purged after 30 days.
 - Promotions: embeds are youtube-nocookie / FB / IG players behind a tap-to-load facade; e2e stubs third-party hosts (gtag, embeds) in the fixture.
+- Security: CSP + nosniff/Referrer/Permissions/X-Frame headers on every route (HSTS outside the e2e build); 'unsafe-inline' scripts are needed for Next's streamed payload and the GA snippet; zod runs jitless in the browser so no 'unsafe-eval'. Checkout (10/10 min) and tracking (20/10 min) are rate-limited per store + IP in process memory.
+- Media on Vercel: S3-compatible adapter (aws4fetch SigV4, path-style; R2/S3/MinIO); STORAGE_DRIVER=s3 requires all S3_* env at boot. Drive *uploads* stay unavailable (links work).
+- Media is served by the app (/api/media, immutable cache) rather than Caddy reading the disk directly: URLs carry media ids, not file paths, so access stays per-store; Caddy/CDN cache the immutable responses.
+- Lighthouse gate (scripts/lighthouse.mjs, part of verify): /, /search, /search?q — all ≥ 95 on mobile (measured 96–97 perf, 100 a11y/BP/SEO). Checkout/track/order are noindex on purpose and excluded from the SEO bar.
+- knip (dead code) reviewed once: findings were public-API re-exports used by tests, path-referenced fonts and config files; removed the one truly unused dependency (@testing-library/react). Not wired into the gate (needs per-file config to avoid false positives).
+- legacy/ deleted at the end of Phase 7 (spec §0.12).
 - Runtime singleton lives on globalThis (Next bundles routes separately → module singletons duplicated; with PGlite that meant two diverging DB instances). DomainError detection is structural (isDomainError) for the same reason.
 - Phases 4 and 5 share one gate: admin order screens need storefront checkout for e2e data; storefront follows immediately.
 - Order numbers: per-store counter `stores.order_seq` (row-locked UPDATE … RETURNING) instead of max()+1 retry — no race, no untestable retry branch.

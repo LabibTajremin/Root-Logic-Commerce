@@ -4,7 +4,6 @@ import nextTs from 'eslint-config-next/typescript'
 const config = [
   {
     ignores: [
-      'legacy/**',
       '.next/**',
       '.next-cov/**',
       'coverage/**',
