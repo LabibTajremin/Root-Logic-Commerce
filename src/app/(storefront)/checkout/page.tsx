@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { storefront } from '../storefront'
-import { GaEvent } from '../analytics'
+import { GaEvent } from '../ga'
 import { CheckoutForm } from './checkout-form'
 
 export const metadata: Metadata = { robots: { index: false } }

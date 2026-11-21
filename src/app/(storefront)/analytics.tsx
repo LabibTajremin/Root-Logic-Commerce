@@ -3,17 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
-declare global {
-  interface Window {
-    dataLayer?: unknown[]
-    gtag?: (...args: unknown[]) => void
-  }
-}
-
-/** GA4 ecommerce event; a no-op when the store has no Measurement ID. */
-export const gaEvent = (name: string, params: Record<string, unknown>) =>
-  window.gtag?.('event', name, params)
-
+// Layout-only (page chunks import ./ga instead), so every chunk runs all the code it carries.
 /** First-party page views on every route change, plus GA4 when configured. */
 export const Analytics = ({ ga4 }: { ga4: string | null }) => {
   const path = usePathname()
@@ -35,13 +25,5 @@ export const Analytics = ({ ga4 }: { ga4: string | null }) => {
       document.head.append(s)
     }, 2000)
   }, [ga4])
-  return null
-}
-
-/** Fires one GA4 event when the page shows (view_item, begin_checkout, purchase). */
-export const GaEvent = ({ name, params }: { name: string; params: Record<string, unknown> }) => {
-  useEffect(() => {
-    gaEvent(name, params)
-  }, [name, params])
   return null
 }

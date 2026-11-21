@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { GaEvent } from '../../analytics'
+import { GaEvent } from '../../ga'
 import { storefront } from '../../storefront'
 
 export const metadata: Metadata = { robots: { index: false } }

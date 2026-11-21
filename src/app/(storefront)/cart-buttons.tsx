@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/ui/icon'
-import { gaEvent } from './analytics'
+import { gaEvent } from './ga'
 import { cart, openCart, type Item } from './cart-store'
 
 const added = (item: Item) => {
