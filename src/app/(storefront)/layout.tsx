@@ -26,6 +26,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     categories,
     locale,
     business,
+    moneyFormat,
     credit,
     preview,
     t,
@@ -81,7 +82,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           ...k(['cart', 'cartEmpty', 'checkout', 'continue', 'subtotal', 'remove', 'qty']),
           close: t('common.cancel'),
         }}
-        banglaDigits={business.banglaDigits}
+        moneyFormat={moneyFormat}
       />
       <Analytics ga4={business.ga4MeasurementId} />
     </div>

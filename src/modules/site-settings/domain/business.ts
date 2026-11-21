@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
 
 export const businessSchema = z.object({
   contact: z
@@ -24,6 +25,8 @@ export const businessSchema = z.object({
     ]),
   lowStockThreshold: z.number().int().nonnegative().default(5),
   banglaDigits: z.boolean().default(false),
+  currency: z.enum(currencyCodes as [CurrencyCode, ...CurrencyCode[]]).default('BDT'),
+  dateFormat: z.enum(dateFormats).default('d MMM yyyy'),
   // Channel settings; password/apiKey/token are stored sealed (AES-GCM, SETTINGS_KEY).
   messages: z
     .object({

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { formatMoney } from '@/modules/shared'
+import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { Icon } from '@/ui/icon'
 import { cart, DRAWER, openCart, useCart } from './cart-store'
 
@@ -28,13 +28,13 @@ export const CartButton = ({ label }: { label: string }) => {
 
 export const CartDrawer = ({
   labels: L,
-  banglaDigits,
+  moneyFormat,
 }: {
   labels: Record<string, string>
-  banglaDigits: boolean
+  moneyFormat: MoneyFormat
 }) => {
   const items = useCart()
-  const money = (m: number) => formatMoney(m, { banglaDigits })
+  const money = (m: number) => formatMoney(m, moneyFormat)
   const close = () => drawer().close()
   return (
     <dialog

@@ -6,7 +6,7 @@ import { DomainError } from '@/modules/shared'
 import { PREVIEW_COOKIE, previewValue } from '@/server/preview'
 import { currentSettings } from '@/server/request'
 import { runtime } from '@/server/runtime'
-import { isPresetId, presetLayout } from '@/sections/registry'
+import { isPresetId, layoutOf, presetLayout } from '@/sections/registry'
 import { act, type ActionState } from '../act'
 
 const presetOf = (form: FormData) => {
@@ -37,6 +37,18 @@ export async function applyLayout(_: ActionState, form: FormData) {
     const { version } = await currentSettings()
     await settings.saveLayout(store.id, presetLayout(presetOf(form)), version)
     ;(await cookies()).delete(PREVIEW_COOKIE)
+    revalidateTag(`store:${store.id}`, 'max')
+  })
+}
+
+/** Show or hide one home section without changing the rest of the layout. */
+export async function toggleSection(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ settings, store }) => {
+    const { layout, version } = await currentSettings()
+    const current = layoutOf(layout)
+    const at = Number(form.get('index'))
+    const home = current.home.map((r, i) => (i === at ? { ...r, enabled: !r.enabled } : r))
+    await settings.saveLayout(store.id, { ...current, home }, version)
     revalidateTag(`store:${store.id}`, 'max')
   })
 }

@@ -10,7 +10,8 @@ export type Palette = {
   accentTint: string
 }
 
-export type StoreView = { name: string; slug: string }
+/** `showName: false` keeps the name for screen readers but hides the logo text. */
+export type StoreView = { name: string; slug: string; showName: boolean }
 export type CategoryView = { name: string; slug: string }
 /** `src` is the media base URL; the image loader appends the width. */
 export type ImageView = { src: string; color: string }

@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 11 — J5 feature toggles built (store_features + migration 0001, plans/features use-case, /admin/features, i18n EN/BN, unit+integration+e2e tests); full pnpm verify running. NEXT: confirm verify + CI green → BreadcrumbList/Organization JSON-LD (v1 gap) → sections registry + layout → J2/J3 → J1 → J4 → J8 → admin shell F1/F2/F3 → B1/B3/B9/B10/B15.
+Now: Phase 11 — batch committed (JSON-LD fix, sections registry + layout, J2 layout gallery + preview + section on/off, J4 language texts + shop language + Bangla digits + currency sign + date format, logo text on/off); full pnpm verify running. NEXT: fix verify → push → CI green → J8 CMS pages (draft in scratchpad j8/) → J1 → admin shell F1/F2/F3 → B1/B3/B9/B10/B15. J3 waits for demo packs. Figma: Core translated to English + Bangla demo section; theme pages still to translate (dictionary in file shared plugin data rlc.design/bn2en) + Language texts admin screen.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)

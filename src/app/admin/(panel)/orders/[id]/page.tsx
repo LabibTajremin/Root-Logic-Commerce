@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { nextStatuses } from '@/modules/orders'
-import { formatMoney, isUuid } from '@/modules/shared'
+import { isUuid } from '@/modules/shared'
 import { ActionForm } from '@/ui/action-form'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: 'Order' }
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (!isUuid(id)) notFound()
-  const { orders, store, t } = await adminContext('orders.manage')
+  const { orders, store, t, money } = await adminContext('orders.manage')
   const o = await orders.getOrder(store.id, id)
   if (!o) notFound()
   const wa = `https://wa.me/88${o.shipPhone}`
@@ -67,22 +67,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                       {t('order.qty', { n: i.quantity })}
                     </span>
                   </span>
-                  <span className="font-semibold">{formatMoney(i.unitPrice * i.quantity)}</span>
+                  <span className="font-semibold">{money(i.unitPrice * i.quantity)}</span>
                 </li>
               ))}
             </ul>
             <dl className="mt-3 grid grid-cols-2 gap-1 border-t border-line pt-3 text-sm">
               <dt className="text-muted">{t('order.subtotal')}</dt>
-              <dd className="text-right">{formatMoney(o.subtotal)}</dd>
+              <dd className="text-right">{money(o.subtotal)}</dd>
               <dt className="text-muted">
                 {t('order.delivery')} · {o.deliveryZone}
               </dt>
-              <dd className="text-right">{formatMoney(o.deliveryCharge)}</dd>
+              <dd className="text-right">{money(o.deliveryCharge)}</dd>
               <dt className="font-semibold">
                 {t('order.total')} · {t('order.cod')}
               </dt>
               <dd className="text-right text-lg font-semibold" data-testid="order-total">
-                {formatMoney(o.total)}
+                {money(o.total)}
               </dd>
             </dl>
           </Card>

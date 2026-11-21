@@ -136,6 +136,7 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             className={sel}
           />
         </label>
+        {check('showName', L.showName!, d.brand.showName, (b) => set('brand', { showName: b }))}
         <div className="grid grid-cols-2 gap-3">
           {select('nameFont', L.nameFont!, d.brand.nameFont, fontIds, (v) =>
             set('brand', { nameFont: v as Design['brand']['nameFont'] }),

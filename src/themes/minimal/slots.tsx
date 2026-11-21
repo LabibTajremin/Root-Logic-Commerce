@@ -7,14 +7,18 @@ const initial = (name: string) => name.trim().charAt(0).toUpperCase()
 export const Header: Slots['Header'] = ({ store, categories, actions }) => (
   <header className="rlc-header sticky top-0 z-20 border-b border-line bg-header text-header-text">
     <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-2">
-      <Link href="/" className="flex min-h-11 items-center gap-2 font-heading text-xl">
+      <Link
+        data-show-name={String(store.showName)}
+        href="/"
+        className="flex min-h-11 items-center gap-2 font-heading text-xl"
+      >
         <span
           aria-hidden
           className="inline-flex size-9 items-center justify-center rounded-control bg-button text-button-text"
         >
           {initial(store.name)}
         </span>
-        {store.name}
+        <span className="rlc-brand-name">{store.name}</span>
       </Link>
       <nav aria-label="Categories" className="hidden flex-1 justify-center gap-6 text-sm md:flex">
         {categories.map((c) => (

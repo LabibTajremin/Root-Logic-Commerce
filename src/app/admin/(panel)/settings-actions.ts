@@ -20,6 +20,8 @@ export async function saveBusiness(_: ActionState, form: FormData) {
       }),
       ...(has('texts') && {
         banglaDigits: form.get('banglaDigits') === 'on',
+        currency: form.get('currency'),
+        dateFormat: form.get('dateFormat'),
         language: {
           default: form.get('language.default'),
           switcher: form.get('language.switcher') === 'on',

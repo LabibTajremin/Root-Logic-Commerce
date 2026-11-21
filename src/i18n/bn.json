@@ -495,5 +495,11 @@
   "texts.lang.en": "ইংরেজি",
   "texts.lang.bn": "বাংলা",
   "texts.language": "দোকানের ভাষা",
-  "texts.switcher": "ক্রেতারা ইংরেজি ও বাংলার মধ্যে বদলাতে পারবেন"
+  "texts.switcher": "ক্রেতারা ইংরেজি ও বাংলার মধ্যে বদলাতে পারবেন",
+  "texts.currency": "মুদ্রার চিহ্ন",
+  "texts.dateFormat": "তারিখের ধরন",
+  "design.showName": "লোগোর লেখা হিসেবে দোকানের নাম দেখান",
+  "layouts.sections": "হোম পেজের অংশ",
+  "layouts.sectionsHint": "হোম পেজের যেকোনো অংশ বন্ধ বা আবার চালু করুন। কিছুই মুছে যাবে না।",
+  "layouts.gallery": "তৈরি লেআউট"
 }

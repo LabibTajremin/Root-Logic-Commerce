@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
-import { formatMoney } from '@/modules/shared'
+import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart } from '../cart-store'
 import { placeOrder } from './actions'
 
@@ -37,11 +37,11 @@ const Section = ({ title, children }: { title?: string; children: ReactNode }) =
 export const CheckoutForm = ({
   zones,
   labels: L,
-  banglaDigits,
+  moneyFormat,
 }: {
   zones: Zone[]
   labels: Record<string, string>
-  banglaDigits: boolean
+  moneyFormat: MoneyFormat
 }) => {
   const items = useCart()
   const router = useRouter()
@@ -49,7 +49,7 @@ export const CheckoutForm = ({
   const [error, setError] = useState('')
   const [otpTo, setOtpTo] = useState('')
   const [pending, start] = useTransition()
-  const money = (m: number) => formatMoney(m, { banglaDigits })
+  const money = (m: number) => formatMoney(m, moneyFormat)
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
   const charge = zones.find((z) => z.id === zoneId)!.charge
 

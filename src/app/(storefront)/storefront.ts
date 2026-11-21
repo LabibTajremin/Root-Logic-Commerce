@@ -25,7 +25,8 @@ export const storefront = cache(async () => {
   ])
   const t = (k: string, v?: Record<string, string | number>) =>
     translate(locale, k, v, business.texts[locale])
-  const money = (minor: number) => formatMoney(minor, { banglaDigits: business.banglaDigits })
+  const moneyFormat = { banglaDigits: business.banglaDigits, currency: business.currency }
+  const money = (minor: number) => formatMoney(minor, moneyFormat)
   const image = (m: MediaRow): ImageView => ({ src: `/api/media/${m.id}`, color: m.dominantColor })
   /** Every product's images in order, for the given products. */
   const imagesOf = async (products: Product[]) => {
@@ -48,10 +49,11 @@ export const storefront = cache(async () => {
   })
   const live = categories.filter((c) => !c.archived)
   return {
-    store: { ...store, name: design.brand.name },
+    store: { ...store, name: design.brand.name, showName: design.brand.showName },
     locale,
     design,
     business,
+    moneyFormat,
     layout: preview ? presetLayout(preview) : layoutOf(layout),
     preview,
     theme,

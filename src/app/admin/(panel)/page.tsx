@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { translate } from '@/i18n'
 import { daysAgo, formatMoney } from '@/modules/shared'
 import { runtime } from '@/server/runtime'
-import { currentLocale, currentStore } from '@/server/request'
+import { currentLocale, currentSettings, currentStore } from '@/server/request'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { InsightsPanel } from './insights-panel'
@@ -13,11 +13,13 @@ export const metadata: Metadata = { title: 'Dashboard' }
 type Search = Promise<{ range?: string; from?: string; to?: string; group?: string }>
 
 export default async function Dashboard({ searchParams }: { searchParams: Search }) {
-  const [store, locale, { container }] = await Promise.all([
+  const [store, locale, { container }, { business }] = await Promise.all([
     currentStore(),
     currentLocale(),
     runtime(),
+    currentSettings(),
   ])
+  const money = (minor: number) => formatMoney(minor, { currency: business.currency })
   const t = (k: string, v?: Record<string, string | number>) => translate(locale, k, v)
   const [pending, month, recent, low, cats, prods, ga4InAdmin, search] = await Promise.all([
     container.orders.listOrders(store.id, { status: 'PENDING', limit: 1 }),
@@ -58,6 +60,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
         search={search}
         ga4InAdmin={ga4InAdmin}
         t={t}
+        money={money}
       />
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
@@ -74,7 +77,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
                   >
                     <span className="font-semibold">#{o.orderNo}</span>
                     <span className="flex-1 truncate text-sm text-muted">{o.shipName}</span>
-                    <span className="font-semibold">{formatMoney(o.total)}</span>
+                    <span className="font-semibold">{money(o.total)}</span>
                   </Link>
                 </li>
               ))}

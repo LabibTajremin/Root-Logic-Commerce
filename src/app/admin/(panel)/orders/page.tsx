@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { orderStatuses, type OrderStatus } from '@/modules/orders'
-import { formatMoney } from '@/modules/shared'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../context'
@@ -13,7 +12,7 @@ type Search = Promise<{ status?: string; q?: string }>
 
 export default async function OrdersPage({ searchParams }: { searchParams: Search }) {
   const { status, q } = await searchParams
-  const { orders, store, t } = await adminContext('orders.manage')
+  const { orders, store, t, money } = await adminContext('orders.manage')
   const active = orderStatuses.find((s) => s === status) as OrderStatus | undefined
   const { rows, total } = await orders.listOrders(store.id, {
     status: active,
@@ -78,7 +77,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                 <span className="min-w-0 flex-1 truncate text-sm text-muted">
                   {o.shipName} · {o.shipPhone}
                 </span>
-                <span className="font-semibold">{formatMoney(o.total)}</span>
+                <span className="font-semibold">{money(o.total)}</span>
               </Link>
             </li>
           ))}

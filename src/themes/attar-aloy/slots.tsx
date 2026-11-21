@@ -11,10 +11,11 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
       <div className="flex w-full items-center justify-between">
         <span aria-hidden className="flex-1" />
         <Link
+          data-show-name={String(store.showName)}
           href="/"
           className="flex min-h-11 items-center font-heading text-3xl font-light tracking-wide"
         >
-          {store.name}
+          <span className="rlc-brand-name">{store.name}</span>
         </Link>
         <div className="flex flex-1 items-center justify-end gap-1">{actions}</div>
       </div>

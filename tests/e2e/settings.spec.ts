@@ -113,6 +113,8 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await page.locator('#color-text').fill('#1e2a1c')
   await page.getByLabel('Theme').selectOption('ankito')
   await page.getByLabel('Store name').fill('Ankito')
+  await page.getByLabel('Show the shop name as logo text').uncheck()
+  await page.getByLabel('Show the shop name as logo text').check()
   await page.getByLabel('Name font').selectOption('dm-serif-display')
   await page.getByLabel('Site font').selectOption('dm-sans')
   await page.locator('#color-button').fill('#3c6430')
@@ -294,6 +296,18 @@ test('layouts: owner previews a niche layout privately, then switches the home p
   await page.goto('/admin/layouts')
   await page.getByTestId('layout-general').getByRole('button', { name: 'Use this layout' }).click()
   await expect(page.getByTestId('layout-general')).toContainText('In use')
+
+  // Any section can be switched off and back on.
+  const grid = page.getByTestId('section-product-grid')
+  await grid.getByRole('button', { name: 'Turn off' }).click()
+  await expect(grid).toContainText('Off')
+  await page.goto('/')
+  await expect(page.locator('#products')).toHaveCount(0)
+  await page.goto('/admin/layouts')
+  await page.getByTestId('section-product-grid').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('section-product-grid')).toContainText('On')
+  await page.goto('/')
+  await expect(page.locator('#products')).toHaveCount(1)
 })
 
 test('language texts: owner picks the shop language, rewords labels and turns on Bangla digits', async ({
@@ -313,12 +327,15 @@ test('language texts: owner picks the shop language, rewords labels and turns on
   await page.getByLabel('Bangla', { exact: true }).check()
   await page.getByLabel('Let shoppers switch between English and Bangla').uncheck()
   await page.getByLabel(/Bangla digits/).check()
+  await page.getByLabel('Currency sign').selectOption('USD')
+  await page.getByLabel('Date format').selectOption('yyyy-MM-dd')
   await save()
 
   await page.context().clearCookies()
   await page.goto('/')
   await expect(page.getByRole('button', { name: /^ঝুড়ি/ })).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Language' })).toHaveCount(0)
+  await expect(page.getByText(/^\$[০-৯]/).first()).toBeVisible()
   await a11y()
 
   // The shop now opens in Bangla; pick English like an owner would before signing in.
@@ -329,6 +346,8 @@ test('language texts: owner picks the shop language, rewords labels and turns on
   await page.getByLabel('English', { exact: true }).check()
   await page.getByLabel('Let shoppers switch between English and Bangla').check()
   await page.getByLabel(/Bangla digits/).uncheck()
+  await page.getByLabel('Currency sign').selectOption('BDT')
+  await page.getByLabel('Date format').selectOption('d MMM yyyy')
   await save()
   await page.context().clearCookies()
   await page.goto('/')

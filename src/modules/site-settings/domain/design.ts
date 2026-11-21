@@ -30,7 +30,9 @@ const mediaRef = z.discriminatedUnion('kind', [
 export const designSchema = z.object({
   themeId: z.string().regex(/^[a-z0-9-]+$/),
   brand: z.object({
+    // Shown exactly as typed (any script); `showName: false` leaves just the logo mark.
     name: z.string().trim().min(1).max(60),
+    showName: z.boolean().default(true),
     logo: mediaRef.optional(),
     nameFont: font,
     siteFont: font,
@@ -68,7 +70,7 @@ export type DeepPartial<T> = {
 
 export const baseDesign: Design = {
   themeId: 'minimal',
-  brand: { name: 'My Store', nameFont: 'inter', siteFont: 'inter' },
+  brand: { name: 'My Store', showName: true, nameFont: 'inter', siteFont: 'inter' },
   mode: { base: 'light', light: 'white', dark: 'midnight', visitorToggle: false },
   colors: { accent: '#4F46E5', button: '#18181B', header: '#FFFFFF' },
   background: { pattern: 'none', patternOpacity: 10 },

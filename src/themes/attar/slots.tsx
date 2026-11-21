@@ -18,10 +18,11 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
         ))}
       </nav>
       <Link
+        data-show-name={String(store.showName)}
         href="/"
         className="col-start-2 flex min-h-11 items-center font-heading text-2xl uppercase tracking-[0.25em]"
       >
-        {store.name}
+        <span className="rlc-brand-name">{store.name}</span>
       </Link>
       <div className="col-start-3 flex items-center justify-end gap-1">{actions}</div>
     </div>

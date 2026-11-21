@@ -1,5 +1,4 @@
 import { groups, rangeKeys, type Insights } from '@/modules/insights'
-import { formatMoney } from '@/modules/shared'
 import { Button, Card, LockBadge } from '@/ui/primitives'
 
 type Search = { range?: string; from?: string; to?: string; group?: string }
@@ -9,11 +8,12 @@ type Props = {
   search: Search
   ga4InAdmin: boolean
   t: (k: string, v?: Record<string, string | number>) => string
+  money: (minor: number) => string
 }
 
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`
 
-export const InsightsPanel = async ({ insights, storeId, search, ga4InAdmin, t }: Props) => {
+export const InsightsPanel = async ({ insights, storeId, search, ga4InAdmin, t, money }: Props) => {
   const key = rangeKeys.find((k) => k === search.range) ?? '30d'
   const report = await insights.report(storeId, key, search)
   const s = report.summary
@@ -25,10 +25,10 @@ export const InsightsPanel = async ({ insights, storeId, search, ga4InAdmin, t }
     ['ordersDelivered', String(s.ordersDelivered)],
     ['ordersCancelled', String(s.ordersCancelled)],
     ['ordersReturned', String(s.ordersReturned)],
-    ['revenue', formatMoney(s.revenue)],
-    ['cost', formatMoney(s.cost)],
-    ['grossProfit', formatMoney(s.grossProfit)],
-    ['aov', formatMoney(s.aov)],
+    ['revenue', money(s.revenue)],
+    ['cost', money(s.cost)],
+    ['grossProfit', money(s.grossProfit)],
+    ['aov', money(s.aov)],
     ['conversion', pct(s.conversion)],
   ]
   const peak = Math.max(1, ...report.series.map((p) => p.pageViews))
@@ -108,7 +108,7 @@ export const InsightsPanel = async ({ insights, storeId, search, ga4InAdmin, t }
                 <li key={p.name} className="flex justify-between gap-2">
                   <span className="truncate">{p.name}</span>
                   <span className="text-muted">
-                    × {p.quantity} · {formatMoney(p.revenue)}
+                    × {p.quantity} · {money(p.revenue)}
                   </span>
                 </li>
               ))}

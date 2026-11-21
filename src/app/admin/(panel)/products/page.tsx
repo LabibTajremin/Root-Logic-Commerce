@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { formatMoney } from '@/modules/shared'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { SortableList } from '@/ui/sortable-list'
@@ -12,7 +11,7 @@ export const metadata: Metadata = { title: 'Products' }
 const TONE = { draft: 'neutral', active: 'success', archived: 'warning' } as const
 
 export default async function ProductsPage() {
-  const { catalog, store, t } = await adminContext('products.manage')
+  const { catalog, store, t, money } = await adminContext('products.manage')
   const products = await catalog.listProducts(store.id)
   return (
     <>
@@ -44,7 +43,7 @@ export default async function ProductsPage() {
                 <span className="min-w-0 flex-1 truncate font-semibold">{p.name}</span>
                 <Badge tone={TONE[p.status]}>{t(`status.${p.status}`)}</Badge>
                 <span className="text-sm text-muted">{t('products.inStock', { n: p.stock })}</span>
-                <span className="font-semibold">{formatMoney(p.price)}</span>
+                <span className="font-semibold">{money(p.price)}</span>
               </Link>
             ),
           }))}

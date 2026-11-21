@@ -4,7 +4,7 @@ import { layoutOf, presetIds, presetLayout, resolveSections } from '@/sections/r
 import { ActionForm } from '@/ui/action-form'
 import { Badge } from '@/ui/primitives'
 import { adminContext } from '../context'
-import { previewLayout, applyLayout } from './actions'
+import { applyLayout, previewLayout, toggleSection } from './actions'
 
 export const metadata: Metadata = { title: 'Layouts' }
 
@@ -16,11 +16,37 @@ export default async function LayoutsPage() {
     currentSettings(),
   ])
   if (!allowed) return <p className="text-muted">{t('error.access.denied')}</p>
-  const current = layoutOf(settings.layout).preset
+  const layout = layoutOf(settings.layout)
+  const current = layout.preset
   return (
     <>
       <h1 className="font-heading text-3xl">{t('layouts.title')}</h1>
       <p className="text-sm text-muted">{t('layouts.intro')}</p>
+      <section className="flex flex-col gap-3 rounded-card border border-line bg-surface p-5">
+        <h2 className="font-heading text-xl">{t('layouts.sections')}</h2>
+        <p className="text-sm text-muted">{t('layouts.sectionsHint')}</p>
+        <ul className="flex flex-col divide-y divide-line">
+          {layout.home.map((r, i) => (
+            <li
+              key={`${r.sectionId}-${i}`}
+              data-testid={`section-${r.sectionId}`}
+              className="flex min-h-14 items-center gap-3"
+            >
+              <span className="flex-1 font-semibold">{t(`sections.${r.sectionId}`)}</span>
+              <Badge tone={r.enabled ? 'success' : 'accent'}>
+                {t(r.enabled ? 'features.on' : 'features.off')}
+              </Badge>
+              <ActionForm action={toggleSection}>
+                <input type="hidden" name="index" value={i} />
+                <button className={button}>
+                  {t(r.enabled ? 'features.turnOff' : 'features.turnOn')}
+                </button>
+              </ActionForm>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <h2 className="font-heading text-xl">{t('layouts.gallery')}</h2>
       <ul className="grid gap-4 md:grid-cols-2">
         {presetIds.map((id) => (
           <li

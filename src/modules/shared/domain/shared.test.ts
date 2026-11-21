@@ -3,6 +3,7 @@ import {
   createEventBus,
   daysAgo,
   DomainError,
+  formatDate,
   formatMoney,
   isDomainError,
   toBanglaDigits,
@@ -23,6 +24,25 @@ describe('money', () => {
     expect(formatMoney(34950)).toBe('৳349.50')
     expect(formatMoney(129000, { banglaDigits: true })).toBe('৳১,২৯০')
     expect(toBanglaDigits('01712')).toBe('০১৭১২')
+  })
+  it("shows the owner's currency sign and its grouping", () => {
+    expect(formatMoney(24850000, { currency: 'INR' })).toBe('₹2,48,500')
+    expect(formatMoney(24850000, { currency: 'USD' })).toBe('$248,500')
+    expect(formatMoney(150, { currency: 'EUR' })).toBe('€1.50')
+  })
+})
+
+describe('dates', () => {
+  // 21 Nov 2026 22:30 UTC is already 22 Nov in Dhaka.
+  const late = new Date('2026-11-21T22:30:00Z')
+  it("formats in the shop's day and chosen format", () => {
+    expect(formatDate(late, { format: 'd MMM yyyy', locale: 'en' })).toBe('22 Nov 2026')
+    expect(formatDate(late, { format: 'dd/MM/yyyy', locale: 'en' })).toBe('22/11/2026')
+    expect(formatDate(late, { format: 'MM/dd/yyyy', locale: 'en' })).toBe('11/22/2026')
+    expect(formatDate(late, { format: 'yyyy-MM-dd', locale: 'en', banglaDigits: true })).toBe(
+      '২০২৬-১১-২২',
+    )
+    expect(formatDate(late, { format: 'd MMM yyyy', locale: 'bn' })).toBe('২২ নভে ২০২৬')
   })
 })
 

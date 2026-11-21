@@ -12,6 +12,7 @@ const KEYS = [
   'publish',
   'theme',
   'storeName',
+  'showName',
   'nameFont',
   'siteFont',
   'colors',

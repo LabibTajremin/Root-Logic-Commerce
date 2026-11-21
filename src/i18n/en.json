@@ -495,5 +495,11 @@
   "texts.lang.en": "English",
   "texts.lang.bn": "Bangla",
   "texts.language": "Shop language",
-  "texts.switcher": "Let shoppers switch between English and Bangla"
+  "texts.switcher": "Let shoppers switch between English and Bangla",
+  "texts.currency": "Currency sign",
+  "texts.dateFormat": "Date format",
+  "design.showName": "Show the shop name as logo text",
+  "layouts.sections": "Home page sections",
+  "layouts.sectionsHint": "Turn any part of your home page off or back on. Nothing is deleted.",
+  "layouts.gallery": "Ready-made layouts"
 }

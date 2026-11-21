@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { helpText } from '@/help'
 import { locales, storefrontKeys, translate } from '@/i18n'
+import { currencies, currencyCodes, dateFormats, formatDate, formatMoney } from '@/modules/shared'
 import { currentSettings } from '@/server/request'
 import { runtime } from '@/server/runtime'
 import { ActionForm } from '@/ui/action-form'
@@ -9,6 +10,8 @@ import { adminContext } from '../context'
 import { saveBusiness } from '../settings-actions'
 
 export const metadata: Metadata = { title: 'Language texts' }
+
+const SAMPLE_DATE = new Date('2026-11-21T06:00:00Z')
 
 export default async function TextsPage() {
   const { allowed, locale, t } = await adminContext('settings.manage')
@@ -69,6 +72,36 @@ export default async function TextsPage() {
               defaultChecked={business.banglaDigits}
               className="size-6 accent-[var(--color-accent)]"
             />
+          </label>
+        </Card>
+        <Card className="grid gap-4 md:grid-cols-2">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold">
+            {t('texts.currency')}
+            <select
+              name="currency"
+              defaultValue={business.currency}
+              className="min-h-11 rounded-control border border-line bg-surface px-3 text-base font-normal"
+            >
+              {currencyCodes.map((c) => (
+                <option key={c} value={c}>
+                  {`${currencies[c].sign.trim()} · ${c} · ${formatMoney(125000, { currency: c })}`}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-semibold">
+            {t('texts.dateFormat')}
+            <select
+              name="dateFormat"
+              defaultValue={business.dateFormat}
+              className="min-h-11 rounded-control border border-line bg-surface px-3 text-base font-normal"
+            >
+              {dateFormats.map((f) => (
+                <option key={f} value={f}>
+                  {formatDate(SAMPLE_DATE, { format: f, locale: 'en' })}
+                </option>
+              ))}
+            </select>
           </label>
         </Card>
         <Card>
