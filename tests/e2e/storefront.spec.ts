@@ -14,8 +14,10 @@ import {
 const drawer = (page: Page) => page.getByRole('dialog', { name: 'Cart' })
 const alert = (page: Page, text: string | RegExp) =>
   expect(page.getByRole('alert').filter({ hasText: text })).toBeVisible()
-const ld = async (page: Page) =>
-  (await page.locator('script[type="application/ld+json"]').textContent())!
+const ld = async (page: Page, type = 'Product') =>
+  (await page.locator('script[type="application/ld+json"]').allTextContents()).find((s) =>
+    s.includes(`"@type":"${type}"`),
+  )!
 const placeOrder = async (page: Page) => {
   await page.getByRole('button', { name: 'Place order' }).click()
   await page.waitForURL(/\/order\/\d+$/)
@@ -45,6 +47,7 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
 
   await page.goto('/')
   await expect(page.getByRole('link', { name: tea }).first()).toBeVisible()
+  expect(JSON.parse(await ld(page, 'Organization'))).toMatchObject({ url: expect.any(String) })
   await a11y()
   await page
     .getByRole('navigation', { name: 'All products' })
@@ -52,6 +55,7 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
     .click()
   await expect(page.getByRole('heading', { level: 1, name: `Drinks ${id}` })).toBeVisible()
   await expect(page.getByRole('link', { name: honey })).toHaveCount(0)
+  expect(JSON.parse(await ld(page, 'BreadcrumbList')).itemListElement).toHaveLength(2)
   await a11y()
 
   await page.getByRole('link', { name: tea }).first().click()
@@ -63,6 +67,11 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
     category: `Drinks ${id}`,
     offers: { price: '500.00', availability: 'https://schema.org/InStock' },
   })
+  expect(
+    JSON.parse(await ld(page, 'BreadcrumbList')).itemListElement.map(
+      (i: { name: string }) => i.name,
+    ),
+  ).toEqual(['Home', `Drinks ${id}`, tea])
   await a11y()
   await page.getByRole('button', { name: 'Add to cart' }).click()
   await expect(drawer(page)).toBeVisible()

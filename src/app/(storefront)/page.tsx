@@ -1,14 +1,23 @@
 import Link from 'next/link'
+import { JsonLd, organizationLd } from './json-ld'
+import { origin } from './origin'
 import { ProductGrid } from './product-grid'
 import { PromoBanners } from './promo-banners'
 import { storefront } from './storefront'
 
 export default async function HomePage() {
-  const { theme, store, categories, catalog, t } = await storefront()
+  const { theme, store, design, categories, catalog, t } = await storefront()
   const { Hero, CategoryNav } = theme.slots
   const products = await catalog.listProducts(store.id, { status: 'active' })
   return (
     <>
+      <JsonLd
+        data={organizationLd(
+          await origin(),
+          store.name,
+          design.footer.socials.map((s) => s.url),
+        )}
+      />
       <PromoBanners />
       <Hero
         store={store}

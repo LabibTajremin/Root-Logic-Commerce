@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { GaEvent } from '../../ga'
+import { breadcrumbLd, JsonLd } from '../../json-ld'
 import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
@@ -46,10 +47,13 @@ export default async function ProductPage({ params }: Props) {
   }
   return (
     <article className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-2">
-      <script
-        type="application/ld+json"
-        // JSON.stringify output with `<` escaped cannot close the script tag.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      <JsonLd data={jsonLd} />
+      <JsonLd
+        data={breadcrumbLd(base, [
+          { name: t('nav.home'), path: '/' },
+          ...(cat ? [{ name: cat.name, path: `/c/${cat.slug}` }] : []),
+          { name: p.name, path: `/p/${p.slug}` },
+        ])}
       />
       <GaEvent
         name="view_item"
