@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 10 (merged design redo) — spec docs/BUILD_SPEC.md (v1+v2 merged)
-Now: Phase 10 redo — step 1 DONE (textures handloom/smoke-gold/florals/paper + per-theme hero/mood photos `photo/<theme>-hero|mood`, Foundation › Assets). NEXT: moodboard → missing §10.1 components (reel cover-flow + overlay first) → Core Home/Product/Landing redo + missing §10.2 screens + বাংলা variants → 5 theme pages → Cover + Docs → design/README.md → Phase 11.
+Now: Phase 10 redo — steps 1–2 DONE (assets; Foundation › Moodboard 84:60, Reels cover-flow section 84:116 [Reel/Card 84:117, carousel desktop 84:132 / mobile 84:244, overlay 84:290], components section 86:200: form controls, stat tile, chart, filter bar, data table, empty state, toasts, confirm, countdown, popups, live preview, stickers, price tag, seal, dividers, micro-illustrations). NEXT: rebuild Core Home/Product/Landing web+mobile to quality bar → missing §10.2 screens + বাংলা variants → theme pages → Cover + Docs → README → Phase 11.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
