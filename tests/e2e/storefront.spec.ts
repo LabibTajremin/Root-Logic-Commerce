@@ -363,3 +363,10 @@ test('order tracking is rate limited per connection', async ({ page }) => {
   }
   await expect(page.getByRole('alert').filter({ hasText: 'Too many tries' })).toBeVisible()
 })
+
+test('TLS ask endpoint approves only store domains', async ({ request }) => {
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  expect((await request.get('/api/domains/check?domain=127.0.0.1')).status()).toBe(200)
+  expect((await request.get('/api/domains/check?domain=evil.example')).status()).toBe(404)
+  expect((await request.get('/api/domains/check')).status()).toBe(404)
+})

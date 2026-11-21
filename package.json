@@ -20,7 +20,8 @@
     "e2e": "playwright test --trace off",
     "coverage:merge": "node scripts/coverage-merge.mjs",
     "verify": "node scripts/verify.mjs",
-    "themes:gen": "node scripts/themes-gen.mjs"
+    "themes:gen": "node scripts/themes-gen.mjs",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
