@@ -1,5 +1,5 @@
-RUNNING
-Now: Phase 7 — hardening & deploy: CSP, rate limits, S3, deploy/, vercel.json, load check, Lighthouse gate, README, legacy removed. Running the full gate, then CI; then Phase 8 (new-theme skill → attar-aloy).
+ALL_PHASES_DONE 21bc2f8
+Now: all phases done — PR https://github.com/LabibTajremin/Root-Logic-Commerce/pull/2 ready for the owner to review and merge.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)
@@ -9,9 +9,9 @@ Now: Phase 7 — hardening & deploy: CSP, rate limits, S3, deploy/, vercel.json,
 - [x] Phase 4 — Admin panel — phase 4 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green, gated with phase 5)
 - [x] Phase 5 — Storefront + themes — phase 5 done 010ebc3 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44818857458 — green)
 - [x] Phase 6 — Messages, insights, promotions — phase 6 done 3bbb01d (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44851341080 — green)
-- [ ] Phase 7 — Hardening & deploy
-- [ ] Phase 8 — Theme-builder skill
-- [ ] Phase 9 — Update automatic-agentic-run skill
+- [x] Phase 7 — Hardening & deploy — phase 7 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green)
+- [x] Phase 8 — Theme-builder skill — phase 8 done 21bc2f8 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44876019184 — green; theme attar-aloy shipped)
+- [x] Phase 9 — Update automatic-agentic-run skill — phase 9 done 21bc2f8 (docs/SKILL_FEEDBACK.md)
 
 ## Preflight
 - git push to `claude/vibrant-cannon-wwnfb9`: granted (verified dry-run)
