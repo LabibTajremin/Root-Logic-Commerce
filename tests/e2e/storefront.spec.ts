@@ -354,7 +354,8 @@ test('order tracking is rate limited per connection', async ({ page }) => {
   const limited = page.getByRole('alert').filter({ hasText: 'Too many tries' })
   // 20 tries per 10 minutes: keep submitting (each waits for its answer) until refused.
   for (let i = 0; i < 25 && !(await limited.isVisible()); i++) {
-    // The form clears after each answer (React form actions reset it).
+    // The form clears after each answer (React form actions reset it): wait, then refill.
+    await expect(page.getByLabel('Order number')).toHaveValue('')
     await page.getByLabel('Order number').fill('999999')
     await page.getByLabel('Phone number').fill('01712345678')
     const answered = page.waitForResponse((r) => r.request().method() === 'POST')
