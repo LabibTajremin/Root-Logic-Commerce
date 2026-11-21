@@ -14,6 +14,7 @@ export default async function MorePage() {
     ['/admin/messages', 'nav.messages', 'chat'],
     ['/admin/seo', 'nav.seo', 'trend'],
     ['/admin/users', 'nav.users', 'users'],
+    ['/admin/features', 'nav.features', 'layers'],
     ['/admin/plan', 'nav.plan', 'star'],
     ['/admin/help', 'nav.help', 'help'],
   ]

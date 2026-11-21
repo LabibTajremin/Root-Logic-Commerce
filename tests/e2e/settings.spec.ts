@@ -217,6 +217,41 @@ test('SUPER_ADMIN grants and revokes a premium feature; owners only see locks', 
   await expect(page.getByTestId('feature-ga4InAdmin')).toContainText('Premium')
 })
 
+test('features: owner switches modules; paid ones stay locked until SUPER_ADMIN grants them', async ({
+  page,
+  a11y,
+}) => {
+  await page.goto('/admin/features')
+  await expect(page.getByRole('heading', { level: 1, name: 'Features' })).toBeVisible()
+  await a11y()
+  const coupons = page.getByTestId('module-coupons')
+  await expect(coupons).toContainText('On')
+  await coupons.getByRole('button', { name: 'Turn off' }).click()
+  await expect(coupons).toContainText('Off')
+  await coupons.getByRole('button', { name: 'Turn on' }).click()
+  await expect(coupons).toContainText('On')
+  await expect(page.getByTestId('module-reels')).toContainText('Premium')
+  await expect(page.getByTestId('module-reels').getByRole('link')).toHaveAttribute(
+    'href',
+    /^https:\/\/wa\.me\/\d+$/,
+  )
+
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-reels').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-reels')).toContainText('Included')
+  await page.goto('/admin/features')
+  const reels = page.getByTestId('module-reels')
+  await expect(reels).toContainText('Off')
+  await reels.getByRole('button', { name: 'Turn on' }).click()
+  await expect(reels).toContainText('On')
+  await reels.getByRole('button', { name: 'Turn off' }).click()
+  await expect(reels).toContainText('Off')
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-reels').getByRole('button', { name: 'Revoke' }).click()
+  await expect(page.getByTestId('feature-reels')).toContainText('Premium')
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

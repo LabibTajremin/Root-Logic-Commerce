@@ -70,6 +70,18 @@ export const storeEntitlements = pgTable(
   (t) => [primaryKey({ columns: [t.storeId, t.entitlement] })],
 )
 
+// Per-store module switches (J5); a missing row means "use the catalogue default".
+export const storeFeatures = pgTable(
+  'store_features',
+  {
+    storeId: storeId(),
+    feature: text().notNull(),
+    enabled: boolean().notNull(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.storeId, t.feature] })],
+)
+
 // Better Auth core tables (plural names) + role/store for authorization.
 export const users = pgTable(
   'users',

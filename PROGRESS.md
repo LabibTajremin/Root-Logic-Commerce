@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 10 DONE (Figma 9 pages; design/README.md). NEXT: Phase 11 — install deps, baseline pnpm verify, then J5 feature toggles + entitlements (TDD) → sections registry + layout → J2/J3 → J1 → J4 → J8 → admin shell (F1/F2/F3) → B1/B3/B9/B10/B15 → v1 gaps.
+Now: Phase 11 — J5 feature toggles built (store_features + migration 0001, plans/features use-case, /admin/features, i18n EN/BN, unit+integration+e2e tests); full pnpm verify running. NEXT: confirm verify + CI green → BreadcrumbList/Organization JSON-LD (v1 gap) → sections registry + layout → J2/J3 → J1 → J4 → J8 → admin shell F1/F2/F3 → B1/B3/B9/B10/B15.
 
 ## Phases
 - [x] Phase 0 — quality gate (pnpm verify + CI on PR) — phase 0 done 3dc6088 (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/44727113133)

@@ -7,7 +7,7 @@ import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
-import { createPlans } from '@/modules/plans'
+import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
 import { createSiteSettings } from '@/modules/site-settings'
 import { createStock } from '@/modules/stock'
@@ -23,6 +23,7 @@ import { createS3Storage } from '@/infrastructure/storage/s3-storage'
 import { unavailableStorage } from '@/infrastructure/storage/unavailable'
 import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
+import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
@@ -55,6 +56,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
   const settings = createSiteSettings({ repo: createSettingsRepo(db) })
   const orders = createOrders({ repo: createOrdersRepo(db), bus })
   const secrets = createSecretBox(config.settingsKey)
+  const plans = createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements })
   const storeSettings = (storeId: string) => settings.get(storeId, { storeName: config.store.name })
   const deliver = createDeliver({
     mode: config.messagesTransport,
@@ -129,7 +131,8 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     }),
     orders,
     stock: createStock({ repo: createStockRepo(db) }),
-    plans: createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements }),
+    plans,
+    features: createFeatures({ repo: createFeaturesRepo(db), plans }),
     settings,
     access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
     media: createMedia({

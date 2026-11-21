@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createPlans } from '@/modules/plans'
+import { createPlans, entitlementIds } from '@/modules/plans'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { storeEntitlements } from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
@@ -17,7 +17,7 @@ describe('plans', () => {
     expect(await plans.has(store, 'seoPro')).toBe(true)
     expect(await plans.has(store, 'ga4InAdmin')).toBe(false)
     const f = await plans.features(store)
-    expect(f).toHaveLength(6)
+    expect(f).toHaveLength(entitlementIds.length)
     expect(f.filter((x) => x.unlocked).map((x) => x.id)).toEqual(['removeBranding', 'seoPro'])
     await plans.revoke(store, 'removeBranding')
     expect(await plans.has(store, 'removeBranding')).toBe(false)
