@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { defaultLayout, isSectionId, layoutOf, resolveSections } from './registry'
+import {
+  defaultLayout,
+  isPresetId,
+  isSectionId,
+  layoutOf,
+  presetIds,
+  presetLayout,
+  previewPreset,
+  resolveSections,
+} from './registry'
 
 describe('sections registry', () => {
   it('renders only enabled, known sections whose settings validate', () => {
@@ -26,5 +35,19 @@ describe('sections registry', () => {
       'category-nav',
       'product-grid',
     ])
+  })
+
+  it('every preset only uses registered sections and is a valid layout', () => {
+    for (const id of presetIds) {
+      const l = presetLayout(id)
+      expect(layoutOf(l)).toEqual(l)
+      expect(l.home.every((r) => isSectionId(r.sectionId))).toBe(true)
+    }
+    expect(resolveSections(presetLayout('gadget').home).map((s) => s.id)).not.toContain('hero')
+    expect(isPresetId('fashion')).toBe(true)
+    expect(isPresetId('constructor')).toBe(false)
+    expect(previewPreset('gadget')).toBe('gadget')
+    expect(previewPreset('retired')).toBeNull()
+    expect(previewPreset(null)).toBeNull()
   })
 })

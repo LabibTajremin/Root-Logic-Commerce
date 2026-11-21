@@ -254,6 +254,48 @@ test('features: owner switches modules; paid ones stay locked until SUPER_ADMIN 
   await expect(page.getByTestId('feature-reels')).toContainText('Premium')
 })
 
+test('layouts: owner previews a niche layout privately, then switches the home page', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  await page.goto('/admin/layouts')
+  await expect(page.getByRole('heading', { level: 1, name: 'Layout gallery' })).toBeVisible()
+  await expect(page.getByTestId('layout-general')).toContainText('In use')
+  await a11y()
+  const fashion = page.getByTestId('layout-fashion')
+  await fashion
+    .locator('input[name="preset"]')
+    .first()
+    .evaluate((el) => {
+      ;(el as HTMLInputElement).value = 'nope'
+    })
+  await fashion.getByRole('button', { name: 'Preview' }).click()
+  await alert(page, 'That layout does not exist.')
+
+  await page.getByTestId('layout-gadget').getByRole('button', { name: 'Preview' }).click()
+  await page.waitForURL((u) => u.pathname === '/')
+  const banner = page.getByRole('status').filter({ hasText: 'Only you see this' })
+  await expect(banner).toContainText('Gadgets')
+  await expect(page.locator('a[href="#products"]')).toHaveCount(0)
+  await a11y()
+  await banner.getByRole('button', { name: 'Exit preview' }).click()
+  await page.waitForURL(/\/admin\/layouts$/)
+  await page.goto('/')
+  await expect(page.getByText('Only you see this')).toHaveCount(0)
+  await expect(page.locator('a[href="#products"]')).toHaveCount(1)
+
+  await page.goto('/admin/layouts')
+  await page.getByTestId('layout-grocery').getByRole('button', { name: 'Use this layout' }).click()
+  await expect(page.getByTestId('layout-grocery')).toContainText('In use')
+  await page.goto('/')
+  await expect(page.locator('a[href="#products"]')).toHaveCount(0)
+
+  await page.goto('/admin/layouts')
+  await page.getByTestId('layout-general').getByRole('button', { name: 'Use this layout' }).click()
+  await expect(page.getByTestId('layout-general')).toContainText('In use')
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

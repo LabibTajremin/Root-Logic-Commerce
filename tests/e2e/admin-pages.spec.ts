@@ -192,6 +192,7 @@ test('owner invites staff; staff cannot reach owner-only settings', async ({
     '/admin/messages',
     '/admin/promotions',
     '/admin/features',
+    '/admin/layouts',
   ]) {
     await staff.goto(p)
     await expect(staff.getByText('Only the store owner can do this.')).toBeVisible()

@@ -1,4 +1,4 @@
-import { layoutOf, resolveSections } from '@/sections/registry'
+import { resolveSections } from '@/sections/registry'
 import { JsonLd, organizationLd } from './json-ld'
 import { origin } from './origin'
 import { Sections } from './sections'
@@ -16,7 +16,7 @@ export default async function HomePage() {
           design.footer.socials.map((s) => s.url),
         )}
       />
-      <Sections sections={resolveSections(layoutOf(layout).home)} ctx={ctx} />
+      <Sections sections={resolveSections(layout.home)} ctx={ctx} />
     </>
   )
 }

@@ -17,12 +17,28 @@ export const isSectionId = (id: string): id is SectionId => Object.hasOwn(sectio
 
 const ref = (sectionId: SectionId): SectionRef => ({ sectionId, enabled: true, settings: {} })
 
-/** Niche layout presets: ordered home sections. */
+const off = (sectionId: SectionId): SectionRef => ({ ...ref(sectionId), enabled: false })
+
+/** Niche layout presets: ordered home sections. More niches arrive with their sections. */
 export const layoutPresets = {
   general: [ref('promo-banners'), ref('hero'), ref('category-nav'), ref('product-grid')],
+  fashion: [ref('hero'), ref('category-nav'), ref('product-grid'), ref('promo-banners')],
+  gadget: [ref('promo-banners'), ref('product-grid'), ref('category-nav'), off('hero')],
+  grocery: [ref('category-nav'), ref('promo-banners'), ref('product-grid'), off('hero')],
 } as const satisfies Record<string, SectionRef[]>
 
-export const defaultLayout: Layout = { preset: 'general', home: [...layoutPresets.general] }
+export type PresetId = keyof typeof layoutPresets
+export const presetIds = Object.keys(layoutPresets) as PresetId[]
+export const isPresetId = (id: string): id is PresetId => Object.hasOwn(layoutPresets, id)
+export const presetLayout = (preset: PresetId): Layout => ({
+  preset,
+  home: [...layoutPresets[preset]],
+})
+
+/** A previewed preset that still exists (presets can be retired between deploys). */
+export const previewPreset = (id: string | null) => (id !== null && isPresetId(id) ? id : null)
+
+export const defaultLayout = presetLayout('general')
 
 export type ResolvedSection = { id: SectionId; settings: Record<string, unknown> }
 

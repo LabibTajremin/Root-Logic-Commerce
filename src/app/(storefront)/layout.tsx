@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
 import { Analytics } from './analytics'
 import { CartButton, CartDrawer } from './cart-drawer'
+import { exitPreview } from './preview-actions'
 import { storefront } from './storefront'
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -17,7 +19,17 @@ export const generateMetadata = async (): Promise<Metadata> => {
 }
 
 export default async function StorefrontLayout({ children }: { children: ReactNode }) {
-  const { theme, design: d, store, categories, locale, business, credit, t } = await storefront()
+  const {
+    theme,
+    design: d,
+    store,
+    categories,
+    locale,
+    business,
+    credit,
+    preview,
+    t,
+  } = await storefront()
   const { Header, Footer } = theme.slots
   const k = (keys: string[]) => Object.fromEntries(keys.map((x) => [x, t(`shop.${x}`)]))
   return (
@@ -30,6 +42,20 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       className="flex min-h-dvh flex-col"
     >
       <style>{themeCss(theme, d.mode.base) + toCssVars(d)}</style>
+      {preview && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-center gap-3 bg-text px-4 py-2 text-sm text-bg"
+        >
+          <span>{t('layouts.previewBanner', { name: t(`layouts.preset.${preview}`) })}</span>
+          <Link href="/admin/layouts" className="min-h-11 content-center font-semibold underline">
+            {t('layouts.use')}
+          </Link>
+          <form action={exitPreview}>
+            <button className="min-h-11 font-semibold underline">{t('layouts.exitPreview')}</button>
+          </form>
+        </div>
+      )}
       <Header
         store={store}
         categories={categories}

@@ -1,20 +1,23 @@
+import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { translate } from '@/i18n'
 import type { Product } from '@/modules/catalog'
 import { formatMoney } from '@/modules/shared'
 import { runtime } from '@/server/runtime'
+import { PREVIEW_COOKIE, readPreview } from '@/server/preview'
 import { currentLocale, currentSettings, currentStore } from '@/server/request'
+import { layoutOf, presetLayout, previewPreset } from '@/sections/registry'
 import type { MediaRow } from '@/modules/media'
 import { loadTheme, type ImageView, type ProductView } from '@/themes'
 
 /** Everything a storefront page needs for the store resolved from the Host header. */
 export const storefront = cache(async () => {
-  const [store, locale, { design, business, layout }, { container }] = await Promise.all([
-    currentStore(),
-    currentLocale(),
-    currentSettings(),
-    runtime(),
-  ])
+  const [store, locale, { design, business, layout }, { container, config }, jar] =
+    await Promise.all([currentStore(), currentLocale(), currentSettings(), runtime(), cookies()])
+  // Owner-only layout preview: a cookie signed for this store, set from the layout gallery.
+  const preview = previewPreset(
+    readPreview(config.authSecret, store.id, jar.get(PREVIEW_COOKIE)?.value),
+  )
   const [theme, categories, unbranded] = await Promise.all([
     loadTheme(design.themeId),
     container.catalog.listCategories(store.id),
@@ -48,7 +51,8 @@ export const storefront = cache(async () => {
     locale,
     design,
     business,
-    layout,
+    layout: preview ? presetLayout(preview) : layoutOf(layout),
+    preview,
     theme,
     t,
     money,

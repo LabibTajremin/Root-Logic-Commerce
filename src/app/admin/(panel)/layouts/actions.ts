@@ -1,0 +1,42 @@
+'use server'
+
+import { revalidateTag } from 'next/cache'
+import { cookies } from 'next/headers'
+import { DomainError } from '@/modules/shared'
+import { PREVIEW_COOKIE, previewValue } from '@/server/preview'
+import { currentSettings } from '@/server/request'
+import { runtime } from '@/server/runtime'
+import { isPresetId, presetLayout } from '@/sections/registry'
+import { act, type ActionState } from '../act'
+
+const presetOf = (form: FormData) => {
+  const id = String(form.get('preset'))
+  if (!isPresetId(id)) throw new DomainError('layouts.unknown')
+  return id
+}
+
+/** Owner-only preview: a store-bound signed cookie, then the full site. */
+export async function previewLayout(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ store }) => {
+    const { config } = await runtime()
+    ;(await cookies()).set(
+      PREVIEW_COOKIE,
+      previewValue(config.authSecret, store.id, presetOf(form)),
+      {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      },
+    )
+    return '/'
+  })
+}
+
+export async function applyLayout(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ settings, store }) => {
+    const { version } = await currentSettings()
+    await settings.saveLayout(store.id, presetLayout(presetOf(form)), version)
+    ;(await cookies()).delete(PREVIEW_COOKIE)
+    revalidateTag(`store:${store.id}`, 'max')
+  })
+}
