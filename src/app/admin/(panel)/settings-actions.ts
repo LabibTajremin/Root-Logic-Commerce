@@ -2,7 +2,8 @@
 
 import { locales, storefrontKeys } from '@/i18n'
 import { act, type ActionState } from './act'
-import { currentSettings } from '@/server/request'
+import { cookies } from 'next/headers'
+import { currentLocale, currentSettings } from '@/server/request'
 
 /** Merges a partial business-settings patch from a form into the saved settings (version-locked). */
 export async function saveBusiness(_: ActionState, form: FormData) {
@@ -42,6 +43,12 @@ export async function saveBusiness(_: ActionState, form: FormData) {
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },
       }),
+    }
+    // Changing the shop language must not flip the owner's own admin language mid-edit.
+    if (has('texts')) {
+      const jar = await cookies()
+      if (!jar.get('lang'))
+        jar.set('lang', await currentLocale(), { path: '/', maxAge: 31536000, sameSite: 'lax' })
     }
     await settings.saveBusiness(store.id, next, Number(form.get('version')))
   })

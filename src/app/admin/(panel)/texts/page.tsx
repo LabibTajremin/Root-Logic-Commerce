@@ -57,7 +57,11 @@ export default async function TextsPage() {
               className="size-6 accent-[var(--color-accent)]"
             />
           </label>
-          <label className="flex min-h-11 items-center justify-between gap-3 font-semibold">
+          {/* htmlFor: the help button inside would otherwise become the label's control. */}
+          <label
+            htmlFor="bangla-digits"
+            className="flex min-h-11 items-center justify-between gap-3 font-semibold"
+          >
             <span className="flex items-center gap-1">
               {t('texts.banglaDigits')}
               <HelpHint
@@ -67,6 +71,7 @@ export default async function TextsPage() {
               />
             </span>
             <input
+              id="bangla-digits"
               type="checkbox"
               name="banglaDigits"
               defaultChecked={business.banglaDigits}
