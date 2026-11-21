@@ -52,6 +52,7 @@ test('categories: add, nest, rename, block cycles, reorder and archive', async (
   await drag(page, `Oil ${id}`)
 
   await page.getByRole('link', { name: `Oil ${id}` }).click()
+  await expect(page.getByLabel('Category name')).toHaveValue(`Oil ${id}`)
   // A tampered id is an unexpected failure: a retry hint, never a 500.
   await page
     .locator('input[name="id"]')
