@@ -22,6 +22,12 @@ Now: Phase 7 — hardening & deploy. Done: security headers/CSP (local). Next: c
 
 Preflight: done 2026-11-20
 
+## Footprint check (spec §8)
+Production standalone build pinned to 1 CPU (`taskset -c 0`, `--max-old-space-size=256`), real Postgres 16 (`shared_buffers=128MB`), migrated with `pnpm db:migrate`:
+- idle RSS **132 MB**; after 20 s of 20 concurrent clients (home, search, track, 404): **192 MB** (budget ≤ 300 MB)
+- **104 req/s**, p50 178 ms, p95 299 ms, 0 errors
+Namecheap Spark-class VPS (1 vCPU / 2 GB) fits: app ≤ ~450 MB worst case (PM2 restarts above), Postgres small, Caddy ~30 MB. Measured 2026-11-21.
+
 ## Skipped
 - S3 and Google Drive *upload* storage adapters (no credentials; S3 needs SigV4 client). Configured but unavailable drivers fail uploads with a friendly message; Drive *links* work. Planned for Phase 7 (needed for the Vercel profile).
 - GA4 *data inside admin* (premium ga4InAdmin) needs a Google service account per store; the dashboard shows the lock / "Root Logic Lab will connect it" note. gtag + ecommerce events on the storefront are done.
