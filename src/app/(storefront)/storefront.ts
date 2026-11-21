@@ -9,7 +9,7 @@ import { loadTheme, type ImageView, type ProductView } from '@/themes'
 
 /** Everything a storefront page needs for the store resolved from the Host header. */
 export const storefront = cache(async () => {
-  const [store, locale, { design, business }, { container }] = await Promise.all([
+  const [store, locale, { design, business, layout }, { container }] = await Promise.all([
     currentStore(),
     currentLocale(),
     currentSettings(),
@@ -48,6 +48,7 @@ export const storefront = cache(async () => {
     locale,
     design,
     business,
+    layout,
     theme,
     t,
     money,

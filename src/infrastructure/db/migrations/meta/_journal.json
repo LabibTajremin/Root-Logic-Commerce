@@ -15,6 +15,13 @@
       "when": 1795293988508,
       "tag": "0001_store_features",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795296140552,
+      "tag": "0002_site_layout",
+      "breakpoints": true
     }
   ]
 }

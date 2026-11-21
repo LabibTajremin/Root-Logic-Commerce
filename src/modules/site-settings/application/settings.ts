@@ -1,5 +1,6 @@
 import { DomainError, validate } from '@/modules/shared'
 import { businessSchema, type Business } from '../domain/business'
+import { layoutSchema, type Layout } from '../domain/layout'
 import {
   baseDesign,
   designSchema,
@@ -8,14 +9,19 @@ import {
   type Design,
 } from '../domain/design'
 
-export type StoredSettings = { design: unknown; business: unknown; version: number }
+export type StoredSettings = {
+  design: unknown
+  business: unknown
+  layout: unknown
+  version: number
+}
 export type SettingsRepo = {
   get(storeId: string): Promise<StoredSettings | null>
   insert(storeId: string, s: { design: Design; business: Business }): Promise<void>
   /** Optimistic lock: returns the new version, or null if someone saved in between. */
   update(
     storeId: string,
-    patch: { design?: Design; business?: Business },
+    patch: { design?: Design; business?: Business; layout?: Layout },
     expectedVersion: number,
   ): Promise<number | null>
 }
@@ -31,7 +37,7 @@ export const createSiteSettings = ({ repo }: { repo: SettingsRepo }) => {
 
   const save = async (
     storeId: string,
-    patch: { design?: Design; business?: Business },
+    patch: { design?: Design; business?: Business; layout?: Layout },
     version: number,
   ) => {
     const next = await repo.update(storeId, patch, version)
@@ -46,11 +52,13 @@ export const createSiteSettings = ({ repo }: { repo: SettingsRepo }) => {
       if (!row) {
         const fresh = { design: resolve(undefined, defaults), business: businessSchema.parse({}) }
         await repo.insert(storeId, fresh)
-        return { ...fresh, version: 1 }
+        return { ...fresh, layout: null, version: 1 }
       }
       return {
         design: resolve(row.design, defaults),
         business: businessSchema.parse(row.business),
+        // Raw: the sections registry owns section ids and falls back to its default layout.
+        layout: row.layout,
         version: row.version,
       }
     },
@@ -58,6 +66,8 @@ export const createSiteSettings = ({ repo }: { repo: SettingsRepo }) => {
       save(storeId, { design: validate(designSchema, input) }, version),
     saveBusiness: async (storeId: string, input: unknown, version: number) =>
       save(storeId, { business: validate(businessSchema, input) }, version),
+    saveLayout: async (storeId: string, input: unknown, version: number) =>
+      save(storeId, { layout: validate(layoutSchema, input) }, version),
   }
 }
 

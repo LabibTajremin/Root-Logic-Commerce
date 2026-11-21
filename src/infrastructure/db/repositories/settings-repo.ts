@@ -10,6 +10,7 @@ export const createSettingsRepo = (db: Db): SettingsRepo => ({
         .select({
           design: siteSettings.design,
           business: siteSettings.business,
+          layout: siteSettings.layout,
           version: siteSettings.version,
         })
         .from(siteSettings)

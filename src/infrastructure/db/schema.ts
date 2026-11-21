@@ -153,6 +153,7 @@ export const siteSettings = pgTable('site_settings', {
     .references(() => stores.id, { onDelete: 'cascade' }),
   design: jsonb().notNull(),
   business: jsonb().notNull(),
+  layout: jsonb(),
   version: integer().notNull().default(1),
   updatedAt: updatedAt(),
 })

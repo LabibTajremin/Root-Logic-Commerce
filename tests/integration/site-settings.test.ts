@@ -47,6 +47,17 @@ describe('site settings', () => {
       business: { banglaDigits: true },
       design: { themeId: 'ankito', colors: { header: '#000000', accent: '#A8763E' } },
     })
+    expect(again.layout).toBeNull()
+    const layout = {
+      preset: 'general',
+      home: [{ sectionId: 'hero', enabled: true, settings: {} }],
+    }
+    expect(await settings.saveLayout(store, layout, 3)).toBe(4)
+    expect((await settings.get(store, defaults)).layout).toEqual(layout)
+    await expect(
+      settings.saveLayout(store, { preset: 'Bad Id', home: [] }, 4),
+    ).rejects.toMatchObject({ code: 'validation' })
+
     expect(
       (await settings.get(await seedStore(db, 'plain'), { storeName: 'Plain' })).design.themeId,
     ).toBe('minimal')
