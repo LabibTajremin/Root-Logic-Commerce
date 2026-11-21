@@ -53,11 +53,12 @@ test('categories: add, nest, rename, block cycles, reorder and archive', async (
 
   await page.getByRole('link', { name: `Oil ${id}` }).click()
   await expect(page.getByLabel('Category name')).toHaveValue(`Oil ${id}`)
+  // The reorder's refresh can re-render the form late and undo the tamper.
+  await page.waitForLoadState('networkidle')
   // A tampered id is an unexpected failure: a retry hint, never a 500.
-  await page
-    .locator('input[name="id"]')
-    .first()
-    .evaluate((e: HTMLInputElement) => (e.value = 'x'))
+  const hiddenId = page.locator('input[name="id"]').first()
+  await hiddenId.evaluate((e: HTMLInputElement) => (e.value = 'x'))
+  await expect(hiddenId).toHaveValue('x')
   await page.getByRole('button', { name: 'Archive' }).click()
   await alert(page, 'Something went wrong. Please try again.')
   await page.reload()
