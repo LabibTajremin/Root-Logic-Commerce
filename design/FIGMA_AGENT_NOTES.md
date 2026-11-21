@@ -69,3 +69,9 @@ Sections: Core web public `81:4742`, web admin `81:4743`, mobile public `81:4744
 - Frames in every section are ordered by user flow: public Home → Category → Search → Product → … → Cart → Checkout → OTP → Thank-you → Track → Landing/Blog/CMS → Offline → 404; admin Login → checklist → Dashboard → then sidebar menu order. Labels sit 60px above each frame.
 - Each design page ends with a `Dark mode › Web + Mobile` section (Attar is dark-first, so it gets `Light mode ›`): web Home, Product, Checkout, admin Dashboard, Orders; mobile Home, Product, Cart, Checkout, admin Dashboard, Orders. Mode is set on the section AND every clone (clones carry their own explicit mode).
 - Chip gotcha again: fills bound to a variable reset opacity → chips whose fill equals their text colour were set to 0.14 (Core 115, each theme 32).
+
+## Language pass (2026-11-21)
+- Every screen is in English. Bangla lives only in `Bangla demo › Web + Mobile` sections (Core: Home, Product, Cart, Checkout, AI Knowledge, Dashboard, Orders; each theme: Home + Product web/mobile) with the logo name in Bangla (Anek Bangla) — owners may type any script as logo text.
+- Bangla→English dictionary (852 strings) is stored in the file: `figma.root.getSharedPluginData('rlc.design','bn2en')` — reuse it for any new Bangla mock copy. Bangla digits are converted automatically; text that names the language itself ("বাংলা", the "বাং" toggle) stays.
+- `Admin/Language texts` now = "Language, money & dates": shop language, shopper EN/BN switch, Bangla digits, currency sign, date format, wording table.
+- Fixed again: the topbar "Do it with AI" button (main component `62:110`) fill opacity 0.12 — opacity on variable-bound fills resets; re-apply after bulk edits.
