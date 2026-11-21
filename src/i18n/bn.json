@@ -401,5 +401,6 @@
   "error.plan.locked": "এটি প্রিমিয়াম ফিচার — চালু করতে Root Logic Lab-এ যোগাযোগ করুন।",
   "error.media.video_too_large": "ভিডিওটি অনেক বড়। প্রোমো ভিডিও সর্বোচ্চ ২০ MB।",
   "error.media.video_type": "MP4 বা WebM ভিডিও বাছাই করুন।",
-  "error.banner.not_found": "ব্যানারটি আর নেই।"
+  "error.banner.not_found": "ব্যানারটি আর নেই।",
+  "error.rate.limited": "এই সংযোগ থেকে অনেকবার চেষ্টা হয়েছে। কয়েক মিনিট পরে আবার চেষ্টা করুন।"
 }

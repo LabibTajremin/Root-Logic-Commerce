@@ -32,6 +32,7 @@ describe('container', () => {
       'bus',
       'catalog',
       'insights',
+      'limits',
       'media',
       'messaging',
       'orders',

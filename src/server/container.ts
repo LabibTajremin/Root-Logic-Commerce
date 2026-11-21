@@ -8,7 +8,7 @@ import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
 import { createPlans } from '@/modules/plans'
-import { createEventBus, formatMoney } from '@/modules/shared'
+import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
 import { createSiteSettings } from '@/modules/site-settings'
 import { createStock } from '@/modules/stock'
 import type { Db } from '@/infrastructure/db/client'
@@ -114,6 +114,11 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     messaging,
     insights,
     promotions: createPromotions({ repo: createBannersRepo(db) }),
+    // Per store + client IP, per process (spec §8: rate-limit checkout and tracking).
+    limits: {
+      checkout: createRateLimiter({ limit: 10, windowMs: 10 * 60_000 }),
+      track: createRateLimiter({ limit: 20, windowMs: 10 * 60_000 }),
+    },
     secrets,
     stores: createStoreDirectory(db),
     catalog: createCatalog({

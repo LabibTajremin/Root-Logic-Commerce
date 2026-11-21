@@ -14,7 +14,7 @@ const rt = vi.hoisted(() => ({
   auth: { api: { getSession: vi.fn() } },
 }))
 vi.mock('next/headers', () => ({
-  headers: async () => new Headers({ host: req.host }),
+  headers: async () => new Headers({ host: req.host, 'x-forwarded-for': '1.2.3.4, 10.0.0.1' }),
   cookies: async () => ({ get: () => (req.lang ? { value: req.lang } : undefined) }),
 }))
 vi.mock('next/navigation', () => ({
@@ -24,7 +24,8 @@ vi.mock('next/navigation', () => ({
 }))
 vi.mock('./runtime', () => ({ runtime: async () => rt }))
 
-const { currentActor, currentLocale, currentSettings, currentStore } = await import('./request')
+const { currentActor, currentIp, currentLocale, currentSettings, currentStore } =
+  await import('./request')
 const store = { id: 's1', slug: 'shop', active: true }
 
 beforeEach(() => {
@@ -68,5 +69,9 @@ describe('request helpers', () => {
       storeName: 'Shop',
       design: expect.objectContaining({ brand: { nameFont: 'inter', siteFont: 'inter' } }),
     })
+  })
+
+  it('reads the client IP (first x-forwarded-for hop)', async () => {
+    expect(await currentIp()).toBe('1.2.3.4')
   })
 })

@@ -2,6 +2,7 @@
 
 import { otpTarget } from '@/modules/messages'
 import { isDomainError } from '@/modules/shared'
+import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
 
 export type PlaceResult = { error: string } | { otp: string } | { orderNo: number }
@@ -9,9 +10,13 @@ export type PlaceResult = { error: string } | { otp: string } | { orderNo: numbe
 const optional = (v: string) => v.trim() || null
 
 export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
-  const { orders, otp, store, business, t } = await storefront()
+  const [{ orders, otp, store, business, limits, t }, ip] = await Promise.all([
+    storefront(),
+    currentIp(),
+  ])
   const f = (k: string) => String(form.get(k) ?? '')
   try {
+    limits.checkout.assert(`${store.id}:${ip}`)
     const email = optional(f('email'))
     // With a verification channel on, the first submit only sends the code.
     const check = otpTarget(business.otp, { phone: f('phone'), email })

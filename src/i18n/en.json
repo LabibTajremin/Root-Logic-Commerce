@@ -401,5 +401,6 @@
   "error.plan.locked": "This is a premium feature — contact Root Logic Lab to unlock it.",
   "error.media.video_too_large": "That video is too large. Promo videos can be up to 20 MB.",
   "error.media.video_type": "Please choose an MP4 or WebM video.",
-  "error.banner.not_found": "That banner no longer exists."
+  "error.banner.not_found": "That banner no longer exists.",
+  "error.rate.limited": "Too many tries from this connection. Please wait a few minutes and try again."
 }

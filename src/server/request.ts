@@ -37,3 +37,9 @@ export const currentSettings = cache(async () => {
   const seed = await loadTheme(config.store.theme)
   return container.settings.get(store.id, { storeName: config.store.name, design: seed.defaults })
 })
+
+// Next sets x-forwarded-for itself (from the proxy, else the socket), so it is always there.
+export const currentIp = async () =>
+  String((await headers()).get('x-forwarded-for'))
+    .split(',')[0]!
+    .trim()

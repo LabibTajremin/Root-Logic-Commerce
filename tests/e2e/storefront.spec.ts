@@ -343,3 +343,23 @@ test('product images: upload checks, Drive links, removal, and the shop shows th
     expect((await page.request.get(url)).status()).toBe(404)
   }
 })
+
+test('order tracking is rate limited per connection', async ({ page }) => {
+  await page.goto('/track')
+  await page.getByLabel('Order number').fill('999999')
+  await page.getByLabel('Phone number').fill('01712345678')
+  const submit = page.getByRole('button', { name: 'Track order' })
+  await submit.click()
+  await expect(page.getByRole('alert').filter({ hasText: 'No order found' })).toBeVisible()
+  const limited = page.getByRole('alert').filter({ hasText: 'Too many tries' })
+  // 20 tries per 10 minutes: keep submitting (each waits for its answer) until refused.
+  for (let i = 0; i < 25 && !(await limited.isVisible()); i++) {
+    // The form clears after each answer (React form actions reset it).
+    await page.getByLabel('Order number').fill('999999')
+    await page.getByLabel('Phone number').fill('01712345678')
+    const answered = page.waitForResponse((r) => r.request().method() === 'POST')
+    await submit.click()
+    await answered
+  }
+  await expect(page.getByRole('alert').filter({ hasText: 'Too many tries' })).toBeVisible()
+})

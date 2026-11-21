@@ -52,6 +52,11 @@ export const TrackForm = ({
           {L.submit}
         </button>
       </form>
+      {state.limited && (
+        <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">
+          {L.limited}
+        </p>
+      )}
       {state.notFound && (
         <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">
           {L.notFound}

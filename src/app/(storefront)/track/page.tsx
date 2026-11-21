@@ -22,6 +22,7 @@ export default async function TrackPage({
           phone: t('checkout.phone'),
           submit: t('track.submit'),
           notFound: t('track.notFound'),
+          limited: t('error.rate.limited'),
           total: t('checkout.total'),
         }}
       />
