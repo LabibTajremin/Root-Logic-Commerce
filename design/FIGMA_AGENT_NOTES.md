@@ -75,3 +75,7 @@ Sections: Core web public `81:4742`, web admin `81:4743`, mobile public `81:4744
 - Bangla→English dictionary (852 strings) is stored in the file: `figma.root.getSharedPluginData('rlc.design','bn2en')` — reuse it for any new Bangla mock copy. Bangla digits are converted automatically; text that names the language itself ("বাংলা", the "বাং" toggle) stays.
 - `Admin/Language texts` now = "Language, money & dates": shop language, shopper EN/BN switch, Bangla digits, currency sign, date format, wording table.
 - Fixed again: the topbar "Do it with AI" button (main component `62:110`) fill opacity 0.12 — opacity on variable-bound fills resets; re-apply after bulk edits.
+
+## Owner-notes pass (2026-11-22)
+- New Core web admin screens (after `Admin/Design`): `Admin/Design/Header & logo` (logo, dark-mode logo, favicon uploads with size hints; logo text on/off; name/site font; header opacity; sticky), `Admin/Design/Background` (accent; Light bg cream→white slider, warm↔cool slider, Dark bg midnight→black slider; 24 patterns; pattern opacity; visitor light/dark switch), `Admin/Design/Footer` (3 presets, footer logo, colour, column/payment/social/call toggles, footer text, Pro "remove Powered by Root Logic Lab"), `Admin/Design/Home sections` (section on/off + drag order). Live preview = scaled clone of `Public/Home` (top or footer).
+- "Do it with AI" button: fill now bound to accent-tint variable `2:15` at full opacity (opacity on bound paints is dropped on clone — never rely on it).
