@@ -18,6 +18,7 @@ export const fontIds = [
 ] as const
 export const patternIds = Array.from({ length: 24 }, (_, i) => `p${String(i + 1).padStart(2, '0')}`)
 export const footerStyles = ['classic', 'centered', 'minimal'] as const
+export const cardShapes = ['theme', '1:1', '4:5', '3:4'] as const
 export const socialKinds = ['facebook', 'instagram', 'youtube', 'tiktok', 'whatsapp', 'x'] as const
 
 const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'color.invalid')
@@ -81,6 +82,14 @@ export const designSchema = z.object({
       button: z.boolean().default(true),
     })
     .prefault({}),
+  // J1 layout: products per row on phones / desktops and the card picture shape.
+  grid: z
+    .object({
+      mobile: z.number().int().min(1).max(2).default(2),
+      desktop: z.number().int().min(2).max(5).default(4),
+      shape: z.enum(cardShapes).default('theme'),
+    })
+    .prefault({}),
   // B3: active poster banners shown as an autoplaying slider in place of the welcome hero.
   heroSlider: z
     .object({
@@ -134,6 +143,7 @@ export const baseDesign: Design = {
   header: { opacity: 100, sticky: true },
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
   productCard: { badges: true, oldPrice: true, button: true },
+  grid: { mobile: 2, desktop: 4, shape: 'theme' },
   heroSlider: { enabled: false, interval: 5, effect: 'slide' },
   announcement: { messages: [], mode: 'rotate', link: '', closable: true },
   footer: {
@@ -192,10 +202,17 @@ export const toCssVars = (d: Design) => {
     '--font-body': `var(--font-${d.brand.siteFont}),var(--font-hind-siliguri),sans-serif`,
     '--pattern-opacity': String(d.background.patternOpacity / 100),
     '--header-opacity': String(d.header.opacity / 100),
+    '--cols-mobile': String(d.grid.mobile),
+    '--cols-desktop': String(d.grid.desktop),
   }
+  // 'theme' keeps each theme's own picture ratio.
+  const shape =
+    d.grid.shape === 'theme'
+      ? ''
+      : `.rlc-card .rlc-media{aspect-ratio:${d.grid.shape.replace(':', '/')}}`
   return `:root{${Object.entries(vars)
     .map(([k, v]) => `${k}:${v}`)
-    .join(';')}}`
+    .join(';')}}${shape}`
 }
 
 /** Pairs the Design editor warns about (below WCAG AA). */

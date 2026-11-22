@@ -32,7 +32,7 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
   return (
     <ul
       data-showcase={design.style.showcase}
-      className="rlc-grid grid grid-cols-2 gap-4 md:grid-cols-4"
+      className="rlc-grid grid grid-cols-[repeat(var(--cols-mobile),minmax(0,1fr))] gap-4 md:grid-cols-[repeat(var(--cols-desktop),minmax(0,1fr))]"
     >
       {products.map((p) => (
         <li key={p.id}>

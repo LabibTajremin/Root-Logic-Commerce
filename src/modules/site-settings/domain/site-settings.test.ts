@@ -41,12 +41,10 @@ describe('design', () => {
   })
 
   it('older saves without product-card toggles show everything', () => {
-    const { productCard: _, ...old } = baseDesign
-    expect(designSchema.parse(old).productCard).toEqual({
-      badges: true,
-      oldPrice: true,
-      button: true,
-    })
+    const { productCard: _, grid: __, ...old } = baseDesign
+    const parsed = designSchema.parse(old)
+    expect(parsed.productCard).toEqual({ badges: true, oldPrice: true, button: true })
+    expect(parsed.grid).toEqual(baseDesign.grid)
   })
 
   it('rejects anything that could break out of a <style> tag', () => {
@@ -77,6 +75,11 @@ describe('design', () => {
     expect(css).toContain('--color-button-text:#FFFFFF')
     expect(css).toContain('--font-heading:var(--font-fraunces),var(--font-hind-siliguri),serif')
     expect(css).toContain('--header-opacity:0.92')
+    expect(css).toContain('--cols-mobile:2;--cols-desktop:4}')
+    expect(css).not.toContain('aspect-ratio')
+    expect(
+      toCssVars(mergeDesign(baseDesign, { grid: { mobile: 1, shape: '4:5' } }) as Design),
+    ).toMatch(/--cols-mobile:1;.*\}\.rlc-card \.rlc-media\{aspect-ratio:4\/5\}$/)
     const cream = toCssVars(
       mergeDesign(baseDesign, { mode: { light: 0 }, colors: { text: '#1E2A1C' } }) as Design,
     )

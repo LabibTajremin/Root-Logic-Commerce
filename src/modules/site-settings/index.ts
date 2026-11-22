@@ -17,6 +17,7 @@ export {
   contrastWarnings,
   designSchema,
   fontIds,
+  cardShapes,
   footerStyles,
   mergeDesign,
   patternIds,

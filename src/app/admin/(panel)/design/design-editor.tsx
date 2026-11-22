@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState, useTransition } from 'react'
 import {
   contrastWarnings,
   brandImageSlots,
+  cardShapes,
   fontIds,
   footerStyles,
   mergeDesign,
@@ -81,8 +82,9 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
     options: readonly string[],
     on: (v: string) => void,
   ) => (
-    <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor={id}>
-      {label}
+    // Label beside (not around) the select: wrapped, the option texts join its accessible name.
+    <div className="flex flex-col gap-1.5 text-sm font-semibold">
+      <label htmlFor={id}>{label}</label>
       <select id={id} value={value} onChange={(e) => on(e.target.value)} className={sel}>
         {options.map((o) => (
           <option key={o} value={o}>
@@ -90,7 +92,7 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
           </option>
         ))}
       </select>
-    </label>
+    </div>
   )
   const color = (k: 'accent' | 'button' | 'header' | 'text', label: string) => (
     <label className="flex min-h-11 items-center gap-3 text-sm" htmlFor={`color-${k}`}>
@@ -219,6 +221,21 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             d.style.motion,
             ['none', 'subtle', 'smooth', 'playful'],
             (v) => set('style', { motion: v as 'subtle' }),
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {select('cols-mobile', L.colsMobile!, String(d.grid.mobile), ['1', '2'], (v) =>
+            set('grid', { mobile: Number(v) }),
+          )}
+          {select(
+            'cols-desktop',
+            L.colsDesktop!,
+            String(d.grid.desktop),
+            ['2', '3', '4', '5'],
+            (v) => set('grid', { desktop: Number(v) }),
+          )}
+          {select('card-shape', L.cardShape!, d.grid.shape, cardShapes, (v) =>
+            set('grid', { shape: v as 'theme' }),
           )}
         </div>
         <fieldset className="flex flex-col">

@@ -155,6 +155,14 @@ test('design editor previews live, warns on low contrast and publishes', async (
     await page.getByLabel(`Footer: show ${l}`).uncheck()
   for (const l of [/^Show badges/, 'Show the old price', 'Show the Add to cart button'])
     await page.getByLabel(l).uncheck()
+  await page.getByLabel('Per row (phone)').selectOption('1')
+  await page.getByLabel('Per row (computer)').selectOption('5')
+  await page.getByLabel('Picture shape').selectOption('4:5')
+  // A carousel lays cards in one row; the per-row counts apply to the grid showcase.
+  await page.getByLabel('Product showcase').selectOption('grid')
+  await expect
+    .poll(() => preview.locator('#rlc-preview').evaluate((e) => e.textContent))
+    .toMatch(/--cols-mobile:1;--cols-desktop:5\}\.rlc-card \.rlc-media\{aspect-ratio:4\/5\}/)
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
   await page.goto('/')
@@ -168,6 +176,11 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await expect(cards.getByRole('button', { name: 'Add to cart' })).toHaveCount(0)
   await expect(cards.locator('s')).toHaveCount(0)
   await expect(cards.getByText(/^Save \d+%$/)).toHaveCount(0)
+  await expect(cards.first().locator('.rlc-media')).toHaveCSS('aspect-ratio', '4 / 5')
+  const cols = await page
+    .locator('.rlc-grid')
+    .evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(' ').length)
+  expect(cols).toBe(page.viewportSize()!.width >= 768 ? 5 : 1)
 
   await page.goto('/admin/design')
   for (const l of ['categories', 'help links and pages', 'payment methods'])
@@ -175,6 +188,9 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await page.getByLabel('Footer style').selectOption('classic')
   for (const l of [/^Show badges/, 'Show the old price', 'Show the Add to cart button'])
     await page.getByLabel(l).check()
+  await page.getByLabel('Per row (phone)').selectOption('2')
+  await page.getByLabel('Per row (computer)').selectOption('4')
+  await page.getByLabel('Picture shape').selectOption('theme')
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
   await page.goto('/')
