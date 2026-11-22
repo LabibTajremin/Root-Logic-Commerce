@@ -544,5 +544,14 @@
   "search.open": "অর্ডার, পণ্য, মেনু খুঁজুন…",
   "search.placeholder": "অর্ডার নং, ফোন, পণ্য বা পেজ",
   "search.menus": "পেজ",
-  "search.none": "কিছু পাওয়া যায়নি — অর্ডার নম্বর বা ফোন দিয়ে চেষ্টা করুন।"
+  "search.none": "কিছু পাওয়া যায়নি — অর্ডার নম্বর বা ফোন দিয়ে চেষ্টা করুন।",
+  "notices.title": "নোটিফিকেশন",
+  "notices.sound": "এই ডিভাইসে নতুন অর্ডারে শব্দ বাজবে",
+  "notices.orders": "অর্ডার",
+  "notices.markAll": "সব পড়া হয়েছে",
+  "notices.markRead": "পড়া হয়েছে",
+  "notices.read": "পড়া",
+  "notices.none": "এখনো কোনো নোটিফিকেশন নেই।",
+  "notices.newOrder": "নতুন অর্ডার #{{no}}",
+  "notices.open": "খুলুন"
 }

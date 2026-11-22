@@ -6,9 +6,11 @@ import { translate } from '@/i18n'
 import { isAllowed } from '@/modules/access'
 import { toCssVars } from '@/modules/site-settings'
 import { currentActor, currentLocale, currentSettings, currentStore } from '@/server/request'
+import { runtime } from '@/server/runtime'
 import { Icon } from '@/ui/icon'
 import { LangToggle } from '@/ui/lang-toggle'
 import { CommandPalette } from './command-palette'
+import { Bell } from './notifications/bell'
 import { adminMenu, isAdminMode, menuGroups } from './menu'
 import { BottomNav, ModeToggle, SideNav, type NavGroup, type NavItem } from './nav'
 import { SignOut } from './sign-out'
@@ -21,7 +23,8 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   ])
   // Role AND tenant: a user of another store is treated as signed out here.
   if (!actor || !isAllowed(actor, 'orders.manage', store.id)) redirect('/admin/login')
-  const { design } = await currentSettings()
+  const [{ design }, { container }] = await Promise.all([currentSettings(), runtime()])
+  const notices = await container.notifications.poll(store.id)
   const t = (k: string) => translate(locale, k)
   const saved = (await cookies()).get('admin-mode')?.value
   const mode = isAdminMode(saved) ? saved : 'simple'
@@ -70,6 +73,15 @@ export default async function PanelLayout({ children }: { children: ReactNode })
               orders: t('nav.orders'),
               products: t('nav.products'),
               none: t('search.none'),
+            }}
+          />
+          <Bell
+            unread={notices.unread}
+            latestId={notices.latest?.id ?? null}
+            labels={{
+              bell: t('notices.title'),
+              newOrder: t('notices.newOrder'),
+              open: t('notices.open'),
             }}
           />
           <LangToggle locale={locale} />

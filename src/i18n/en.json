@@ -544,5 +544,14 @@
   "search.open": "Search orders, products, menus…",
   "search.placeholder": "Order no., phone, product or screen",
   "search.menus": "Screens",
-  "search.none": "Nothing found yet — try an order number or phone."
+  "search.none": "Nothing found yet — try an order number or phone.",
+  "notices.title": "Notifications",
+  "notices.sound": "Play a chime for new orders on this device",
+  "notices.orders": "Orders",
+  "notices.markAll": "Mark all read",
+  "notices.markRead": "Mark read",
+  "notices.read": "Read",
+  "notices.none": "No notifications yet.",
+  "notices.newOrder": "New order #{{no}}",
+  "notices.open": "Open"
 }

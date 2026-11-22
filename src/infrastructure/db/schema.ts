@@ -71,6 +71,21 @@ export const storeEntitlements = pgTable(
 )
 
 // Per-store module switches (J5); a missing row means "use the catalogue default".
+// Admin notifications (F2): new orders today; more kinds later.
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: id(),
+    storeId: storeId(),
+    kind: text().$type<'order'>().notNull(),
+    ref: text().notNull(),
+    data: jsonb().$type<{ orderNo: number }>().notNull(),
+    readAt: timestamp({ withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('notifications_store_created_idx').on(t.storeId, t.createdAt)],
+)
+
 // CMS pages (J8): body is plain text with light markup, rendered as text (never HTML).
 export const pages = pgTable(
   'pages',

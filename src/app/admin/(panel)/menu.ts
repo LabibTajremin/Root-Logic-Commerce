@@ -31,6 +31,7 @@ export const menuGroups: MenuGroup[] = [
   {
     key: 'nav.group.settings',
     items: [
+      { href: '/admin/notifications', key: 'notices.title', icon: 'alert' },
       { href: '/admin/messages', key: 'nav.messages', icon: 'chat' },
       { href: '/admin/users', key: 'nav.users', icon: 'users' },
       { href: '/admin/features', key: 'nav.features', icon: 'layers' },

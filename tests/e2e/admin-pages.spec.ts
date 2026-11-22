@@ -271,3 +271,50 @@ test('admin shell: Simple/Pro menu and ⌘K finds screens, orders and products',
   await page.getByRole('button', { name: 'Search orders, products, menus…' }).click()
   await expect(dialog).toBeVisible()
 })
+
+test('notifications: a new order rings the bell, shows a toast and lands in the centre', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  await signedIn(page)
+  await createProduct(page, { name: `Bell ${id}`, price: '120', stock: '3' })
+  await page.goto('/admin/notifications')
+  await expect(page.getByRole('heading', { level: 1, name: 'Notifications' })).toBeVisible()
+  await a11y()
+  const sound = page.getByLabel('Play a chime for new orders on this device')
+  await sound.check()
+  await sound.uncheck()
+  await sound.check()
+
+  const shopper = await page.context().newPage()
+  await shopper.goto(`/p/${slug(`Bell ${id}`)}`)
+  await shopper.waitForLoadState('networkidle')
+  await shopper.getByRole('button', { name: 'Order now' }).click()
+  await shopper.waitForURL(/\/checkout$/)
+  await fillCheckout(shopper, `0181${String(Date.now()).slice(-7)}`)
+  await shopper.getByRole('button', { name: 'Place order' }).click()
+  await shopper.waitForURL(/\/order\/\d+$/)
+  const no = (await shopper.getByTestId('order-no').textContent())!.replace('#', '')
+  await shopper.close()
+
+  // The bell also polls every 15 s; regaining focus checks right away.
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  const toast = page.getByRole('status').filter({ hasText: `New order #${no}` })
+  await expect(toast).toBeVisible()
+  await expect(page.getByTestId('bell-count')).not.toHaveText('0')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await toast.getByRole('link', { name: 'Open' }).click()
+  await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/)
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  await page.goto('/admin/notifications')
+  const notice = page.getByTestId(`notice-${no}`)
+  await notice.getByRole('button', { name: 'Mark read' }).click()
+  await expect(notice).toContainText('Read')
+  // Other tests may place orders meanwhile, so only this test's notice is asserted.
+  await page.getByRole('button', { name: 'Mark all read' }).click()
+  await page.waitForLoadState('networkidle')
+  await expect(notice).toContainText('Read')
+})

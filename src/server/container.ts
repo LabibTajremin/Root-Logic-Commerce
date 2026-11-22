@@ -7,6 +7,7 @@ import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
+import { createNotifications } from '@/modules/notifications'
 import { createPages } from '@/modules/pages'
 import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
@@ -26,6 +27,7 @@ import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
 import { createPagesRepo } from '@/infrastructure/db/repositories/pages-repo'
+import { createNotificationsRepo } from '@/infrastructure/db/repositories/notifications-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
@@ -99,6 +101,8 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
   })
   for (const s of ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'] as const)
     bus.on(`order.${s}`, (e) => messaging.onOrderEvent(`order.${s}`, e))
+  const notifications = createNotifications({ repo: createNotificationsRepo(db) })
+  bus.on('order.placed', (e) => notifications.onOrderPlaced(e))
   const insights = createInsights({
     repo: createInsightsRepo(db),
     hash: (s) => createHmac('sha256', config.authSecret).update(s).digest('hex'),
@@ -136,6 +140,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     plans,
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),
     pages: createPages({ repo: createPagesRepo(db) }),
+    notifications,
     settings,
     access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
     media: createMedia({
