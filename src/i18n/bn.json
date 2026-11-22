@@ -534,5 +534,15 @@
   "design.footerStyle": "ফুটারের ধরন",
   "design.footer_categories": "ফুটারে ক্যাটাগরি দেখান",
   "design.footer_help": "ফুটারে সাহায্যের লিংক ও পেজ দেখান",
-  "design.footer_payments": "ফুটারে পেমেন্টের উপায় দেখান"
+  "design.footer_payments": "ফুটারে পেমেন্টের উপায় দেখান",
+  "nav.group.sell": "বিক্রি",
+  "nav.group.design": "দোকানের ডিজাইন",
+  "nav.group.settings": "সেটিংস",
+  "nav.mode": "মেনুর ধরন",
+  "nav.simple": "সহজ",
+  "nav.pro": "প্রো",
+  "search.open": "অর্ডার, পণ্য, মেনু খুঁজুন…",
+  "search.placeholder": "অর্ডার নং, ফোন, পণ্য বা পেজ",
+  "search.menus": "পেজ",
+  "search.none": "কিছু পাওয়া যায়নি — অর্ডার নম্বর বা ফোন দিয়ে চেষ্টা করুন।"
 }

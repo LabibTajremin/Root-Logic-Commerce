@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
@@ -7,7 +8,9 @@ import { toCssVars } from '@/modules/site-settings'
 import { currentActor, currentLocale, currentSettings, currentStore } from '@/server/request'
 import { Icon } from '@/ui/icon'
 import { LangToggle } from '@/ui/lang-toggle'
-import { BottomNav, SideNav, type NavItem } from './nav'
+import { CommandPalette } from './command-palette'
+import { adminMenu, isAdminMode, menuGroups } from './menu'
+import { BottomNav, ModeToggle, SideNav, type NavGroup, type NavItem } from './nav'
 import { SignOut } from './sign-out'
 
 export default async function PanelLayout({ children }: { children: ReactNode }) {
@@ -20,29 +23,18 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   if (!actor || !isAllowed(actor, 'orders.manage', store.id)) redirect('/admin/login')
   const { design } = await currentSettings()
   const t = (k: string) => translate(locale, k)
-  const all: NavItem[] = [
-    { href: '/admin', label: t('nav.dashboard'), icon: 'chart' },
-    { href: '/admin/orders', label: t('nav.orders'), icon: 'receipt' },
-    { href: '/admin/products', label: t('nav.products'), icon: 'box' },
-    { href: '/admin/categories', label: t('nav.categories'), icon: 'layers' },
-    { href: '/admin/stock', label: t('nav.stock'), icon: 'box' },
-    { href: '/admin/promotions', label: t('nav.promotions'), icon: 'megaphone' },
-    { href: '/admin/design', label: t('nav.design'), icon: 'palette' },
-    { href: '/admin/messages', label: t('nav.messages'), icon: 'chat' },
-    { href: '/admin/seo', label: t('nav.seo'), icon: 'trend' },
-    { href: '/admin/users', label: t('nav.users'), icon: 'users' },
-    { href: '/admin/layouts', label: t('nav.layouts'), icon: 'home' },
-    { href: '/admin/texts', label: t('nav.texts'), icon: 'edit' },
-    { href: '/admin/pages', label: t('nav.pages'), icon: 'store' },
-    { href: '/admin/features', label: t('nav.features'), icon: 'layers' },
-    { href: '/admin/plan', label: t('nav.plan'), icon: 'star' },
-    { href: '/admin/help', label: t('nav.help'), icon: 'help' },
-  ]
+  const saved = (await cookies()).get('admin-mode')?.value
+  const mode = isAdminMode(saved) ? saved : 'simple'
+  const groups: NavGroup[] = adminMenu(mode).map((g) => ({
+    label: t(g.key),
+    items: g.items.map((i) => ({ href: i.href, label: t(i.key), icon: i.icon })),
+  }))
+  const item = (href: string) => groups.flatMap((g) => g.items).find((i) => i.href === href)!
   const bottom: NavItem[] = [
     { href: '/admin', label: t('nav.home'), icon: 'home' },
-    all[1]!,
-    all[2]!,
-    all[4]!,
+    item('/admin/orders'),
+    item('/admin/products'),
+    item('/admin/stock'),
     { href: '/admin/more', label: t('nav.more'), icon: 'menu' },
   ]
   return (
@@ -56,13 +48,30 @@ export default async function PanelLayout({ children }: { children: ReactNode })
           </span>
           {design.brand.name}
         </Link>
+        <ModeToggle
+          mode={mode}
+          labels={{ label: t('nav.mode'), simple: t('nav.simple'), pro: t('nav.pro') }}
+        />
         <nav aria-label="Admin">
-          <SideNav items={all} />
+          <SideNav groups={groups} />
         </nav>
         <p className="mt-auto px-2 text-xs text-muted">{t('common.poweredBy')}</p>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
         <header className="flex items-center justify-end gap-2 border-b border-line px-4 py-2 lg:px-8">
+          <CommandPalette
+            menu={menuGroups.flatMap((g) =>
+              g.items.map((i) => ({ href: i.href, label: t(i.key), detail: t(g.key) })),
+            )}
+            labels={{
+              open: t('search.open'),
+              placeholder: t('search.placeholder'),
+              menus: t('search.menus'),
+              orders: t('nav.orders'),
+              products: t('nav.products'),
+              none: t('search.none'),
+            }}
+          />
           <LangToggle locale={locale} />
           <SignOut label={t('admin.signOut')} />
         </header>

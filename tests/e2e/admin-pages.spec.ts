@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { signedIn } from './admin'
+import { createProduct, fillCheckout, slug } from './shop'
 
 const uid = () => `${test.info().project.name}-${Date.now().toString(36)}`
 const saved = (page: Page) =>
@@ -200,4 +201,66 @@ test('owner invites staff; staff cannot reach owner-only settings', async ({
     await expect(staff.getByText('Only the store owner can do this.')).toBeVisible()
   }
   await staff.close()
+})
+
+test('admin shell: Simple/Pro menu and ⌘K finds screens, orders and products', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const phone = `0171${String(Date.now()).slice(-7)}`
+  await signedIn(page)
+  await createProduct(page, { name: `Find ${id}`, price: '250', stock: '5' })
+  await page.goto(`/p/${slug(`Find ${id}`)}`)
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await fillCheckout(page, phone)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+
+  // Simple is the default: advanced screens stay out of the sidebar but remain in More.
+  const side = (href: string) => page.locator(`nav[aria-label="Admin"] a[href="${href}"]`)
+  await page.goto('/admin')
+  await expect(side('/admin/features')).toHaveCount(0)
+  await expect(side('/admin/orders')).toHaveCount(1)
+  await page.goto('/admin/mode?to=pro&back=/admin/orders')
+  await page.waitForURL(/\/admin\/orders$/)
+  await expect(side('/admin/features')).toHaveCount(1)
+  await page.goto('/admin/mode?to=nope&back=//evil.example')
+  await page.waitForURL(/\/admin$/)
+  await expect(side('/admin/features')).toHaveCount(1)
+  await page.goto('/admin/mode?to=simple')
+  await page.waitForURL(/\/admin$/)
+  await expect(side('/admin/features')).toHaveCount(0)
+  await page.goto('/admin/more')
+  await expect(page.getByRole('link', { name: 'Features' })).toBeVisible()
+
+  // ⌘K: keyboard shortcut, then the header button.
+  await page.goto('/admin')
+  await page.waitForLoadState('networkidle')
+  await page.keyboard.press('Control+k')
+  const dialog = page.getByRole('dialog', { name: 'Search orders, products, menus…' })
+  await expect(dialog).toBeVisible()
+  const box = dialog.getByRole('textbox')
+  await box.fill('Pages')
+  await expect(
+    dialog.getByRole('region', { name: 'Screens' }).getByRole('link', { name: /Pages/ }),
+  ).toBeVisible()
+  await a11y()
+  await box.fill('z')
+  await box.fill('zzzz-no-match')
+  await expect(dialog.getByText('Nothing found yet')).toBeVisible()
+  await box.fill(phone)
+  await expect(dialog.getByRole('region', { name: 'Orders' }).getByRole('link')).toHaveCount(1)
+  await box.fill(`Find ${id}`)
+  const product = dialog
+    .getByRole('region', { name: 'Products' })
+    .getByRole('link', { name: `Find ${id}` })
+  await product.click()
+  await page.waitForURL(/\/admin\/products\/[0-9a-f-]+$/)
+  await expect(dialog).toBeHidden()
+  await page.keyboard.press('Shift+K')
+  await page.getByRole('button', { name: 'Search orders, products, menus…' }).click()
+  await expect(dialog).toBeVisible()
 })

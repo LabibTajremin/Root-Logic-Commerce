@@ -534,5 +534,15 @@
   "design.footerStyle": "Footer style",
   "design.footer_categories": "Footer: show categories",
   "design.footer_help": "Footer: show help links and pages",
-  "design.footer_payments": "Footer: show payment methods"
+  "design.footer_payments": "Footer: show payment methods",
+  "nav.group.sell": "Sell",
+  "nav.group.design": "Shop design",
+  "nav.group.settings": "Settings",
+  "nav.mode": "Menu size",
+  "nav.simple": "Simple",
+  "nav.pro": "Pro",
+  "search.open": "Search orders, products, menus…",
+  "search.placeholder": "Order no., phone, product or screen",
+  "search.menus": "Screens",
+  "search.none": "Nothing found yet — try an order number or phone."
 }
