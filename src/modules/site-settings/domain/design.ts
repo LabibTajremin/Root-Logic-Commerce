@@ -17,6 +17,7 @@ export const fontIds = [
   'tiro-bangla',
 ] as const
 export const patternIds = Array.from({ length: 24 }, (_, i) => `p${String(i + 1).padStart(2, '0')}`)
+export const footerStyles = ['classic', 'centered', 'minimal'] as const
 export const socialKinds = ['facebook', 'instagram', 'youtube', 'tiktok', 'whatsapp', 'x'] as const
 
 const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'color.invalid')
@@ -73,6 +74,15 @@ export const designSchema = z.object({
     motion: z.enum(['none', 'subtle', 'smooth', 'playful']),
   }),
   footer: z.object({
+    // Layout preset + which blocks show; colours follow the theme tokens.
+    style: z.enum(footerStyles).default('classic'),
+    show: z
+      .object({
+        categories: z.boolean().default(true),
+        help: z.boolean().default(true),
+        payments: z.boolean().default(true),
+      })
+      .prefault({}),
     text: z.string().max(300).optional(),
     socials: z
       .array(z.object({ kind: z.enum(socialKinds), url: z.url().startsWith('https://') }))
@@ -92,7 +102,11 @@ export const baseDesign: Design = {
   background: { pattern: 'none', patternOpacity: 10 },
   header: { opacity: 100, sticky: true },
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
-  footer: { socials: [] },
+  footer: {
+    style: 'classic',
+    show: { categories: true, help: true, payments: true },
+    socials: [],
+  },
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>

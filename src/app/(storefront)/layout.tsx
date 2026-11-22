@@ -78,8 +78,9 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         categories={categories}
         text={d.footer.text}
         credit={credit}
-        labels={k(['shop', 'help', 'track', 'search'])}
+        labels={k(['shop', 'help', 'track', 'search', 'payWith', 'codShort'])}
         pages={footerPages}
+        look={d.footer}
       />
       <CartDrawer
         labels={{

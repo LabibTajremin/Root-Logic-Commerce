@@ -16,6 +16,7 @@ export {
   contrastWarnings,
   designSchema,
   fontIds,
+  footerStyles,
   mergeDesign,
   patternIds,
   socialKinds,

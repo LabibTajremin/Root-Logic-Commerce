@@ -38,37 +38,66 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
   </header>
 )
 
-export const Footer: Slots['Footer'] = ({ store, categories, text, credit, labels, pages }) => (
-  <footer className="mt-16 bg-soft">
-    <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
+export const Footer: Slots['Footer'] = ({
+  store,
+  categories,
+  text,
+  credit,
+  labels,
+  pages,
+  look,
+}) => (
+  // The preset (classic / centered / minimal) is a data-* hook styled in globals.css.
+  <footer data-footer={look.style} className="mt-16 bg-soft">
+    <div className="rlc-footer-grid mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
       <div className="flex flex-col gap-2">
         <BrandLogo src={store.footerLogo} fallback={null} />
         <p className="font-heading text-xl">{store.name}</p>
         {text && <p className="text-sm text-muted">{text}</p>}
       </div>
-      <nav aria-label={labels.shop} className="flex flex-col gap-2 text-sm">
-        <p className="font-semibold">{labels.shop}</p>
-        {categories.map((c) => (
-          <Link key={c.slug} href={`/c/${c.slug}`} className="text-muted">
-            {c.name}
+      {look.show.categories && (
+        <nav aria-label={labels.shop} className="flex flex-col gap-2 text-sm">
+          <p className="font-semibold">{labels.shop}</p>
+          {categories.map((c) => (
+            <Link key={c.slug} href={`/c/${c.slug}`} className="text-muted">
+              {c.name}
+            </Link>
+          ))}
+        </nav>
+      )}
+      {look.show.help && (
+        <nav aria-label={labels.help} className="flex flex-col gap-2 text-sm">
+          <p className="font-semibold">{labels.help}</p>
+          <Link href="/track" className="text-muted">
+            {labels.track}
           </Link>
-        ))}
-      </nav>
-      <nav aria-label={labels.help} className="flex flex-col gap-2 text-sm">
-        <p className="font-semibold">{labels.help}</p>
-        <Link href="/track" className="text-muted">
-          {labels.track}
-        </Link>
-        <Link href="/search" className="text-muted">
-          {labels.search}
-        </Link>
-        {pages.map((p) => (
-          <Link key={p.slug} href={`/page/${p.slug}`} className="text-muted">
-            {p.title}
+          <Link href="/search" className="text-muted">
+            {labels.search}
           </Link>
-        ))}
-      </nav>
+          {pages.map((p) => (
+            <Link key={p.slug} href={`/page/${p.slug}`} className="text-muted">
+              {p.title}
+            </Link>
+          ))}
+        </nav>
+      )}
     </div>
+    {look.show.payments && (
+      <p
+        data-testid="footer-payments"
+        className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 pb-4 text-xs text-muted"
+      >
+        <span>{labels.payWith}</span>
+        {['cod', 'bKash', 'Nagad'].map((m) => (
+          <span
+            key={m}
+            className="rounded-full border border-line bg-surface px-2.5 py-1 font-semibold"
+          >
+            {m === 'cod' ? labels.codShort : m}
+          </span>
+        ))}
+      </p>
+    )}
     <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 border-t border-line px-4 py-5 text-sm text-muted">
       <span>
         © {new Date().getFullYear()} {store.name}

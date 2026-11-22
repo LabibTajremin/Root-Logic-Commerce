@@ -528,5 +528,11 @@
   "brand.footerLogo": "ফুটারের লোগো",
   "brand.footerLogoHint": "চওড়া হলে ভালো · প্রায় 400×120 · সর্বোচ্চ 2 MB। খালি থাকলে লোগোই দেখাবে।",
   "brand.favicon": "ফেভিকন (ব্রাউজার ট্যাবের আইকন)",
-  "brand.faviconHint": "বর্গাকার PNG · 64×64 বা বড় · সর্বোচ্চ 1 MB।"
+  "brand.faviconHint": "বর্গাকার PNG · 64×64 বা বড় · সর্বোচ্চ 1 MB।",
+  "shop.payWith": "পেমেন্ট নিই",
+  "shop.codShort": "ক্যাশ অন ডেলিভারি",
+  "design.footerStyle": "ফুটারের ধরন",
+  "design.footer_categories": "ফুটারে ক্যাটাগরি দেখান",
+  "design.footer_help": "ফুটারে সাহায্যের লিংক ও পেজ দেখান",
+  "design.footer_payments": "ফুটারে পেমেন্টের উপায় দেখান"
 }

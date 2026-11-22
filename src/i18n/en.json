@@ -528,5 +528,11 @@
   "brand.footerLogo": "Footer logo",
   "brand.footerLogoHint": "Wide works well · about 400×120 · max 2 MB. Empty uses the logo.",
   "brand.favicon": "Favicon (browser tab icon)",
-  "brand.faviconHint": "Square PNG · 64×64 or bigger · max 1 MB."
+  "brand.faviconHint": "Square PNG · 64×64 or bigger · max 1 MB.",
+  "shop.payWith": "We accept",
+  "shop.codShort": "Cash on delivery",
+  "design.footerStyle": "Footer style",
+  "design.footer_categories": "Footer: show categories",
+  "design.footer_help": "Footer: show help links and pages",
+  "design.footer_payments": "Footer: show payment methods"
 }

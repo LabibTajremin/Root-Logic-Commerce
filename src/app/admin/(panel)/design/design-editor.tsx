@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { Fragment, useEffect, useRef, useState, useTransition } from 'react'
 import {
   contrastWarnings,
   fontIds,
+  footerStyles,
   mergeDesign,
   patternIds,
   toCssVars,
@@ -203,6 +204,16 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             (v) => set('style', { motion: v as 'subtle' }),
           )}
         </div>
+        {select('footerStyle', L.footerStyle!, d.footer.style, footerStyles, (v) =>
+          set('footer', { style: v as 'classic' }),
+        )}
+        {(['categories', 'help', 'payments'] as const).map((k) => (
+          <Fragment key={k}>
+            {check(`footer-${k}`, L[`footer_${k}`]!, d.footer.show[k], (b) =>
+              set('footer', { show: { ...d.footer.show, [k]: b } }),
+            )}
+          </Fragment>
+        ))}
         <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="footer-text">
           {L.footer}
           <input

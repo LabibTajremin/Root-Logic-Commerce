@@ -140,8 +140,26 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await expect
     .poll(() => preview.locator('#rlc-preview').evaluate((e) => e.textContent))
     .toMatch(/--color-accent:#A8763E/)
+  await page.getByLabel('Footer style').selectOption('centered')
+  for (const l of ['categories', 'help links and pages', 'payment methods'])
+    await page.getByLabel(`Footer: show ${l}`).uncheck()
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+  await page.goto('/')
+  const footer = page.getByRole('contentinfo')
+  await expect(footer).toHaveAttribute('data-footer', 'centered')
+  await expect(footer.getByRole('navigation')).toHaveCount(0)
+  await expect(page.getByTestId('footer-payments')).toHaveCount(0)
+
+  await page.goto('/admin/design')
+  for (const l of ['categories', 'help links and pages', 'payment methods'])
+    await page.getByLabel(`Footer: show ${l}`).check()
+  await page.getByLabel('Footer style').selectOption('classic')
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+  await page.goto('/')
+  await expect(page.getByTestId('footer-payments')).toContainText('bKash')
+  await page.goto('/admin/design')
 
   // Someone publishes from another tab: this editor is now stale and must not overwrite.
   const other = await page.context().newPage()

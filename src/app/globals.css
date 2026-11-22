@@ -103,3 +103,13 @@ body {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Footer presets (J1): centered stacks and centres the columns; minimal keeps only the bottom bar. */
+[data-footer='centered'] .rlc-footer-grid {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+[data-footer='minimal'] .rlc-footer-grid {
+  display: none;
+}

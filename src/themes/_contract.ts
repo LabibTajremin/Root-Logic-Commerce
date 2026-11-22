@@ -40,6 +40,11 @@ export type Slots = {
     text?: string
     credit: boolean
     labels: Record<string, string>
+    /** Owner's footer layout and which blocks show (J1). */
+    look: {
+      style: 'classic' | 'centered' | 'minimal'
+      show: { categories: boolean; help: boolean; payments: boolean }
+    }
     /** CMS pages the owner put in the footer (J8). */
     pages: { slug: string; title: string }[]
   }>
