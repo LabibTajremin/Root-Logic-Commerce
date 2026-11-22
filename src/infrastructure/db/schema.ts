@@ -71,6 +71,23 @@ export const storeEntitlements = pgTable(
 )
 
 // Per-store module switches (J5); a missing row means "use the catalogue default".
+// CMS pages (J8): body is plain text with light markup, rendered as text (never HTML).
+export const pages = pgTable(
+  'pages',
+  {
+    id: id(),
+    storeId: storeId(),
+    slug: text().notNull(),
+    title: text().notNull(),
+    body: text().notNull(),
+    published: boolean().notNull(),
+    inFooter: boolean().notNull(),
+    sortOrder: integer().notNull().default(0),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex('pages_store_slug_uq').on(t.storeId, t.slug)],
+)
+
 export const storeFeatures = pgTable(
   'store_features',
   {

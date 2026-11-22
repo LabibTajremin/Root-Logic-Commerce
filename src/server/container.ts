@@ -7,6 +7,7 @@ import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
+import { createPages } from '@/modules/pages'
 import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
 import { createSiteSettings } from '@/modules/site-settings'
@@ -24,6 +25,7 @@ import { unavailableStorage } from '@/infrastructure/storage/unavailable'
 import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
+import { createPagesRepo } from '@/infrastructure/db/repositories/pages-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
@@ -133,6 +135,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     stock: createStock({ repo: createStockRepo(db) }),
     plans,
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),
+    pages: createPages({ repo: createPagesRepo(db) }),
     settings,
     access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
     media: createMedia({

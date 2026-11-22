@@ -32,7 +32,7 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
   </header>
 )
 
-export const Footer: Slots['Footer'] = ({ store, categories, text, credit, labels }) => (
+export const Footer: Slots['Footer'] = ({ store, categories, text, credit, labels, pages }) => (
   <footer className="mt-16 bg-soft">
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
       <div className="flex flex-col gap-2">
@@ -55,6 +55,11 @@ export const Footer: Slots['Footer'] = ({ store, categories, text, credit, label
         <Link href="/search" className="text-muted">
           {labels.search}
         </Link>
+        {pages.map((p) => (
+          <Link key={p.slug} href={`/page/${p.slug}`} className="text-muted">
+            {p.title}
+          </Link>
+        ))}
       </nav>
     </div>
     <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 border-t border-line px-4 py-5 text-sm text-muted">

@@ -37,5 +37,8 @@
   "promotions.poster": "A simple poster: colour or image background, a headline and a button.",
   "texts.banglaDigits": "Prices and counts in the shop use ০১২৩ instead of 0123.",
   "texts.wording": "Each row is one label in the shop. The grey text is the current default; type to replace it. You may type Bangla in the English column too.",
-  "texts.language": "The language a shopper sees first. Your own product text, FAQs and pages show exactly as you typed them — in Bangla or English — whichever language is picked."
+  "texts.language": "The language a shopper sees first. Your own product text, FAQs and pages show exactly as you typed them — in Bangla or English — whichever language is picked.",
+  "pages.title": "Shown at the top of the page and in the footer link.",
+  "pages.slug": "Small letters, numbers and dashes, e.g. return-policy. The page opens at /page/return-policy.",
+  "pages.body": "Write in English or Bangla. Start a line with ## for a heading, - for a list item; wrap words in **two stars** to make them bold. Leave an empty line between paragraphs."
 }

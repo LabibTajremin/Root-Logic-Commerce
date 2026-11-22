@@ -355,6 +355,60 @@ test('language texts: owner picks the shop language, rewords labels and turns on
   await expect(page.getByRole('navigation', { name: 'Language' })).toBeVisible()
 })
 
+test('pages: owner adds standard pages, writes a draft, publishes it and it shows in the footer', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  await signedIn(page)
+  await page.goto('/admin/pages')
+  await expect(page.getByRole('heading', { level: 1, name: 'Pages' })).toBeVisible()
+  await a11y()
+  await page.getByRole('button', { name: 'Add standard pages' }).click()
+  await expect(page.getByTestId('page-return-policy')).toContainText('Live')
+  await expect(page.getByTestId('page-about')).toBeVisible()
+
+  // Same web address as an existing page.
+  await page.getByLabel('Page title').fill('Copy')
+  await page.getByLabel('Web address').fill('about')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await alert(page, 'Another page already uses that web address.')
+
+  await page.getByLabel('Page title').fill('Size guide')
+  await page.getByLabel('Web address').fill('size-guide')
+  await page
+    .getByLabel('Text')
+    .fill('## Measure\n\nUse a **soft tape**.\n\n- Chest\n- Length\n\n### Still unsure?\n\nAsk us.')
+  await page.getByLabel('Show on the shop').uncheck()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByTestId('page-size-guide')).toContainText('Draft')
+  const missing = await page.goto('/page/size-guide')
+  expect(missing?.status()).toBe(404)
+
+  await page.goto('/admin/pages')
+  await page.getByTestId('page-size-guide').getByRole('link').click()
+  await expect(page.getByRole('heading', { name: 'Edit page' })).toBeVisible()
+  await page.getByLabel('Show on the shop').check()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByTestId('page-size-guide')).toContainText('Live')
+
+  await page.goto('/')
+  await page.getByRole('contentinfo').getByRole('link', { name: 'Size guide' }).click()
+  await page.waitForURL(/\/page\/size-guide$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Size guide' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Measure' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 3, name: 'Still unsure?' })).toBeVisible()
+  await expect(page.locator('strong', { hasText: 'soft tape' })).toBeVisible()
+  await expect(page.getByRole('listitem').filter({ hasText: 'Chest' })).toBeVisible()
+  await a11y()
+
+  await page.goto('/admin/pages')
+  await page.getByTestId('page-size-guide').getByRole('link').click()
+  await page.getByLabel('Yes, delete this page').check()
+  await page.getByRole('button', { name: 'Delete page' }).click()
+  await expect(page.getByTestId('page-size-guide')).toHaveCount(0)
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

@@ -501,5 +501,22 @@
   "design.showName": "লোগোর লেখা হিসেবে দোকানের নাম দেখান",
   "layouts.sections": "হোম পেজের অংশ",
   "layouts.sectionsHint": "হোম পেজের যেকোনো অংশ বন্ধ বা আবার চালু করুন। কিছুই মুছে যাবে না।",
-  "layouts.gallery": "তৈরি লেআউট"
+  "layouts.gallery": "তৈরি লেআউট",
+  "nav.pages": "পেজ",
+  "pages.title": "পেজ",
+  "pages.intro": "আমাদের সম্পর্কে, রিটার্ন পলিসি, প্রাইভেসি, শর্তাবলি, যোগাযোগ — বা আপনার নিজের যেকোনো পেজ। ফুটারের পেজগুলো দোকানের প্রতিটি পেজে দেখা যায়।",
+  "pages.published": "চালু",
+  "pages.draft": "খসড়া",
+  "pages.addStandard": "সাধারণ পেজগুলো যোগ করুন",
+  "pages.new": "নতুন পেজ",
+  "pages.edit": "পেজ এডিট",
+  "pages.pageTitle": "পেজের শিরোনাম",
+  "pages.slug": "ওয়েব ঠিকানা",
+  "pages.body": "লেখা",
+  "pages.publish": "দোকানে দেখান",
+  "pages.inFooter": "ফুটারে লিংক",
+  "pages.confirmDelete": "হ্যাঁ, পেজটি মুছে ফেলুন",
+  "pages.delete": "পেজ মুছুন",
+  "error.pages.slug_taken": "এই ওয়েব ঠিকানা অন্য একটি পেজে আছে।",
+  "error.pages.not_found": "পেজটি আর নেই।"
 }

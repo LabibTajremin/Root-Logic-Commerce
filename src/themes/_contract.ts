@@ -33,6 +33,8 @@ export type Slots = {
     text?: string
     credit: boolean
     labels: Record<string, string>
+    /** CMS pages the owner put in the footer (J8). */
+    pages: { slug: string; title: string }[]
   }>
   Hero: ComponentType<{ store: StoreView; title: string; sub: string; cta: ReactNode }>
   ProductCard: ComponentType<{

@@ -501,5 +501,22 @@
   "design.showName": "Show the shop name as logo text",
   "layouts.sections": "Home page sections",
   "layouts.sectionsHint": "Turn any part of your home page off or back on. Nothing is deleted.",
-  "layouts.gallery": "Ready-made layouts"
+  "layouts.gallery": "Ready-made layouts",
+  "nav.pages": "Pages",
+  "pages.title": "Pages",
+  "pages.intro": "About us, return policy, privacy, terms, contact — or any page of your own. Pages in the footer show on every page of your shop.",
+  "pages.published": "Live",
+  "pages.draft": "Draft",
+  "pages.addStandard": "Add standard pages",
+  "pages.new": "New page",
+  "pages.edit": "Edit page",
+  "pages.pageTitle": "Page title",
+  "pages.slug": "Web address",
+  "pages.body": "Text",
+  "pages.publish": "Show on the shop",
+  "pages.inFooter": "Link in the footer",
+  "pages.confirmDelete": "Yes, delete this page",
+  "pages.delete": "Delete page",
+  "error.pages.slug_taken": "Another page already uses that web address.",
+  "error.pages.not_found": "That page no longer exists."
 }

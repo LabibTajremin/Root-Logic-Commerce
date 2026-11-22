@@ -65,6 +65,7 @@ export const storefront = cache(async () => {
     categories: live.filter((c) => !c.parentId).map((c) => ({ name: c.name, slug: c.slug })),
     allCategories: live,
     catalog: container.catalog,
+    pages: container.pages,
     orders: container.orders,
     otp: container.otp,
     promotions: container.promotions,

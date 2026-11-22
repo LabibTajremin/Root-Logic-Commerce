@@ -29,8 +29,10 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     moneyFormat,
     credit,
     preview,
+    pages,
     t,
   } = await storefront()
+  const footerPages = (await pages.published(store.id)).filter((p) => p.inFooter)
   const { Header, Footer } = theme.slots
   const k = (keys: string[]) => Object.fromEntries(keys.map((x) => [x, t(`shop.${x}`)]))
   return (
@@ -76,6 +78,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         text={d.footer.text}
         credit={credit}
         labels={k(['shop', 'help', 'track', 'search'])}
+        pages={footerPages}
       />
       <CartDrawer
         labels={{
