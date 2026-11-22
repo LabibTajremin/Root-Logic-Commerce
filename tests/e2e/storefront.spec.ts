@@ -274,6 +274,10 @@ test('robots.txt and sitemap.xml use the store origin', async ({ page, request }
   await createProduct(page, { name, price: '10', stock: '1' })
   const robots = await (await request.get('/robots.txt')).text()
   expect(robots).toContain('Disallow: /admin')
+  // Default favicon when the owner has not uploaded one.
+  const icon = await request.get('/icon.svg')
+  expect(icon.status()).toBe(200)
+  expect(icon.headers()['content-type']).toContain('image/svg+xml')
   expect(robots).toMatch(/Sitemap: http:\/\/127\.0\.0\.1:3100\/sitemap\.xml/)
   const res = await request.get('/sitemap.xml', { headers: { 'x-forwarded-proto': 'https' } })
   const xml = await res.text()
