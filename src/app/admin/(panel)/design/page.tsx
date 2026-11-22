@@ -60,9 +60,7 @@ export default async function DesignPage() {
     <>
       <h1 className="font-heading text-3xl">{t('design.title')}</h1>
       <BrandImages brand={design.brand} t={t} />
-      {/* Remount on a new version so logo saves never leave the editor holding a stale copy. */}
       <DesignEditor
-        key={version}
         initial={design}
         version={version}
         themes={Object.fromEntries(themes)}

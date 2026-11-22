@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, useState, useTransition } from 'react'
 import {
   contrastWarnings,
+  brandImageSlots,
   fontIds,
   footerStyles,
   mergeDesign,
@@ -27,6 +28,19 @@ const sel = 'min-h-11 w-full rounded-control border border-line bg-surface px-3'
 export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props) => {
   const [d, setD] = useState(initial)
   const [version, setVersion] = useState(v0)
+  // A logo/icon saved on this page bumps the stored version: adopt it and the new images,
+  // keeping the owner's unsaved edits, so the next Publish doesn't hit a false conflict.
+  useEffect(() => {
+    if (v0 <= version) return
+    setVersion(v0)
+    setD((x) => ({
+      ...x,
+      brand: {
+        ...x.brand,
+        ...Object.fromEntries(brandImageSlots.map((s) => [s, initial.brand[s]])),
+      },
+    }))
+  }, [v0, version, initial])
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
   const [msg, setMsg] = useState('')
   const [pending, start] = useTransition()
