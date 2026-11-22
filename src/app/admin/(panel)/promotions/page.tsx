@@ -7,7 +7,9 @@ import { ActionForm } from '@/ui/action-form'
 import { Badge, Button, Card, Field, LockBadge } from '@/ui/primitives'
 import { SortableList } from '@/ui/sortable-list'
 import { adminContext } from '../context'
+import { currentSettings } from '@/server/request'
 import { addBanner, removeBanner, reorderBanners, toggleBanner } from './actions'
+import { SliderForm } from './slider-form'
 
 export const metadata: Metadata = { title: 'Promotions' }
 
@@ -147,6 +149,11 @@ export default async function PromotionsPage({
     <>
       <h1 className="font-heading text-3xl">{t('promotions.title')}</h1>
       <p className="text-sm text-muted">{t('promotions.hint')}</p>
+      <SliderForm
+        s={(await currentSettings()).design.heroSlider}
+        t={t}
+        help={helpText(locale, 'slider')}
+      />
       {banners.length === 0 ? (
         <Card>
           <p className="text-muted">{t('promotions.empty')}</p>

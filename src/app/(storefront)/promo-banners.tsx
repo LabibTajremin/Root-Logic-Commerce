@@ -2,23 +2,19 @@ import Link from 'next/link'
 import { parseEmbed, type Banner } from '@/modules/promotions'
 import { ProductImage } from '@/ui/product-image'
 import { EmbedFacade } from './embed-facade'
+import { sliderPosters } from './hero-posters'
+import { Cta, Poster } from './poster'
 import { storefront } from './storefront'
 
 const PLACEHOLDER = '#E5E7EB'
-const Cta = ({ href, label }: { href: string; label: string }) =>
-  label && (
-    <Link
-      href={href || '/'}
-      className="inline-flex min-h-11 w-fit items-center rounded-control bg-button px-5 font-semibold text-button-text"
-    >
-      {label}
-    </Link>
-  )
 
 /** Owner's active banners at the top of the home page, in their chosen order. */
 export const PromoBanners = async () => {
-  const { store, promotions, catalog, imagesOf, t } = await storefront()
-  const banners = await promotions.active(store.id)
+  const ctx = await storefront()
+  const { store, promotions, catalog, imagesOf, t } = ctx
+  // Posters already shown in the hero slider aren't repeated below it.
+  const inSlider = new Set((await sliderPosters(ctx)).map((p) => p.id))
+  const banners = (await promotions.active(store.id)).filter((b) => !inSlider.has(b.id))
   const ids = banners.flatMap((b) => (b.data.kind === 'products' ? b.data.productIds : []))
   const products = (await catalog.listProducts(store.id, { status: 'active' })).filter((p) =>
     ids.includes(p.id),
@@ -76,24 +72,7 @@ export const PromoBanners = async () => {
           </div>
         )
       case 'poster':
-        return (
-          <div
-            className="relative overflow-hidden rounded-card px-6 py-12 text-white md:px-12 md:py-20"
-            style={{ backgroundColor: d.background }}
-          >
-            {d.imageId && (
-              <ProductImage
-                image={{ src: `/api/media/${d.imageId}`, color: d.background }}
-                sizes="100vw"
-              />
-            )}
-            <div className="relative flex max-w-xl flex-col gap-3 rounded-card bg-black/55 p-5">
-              <p className="font-heading text-3xl md:text-5xl">{d.headline}</p>
-              <p>{d.sub}</p>
-              <Cta href={d.href} label={d.cta} />
-            </div>
-          </div>
-        )
+        return <Poster d={d} />
       case 'video':
         return (
           <figure className="flex flex-col gap-2">

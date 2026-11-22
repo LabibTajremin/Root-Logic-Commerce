@@ -597,5 +597,15 @@
   "common.close": "বন্ধ করুন",
   "shop.miniCart": "আপনার কার্ট",
   "shop.miniCartItems": "কার্টে {{n}}টি",
-  "shop.viewCart": "কার্ট দেখুন"
+  "shop.viewCart": "কার্ট দেখুন",
+  "slider.title": "হিরো স্লাইডার",
+  "slider.enabled": "পোস্টার ব্যানারগুলো হোম পেজের উপরে স্লাইডার হিসেবে দেখান",
+  "slider.interval": "প্রতি স্লাইডে সেকেন্ড (৩–১০)",
+  "slider.effect": "ইফেক্ট",
+  "slider.slide": "স্লাইড",
+  "slider.fade": "ফেড",
+  "shop.featured": "বিশেষ",
+  "shop.prevSlide": "আগের স্লাইড",
+  "shop.nextSlide": "পরের স্লাইড",
+  "shop.slideOf": "স্লাইড {{i}} / {{n}}"
 }

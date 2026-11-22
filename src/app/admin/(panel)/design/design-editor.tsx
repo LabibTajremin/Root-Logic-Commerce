@@ -37,6 +37,7 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
     setD((x) => ({
       ...x,
       announcement: initial.announcement,
+      heroSlider: initial.heroSlider,
       brand: {
         ...x.brand,
         ...Object.fromEntries(brandImageSlots.map((s) => [s, initial.brand[s]])),

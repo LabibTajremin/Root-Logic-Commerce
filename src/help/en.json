@@ -46,5 +46,6 @@
   "store.messenger": "The part after facebook.com/ for your page, e.g. ankito.bd",
   "store.address": "Printed on invoices and the contact page.",
   "store.mapUrl": "Open your shop in Google Maps → Share → Copy link.",
-  "announce": "Short lines above your shop's header — offers, delivery news. Leave the messages empty to hide the bar. Links can be a page of your shop (/c/…) or a full https:// address."
+  "announce": "Short lines above your shop's header — offers, delivery news. Leave the messages empty to hide the bar. Links can be a page of your shop (/c/…) or a full https:// address.",
+  "slider": "Your active poster banners replace the welcome picture and play one after another. It pauses while a shopper points at it and stays still for people who turn off motion."
 }

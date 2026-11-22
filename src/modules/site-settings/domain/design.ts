@@ -73,6 +73,14 @@ export const designSchema = z.object({
     hover: z.enum(['none', 'lift', 'zoom', 'glow']),
     motion: z.enum(['none', 'subtle', 'smooth', 'playful']),
   }),
+  // B3: active poster banners shown as an autoplaying slider in place of the welcome hero.
+  heroSlider: z
+    .object({
+      enabled: z.boolean().default(false),
+      interval: z.number().int().min(3).max(10).default(5),
+      effect: z.enum(['slide', 'fade']).default('slide'),
+    })
+    .prefault({}),
   // B1: short messages above the header; a link may be a page of the shop or an https URL.
   announcement: z
     .object({
@@ -117,6 +125,7 @@ export const baseDesign: Design = {
   background: { pattern: 'none', patternOpacity: 10 },
   header: { opacity: 100, sticky: true },
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
+  heroSlider: { enabled: false, interval: 5, effect: 'slide' },
   announcement: { messages: [], mode: 'rotate', link: '', closable: true },
   footer: {
     style: 'classic',

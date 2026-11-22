@@ -597,5 +597,15 @@
   "common.close": "Close",
   "shop.miniCart": "Your cart",
   "shop.miniCartItems": "{{n}} in cart",
-  "shop.viewCart": "View cart"
+  "shop.viewCart": "View cart",
+  "slider.title": "Hero slider",
+  "slider.enabled": "Show poster banners as a slider at the top of the home page",
+  "slider.interval": "Seconds per slide (3–10)",
+  "slider.effect": "Effect",
+  "slider.slide": "Slide",
+  "slider.fade": "Fade",
+  "shop.featured": "Featured",
+  "shop.prevSlide": "Previous slide",
+  "shop.nextSlide": "Next slide",
+  "shop.slideOf": "Slide {{i}} of {{n}}"
 }

@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { ResolvedSection, SectionId } from '@/sections/registry'
+import { sliderPosters } from './hero-posters'
+import { HeroSlider } from './hero-slider'
+import { Poster } from './poster'
 import { ProductGrid } from './product-grid'
 import { PromoBanners } from './promo-banners'
 import type { storefront } from './storefront'
@@ -9,7 +12,25 @@ type Ctx = Awaited<ReturnType<typeof storefront>>
 
 const renderers: Record<SectionId, (p: { ctx: Ctx }) => ReactNode | Promise<ReactNode>> = {
   'promo-banners': () => <PromoBanners />,
-  hero: ({ ctx: { theme, store, t } }) => {
+  hero: async ({ ctx }) => {
+    const { theme, store, design, t } = ctx
+    const posters = await sliderPosters(ctx)
+    if (posters.length > 0)
+      return (
+        <HeroSlider
+          slides={posters.map((p, i) => (
+            <Poster key={p.id} d={p.data} priority={i === 0} />
+          ))}
+          interval={design.heroSlider.interval}
+          effect={design.heroSlider.effect}
+          labels={{
+            region: t('shop.featured'),
+            prev: t('shop.prevSlide'),
+            next: t('shop.nextSlide'),
+            slide: t('shop.slideOf'),
+          }}
+        />
+      )
     const { Hero } = theme.slots
     return (
       <Hero
