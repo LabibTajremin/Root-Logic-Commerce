@@ -469,8 +469,6 @@ test('activity log: a design change is logged with who and where, filtered, and 
   page,
   a11y,
 }) => {
-  // The design preview renders the shop, whose fake Drive images answer 404 (see product images).
-  test.info().annotations.push({ type: 'allow-status', description: '404' })
   await signedIn(page)
   await page.goto('/admin/design')
   const footer = page.getByLabel('Footer text')
@@ -485,6 +483,8 @@ test('activity log: a design change is logged with who and where, filtered, and 
   const row = page.getByTestId('activity-row').first()
   await expect(row).toContainText('Design changed')
   await expect(row).toContainText('footer.text')
+  // Logged against the signed-in owner, not "System".
+  await expect(row).toContainText(e2eEnv.BOOTSTRAP_OWNER_NAME)
 
   const chips = page.getByRole('navigation', { name: 'Filter by change' })
   await chips.getByRole('link', { name: /^Design changed/ }).click()
