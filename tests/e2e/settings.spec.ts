@@ -469,6 +469,8 @@ test('activity log: a design change is logged with who and where, filtered, and 
   page,
   a11y,
 }) => {
+  // The design preview renders the shop, whose fake Drive images answer 404 (see product images).
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
   await signedIn(page)
   await page.goto('/admin/design')
   const footer = page.getByLabel('Footer text')
