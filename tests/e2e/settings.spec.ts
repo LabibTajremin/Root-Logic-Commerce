@@ -734,6 +734,7 @@ test('promotions: every banner kind, the video lock, embeds that load on tap, an
   page,
   a11y,
 }) => {
+  test.setTimeout(90_000) // every banner kind, then the hero slider's autoplay timings
   test.info().annotations.push({ type: 'allow-status', description: '416' })
   const id = uid()
   await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
