@@ -252,7 +252,14 @@ test('admin shell: Simple/Pro menu and ⌘K finds screens, orders and products',
   await box.fill('zzzz-no-match')
   await expect(dialog.getByText('Nothing found yet')).toBeVisible()
   await box.fill(phone)
-  await expect(dialog.getByRole('region', { name: 'Orders' }).getByRole('link')).toHaveCount(1)
+  const order = dialog.getByRole('region', { name: 'Orders' }).getByRole('link')
+  await expect(order).toHaveCount(1)
+  // Open it from the palette and cancel it, so no stray pending order skews other tests' counts.
+  await order.click()
+  await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/)
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+  await page.keyboard.press('Control+k')
   await box.fill(`Find ${id}`)
   const product = dialog
     .getByRole('region', { name: 'Products' })
