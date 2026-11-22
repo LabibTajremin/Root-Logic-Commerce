@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 11 — done since last update: admin shell (grouped Simple/Pro menu, More), F1 ⌘K, F2 new-order bell/toast/chime + notification centre, F3 activity log (settings saves, filters, undo, 30-day retention; audit context on globalThis). Verify running. NEXT: storefront batch — Shop info page (contact phone/WhatsApp/Messenger/address/map), storefront feature gating, B1 announcement bar, B9 help bubble (draft in scratchpad b/), B10 bottom nav → B15 mini-cart, B3 hero slider → J1 remaining tabs → Drive uploads gap → J3 with demo packs. Activity log covers settings only so far; products/orders to add.
+Now: Phase 11 — storefront batch done & green (231/231 files 100%): Shop info page, module switches on the storefront (J5), B1 announcement bar, B9 help bubble, B10 phone bottom nav, B15 mini-cart, B3 hero slider (posters). NEXT: J1 remaining editor tabs (product card toggles, floating buttons, product page, checkout, thank-you, mobile menu) → Drive uploads storage gap → J3 switch dialog with demo packs → activity log for products/orders → Phase 11 wrap-up (PR body section, CI green) → Phase 12 Catalog.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
