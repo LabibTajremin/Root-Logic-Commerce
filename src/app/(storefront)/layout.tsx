@@ -10,6 +10,7 @@ import { BottomNav } from './bottom-nav'
 import { CartButton, CartDrawer } from './cart-drawer'
 import { HelpBubble } from './help-bubble'
 import { helpLinks } from './help-links'
+import { MiniCart } from './mini-cart'
 import { exitPreview } from './preview-actions'
 import { storefront } from './storefront'
 
@@ -110,6 +111,16 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           links={helpLinks(business.contact, t)}
           label={t('shop.help')}
           top={t('shop.backToTop')}
+        />
+      )}
+      {on('miniCart') && (
+        <MiniCart
+          labels={{
+            region: t('shop.miniCart'),
+            items: t('shop.miniCartItems'),
+            view: t('shop.viewCart'),
+          }}
+          moneyFormat={moneyFormat}
         />
       )}
       {on('bottomNav') && (

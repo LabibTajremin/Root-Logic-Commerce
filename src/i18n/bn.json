@@ -594,5 +594,8 @@
   "announce.link": "লিংক (ঐচ্ছিক)",
   "announce.closable": "ক্রেতারা বন্ধ করতে পারবেন",
   "shop.announcements": "ঘোষণা",
-  "common.close": "বন্ধ করুন"
+  "common.close": "বন্ধ করুন",
+  "shop.miniCart": "আপনার কার্ট",
+  "shop.miniCartItems": "কার্টে {{n}}টি",
+  "shop.viewCart": "কার্ট দেখুন"
 }

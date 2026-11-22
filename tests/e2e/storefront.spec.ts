@@ -380,3 +380,24 @@ test('TLS ask endpoint approves only store domains', async ({ request }) => {
   expect((await request.get('/api/domains/check?domain=evil.example')).status()).toBe(404)
   expect((await request.get('/api/domains/check')).status()).toBe(404)
 })
+
+test('mini-cart: a count and total pill appears with items and reopens the cart', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  await signedIn(page)
+  await createProduct(page, { name: `Mini ${id}`, price: '120', stock: '5' })
+  await page.goto(`/search?q=${encodeURIComponent(`Mini ${id}`)}`)
+  const pill = page.getByRole('complementary', { name: 'Your cart' })
+  await expect(pill).toHaveCount(0)
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await expect(drawer(page)).toBeVisible()
+  await drawer(page).getByRole('button', { name: 'Continue shopping' }).click()
+  await expect(pill.getByRole('button')).toContainText('1 in cart · ৳120 · View cart')
+  await a11y()
+  await pill.getByRole('button').click()
+  await expect(drawer(page)).toBeVisible()
+  await drawer(page).getByRole('button', { name: 'Remove' }).click()
+  await expect(pill).toHaveCount(0)
+})

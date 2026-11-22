@@ -594,5 +594,8 @@
   "announce.link": "Link (optional)",
   "announce.closable": "Shoppers can close it",
   "shop.announcements": "Announcements",
-  "common.close": "Close"
+  "common.close": "Close",
+  "shop.miniCart": "Your cart",
+  "shop.miniCartItems": "{{n}} in cart",
+  "shop.viewCart": "View cart"
 }
