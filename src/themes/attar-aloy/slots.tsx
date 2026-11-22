@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BrandLogo } from '@/ui/brand-logo'
+import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
@@ -73,11 +74,7 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
           initial(product.name)
         )}
       </span>
-      {product.compareAt && (
-        <span className="absolute right-3 top-3 rounded-full bg-button px-3 py-0.5 text-xs font-semibold text-button-text">
-          {labels.sale}
-        </span>
-      )}
+      <ProductBadges badges={product.badges} className="absolute right-3 top-3" />
     </Link>
     <Link href={`/p/${product.slug}`} className="font-heading text-xl font-light">
       {product.name}
@@ -87,6 +84,7 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
       {product.compareAt && <s className="text-muted">{product.compareAt}</s>}
     </p>
     <div className="mt-auto w-full">
+      <StockLeft n={product.left} label={labels.left} />
       {product.inStock ? action : <p className="text-sm text-muted">{labels.soldOut}</p>}
     </div>
   </article>

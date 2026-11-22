@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { GaEvent } from '../../ga'
 import { breadcrumbLd, JsonLd } from '../../json-ld'
 import { AddToCart, OrderNow } from '../../cart-buttons'
@@ -65,12 +66,14 @@ export default async function ProductPage({ params }: Props) {
       />
       <ProductGallery name={p.name} images={images} />
       <div className="flex flex-col gap-4">
+        <ProductBadges badges={v.badges} className="flex-row" />
         <h1 className="font-heading text-3xl md:text-4xl">{p.name}</h1>
         <p className="flex items-baseline gap-3 text-2xl font-semibold">
           {v.price}
           {v.compareAt && <s className="text-base font-normal text-muted">{v.compareAt}</s>}
         </p>
         <p className="text-sm font-semibold">{v.inStock ? t('shop.inStock') : t('shop.soldOut')}</p>
+        <StockLeft n={v.left} label={t('shop.left')} />
         {v.inStock && (
           <div className="flex flex-col gap-2 sm:max-w-sm">
             <AddToCart item={item} label={t('shop.addToCart')} />

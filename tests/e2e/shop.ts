@@ -18,6 +18,7 @@ type NewProduct = {
   category?: string
   seoTitle?: string
   description?: string
+  badge?: { text: string; tone: string }
 }
 
 /** Creates a product through the admin editor (owner must be signed in). */
@@ -32,6 +33,10 @@ export const createProduct = async (page: Page, p: NewProduct) => {
     await page.getByLabel('Category', { exact: true }).selectOption({ label: p.category })
   if (p.seoTitle) await page.getByLabel('SEO title').fill(p.seoTitle)
   if (p.description) await page.getByLabel('Description', { exact: true }).fill(p.description)
+  if (p.badge) {
+    await page.getByLabel('Badge text (optional)').fill(p.badge.text)
+    await page.getByLabel('Badge colour').selectOption(p.badge.tone)
+  }
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page).toHaveURL(/\/admin\/products$/)
 }

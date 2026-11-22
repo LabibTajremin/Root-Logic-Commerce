@@ -29,7 +29,7 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
         <li key={p.id}>
           <ProductCard
             product={view(p, images.get(p.id)!)}
-            labels={{ sale: t('shop.sale'), soldOut: t('shop.soldOut') }}
+            labels={{ soldOut: t('shop.soldOut'), left: t('shop.left') }}
             action={
               <AddToCart
                 item={{ id: p.id, slug: p.slug, name: p.name, price: p.price }}

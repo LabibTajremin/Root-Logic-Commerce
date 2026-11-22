@@ -169,3 +169,21 @@ body {
     transition: none;
   }
 }
+
+/* A3 badge tones (contrast-safe on any theme). */
+.rlc-badge[data-tone='danger'] {
+  background: var(--color-danger);
+  color: #fff;
+}
+.rlc-badge[data-tone='success'] {
+  background: var(--color-success);
+  color: #fff;
+}
+.rlc-badge[data-tone='accent'] {
+  background: var(--color-button);
+  color: var(--color-button-text);
+}
+.rlc-badge[data-tone='neutral'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}

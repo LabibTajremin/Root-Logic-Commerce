@@ -29,6 +29,10 @@ export type ProductView = {
   price: string
   compareAt: string | null
   inStock: boolean
+  /** A3: "Save N%" then the owner's badge. */
+  badges: { text: string; tone: 'accent' | 'success' | 'danger' | 'neutral' }[]
+  /** A4: units left when low (null = don't show). */
+  left: number | null
   image: ImageView | null
 }
 
@@ -52,7 +56,7 @@ export type Slots = {
   ProductCard: ComponentType<{
     product: ProductView
     action: ReactNode
-    labels: { sale: string; soldOut: string }
+    labels: { soldOut: string; left: string }
   }>
   ProductGallery: ComponentType<{ name: string; images: ImageView[] }>
   CategoryNav: ComponentType<{ categories: CategoryView[]; active?: string; allLabel: string }>

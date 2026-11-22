@@ -37,6 +37,7 @@ describe('media repo', () => {
           videoUrl: null,
           seoTitle: null,
           seoDescription: null,
+          badge: null,
         })
       ).id
     const [p, q] = [await product(a, 'p'), await product(b, 'q')]

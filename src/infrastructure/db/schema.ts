@@ -271,6 +271,8 @@ export const products = pgTable(
     videoUrl: text(),
     seoTitle: text(),
     seoDescription: text(),
+    // A3: owner's badge { text, tone } — validated by the catalog schema.
+    badge: jsonb().$type<{ text: string; tone: 'accent' | 'success' | 'danger' | 'neutral' }>(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

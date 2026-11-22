@@ -48,6 +48,7 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           address: String(form.get('contact.address')).trim(),
           mapUrl: String(form.get('contact.mapUrl')).trim(),
         },
+        showStockLeft: form.get('showStockLeft') === 'on',
       }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },

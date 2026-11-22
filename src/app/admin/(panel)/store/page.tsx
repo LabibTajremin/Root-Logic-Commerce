@@ -33,6 +33,15 @@ export default async function StorePage() {
               helpLabel={t('common.help')}
             />
           ))}
+          <label className="flex min-h-11 items-center justify-between gap-3 font-semibold">
+            {t('stock.showLeft')}
+            <input
+              type="checkbox"
+              name="showStockLeft"
+              defaultChecked={business.showStockLeft}
+              className="size-6 accent-[var(--color-accent)]"
+            />
+          </label>
           <Button type="submit" icon="check" className="self-start">
             {t('common.save')}
           </Button>

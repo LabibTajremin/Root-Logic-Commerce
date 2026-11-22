@@ -30,6 +30,8 @@ export const businessSchema = z.object({
       { id: 'outside-dhaka', label: 'Outside Dhaka', charge: 13000 },
     ]),
   lowStockThreshold: z.number().int().nonnegative().default(5),
+  // A4: tell shoppers "Only N left" once a product reaches its low-stock threshold.
+  showStockLeft: z.boolean().default(true),
   banglaDigits: z.boolean().default(false),
   currency: z.enum(currencyCodes as [CurrencyCode, ...CurrencyCode[]]).default('BDT'),
   dateFormat: z.enum(dateFormats).default('d MMM yyyy'),

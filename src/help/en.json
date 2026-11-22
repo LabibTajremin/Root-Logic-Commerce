@@ -47,5 +47,6 @@
   "store.address": "Printed on invoices and the contact page.",
   "store.mapUrl": "Open your shop in Google Maps → Share → Copy link.",
   "announce": "Short lines above your shop's header — offers, delivery news. Leave the messages empty to hide the bar. Links can be a page of your shop (/c/…) or a full https:// address.",
-  "slider": "Your active poster banners replace the welcome picture and play one after another. It pauses while a shopper points at it and stays still for people who turn off motion."
+  "slider": "Your active poster banners replace the welcome picture and play one after another. It pauses while a shopper points at it and stays still for people who turn off motion.",
+  "product.badgeText": "A short label on the product picture, e.g. New, Best seller, Organic. Leave empty for none. “Save N%” shows by itself when you set a compare-at price."
 }

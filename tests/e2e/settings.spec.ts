@@ -75,7 +75,13 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
   test.info().annotations.push({ type: 'allow-status', description: '404' })
   const id = uid()
   await signedIn(page)
-  await createProduct(page, { name: `Sale ${id}`, price: '100', compareAt: '150', stock: '4' })
+  await createProduct(page, {
+    name: `Sale ${id}`,
+    price: '100',
+    compareAt: '150',
+    stock: '4',
+    badge: { text: 'Hot', tone: 'success' },
+  })
   await editProduct(page, `Sale ${id}`)
   await uploadPhoto(page)
   await createProduct(page, { name: `Out ${id}`, price: '100', stock: '0' })
@@ -87,6 +93,10 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
     await page.goto(`/search?q=${encodeURIComponent(id)}`)
     await expect(page.getByRole('link', { name: `Sale ${id}` })).toBeVisible()
     await expect(page.getByText('Sold out')).toBeVisible()
+    // A3/A4 on every theme's card: saving, the owner's badge, and low stock.
+    await expect(page.getByText('Save 33%')).toBeVisible()
+    await expect(page.getByText('Hot', { exact: true })).toBeVisible()
+    await expect(page.getByText('Only 4 left')).toBeVisible()
     await a11y()
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()

@@ -607,5 +607,14 @@
   "shop.featured": "বিশেষ",
   "shop.prevSlide": "আগের স্লাইড",
   "shop.nextSlide": "পরের স্লাইড",
-  "shop.slideOf": "স্লাইড {{i}} / {{n}}"
+  "shop.slideOf": "স্লাইড {{i}} / {{n}}",
+  "shop.save": "{{pct}}% ছাড়",
+  "shop.left": "মাত্র {{n}}টি বাকি",
+  "field.badge": "ব্যাজের লেখা (ঐচ্ছিক)",
+  "field.badgeTone": "ব্যাজের রং",
+  "badge.accent": "ব্র্যান্ডের রং",
+  "badge.success": "সবুজ",
+  "badge.danger": "লাল",
+  "badge.neutral": "সাধারণ",
+  "stock.showLeft": "স্টক কম হলে ক্রেতাদের “মাত্র Nটি বাকি” দেখান"
 }

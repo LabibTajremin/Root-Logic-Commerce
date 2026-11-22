@@ -1,5 +1,6 @@
 'use server'
 
+import type { BadgeTone } from '@/modules/catalog'
 import { act, type ActionState } from '../act'
 
 // Every key below is an input of the product form, so `get` never returns null here.
@@ -21,6 +22,10 @@ const readProduct = (f: FormData) => ({
   categoryId: field(f, 'categoryId') || null,
   seoTitle: field(f, 'seoTitle') || null,
   seoDescription: field(f, 'seoDescription') || null,
+  // An empty badge text means "no badge".
+  badge: field(f, 'badgeText').trim()
+    ? { text: field(f, 'badgeText'), tone: field(f, 'badgeTone') as BadgeTone }
+    : null,
 })
 
 export async function saveProduct(_: ActionState, form: FormData) {

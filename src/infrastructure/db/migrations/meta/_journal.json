@@ -43,6 +43,13 @@
       "when": 1795314130056,
       "tag": "0005_activity_log",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795328572331,
+      "tag": "0006_product_badge",
+      "breakpoints": true
     }
   ]
 }

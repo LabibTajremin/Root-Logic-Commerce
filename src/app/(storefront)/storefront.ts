@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { translate } from '@/i18n'
-import type { Product } from '@/modules/catalog'
+import { cardBadges, stockLeft, type Product } from '@/modules/catalog'
 import { formatMoney } from '@/modules/shared'
 import { runtime } from '@/server/runtime'
 import { PREVIEW_COOKIE, readPreview } from '@/server/preview'
@@ -48,6 +48,8 @@ export const storefront = cache(async () => {
     slug: p.slug,
     price: money(p.price),
     compareAt: p.compareAtPrice === null ? null : money(p.compareAtPrice),
+    badges: cardBadges(p, (pct) => t('shop.save', { pct })),
+    left: stockLeft(p, business.showStockLeft),
     inStock: p.stock > 0,
     image: images[0] ?? null,
   })

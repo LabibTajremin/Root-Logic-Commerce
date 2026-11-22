@@ -1,5 +1,6 @@
 import type { Category, Product } from '@/modules/catalog'
 import { helpText } from '@/help'
+import { badgeTones } from '@/modules/catalog'
 import type { Locale } from '@/i18n'
 import { translate } from '@/i18n'
 import { ActionForm } from '@/ui/action-form'
@@ -123,6 +124,25 @@ export const ProductForm = ({
             defaultValue: product?.lowStockThreshold ?? 5,
           })}
           {f('sku', 'field.sku', { defaultValue: product?.sku ?? '' })}
+          {f('badgeText', 'field.badge', {
+            maxLength: 24,
+            defaultValue: product?.badge?.text ?? '',
+          })}
+          <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="badgeTone">
+            {t('field.badgeTone')}
+            <select
+              id="badgeTone"
+              name="badgeTone"
+              defaultValue={product?.badge?.tone ?? 'accent'}
+              className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+            >
+              {badgeTones.map((tone) => (
+                <option key={tone} value={tone}>
+                  {t(`badge.${tone}`)}
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-1">
               <label htmlFor="categoryId" className="text-sm font-semibold">

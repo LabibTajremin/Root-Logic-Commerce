@@ -607,5 +607,14 @@
   "shop.featured": "Featured",
   "shop.prevSlide": "Previous slide",
   "shop.nextSlide": "Next slide",
-  "shop.slideOf": "Slide {{i}} of {{n}}"
+  "shop.slideOf": "Slide {{i}} of {{n}}",
+  "shop.save": "Save {{pct}}%",
+  "shop.left": "Only {{n}} left",
+  "field.badge": "Badge text (optional)",
+  "field.badgeTone": "Badge colour",
+  "badge.accent": "Brand colour",
+  "badge.success": "Green",
+  "badge.danger": "Red",
+  "badge.neutral": "Plain",
+  "stock.showLeft": "Show “Only N left” to shoppers when stock is low"
 }

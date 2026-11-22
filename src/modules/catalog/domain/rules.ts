@@ -16,6 +16,14 @@ export const toSortOrders = (orderedIds: string[]) =>
 
 const money = z.number().int().nonnegative()
 
+export const badgeTones = ['accent', 'success', 'danger', 'neutral'] as const
+export type BadgeTone = (typeof badgeTones)[number]
+/** A3: the owner's own label on a product ("New", "Best seller", "Organic"). */
+export const productBadge = z.object({
+  text: z.string().trim().min(1).max(24),
+  tone: z.enum(badgeTones),
+})
+
 export const productInput = z
   .object({
     name: z.string().trim().min(1).max(200),
@@ -36,6 +44,7 @@ export const productInput = z
     videoUrl: z.url().nullable().default(null),
     seoTitle: z.string().max(70).nullable().default(null),
     seoDescription: z.string().max(170).nullable().default(null),
+    badge: productBadge.nullable().default(null),
   })
   .refine((p) => p.compareAtPrice === null || p.compareAtPrice > p.price, {
     path: ['compareAtPrice'],
