@@ -6,6 +6,12 @@ export const businessSchema = z.object({
     .object({
       phone: z.string().max(20).default(''),
       whatsapp: z.string().max(20).default(''),
+      // Facebook page username for m.me links (help bubble).
+      messenger: z
+        .string()
+        .regex(/^[\w.]*$/)
+        .max(60)
+        .default(''),
       address: z.string().max(200).default(''),
       mapUrl: z.url().or(z.literal('')).default(''),
     })

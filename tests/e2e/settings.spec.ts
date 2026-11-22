@@ -510,6 +510,53 @@ test('activity log: a design change is logged with who and where, filtered, and 
   await expect(page.getByLabel('Footer text')).toHaveValue(before)
 })
 
+test('shop info feeds the help bubble; help bubble and bottom nav follow their feature switches', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  await page.goto('/admin/store')
+  await expect(page.getByRole('heading', { level: 1, name: 'Shop info' })).toBeVisible()
+  await a11y()
+  await page.getByLabel('Phone', { exact: true }).fill('01711 234567')
+  await page.getByLabel('WhatsApp number').fill('01711-234567')
+  await page.getByLabel(/Messenger/).fill('ankito.bd')
+  await page.getByLabel('Shop address').fill('House 12, Road 3, Mirpur 10, Dhaka')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+
+  await page.goto('/')
+  await page.locator('details > summary').filter({ hasText: 'Help' }).click()
+  await expect(page.getByRole('link', { name: 'Chat on WhatsApp' })).toHaveAttribute(
+    'href',
+    'https://wa.me/8801711234567',
+  )
+  await expect(page.getByRole('link', { name: 'Message on Messenger' })).toHaveAttribute(
+    'href',
+    'https://m.me/ankito.bd',
+  )
+  await expect(page.getByRole('link', { name: 'Call us' })).toHaveAttribute(
+    'href',
+    'tel:01711234567',
+  )
+  await expect(page.getByRole('link', { name: 'Back to top' })).toHaveAttribute('href', '#top')
+  await expect(page.locator('nav[aria-label="Quick links"]')).toHaveCount(1)
+  await a11y()
+
+  const toggle = async (id: string, to: 'Turn off' | 'Turn on') => {
+    await page.goto('/admin/features')
+    await page.getByTestId(`module-${id}`).getByRole('button', { name: to }).click()
+    await expect(page.getByTestId(`module-${id}`)).toContainText(to === 'Turn off' ? 'Off' : 'On')
+  }
+  await toggle('helpBubble', 'Turn off')
+  await toggle('bottomNav', 'Turn off')
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: 'Back to top' })).toHaveCount(0)
+  await expect(page.locator('nav[aria-label="Quick links"]')).toHaveCount(0)
+  await toggle('helpBubble', 'Turn on')
+  await toggle('bottomNav', 'Turn on')
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

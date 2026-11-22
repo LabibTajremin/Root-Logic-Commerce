@@ -40,5 +40,10 @@
   "texts.language": "The language a shopper sees first. Your own product text, FAQs and pages show exactly as you typed them — in Bangla or English — whichever language is picked.",
   "pages.title": "Shown at the top of the page and in the footer link.",
   "pages.slug": "Small letters, numbers and dashes, e.g. return-policy. The page opens at /page/return-policy.",
-  "pages.body": "Write in English or Bangla. Start a line with ## for a heading, - for a list item; wrap words in **two stars** to make them bold. Leave an empty line between paragraphs."
+  "pages.body": "Write in English or Bangla. Start a line with ## for a heading, - for a list item; wrap words in **two stars** to make them bold. Leave an empty line between paragraphs.",
+  "store.phone": "Shown as “Call us”. Example: 01711-234567",
+  "store.whatsapp": "The number shoppers can WhatsApp. Local numbers like 01711… are fine.",
+  "store.messenger": "The part after facebook.com/ for your page, e.g. ankito.bd",
+  "store.address": "Printed on invoices and the contact page.",
+  "store.mapUrl": "Open your shop in Google Maps → Share → Copy link."
 }

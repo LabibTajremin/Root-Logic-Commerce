@@ -113,3 +113,14 @@ body {
 [data-footer='minimal'] .rlc-footer-grid {
   display: none;
 }
+
+/* B10: leave room above the phone bottom nav so it never covers content. */
+@media (width < 64rem) {
+  [data-bottom-nav='true'] {
+    padding-bottom: 4rem;
+  }
+  /* One cart button per screen: on phones it lives in the bottom nav. */
+  [data-bottom-nav='true'] .rlc-header-cart {
+    display: none;
+  }
+}

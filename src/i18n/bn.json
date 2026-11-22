@@ -573,5 +573,17 @@
   "activity.action.settings.business": "ব্যবসার সেটিংস বদলানো হয়েছে",
   "activity.action.settings.layout": "হোম লেআউট বদলানো হয়েছে",
   "error.activity.not_found": "পরিবর্তনটি আর লগে নেই।",
-  "error.activity.not_undoable": "এই পরিবর্তন আগেই ফেরানো হয়েছে বা ফেরানো যায় না।"
+  "error.activity.not_undoable": "এই পরিবর্তন আগেই ফেরানো হয়েছে বা ফেরানো যায় না।",
+  "store.title": "দোকানের তথ্য",
+  "store.intro": "ক্রেতারা কীভাবে যোগাযোগ করবেন। যেগুলো পূরণ করবেন সেগুলো প্রতিটি পেজের সাহায্য বাটনে দেখাবে।",
+  "store.phone": "ফোন",
+  "store.whatsapp": "WhatsApp নম্বর",
+  "store.messenger": "Facebook পেজের ইউজারনেম (Messenger)",
+  "store.address": "দোকানের ঠিকানা",
+  "store.mapUrl": "Google Maps লিংক",
+  "shop.helpWhatsapp": "WhatsApp-এ কথা বলুন",
+  "shop.helpMessenger": "Messenger-এ মেসেজ দিন",
+  "shop.helpCall": "কল করুন",
+  "shop.backToTop": "উপরে যান",
+  "shop.quickNav": "দ্রুত লিংক"
 }

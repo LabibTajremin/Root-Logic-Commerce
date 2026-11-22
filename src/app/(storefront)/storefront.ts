@@ -8,6 +8,7 @@ import { PREVIEW_COOKIE, readPreview } from '@/server/preview'
 import { currentLocale, currentSettings, currentStore } from '@/server/request'
 import { layoutOf, presetLayout, previewPreset } from '@/sections/registry'
 import type { MediaRow } from '@/modules/media'
+import type { FeatureId } from '@/modules/plans'
 import { brandImages } from '@/modules/site-settings'
 import { loadTheme, type ImageView, type ProductView } from '@/themes'
 
@@ -19,11 +20,13 @@ export const storefront = cache(async () => {
   const preview = previewPreset(
     readPreview(config.authSecret, store.id, jar.get(PREVIEW_COOKIE)?.value),
   )
-  const [theme, categories, unbranded] = await Promise.all([
+  const [theme, categories, unbranded, features] = await Promise.all([
     loadTheme(design.themeId),
     container.catalog.listCategories(store.id),
     container.plans.has(store.id, 'removeBranding'),
+    container.features.list(store.id),
   ])
+  const active = new Set(features.filter((f) => f.active).map((f) => f.id))
   const t = (k: string, v?: Record<string, string | number>) =>
     translate(locale, k, v, business.texts[locale])
   const moneyFormat = { banglaDigits: business.banglaDigits, currency: business.currency }
@@ -60,6 +63,8 @@ export const storefront = cache(async () => {
     design,
     business,
     moneyFormat,
+    /** Is this module switched on (J5) for the store? */
+    on: (id: FeatureId) => active.has(id),
     layout: preview ? presetLayout(preview) : layoutOf(layout),
     preview,
     theme,

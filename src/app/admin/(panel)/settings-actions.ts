@@ -40,6 +40,15 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           ]),
         ),
       }),
+      ...(has('contact.phone') && {
+        contact: {
+          phone: String(form.get('contact.phone')).trim(),
+          whatsapp: String(form.get('contact.whatsapp')).trim(),
+          messenger: String(form.get('contact.messenger')).trim(),
+          address: String(form.get('contact.address')).trim(),
+          mapUrl: String(form.get('contact.mapUrl')).trim(),
+        },
+      }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },
       }),

@@ -5,7 +5,10 @@ import { brandImages, toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
 import { Analytics } from './analytics'
+import { BottomNav } from './bottom-nav'
 import { CartButton, CartDrawer } from './cart-drawer'
+import { HelpBubble } from './help-bubble'
+import { helpLinks } from './help-links'
 import { exitPreview } from './preview-actions'
 import { storefront } from './storefront'
 
@@ -31,6 +34,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     credit,
     preview,
     pages,
+    on,
     t,
   } = await storefront()
   const footerPages = (await pages.published(store.id)).filter((p) => p.inFooter)
@@ -43,6 +47,8 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       data-hover={d.style.hover}
       data-motion={d.style.motion}
       data-sticky={String(d.header.sticky)}
+      data-bottom-nav={String(on('bottomNav'))}
+      id="top"
       className="flex min-h-dvh flex-col"
     >
       <style>{themeCss(theme, d.mode.base) + toCssVars(d)}</style>
@@ -66,7 +72,9 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         actions={
           <>
             {business.language.switcher && <LangToggle locale={locale} />}
-            <CartButton label={t('shop.cart')} />
+            <span className="rlc-header-cart">
+              <CartButton label={t('shop.cart')} />
+            </span>
           </>
         }
       />
@@ -89,6 +97,24 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         }}
         moneyFormat={moneyFormat}
       />
+      {on('helpBubble') && (
+        <HelpBubble
+          links={helpLinks(business.contact, t)}
+          label={t('shop.help')}
+          top={t('shop.backToTop')}
+        />
+      )}
+      {on('bottomNav') && (
+        <BottomNav
+          labels={{
+            nav: t('shop.quickNav'),
+            home: t('nav.home'),
+            search: t('shop.search'),
+            track: t('shop.track'),
+            cart: t('shop.cart'),
+          }}
+        />
+      )}
       <Analytics ga4={business.ga4MeasurementId} />
     </div>
   )
