@@ -11,7 +11,14 @@ export type Palette = {
 }
 
 /** `showName: false` keeps the name for screen readers but hides the logo text. */
-export type StoreView = { name: string; slug: string; showName: boolean }
+export type StoreView = {
+  name: string
+  slug: string
+  showName: boolean
+  /** Owner's uploaded logos (media URLs), null when none. */
+  logo: string | null
+  footerLogo: string | null
+}
 export type CategoryView = { name: string; slug: string }
 /** `src` is the media base URL; the image loader appends the width. */
 export type ImageView = { src: string; color: string }

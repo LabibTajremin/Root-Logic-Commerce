@@ -410,6 +410,41 @@ test('pages: owner adds standard pages, writes a draft, publishes it and it show
   await expect(page.getByTestId('page-size-guide')).toHaveCount(0)
 })
 
+test('logos: owner uploads a logo and favicon, links a footer logo from Drive, then removes them', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  await page.goto('/admin/design')
+  await expect(page.getByRole('heading', { name: 'Logos & icon' })).toBeVisible()
+  await a11y('iframe')
+  const slot = (s: string) => page.getByTestId(`brand-${s}`)
+  for (const s of ['logo', 'favicon']) {
+    await slot(s)
+      .getByLabel('Choose a photo')
+      .setInputFiles(await photo('#a8763e'))
+    await slot(s).getByRole('button', { name: 'Upload image' }).click()
+    await expect(slot(s).getByRole('button', { name: 'Remove' })).toBeVisible()
+  }
+  await slot('footerLogo')
+    .getByLabel(/Google Drive/)
+    .fill('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view?usp=sharing')
+  await slot('footerLogo').getByRole('button', { name: 'Add' }).click()
+  await expect(slot('footerLogo').getByRole('button', { name: 'Remove' })).toBeVisible()
+
+  await page.goto('/')
+  await expect(page.getByRole('banner').locator('img[src*="/api/media/"]')).toHaveCount(1)
+  await expect(page.getByRole('contentinfo').locator('img[src*="/api/media/"]')).toHaveCount(1)
+  await expect(page.locator('link[rel="icon"]').first()).toHaveAttribute('href', /\/api\/media\//)
+  await a11y()
+
+  await page.goto('/admin/design')
+  for (const s of ['logo', 'favicon', 'footerLogo']) {
+    await slot(s).getByRole('button', { name: 'Remove' }).click()
+    await expect(slot(s).getByRole('button', { name: 'Remove' })).toHaveCount(0)
+  }
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

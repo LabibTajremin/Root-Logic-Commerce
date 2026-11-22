@@ -41,6 +41,8 @@ export const designSchema = z.object({
     name: z.string().trim().min(1).max(60),
     showName: z.boolean().default(true),
     logo: mediaRef.optional(),
+    darkLogo: mediaRef.optional(),
+    footerLogo: mediaRef.optional(),
     nameFont: font,
     siteFont: font,
     favicon: mediaRef.optional(),
@@ -157,3 +159,18 @@ export const contrastWarnings = (d: Design) => {
   ]
   return checks.filter(([, fg, b, large]) => !passesAA(fg, b, large)).map(([name]) => name)
 }
+
+export const brandImageSlots = ['logo', 'darkLogo', 'footerLogo', 'favicon'] as const
+export type BrandImageSlot = (typeof brandImageSlots)[number]
+
+const mediaUrl = (r: { id: string } | undefined) => (r ? `/api/media/${r.id}` : null)
+
+/**
+ * Which brand images the shop shows: the dark-mode logo on dark shops (else the logo),
+ * the footer logo (else the logo), and a favicon that falls back to the app icon.
+ */
+export const brandImages = (d: Design) => ({
+  logo: mediaUrl(d.mode.base === 'dark' ? (d.brand.darkLogo ?? d.brand.logo) : d.brand.logo),
+  footerLogo: mediaUrl(d.brand.footerLogo ?? d.brand.logo),
+  favicon: d.brand.favicon ? `/api/media/${d.brand.favicon.id}/320` : '/icon.svg',
+})

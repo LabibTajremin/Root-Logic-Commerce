@@ -519,5 +519,14 @@
   "pages.delete": "Delete page",
   "error.pages.slug_taken": "Another page already uses that web address.",
   "error.pages.not_found": "That page no longer exists.",
-  "design.warmth": "Warm ↔ cool"
+  "design.warmth": "Warm ↔ cool",
+  "brand.title": "Logos & icon",
+  "brand.logo": "Logo",
+  "brand.logoHint": "PNG, WebP or JPG · about 512×512 · max 2 MB · transparent background looks best.",
+  "brand.darkLogo": "Dark-mode logo",
+  "brand.darkLogoHint": "Used when your shop is in dark mode · same size as the logo.",
+  "brand.footerLogo": "Footer logo",
+  "brand.footerLogoHint": "Wide works well · about 400×120 · max 2 MB. Empty uses the logo.",
+  "brand.favicon": "Favicon (browser tab icon)",
+  "brand.faviconHint": "Square PNG · 64×64 or bigger · max 1 MB."
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrandLogo } from '@/ui/brand-logo'
 import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
@@ -12,12 +13,17 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
         href="/"
         className="flex min-h-11 items-center gap-2 font-heading text-xl"
       >
-        <span
-          aria-hidden
-          className="inline-flex size-9 items-center justify-center rounded-control bg-button text-button-text"
-        >
-          {initial(store.name)}
-        </span>
+        <BrandLogo
+          src={store.logo}
+          fallback={
+            <span
+              aria-hidden
+              className="inline-flex size-9 items-center justify-center rounded-control bg-button text-button-text"
+            >
+              {initial(store.name)}
+            </span>
+          }
+        />
         <span className="rlc-brand-name">{store.name}</span>
       </Link>
       <nav aria-label="Categories" className="hidden flex-1 justify-center gap-6 text-sm md:flex">
@@ -36,6 +42,7 @@ export const Footer: Slots['Footer'] = ({ store, categories, text, credit, label
   <footer className="mt-16 bg-soft">
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
       <div className="flex flex-col gap-2">
+        <BrandLogo src={store.footerLogo} fallback={null} />
         <p className="font-heading text-xl">{store.name}</p>
         {text && <p className="text-sm text-muted">{text}</p>}
       </div>

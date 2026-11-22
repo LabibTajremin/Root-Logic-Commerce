@@ -519,5 +519,14 @@
   "pages.delete": "পেজ মুছুন",
   "error.pages.slug_taken": "এই ওয়েব ঠিকানা অন্য একটি পেজে আছে।",
   "error.pages.not_found": "পেজটি আর নেই।",
-  "design.warmth": "উষ্ণ ↔ শীতল"
+  "design.warmth": "উষ্ণ ↔ শীতল",
+  "brand.title": "লোগো ও আইকন",
+  "brand.logo": "লোগো",
+  "brand.logoHint": "PNG, WebP বা JPG · প্রায় 512×512 · সর্বোচ্চ 2 MB · স্বচ্ছ ব্যাকগ্রাউন্ড সবচেয়ে ভালো।",
+  "brand.darkLogo": "ডার্ক মোডের লোগো",
+  "brand.darkLogoHint": "দোকান ডার্ক মোডে থাকলে দেখাবে · লোগোর সমান মাপ।",
+  "brand.footerLogo": "ফুটারের লোগো",
+  "brand.footerLogoHint": "চওড়া হলে ভালো · প্রায় 400×120 · সর্বোচ্চ 2 MB। খালি থাকলে লোগোই দেখাবে।",
+  "brand.favicon": "ফেভিকন (ব্রাউজার ট্যাবের আইকন)",
+  "brand.faviconHint": "বর্গাকার PNG · 64×64 বা বড় · সর্বোচ্চ 1 MB।"
 }

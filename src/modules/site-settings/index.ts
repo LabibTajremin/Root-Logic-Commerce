@@ -9,6 +9,9 @@ export { layoutSchema, sectionRefSchema, type Layout, type SectionRef } from './
 export { contrastRatio, passesAA, readableOn } from './domain/contrast'
 export {
   backgroundOf,
+  brandImages,
+  brandImageSlots,
+  type BrandImageSlot,
   baseDesign,
   contrastWarnings,
   designSchema,

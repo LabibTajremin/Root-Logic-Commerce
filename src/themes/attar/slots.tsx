@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrandLogo } from '@/ui/brand-logo'
 import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
@@ -22,6 +23,7 @@ export const Header: Slots['Header'] = ({ store, categories, actions }) => (
         href="/"
         className="col-start-2 flex min-h-11 items-center font-heading text-2xl uppercase tracking-[0.25em]"
       >
+        <BrandLogo src={store.logo} fallback={null} />
         <span className="rlc-brand-name">{store.name}</span>
       </Link>
       <div className="col-start-3 flex items-center justify-end gap-1">{actions}</div>

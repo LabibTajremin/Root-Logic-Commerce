@@ -8,6 +8,7 @@ import { PREVIEW_COOKIE, readPreview } from '@/server/preview'
 import { currentLocale, currentSettings, currentStore } from '@/server/request'
 import { layoutOf, presetLayout, previewPreset } from '@/sections/registry'
 import type { MediaRow } from '@/modules/media'
+import { brandImages } from '@/modules/site-settings'
 import { loadTheme, type ImageView, type ProductView } from '@/themes'
 
 /** Everything a storefront page needs for the store resolved from the Host header. */
@@ -49,7 +50,12 @@ export const storefront = cache(async () => {
   })
   const live = categories.filter((c) => !c.archived)
   return {
-    store: { ...store, name: design.brand.name, showName: design.brand.showName },
+    store: {
+      ...store,
+      name: design.brand.name,
+      showName: design.brand.showName,
+      ...brandImages(design),
+    },
     locale,
     design,
     business,

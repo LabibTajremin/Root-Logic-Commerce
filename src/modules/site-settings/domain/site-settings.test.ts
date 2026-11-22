@@ -5,6 +5,7 @@ import {
   contrastRatio,
   contrastWarnings,
   backgroundOf,
+  brandImages,
   designSchema,
   mergeDesign,
   passesAA,
@@ -84,6 +85,23 @@ describe('design', () => {
       mergeDesign(baseDesign, { mode: { light: 'offwhite', dark: 'black' } }),
     )
     expect(legacy.mode).toMatchObject({ light: 50, dark: 100, warmth: 50 })
+  })
+
+  it('picks the dark logo on dark shops, the footer logo, and a favicon fallback', () => {
+    const ref = (id: string) => ({ kind: 'upload' as const, id })
+    const d = (brand: object, base = 'light') =>
+      brandImages(mergeDesign(baseDesign, { brand, mode: { base } }) as Design)
+    expect(d({})).toEqual({ logo: null, footerLogo: null, favicon: '/icon.svg' })
+    expect(d({ logo: ref('a'), favicon: ref('f') })).toEqual({
+      logo: '/api/media/a',
+      footerLogo: '/api/media/a',
+      favicon: '/api/media/f/320',
+    })
+    expect(d({ logo: ref('a'), darkLogo: ref('b'), footerLogo: ref('c') }, 'dark')).toMatchObject({
+      logo: '/api/media/b',
+      footerLogo: '/api/media/c',
+    })
+    expect(d({ logo: ref('a') }, 'dark').logo).toBe('/api/media/a')
   })
 
   it('warns about low-contrast choices', () => {

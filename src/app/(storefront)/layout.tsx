@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { toCssVars } from '@/modules/site-settings'
+import { brandImages, toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
 import { Analytics } from './analytics'
@@ -10,8 +10,9 @@ import { exitPreview } from './preview-actions'
 import { storefront } from './storefront'
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const { store, business, t } = await storefront()
+  const { store, business, design, t } = await storefront()
   return {
+    icons: { icon: brandImages(design).favicon },
     title: { default: store.name, template: business.seo.titleTemplate },
     description:
       business.seo.metaDescription || `${store.name} — ${t('shop.delivery')}. ${t('shop.cod')}`,
