@@ -557,6 +557,45 @@ test('shop info feeds the help bubble; help bubble and bottom nav follow their f
   await toggle('bottomNav', 'Turn on')
 })
 
+test('announcement bar: messages scroll or rotate, link and close are optional, empty hides it', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  const save = async (messages: string, mode: string, link: string, closable: boolean) => {
+    await page.goto('/admin/design')
+    await page.getByLabel(/^Messages/).fill(messages)
+    await page.getByLabel('Motion').selectOption(mode)
+    await page.getByLabel('Link (optional)').fill(link)
+    await page.getByLabel('Shoppers can close it').setChecked(closable)
+    await page.getByRole('button', { name: 'Save' }).first().click()
+  }
+  const bar = page.getByRole('complementary', { name: 'Announcements' })
+
+  await save('Free delivery over ৳2,000\n\nEid sale: 15% off attar', 'marquee', '/search', true)
+  await saved(page)
+  await page.goto('/')
+  await expect(bar).toContainText('Eid sale: 15% off attar')
+  await expect(bar.getByRole('link')).toHaveAttribute('href', '/search')
+  await a11y()
+  await bar.getByRole('button', { name: 'Close' }).click()
+  await expect(bar).toHaveCount(0)
+
+  await save('Delivery in 24–72 hours', 'rotate', '', false)
+  await saved(page)
+  await page.goto('/')
+  await expect(bar).toContainText('Delivery in 24–72 hours')
+  await expect(bar.getByRole('link')).toHaveCount(0)
+  await expect(bar.getByRole('button', { name: 'Close' })).toHaveCount(0)
+
+  await save('Bad link', 'rotate', 'javascript:alert(1)', false)
+  await expect(page.getByRole('alert')).toBeVisible()
+  await save('', 'rotate', '', true)
+  await saved(page)
+  await page.goto('/')
+  await expect(bar).toHaveCount(0)
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,

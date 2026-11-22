@@ -45,5 +45,6 @@
   "store.whatsapp": "যে নম্বরে ক্রেতারা WhatsApp করবেন। 01711… এভাবে লিখলেই হবে।",
   "store.messenger": "আপনার পেজের facebook.com/ এর পরের অংশ, যেমন ankito.bd",
   "store.address": "ইনভয়েস ও যোগাযোগ পেজে ছাপা হবে।",
-  "store.mapUrl": "Google Maps-এ দোকান খুলুন → Share → Copy link।"
+  "store.mapUrl": "Google Maps-এ দোকান খুলুন → Share → Copy link।",
+  "announce": "দোকানের হেডারের উপরে ছোট লাইন — অফার, ডেলিভারির খবর। বার লুকাতে মেসেজ খালি রাখুন। লিংক আপনার দোকানের পেজ (/c/…) বা পূর্ণ https:// ঠিকানা হতে পারে।"
 }

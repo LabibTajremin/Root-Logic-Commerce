@@ -585,5 +585,14 @@
   "shop.helpMessenger": "Messenger-এ মেসেজ দিন",
   "shop.helpCall": "কল করুন",
   "shop.backToTop": "উপরে যান",
-  "shop.quickNav": "দ্রুত লিংক"
+  "shop.quickNav": "দ্রুত লিংক",
+  "announce.title": "ঘোষণা বার",
+  "announce.messages": "মেসেজ (প্রতি লাইনে একটি, সর্বোচ্চ ৫টি)",
+  "announce.mode": "চলন",
+  "announce.rotate": "একটির পর একটি",
+  "announce.marquee": "স্ক্রল করে",
+  "announce.link": "লিংক (ঐচ্ছিক)",
+  "announce.closable": "ক্রেতারা বন্ধ করতে পারবেন",
+  "shop.announcements": "ঘোষণা",
+  "common.close": "বন্ধ করুন"
 }

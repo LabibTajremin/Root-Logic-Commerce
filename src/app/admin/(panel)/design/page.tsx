@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import { helpText } from '@/help'
 import { loadTheme, themeIds } from '@/themes'
 import { Card } from '@/ui/primitives'
 import { adminContext } from '../context'
+import { AnnouncementForm } from './announcement-form'
 import { BrandImages } from './brand-images'
 import { DesignEditor } from './design-editor'
 import { currentSettings } from '@/server/request'
@@ -46,7 +48,7 @@ const KEYS = [
 ]
 
 export default async function DesignPage() {
-  const { allowed, t } = await adminContext('settings.manage')
+  const { allowed, locale, t } = await adminContext('settings.manage')
   if (!allowed) {
     return (
       <Card>
@@ -60,6 +62,7 @@ export default async function DesignPage() {
     <>
       <h1 className="font-heading text-3xl">{t('design.title')}</h1>
       <BrandImages brand={design.brand} t={t} />
+      <AnnouncementForm a={design.announcement} t={t} help={helpText(locale, 'announce')} />
       <DesignEditor
         initial={design}
         version={version}

@@ -124,3 +124,30 @@ body {
     display: none;
   }
 }
+
+/* B1 announcement bar: rotate = each message fades in for its slice; marquee = scrolls by. */
+.rlc-announce[data-mode='rotate'] p {
+  opacity: 0;
+  animation: var(--rotate) calc(var(--n) * 4s) infinite;
+  animation-delay: calc(var(--i) * 4s);
+}
+.rlc-announce[data-mode='marquee'] p {
+  transform: translateX(100%);
+  animation: rlc-marquee calc(var(--n) * 9s) linear infinite;
+  animation-delay: calc(var(--i) * 9s);
+}
+@keyframes rlc-marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rlc-announce p {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+  .rlc-announce p:first-child {
+    opacity: 1;
+  }
+}

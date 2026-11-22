@@ -73,6 +73,21 @@ export const designSchema = z.object({
     hover: z.enum(['none', 'lift', 'zoom', 'glow']),
     motion: z.enum(['none', 'subtle', 'smooth', 'playful']),
   }),
+  // B1: short messages above the header; a link may be a page of the shop or an https URL.
+  announcement: z
+    .object({
+      messages: z.array(z.string().trim().min(1).max(140)).max(5).default([]),
+      mode: z.enum(['rotate', 'marquee']).default('rotate'),
+      link: z
+        .string()
+        .trim()
+        .max(300)
+        .regex(/^(\/|https:\/\/)/)
+        .or(z.literal(''))
+        .default(''),
+      closable: z.boolean().default(true),
+    })
+    .prefault({}),
   footer: z.object({
     // Layout preset + which blocks show; colours follow the theme tokens.
     style: z.enum(footerStyles).default('classic'),
@@ -102,6 +117,7 @@ export const baseDesign: Design = {
   background: { pattern: 'none', patternOpacity: 10 },
   header: { opacity: 100, sticky: true },
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
+  announcement: { messages: [], mode: 'rotate', link: '', closable: true },
   footer: {
     style: 'classic',
     show: { categories: true, help: true, payments: true },

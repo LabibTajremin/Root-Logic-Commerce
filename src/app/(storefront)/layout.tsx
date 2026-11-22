@@ -5,6 +5,7 @@ import { brandImages, toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
 import { Analytics } from './analytics'
+import { AnnouncementBar } from './announcement-bar'
 import { BottomNav } from './bottom-nav'
 import { CartButton, CartDrawer } from './cart-drawer'
 import { HelpBubble } from './help-bubble'
@@ -65,6 +66,13 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
             <button className="min-h-11 font-semibold underline">{t('layouts.exitPreview')}</button>
           </form>
         </div>
+      )}
+      {on('announcement') && d.announcement.messages.length > 0 && (
+        <AnnouncementBar
+          a={d.announcement}
+          label={t('shop.announcements')}
+          close={t('common.close')}
+        />
       )}
       <Header
         store={store}

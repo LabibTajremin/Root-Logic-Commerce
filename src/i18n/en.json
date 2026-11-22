@@ -585,5 +585,14 @@
   "shop.helpMessenger": "Message on Messenger",
   "shop.helpCall": "Call us",
   "shop.backToTop": "Back to top",
-  "shop.quickNav": "Quick links"
+  "shop.quickNav": "Quick links",
+  "announce.title": "Announcement bar",
+  "announce.messages": "Messages (one per line, up to 5)",
+  "announce.mode": "Motion",
+  "announce.rotate": "Rotate one by one",
+  "announce.marquee": "Scroll across",
+  "announce.link": "Link (optional)",
+  "announce.closable": "Shoppers can close it",
+  "shop.announcements": "Announcements",
+  "common.close": "Close"
 }
