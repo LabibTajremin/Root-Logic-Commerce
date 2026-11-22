@@ -111,12 +111,14 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   await expect(page.getByTestId('track-status')).toHaveText('Pending')
   await expect(page.getByRole('region', { name: `#${no}` })).toContainText(`${tea} × 2`)
   await a11y()
-  await page.goto((await page.getByRole('link', { name: 'বাং' }).getAttribute('href'))!)
+  await page.goto(
+    (await page.getByRole('link', { name: 'বাং', exact: true }).getAttribute('href'))!,
+  )
   await page.getByLabel('অর্ডার নম্বর').fill(no)
   await page.getByLabel('ফোন নম্বর').fill('01712345678')
   await page.getByRole('button', { name: 'ট্র্যাক করুন' }).click()
   await expect(page.getByTestId('track-status')).toHaveText('অপেক্ষমাণ')
-  await page.goto((await page.getByRole('link', { name: 'EN' }).getAttribute('href'))!)
+  await page.goto((await page.getByRole('link', { name: 'EN', exact: true }).getAttribute('href'))!)
   await expect(page.getByRole('heading', { level: 1, name: 'Track my order' })).toBeVisible()
 
   await page.goto('/admin/orders')
