@@ -1,11 +1,11 @@
 IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 11 — batch committed (JSON-LD fix, sections registry + layout, J2 layout gallery + preview + section on/off, J4 language texts + shop language + Bangla digits + currency sign + date format, logo text on/off); full pnpm verify running. NEXT: fix verify → push → CI green → J8 CMS pages (draft in scratchpad j8/) → J1 → admin shell F1/F2/F3 → B1/B3/B9/B10/B15. J3 waits for demo packs. Figma: Core translated to English + Bangla demo section; theme pages still to translate (dictionary in file shared plugin data rlc.design/bn2en) + Language texts admin screen.
+Now: Phase 11 — done: J5, JSON-LD (BreadcrumbList/Organization), sections registry + layout, J2 (gallery + preview + section on/off), J4 (+ shop language, Bangla digits, currency sign, date format), logo text on/off, J8 CMS pages, background sliders (cream→white, warm↔cool, midnight→black), logo/dark logo/footer logo/favicon uploads, footer presets + show/hide. Verify running on the logos+footer batch. NEXT: push + CI → admin shell F1/F2/F3 → B1/B3/B9/B10/B15 → J1 remaining tabs (product card, floating buttons, product page, checkout, mobile menu) → Drive uploads gap → J3 with demo packs.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
-- Light background: off-white/cream → white slider + warm ↔ cool slider; dark background: midnight → black slider (replace the enum selects; keep pattern, pattern opacity, accent).
-- Logo upload UI (main), dark-mode logo, footer logo, favicon upload (schema has logo/favicon, no admin UI yet).
+- DONE: background sliders (cream→white, warm↔cool, midnight→black).
+- DONE: logo, dark-mode logo, footer logo, favicon uploads.
 - Google Drive *uploads* storage adapter (Drive links work; local + S3 adapters exist).
-- Dark-mode logo, footer logo; footer style controls (≥ 2 presets, colours, columns, payment logos).
+- DONE: footer style presets + show/hide blocks (colours follow theme tokens).
 - Logo text: any text/script as typed, font choice, on/off — DONE (b3b2d5f). Section on/off — DONE. Currency sign + date format — DONE.
 
 ## Phases
