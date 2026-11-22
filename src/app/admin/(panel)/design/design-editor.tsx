@@ -221,6 +221,16 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             (v) => set('style', { motion: v as 'subtle' }),
           )}
         </div>
+        <fieldset className="flex flex-col">
+          <legend className="mb-1 text-sm font-semibold">{L.productCard}</legend>
+          {(['badges', 'oldPrice', 'button'] as const).map((k) => (
+            <Fragment key={k}>
+              {check(`card-${k}`, L[`card_${k}`]!, d.productCard[k], (b) =>
+                set('productCard', { [k]: b }),
+              )}
+            </Fragment>
+          ))}
+        </fieldset>
         {select('footerStyle', L.footerStyle!, d.footer.style, footerStyles, (v) =>
           set('footer', { style: v as 'classic' }),
         )}

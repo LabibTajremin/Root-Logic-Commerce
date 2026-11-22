@@ -153,6 +153,8 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await page.getByLabel('Footer style').selectOption('centered')
   for (const l of ['categories', 'help links and pages', 'payment methods'])
     await page.getByLabel(`Footer: show ${l}`).uncheck()
+  for (const l of [/^Show badges/, 'Show the old price', 'Show the Add to cart button'])
+    await page.getByLabel(l).uncheck()
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
   await page.goto('/')
@@ -160,15 +162,27 @@ test('design editor previews live, warns on low contrast and publishes', async (
   await expect(footer).toHaveAttribute('data-footer', 'centered')
   await expect(footer.getByRole('navigation')).toHaveCount(0)
   await expect(page.getByTestId('footer-payments')).toHaveCount(0)
+  await page.goto('/search?q=')
+  const cards = page.locator('.rlc-card')
+  await expect(cards.first()).toBeVisible()
+  await expect(cards.getByRole('button', { name: 'Add to cart' })).toHaveCount(0)
+  await expect(cards.locator('s')).toHaveCount(0)
+  await expect(cards.getByText(/^Save \d+%$/)).toHaveCount(0)
 
   await page.goto('/admin/design')
   for (const l of ['categories', 'help links and pages', 'payment methods'])
     await page.getByLabel(`Footer: show ${l}`).check()
   await page.getByLabel('Footer style').selectOption('classic')
+  for (const l of [/^Show badges/, 'Show the old price', 'Show the Add to cart button'])
+    await page.getByLabel(l).check()
   await page.getByRole('button', { name: 'Publish' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
   await page.goto('/')
   await expect(page.getByTestId('footer-payments')).toContainText('bKash')
+  await page.goto('/search?q=')
+  await expect(
+    page.locator('.rlc-card').getByRole('button', { name: 'Add to cart' }).first(),
+  ).toBeVisible()
   await page.goto('/admin/design')
 
   // Someone publishes from another tab: this editor is now stale and must not overwrite.

@@ -40,6 +40,15 @@ describe('design', () => {
     expect(mergeDesign({ a: [1, 2] }, { a: [3] })).toEqual({ a: [3] })
   })
 
+  it('older saves without product-card toggles show everything', () => {
+    const { productCard: _, ...old } = baseDesign
+    expect(designSchema.parse(old).productCard).toEqual({
+      badges: true,
+      oldPrice: true,
+      button: true,
+    })
+  })
+
   it('rejects anything that could break out of a <style> tag', () => {
     expect(
       designSchema.safeParse(

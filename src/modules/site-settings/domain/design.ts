@@ -73,6 +73,14 @@ export const designSchema = z.object({
     hover: z.enum(['none', 'lift', 'zoom', 'glow']),
     motion: z.enum(['none', 'subtle', 'smooth', 'playful']),
   }),
+  // J1 product card: what each card in a product list shows.
+  productCard: z
+    .object({
+      badges: z.boolean().default(true),
+      oldPrice: z.boolean().default(true),
+      button: z.boolean().default(true),
+    })
+    .prefault({}),
   // B3: active poster banners shown as an autoplaying slider in place of the welcome hero.
   heroSlider: z
     .object({
@@ -125,6 +133,7 @@ export const baseDesign: Design = {
   background: { pattern: 'none', patternOpacity: 10 },
   header: { opacity: 100, sticky: true },
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
+  productCard: { badges: true, oldPrice: true, button: true },
   heroSlider: { enabled: false, interval: 5, effect: 'slide' },
   announcement: { messages: [], mode: 'rotate', link: '', closable: true },
   footer: {
