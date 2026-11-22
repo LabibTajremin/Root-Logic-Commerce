@@ -17,19 +17,23 @@ const renderers: Record<SectionId, (p: { ctx: Ctx }) => ReactNode | Promise<Reac
     const posters = await sliderPosters(ctx)
     if (posters.length > 0)
       return (
-        <HeroSlider
-          slides={posters.map((p, i) => (
-            <Poster key={p.id} d={p.data} priority={i === 0} />
-          ))}
-          interval={design.heroSlider.interval}
-          effect={design.heroSlider.effect}
-          labels={{
-            region: t('shop.featured'),
-            prev: t('shop.prevSlide'),
-            next: t('shop.nextSlide'),
-            slide: t('shop.slideOf'),
-          }}
-        />
+        <>
+          {/* The welcome hero carries the page's h1; the slider replacing it keeps one. */}
+          <h1 className="sr-only">{store.name}</h1>
+          <HeroSlider
+            slides={posters.map((p, i) => (
+              <Poster key={p.id} d={p.data} priority={i === 0} />
+            ))}
+            interval={design.heroSlider.interval}
+            effect={design.heroSlider.effect}
+            labels={{
+              region: t('shop.featured'),
+              prev: t('shop.prevSlide'),
+              next: t('shop.nextSlide'),
+              slide: t('shop.slideOf'),
+            }}
+          />
+        </>
       )
     const { Hero } = theme.slots
     return (
