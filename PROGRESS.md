@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 11 — storefront batch done & green (231/231 files 100%): Shop info page, module switches on the storefront (J5), B1 announcement bar, B9 help bubble, B10 phone bottom nav, B15 mini-cart, B3 hero slider (posters). NEXT: J1 remaining editor tabs (product card toggles, floating buttons, product page, checkout, thank-you, mobile menu) → Drive uploads storage gap → J3 switch dialog with demo packs → activity log for products/orders → Phase 11 wrap-up (PR body section, CI green) → Phase 12 Catalog.
+Now: Phase 11 — storefront batch done & green (231/231 files 100%): Shop info page, module switches on the storefront (J5), B1 announcement bar, B9 help bubble, B10 phone bottom nav, B15 mini-cart, B3 hero slider (posters). J1 product card toggles (badges/old price/add-to-cart) done 5e44e17; default favicon moved to public/. NEXT: J1 remaining editor tabs (floating buttons, product page, checkout, thank-you, mobile menu) → Drive uploads storage gap → J3 switch dialog with demo packs → activity log for products/orders → Phase 11 wrap-up (PR body section, CI green) → Phase 12 Catalog.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
