@@ -19,5 +19,5 @@ export const ProductBadges = ({ badges, className }: { badges: CardBadge[]; clas
 /** A4: "Only N left" — shown only when the storefront computed a count. */
 export const StockLeft = ({ n, label }: { n: number | null; label: string }) =>
   n !== null && (
-    <p className="text-xs font-semibold text-warning">{label.replace('{{n}}', String(n))}</p>
+    <p className="rlc-stock-left text-xs font-semibold">{label.replace('{{n}}', String(n))}</p>
   )

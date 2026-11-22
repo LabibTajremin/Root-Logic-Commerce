@@ -187,3 +187,7 @@ body {
   background: var(--color-surface);
   color: var(--color-text);
 }
+/* A4: amber pulled toward the theme text colour stays readable on light and dark surfaces. */
+.rlc-stock-left {
+  color: color-mix(in oklab, var(--color-warning) 45%, var(--color-text));
+}
