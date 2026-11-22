@@ -71,6 +71,23 @@ export const storeEntitlements = pgTable(
 )
 
 // Per-store module switches (J5); a missing row means "use the catalogue default".
+// Activity log (F3): who changed what, from where; settings entries can be undone.
+export const activityLog = pgTable(
+  'activity_log',
+  {
+    id: id(),
+    storeId: storeId(),
+    action: text().notNull(),
+    actorId: text(),
+    actorIp: text().notNull(),
+    before: jsonb(),
+    after: jsonb(),
+    undoneAt: timestamp({ withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('activity_store_created_idx').on(t.storeId, t.createdAt)],
+)
+
 // Admin notifications (F2): new orders today; more kinds later.
 export const notifications = pgTable(
   'notifications',

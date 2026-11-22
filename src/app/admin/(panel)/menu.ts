@@ -34,6 +34,7 @@ export const menuGroups: MenuGroup[] = [
       { href: '/admin/notifications', key: 'notices.title', icon: 'alert' },
       { href: '/admin/messages', key: 'nav.messages', icon: 'chat' },
       { href: '/admin/users', key: 'nav.users', icon: 'users' },
+      { href: '/admin/activity', key: 'activity.title', icon: 'trend' },
       { href: '/admin/features', key: 'nav.features', icon: 'layers' },
       { href: '/admin/plan', key: 'nav.plan', icon: 'star' },
       { href: '/admin/help', key: 'nav.help', icon: 'help' },

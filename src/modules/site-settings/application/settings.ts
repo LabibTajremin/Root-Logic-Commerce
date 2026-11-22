@@ -28,7 +28,21 @@ export type SettingsRepo = {
 
 type Defaults = { design?: DeepPartial<Design>; storeName: string }
 
-export const createSiteSettings = ({ repo }: { repo: SettingsRepo }) => {
+/** Logs a settings change (F3): which part, and its value before and after. */
+export type SettingsAudit = (
+  storeId: string,
+  action: `settings.${'design' | 'business' | 'layout'}`,
+  before: unknown,
+  after: unknown,
+) => Promise<void>
+
+export const createSiteSettings = ({
+  repo,
+  audit,
+}: {
+  repo: SettingsRepo
+  audit: SettingsAudit
+}) => {
   // Stored JSON is re-validated on read so an older/partial row still yields a complete Design.
   const resolve = (stored: unknown, d: Defaults) =>
     designSchema.parse(
@@ -40,8 +54,12 @@ export const createSiteSettings = ({ repo }: { repo: SettingsRepo }) => {
     patch: { design?: Design; business?: Business; layout?: Layout },
     version: number,
   ) => {
+    const before = await repo.get(storeId)
     const next = await repo.update(storeId, patch, version)
     if (next === null) throw new DomainError('settings.conflict')
+    for (const [part, after] of Object.entries(patch) as [keyof typeof patch, unknown][])
+      // A missing row makes `update` return null above, so `before` exists here.
+      await audit(storeId, `settings.${part}`, before![part], after)
     return next
   }
 

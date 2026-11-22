@@ -10,7 +10,11 @@ describe('site settings', () => {
   it('seeds lazily from theme defaults, saves with a version lock, re-validates stored JSON', async () => {
     const db = await createTestDb()
     const store = await seedStore(db)
-    const settings = createSiteSettings({ repo: createSettingsRepo(db) })
+    const audited: string[] = []
+    const settings = createSiteSettings({
+      repo: createSettingsRepo(db),
+      audit: async (_s, action) => void audited.push(action),
+    })
     const defaults = {
       storeName: 'Ankito',
       design: { themeId: 'ankito', colors: { accent: '#A8763E' } },
@@ -58,6 +62,7 @@ describe('site settings', () => {
       settings.saveLayout(store, { preset: 'Bad Id', home: [] }, 4),
     ).rejects.toMatchObject({ code: 'validation' })
 
+    expect(audited).toEqual(['settings.design', 'settings.business', 'settings.layout'])
     expect(
       (await settings.get(await seedStore(db, 'plain'), { storeName: 'Plain' })).design.themeId,
     ).toBe('minimal')

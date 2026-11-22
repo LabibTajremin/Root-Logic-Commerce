@@ -1,5 +1,6 @@
 export {
   createSiteSettings,
+  type SettingsAudit,
   type SettingsRepo,
   type SiteSettings,
   type StoredSettings,

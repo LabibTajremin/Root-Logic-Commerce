@@ -29,6 +29,7 @@ describe('container', () => {
     expect(onEventError).toHaveBeenCalledWith(expect.any(Error), 'order.placed')
     expect(Object.keys(c).sort()).toEqual([
       'access',
+      'activity',
       'bus',
       'catalog',
       'features',

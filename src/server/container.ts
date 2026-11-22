@@ -8,6 +8,8 @@ import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createOrders, type OrderEvents } from '@/modules/orders'
 import { createNotifications } from '@/modules/notifications'
+import { createActivity } from '@/modules/activity'
+import { auditActor } from './audit-context'
 import { createPages } from '@/modules/pages'
 import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
@@ -27,6 +29,7 @@ import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
 import { createPagesRepo } from '@/infrastructure/db/repositories/pages-repo'
+import { createActivityRepo } from '@/infrastructure/db/repositories/activity-repo'
 import { createNotificationsRepo } from '@/infrastructure/db/repositories/notifications-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
@@ -57,7 +60,18 @@ type Deps = {
 // Composition root: the only place that knows which adapter backs which port.
 export const createContainer = ({ config, db, onEventError }: Deps) => {
   const bus = createEventBus<OrderEvents>((e, t) => onEventError(e, String(t)))
-  const settings = createSiteSettings({ repo: createSettingsRepo(db) })
+  const activity = createActivity({
+    repo: createActivityRepo(db),
+    now: () => new Date(),
+    retentionDays: 30,
+  })
+  const settings = createSiteSettings({
+    repo: createSettingsRepo(db),
+    audit: async (storeId, action, before, after) => {
+      const { actorId, ip } = auditActor()
+      await activity.record(storeId, { action, before, after, actorId, actorIp: ip })
+    },
+  })
   const orders = createOrders({ repo: createOrdersRepo(db), bus })
   const secrets = createSecretBox(config.settingsKey)
   const plans = createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements })
@@ -141,6 +155,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),
     pages: createPages({ repo: createPagesRepo(db) }),
     notifications,
+    activity,
     settings,
     access: createAccess({ repo: createUsersRepo(db), hash: hashPassword }),
     media: createMedia({

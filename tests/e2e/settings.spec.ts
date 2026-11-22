@@ -465,6 +465,49 @@ test('logos: owner uploads a logo and favicon, links a footer logo from Drive, t
   }
 })
 
+test('activity log: a design change is logged with who and where, filtered, and undone', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  await page.goto('/admin/design')
+  const footer = page.getByLabel('Footer text')
+  const before = await footer.inputValue()
+  await footer.fill('Logged change')
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+
+  await page.goto('/admin/activity')
+  await expect(page.getByRole('heading', { level: 1, name: 'Activity log' })).toBeVisible()
+  await a11y()
+  const row = page.getByTestId('activity-row').first()
+  await expect(row).toContainText('Design changed')
+  await expect(row).toContainText('footer.text')
+
+  const chips = page.getByRole('navigation', { name: 'Filter by change' })
+  await chips.getByRole('link', { name: /^Design changed/ }).click()
+  await page.waitForURL(/action=settings\.design/)
+  await page.getByLabel('Who').selectOption({ label: e2eEnv.BOOTSTRAP_OWNER_NAME })
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' })
+  await page.getByLabel('From').fill(today)
+  await page.getByLabel('To').fill(today)
+  await page.getByLabel('Search').fill('design')
+  await page.getByRole('button', { name: 'Apply' }).click()
+  await page.waitForURL(/q=design/)
+  await expect(page.getByTestId('activity-row').first()).toContainText('Design changed')
+  await chips.getByRole('link', { name: /^All/ }).click()
+  await page.waitForURL((u) => !u.searchParams.has('action'))
+
+  await page
+    .getByTestId('activity-row')
+    .first()
+    .getByRole('button', { name: 'Undo this change' })
+    .click()
+  await expect(page.getByTestId('activity-row').filter({ hasText: 'Undone' }).first()).toBeVisible()
+  await page.goto('/admin/design')
+  await expect(page.getByLabel('Footer text')).toHaveValue(before)
+})
+
 test('messages: channels, templates, and the outbox sends order updates via the cron route', async ({
   page,
   a11y,
