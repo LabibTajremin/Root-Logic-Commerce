@@ -52,10 +52,11 @@ export const Bell = ({
     <>
       <Link
         href="/admin/notifications"
-        aria-label={`${labels.bell} (${unread})`}
         className="relative inline-flex size-11 items-center justify-center rounded-control hover:bg-soft"
       >
         <Icon name="alert" />
+        {/* Name = "Notifications 3": visible count stays part of the accessible name. */}
+        <span className="sr-only">{labels.bell}</span>
         <span
           data-testid="bell-count"
           className="absolute right-1 top-1 min-w-5 rounded-full bg-danger px-1 text-center text-xs font-semibold text-white"
