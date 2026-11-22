@@ -23,6 +23,7 @@ const KEYS = [
   'mode',
   'lightBg',
   'darkBg',
+  'warmth',
   'visitorToggle',
   'pattern',
   'patternOpacity',

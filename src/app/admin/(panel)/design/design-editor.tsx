@@ -161,17 +161,13 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             </p>
           )}
         </fieldset>
-        <div className="grid grid-cols-3 gap-3">
-          {select('mode', L.mode!, d.mode.base, ['light', 'dark'], (v) =>
-            set('mode', { base: v as 'light' }),
-          )}
-          {select('lightBg', L.lightBg!, d.mode.light, ['white', 'offwhite', 'cream'], (v) =>
-            set('mode', { light: v as 'white' }),
-          )}
-          {select('darkBg', L.darkBg!, d.mode.dark, ['midnight', 'black'], (v) =>
-            set('mode', { dark: v as 'midnight' }),
-          )}
-        </div>
+        {select('mode', L.mode!, d.mode.base, ['light', 'dark'], (v) =>
+          set('mode', { base: v as 'light' }),
+        )}
+        {/* Sliders: cream → white, warm ↔ cool (50 = neutral), midnight → black. */}
+        {range('lightBg', L.lightBg!, d.mode.light, (n) => set('mode', { light: n }))}
+        {range('warmth', L.warmth!, d.mode.warmth, (n) => set('mode', { warmth: n }))}
+        {range('darkBg', L.darkBg!, d.mode.dark, (n) => set('mode', { dark: n }))}
         {check('visitorToggle', L.visitorToggle!, d.mode.visitorToggle, (b) =>
           set('mode', { visitorToggle: b }),
         )}

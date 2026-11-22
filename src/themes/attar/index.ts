@@ -8,7 +8,7 @@ export const theme: Theme = {
   preview: '/themes/attar.svg',
   defaults: {
     brand: { nameFont: 'cormorant-garamond', siteFont: 'manrope' },
-    mode: { base: 'dark', dark: 'midnight' },
+    mode: { base: 'dark', dark: 0 },
     colors: { accent: '#C9A45C', button: '#C9A45C', header: '#0B1020' },
     style: { card: 'bordered', showcase: 'grid', hover: 'glow', motion: 'smooth' },
   },

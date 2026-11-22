@@ -9,7 +9,7 @@ export const theme: Theme = {
   preview: '/themes/ankito.svg',
   defaults: {
     brand: { nameFont: 'dm-serif-display', siteFont: 'dm-sans' },
-    mode: { base: 'light', light: 'cream' },
+    mode: { base: 'light', light: 0 },
     colors: { accent: '#A8763E', button: '#3C6430', header: '#FBF8F2' },
     style: { card: 'elevated', showcase: 'grid', hover: 'lift', motion: 'smooth' },
   },

@@ -200,8 +200,8 @@
   "design.mode": "Mode",
   "design.light": "Light",
   "design.dark": "Dark",
-  "design.lightBg": "Light background",
-  "design.darkBg": "Dark background",
+  "design.lightBg": "Light background (cream → white)",
+  "design.darkBg": "Dark background (midnight → black)",
   "design.visitorToggle": "Let visitors switch light/dark",
   "design.pattern": "Background pattern",
   "design.patternOpacity": "Pattern opacity",
@@ -518,5 +518,6 @@
   "pages.confirmDelete": "Yes, delete this page",
   "pages.delete": "Delete page",
   "error.pages.slug_taken": "Another page already uses that web address.",
-  "error.pages.not_found": "That page no longer exists."
+  "error.pages.not_found": "That page no longer exists.",
+  "design.warmth": "Warm ↔ cool"
 }

@@ -200,8 +200,8 @@
   "design.mode": "মোড",
   "design.light": "লাইট",
   "design.dark": "ডার্ক",
-  "design.lightBg": "লাইট ব্যাকগ্রাউন্ড",
-  "design.darkBg": "ডার্ক ব্যাকগ্রাউন্ড",
+  "design.lightBg": "হালকা ব্যাকগ্রাউন্ড (ক্রিম → সাদা)",
+  "design.darkBg": "গাঢ় ব্যাকগ্রাউন্ড (মিডনাইট → কালো)",
   "design.visitorToggle": "ভিজিটর লাইট/ডার্ক বদলাতে পারবেন",
   "design.pattern": "ব্যাকগ্রাউন্ড প্যাটার্ন",
   "design.patternOpacity": "প্যাটার্নের স্বচ্ছতা",
@@ -518,5 +518,6 @@
   "pages.confirmDelete": "হ্যাঁ, পেজটি মুছে ফেলুন",
   "pages.delete": "পেজ মুছুন",
   "error.pages.slug_taken": "এই ওয়েব ঠিকানা অন্য একটি পেজে আছে।",
-  "error.pages.not_found": "পেজটি আর নেই।"
+  "error.pages.not_found": "পেজটি আর নেই।",
+  "design.warmth": "উষ্ণ ↔ শীতল"
 }

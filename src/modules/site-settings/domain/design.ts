@@ -19,8 +19,15 @@ export const fontIds = [
 export const patternIds = Array.from({ length: 24 }, (_, i) => `p${String(i + 1).padStart(2, '0')}`)
 export const socialKinds = ['facebook', 'instagram', 'youtube', 'tiktok', 'whatsapp', 'x'] as const
 
-const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'color.invalid')
+const hexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'color.invalid')
 const pct = z.number().int().min(0).max(100)
+const LEGACY_BG: Record<string, number> = {
+  cream: 0,
+  offwhite: 50,
+  white: 100,
+  midnight: 0,
+  black: 100,
+}
 const font = z.enum(fontIds)
 const mediaRef = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('upload'), id: z.uuid() }),
@@ -40,11 +47,18 @@ export const designSchema = z.object({
   }),
   mode: z.object({
     base: z.enum(['light', 'dark']),
-    light: z.enum(['white', 'offwhite', 'cream']),
-    dark: z.enum(['midnight', 'black']),
+    // Sliders 0–100. Older saves stored names; they map onto the same scale.
+    light: z.preprocess((v) => LEGACY_BG[v as string] ?? v, pct),
+    warmth: pct.default(50),
+    dark: z.preprocess((v) => LEGACY_BG[v as string] ?? v, pct),
     visitorToggle: z.boolean(),
   }),
-  colors: z.object({ accent: hex, button: hex, header: hex, text: hex.optional() }),
+  colors: z.object({
+    accent: hexColor,
+    button: hexColor,
+    header: hexColor,
+    text: hexColor.optional(),
+  }),
   background: z.object({
     pattern: z.enum(['none', ...patternIds]),
     patternOpacity: pct,
@@ -71,7 +85,7 @@ export type DeepPartial<T> = {
 export const baseDesign: Design = {
   themeId: 'minimal',
   brand: { name: 'My Store', showName: true, nameFont: 'inter', siteFont: 'inter' },
-  mode: { base: 'light', light: 'white', dark: 'midnight', visitorToggle: false },
+  mode: { base: 'light', light: 100, warmth: 50, dark: 0, visitorToggle: false },
   colors: { accent: '#4F46E5', button: '#18181B', header: '#FFFFFF' },
   background: { pattern: 'none', patternOpacity: 10 },
   header: { opacity: 100, sticky: true },
@@ -91,15 +105,25 @@ export const mergeDesign = (...layers: unknown[]): unknown =>
     return out
   }, undefined)
 
-const BG = {
-  white: '#FFFFFF',
-  offwhite: '#FAFAF7',
-  cream: '#FBF8F2',
-  midnight: '#0B1020',
-  black: '#0A0A0A',
-} as const
+const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
+const hex = (c: number[]) =>
+  '#' + c.map((x) => Math.round(x).toString(16).padStart(2, '0').toUpperCase()).join('')
+/** `t` of the way from colour a to colour b (0–1). */
+const mix = (a: string, b: string, t: number) => {
+  const [x, y] = [rgb(a), rgb(b)]
+  return hex(x.map((v, i) => v + (y[i]! - v) * t))
+}
 
-export const backgroundOf = (d: Design) => BG[d.mode.base === 'light' ? d.mode.light : d.mode.dark]
+/**
+ * Light: cream → white, then nudged warm or cool (50 = neutral, up to a 40% tint).
+ * Dark: midnight → black.
+ */
+export const backgroundOf = (d: Design) => {
+  if (d.mode.base === 'dark') return mix('#0B1020', '#0A0A0A', d.mode.dark / 100)
+  const base = mix('#FBF8F2', '#FFFFFF', d.mode.light / 100)
+  const lean = (d.mode.warmth - 50) / 50
+  return mix(base, lean < 0 ? '#FBE3C8' : '#DCE8F8', Math.abs(lean) * 0.4)
+}
 const textOf = (d: Design) => d.colors.text ?? readableOn(backgroundOf(d))
 
 /** Every value here passed the schema (hex / enum / int), so it is safe inside a <style> tag. */

@@ -10,7 +10,7 @@ export const theme: Theme = {
   preview: '/themes/attar-aloy.svg',
   defaults: {
     brand: { nameFont: 'cormorant-garamond', siteFont: 'manrope' },
-    mode: { base: 'light', light: 'offwhite' },
+    mode: { base: 'light', light: 50 },
     colors: { accent: '#B76E8A', button: '#6B5B8C', header: '#FAFAF7' },
     style: { card: 'flat', showcase: 'grid', hover: 'glow', motion: 'smooth' },
   },

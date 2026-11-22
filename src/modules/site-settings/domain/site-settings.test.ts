@@ -4,6 +4,7 @@ import {
   businessSchema,
   contrastRatio,
   contrastWarnings,
+  backgroundOf,
   designSchema,
   mergeDesign,
   passesAA,
@@ -67,10 +68,22 @@ describe('design', () => {
     expect(css).toContain('--font-heading:var(--font-fraunces),var(--font-hind-siliguri),serif')
     expect(css).toContain('--header-opacity:0.92')
     const cream = toCssVars(
-      mergeDesign(baseDesign, { mode: { light: 'cream' }, colors: { text: '#1E2A1C' } }) as Design,
+      mergeDesign(baseDesign, { mode: { light: 0 }, colors: { text: '#1E2A1C' } }) as Design,
     )
     expect(cream).toContain('--color-bg:#FBF8F2')
     expect(cream).toContain('--color-text:#1E2A1C')
+  })
+
+  it('background sliders: cream → white, warm ↔ cool, midnight → black; old names still load', () => {
+    const bg = (mode: object) => backgroundOf(mergeDesign(baseDesign, { mode }) as Design)
+    expect(bg({ light: 100, warmth: 50 })).toBe('#FFFFFF')
+    expect(bg({ light: 100, warmth: 0 })).toBe('#FDF4E9')
+    expect(bg({ light: 100, warmth: 100 })).toBe('#F1F6FC')
+    expect(bg({ base: 'dark', dark: 100 })).toBe('#0A0A0A')
+    const legacy = designSchema.parse(
+      mergeDesign(baseDesign, { mode: { light: 'offwhite', dark: 'black' } }),
+    )
+    expect(legacy.mode).toMatchObject({ light: 50, dark: 100, warmth: 50 })
   })
 
   it('warns about low-contrast choices', () => {

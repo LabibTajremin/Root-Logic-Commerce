@@ -57,7 +57,7 @@ export const theme: Theme = {
   preview: '/themes/organic.svg',
   defaults: {
     brand: { nameFont: 'fraunces', siteFont: 'manrope' },
-    mode: { base: 'light', light: 'cream' },
+    mode: { base: 'light', light: 0 }, // sliders 0–100: light cream→white, warmth warm↔cool (50 neutral), dark midnight→black
     colors: { accent: '#4E7A3A', button: '#3F6B2F', header: '#FBF8F2' },
     style: { card: 'flat', showcase: 'grid', hover: 'zoom', motion: 'smooth' },
   },

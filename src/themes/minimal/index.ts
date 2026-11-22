@@ -8,7 +8,7 @@ export const theme: Theme = {
   preview: '/themes/minimal.svg',
   defaults: {
     brand: { nameFont: 'inter', siteFont: 'inter' },
-    mode: { base: 'light', light: 'white' },
+    mode: { base: 'light', light: 100 },
     colors: { accent: '#4F46E5', button: '#18181B', header: '#FFFFFF' },
     style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
   },
