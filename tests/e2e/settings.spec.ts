@@ -432,6 +432,8 @@ test('logos: owner uploads a logo and favicon, links a footer logo from Drive, t
   page,
   a11y,
 }) => {
+  // The fake Drive file has no thumbnail: its proxy answers 404 (as in the product images test).
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
   await signedIn(page)
   await page.goto('/admin/design')
   await expect(page.getByRole('heading', { name: 'Logos & icon' })).toBeVisible()
