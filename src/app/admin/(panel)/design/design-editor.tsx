@@ -28,13 +28,15 @@ const sel = 'min-h-11 w-full rounded-control border border-line bg-surface px-3'
 export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props) => {
   const [d, setD] = useState(initial)
   const [version, setVersion] = useState(v0)
-  // A logo/icon saved on this page bumps the stored version: adopt it and the new images,
+  // A logo or announcement saved on this page bumps the stored version: adopt it and the new images,
   // keeping the owner's unsaved edits, so the next Publish doesn't hit a false conflict.
   useEffect(() => {
     if (v0 <= version) return
     setVersion(v0)
+    // Parts saved by the forms beside the editor (logos, announcement) come from the server.
     setD((x) => ({
       ...x,
+      announcement: initial.announcement,
       brand: {
         ...x.brand,
         ...Object.fromEntries(brandImageSlots.map((s) => [s, initial.brand[s]])),
