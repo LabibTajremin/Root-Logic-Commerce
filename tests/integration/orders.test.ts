@@ -537,6 +537,17 @@ describe('coupons at checkout (C2)', () => {
       discount: 100,
       couponCode: 'SMALL',
     })
+    // A coupon with no total limit redeems without the limit check.
+    const { id } = await orders.placeOrder(store, checkout(p.id), zones)
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      couponCode: 'SHIPFREE',
+      discount: 6000,
+    })
+    // Nothing fits: no coupon.
+    expect(await orders.quote(other, checkout((await product(other)).id), zones)).toMatchObject({
+      discount: 0,
+      couponCode: null,
+    })
   })
 
   it('owner coupons: unique codes per store, edits, unknown ids', async () => {

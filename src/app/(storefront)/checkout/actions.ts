@@ -57,7 +57,8 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
 /** C2: the discount a code (or, with none typed, the best automatic coupon) gives this cart. */
 export const quoteOrder = async (form: FormData): Promise<Quote> => {
   const { orders, store, business, t } = await storefront()
-  const f = (k: string) => String(form.get(k) ?? '')
+  // Every key read is an input of the checkout form.
+  const f = (k: string) => String(form.get(k))
   try {
     const q = await orders.quote(
       store.id,

@@ -51,6 +51,9 @@ describe('checkout', () => {
     expect(checkoutInput.parse({ ...valid, altPhone: '' }).altPhone).toBeNull()
     expect(checkoutInput.safeParse({ ...valid, altPhone: '123' }).success).toBe(false)
     expect(checkoutInput.safeParse({ ...valid, preferredTime: 'midnight' }).success).toBe(false)
+    // C2: the code box is trimmed and upper-cased; empty means no code.
+    expect(checkoutInput.parse({ ...valid, couponCode: ' eid10 ' }).couponCode).toBe('EID10')
+    expect(checkoutInput.parse({ ...valid, couponCode: '' }).couponCode).toBeNull()
   })
   it('rejects an invalid BD phone', () => {
     const r = checkoutInput.safeParse({ ...valid, phone: '12345' })
