@@ -28,6 +28,25 @@ export default async function CategoriesPage({
   const { edit } = await searchParams
   const { catalog, store, locale, t } = await adminContext('products.manage')
   const all = await catalog.listCategories(store.id)
+  const charts = await catalog.listSizeCharts(store.id)
+  const chartSelect = (current: string | null) => (
+    <div className="flex flex-col gap-1.5 text-sm font-semibold">
+      <label htmlFor="sizeChartId">{t('field.sizeChart')}</label>
+      <select
+        id="sizeChartId"
+        name="sizeChartId"
+        defaultValue={current ?? ''}
+        className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+      >
+        <option value="">{t('common.none')}</option>
+        {charts.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
   const rows = flatten(all)
   const editing = all.find((c) => c.id === edit)
   const parentSelect = (current: string | null, exclude?: string) => (
@@ -102,6 +121,7 @@ export default async function CategoriesPage({
                 helpLabel={t('common.help')}
               />
               {parentSelect(editing.parentId, editing.id)}
+              {chartSelect(editing.sizeChartId)}
               <div className="flex gap-2">
                 <Button type="submit" icon="check" className="flex-1">
                   {t('common.save')}
@@ -125,6 +145,7 @@ export default async function CategoriesPage({
                 helpLabel={t('common.help')}
               />
               {parentSelect(null)}
+              {chartSelect(null)}
               <Button type="submit" icon="plus">
                 {t('categories.add')}
               </Button>

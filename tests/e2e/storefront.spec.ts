@@ -491,6 +491,70 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
   await expect(list).toHaveCount(0)
 })
 
+test('size charts: owner builds one, links it to a category and a product; shoppers open it', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const [chart, temp, cat, inherit, own] = [
+    `Kurta chart ${id}`,
+    `Temp ${id}`,
+    `Tops ${id}`,
+    `Inherit ${id}`,
+    `Own ${id}`,
+  ]
+  await signedIn(page)
+  const addChart = async (name: string) => {
+    await page.goto('/admin/size-charts')
+    await page.getByLabel('Chart name').fill(name)
+    await page.getByLabel('Table', { exact: true }).fill('Size | Chest\nM | 38\nL | 40')
+    await page.getByRole('button', { name: 'Add size chart' }).click()
+    await expect(page.getByRole('link', { name })).toBeVisible()
+  }
+  await addChart(`First ${id}`)
+  await page.getByRole('link', { name: `First ${id}` }).click()
+  await expect(page.getByRole('heading', { name: 'Edit size chart' })).toBeVisible()
+  await page.getByLabel('Chart name').fill(chart)
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByRole('link', { name: chart })).toBeVisible()
+  await a11y()
+  await addChart(temp)
+  await page.getByRole('link', { name: temp }).click()
+  await expect(page.getByRole('heading', { name: 'Edit size chart' })).toBeVisible()
+  await page.getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByRole('link', { name: temp })).toHaveCount(0)
+
+  await createCategory(page, cat)
+  await page.getByRole('link', { name: cat }).click()
+  await expect(page.getByRole('heading', { name: 'Edit category' })).toBeVisible()
+  await page.getByLabel('Size chart').selectOption({ label: chart })
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/categories$/)
+  await page.getByRole('link', { name: cat }).click()
+  await expect(page.getByRole('heading', { name: 'Edit category' })).toBeVisible()
+  await expect(page.getByLabel('Size chart').locator('option:checked')).toHaveText(chart)
+
+  await createProduct(page, { name: inherit, price: '500', stock: '2', category: cat })
+  await createProduct(page, { name: own, price: '500', stock: '2' })
+  await editProduct(page, own)
+  await page.getByLabel('Size chart').selectOption({ label: chart })
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await editProduct(page, own)
+  await expect(page.getByLabel('Size chart').locator('option:checked')).toHaveText(chart)
+
+  for (const name of [inherit, own]) {
+    await page.goto(`/p/${slug(name)}`)
+    await page.getByRole('button', { name: 'See size chart' }).click()
+    const dialog = page.getByRole('dialog', { name: chart })
+    await expect(dialog.getByRole('columnheader', { name: 'Chest' })).toBeVisible()
+    await expect(dialog.getByRole('cell', { name: '40' })).toBeVisible()
+    await a11y()
+    await dialog.getByRole('button', { name: 'Close' }).click()
+    await expect(dialog).toBeHidden()
+  }
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

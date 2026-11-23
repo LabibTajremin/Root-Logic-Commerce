@@ -6,6 +6,7 @@ export type {
   CategoryData,
   Product,
   ProductFilter,
+  SizeChart,
   ProductWrite,
   Variant,
   SortOrder,
@@ -23,3 +24,4 @@ export {
   type VariantData,
   type VariantOptions,
 } from './domain/variants'
+export { chartFromText, chartToText, type SizeChartInput } from './domain/size-chart'

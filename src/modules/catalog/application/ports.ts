@@ -10,7 +10,9 @@ export type Category = {
   archived: boolean
   seoTitle: string | null
   seoDescription: string | null
+  sizeChartId: string | null
 }
+export type SizeChart = { id: string; name: string; rows: string[][] }
 export type CategoryData = Omit<Category, 'id' | 'sortOrder' | 'archived'>
 export type Brand = {
   id: string
@@ -47,6 +49,10 @@ export type CatalogRepo = {
   ): Promise<void>
   setCategoryOrder(storeId: string, orders: SortOrder[]): Promise<void>
   categorySlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
+  listSizeCharts(storeId: string): Promise<SizeChart[]>
+  insertSizeChart(storeId: string, data: Omit<SizeChart, 'id'>): Promise<SizeChart>
+  updateSizeChart(storeId: string, id: string, data: Omit<SizeChart, 'id'>): Promise<void>
+  deleteSizeChart(storeId: string, id: string): Promise<void>
   listBrands(storeId: string): Promise<Brand[]>
   insertBrand(storeId: string, data: Omit<Brand, 'id' | 'archived'>): Promise<Brand>
   updateBrand(storeId: string, id: string, patch: Partial<Omit<Brand, 'id'>>): Promise<void>

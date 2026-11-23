@@ -6,6 +6,7 @@ import { act, type ActionState } from '../act'
 const read = (f: FormData) => ({
   name: f.get('name') as string,
   parentId: (f.get('parentId') as string) || null,
+  sizeChartId: (f.get('sizeChartId') as string) || null,
 })
 
 export async function addCategory(_: ActionState, form: FormData) {

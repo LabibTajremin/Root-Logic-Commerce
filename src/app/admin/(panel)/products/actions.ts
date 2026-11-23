@@ -21,6 +21,7 @@ const readProduct = (f: FormData) => ({
   status: field(f, 'status') as 'draft' | 'active' | 'archived',
   categoryId: field(f, 'categoryId') || null,
   brandId: field(f, 'brandId') || null,
+  sizeChartId: field(f, 'sizeChartId') || null,
   seoTitle: field(f, 'seoTitle') || null,
   seoDescription: field(f, 'seoDescription') || null,
   // An empty badge text means "no badge".

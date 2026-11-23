@@ -15,6 +15,7 @@ export const menuGroups: MenuGroup[] = [
       { href: '/admin/products', key: 'nav.products', icon: 'box' },
       { href: '/admin/categories', key: 'nav.categories', icon: 'layers' },
       { href: '/admin/brands', key: 'nav.brands', icon: 'star' },
+      { href: '/admin/size-charts', key: 'nav.sizeCharts', icon: 'grip' },
       { href: '/admin/stock', key: 'nav.stock', icon: 'box' },
       { href: '/admin/promotions', key: 'nav.promotions', icon: 'megaphone' },
     ],

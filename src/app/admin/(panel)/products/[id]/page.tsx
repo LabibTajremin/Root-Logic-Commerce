@@ -21,6 +21,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
         product={product}
         categories={await catalog.listCategories(store.id)}
         brands={await catalog.listBrands(store.id)}
+        charts={await catalog.listSizeCharts(store.id)}
         locale={locale}
       />
       <ProductImages productId={product.id} />

@@ -7,6 +7,7 @@ import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 import { ProductTabs } from './product-tabs'
+import { SizeChartButton } from './size-chart'
 import { VariantPicker } from './variant-picker'
 import { variantLabel } from '@/modules/catalog'
 
@@ -41,6 +42,7 @@ export default async function ProductPage({ params }: Props) {
     name: p.name,
     price: p.price,
   }
+  const chart = await catalog.sizeChartFor(store.id, p)
   const variants = (await catalog.listVariants(store.id, [p.id])).map((x) => {
     const shown = view({ ...p, price: x.price, compareAtPrice: x.compareAtPrice }, images)
     const label = variantLabel(p.options, x.options)
@@ -132,6 +134,12 @@ export default async function ProductPage({ params }: Props) {
               </div>
             )}
           </>
+        )}
+        {chart && (
+          <SizeChartButton
+            chart={chart}
+            labels={{ open: t('shop.sizeChart'), close: t('common.close') }}
+          />
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
         <ProductTabs description={p.description} content={p.content} t={t} />

@@ -43,6 +43,7 @@ export const productInput = z
     status: z.enum(['draft', 'active', 'archived']).default('draft'),
     categoryId: z.uuid().nullable().default(null),
     brandId: z.uuid().nullable().default(null),
+    sizeChartId: z.uuid().nullable().default(null),
     videoUrl: z.url().nullable().default(null),
     seoTitle: z.string().max(70).nullable().default(null),
     seoDescription: z.string().max(170).nullable().default(null),
@@ -65,6 +66,7 @@ export const categoryInput = z.object({
     .max(80)
     .optional(),
   parentId: z.uuid().nullable().default(null),
+  sizeChartId: z.uuid().nullable().default(null),
   seoTitle: z.string().max(70).nullable().default(null),
   seoDescription: z.string().max(170).nullable().default(null),
 })

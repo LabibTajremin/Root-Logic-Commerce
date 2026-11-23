@@ -232,12 +232,22 @@ export const media = pgTable(
   ],
 )
 
+export const sizeCharts = pgTable('size_charts', {
+  id: id(),
+  storeId: storeId(),
+  name: text().notNull(),
+  // A5: the first row is the header.
+  rows: jsonb().$type<string[][]>().notNull(),
+  createdAt: createdAt(),
+})
+
 export const categories = pgTable(
   'categories',
   {
     id: id(),
     storeId: storeId(),
     parentId: uuid().references((): AnyPgColumn => categories.id, { onDelete: 'restrict' }),
+    sizeChartId: uuid().references(() => sizeCharts.id, { onDelete: 'set null' }),
     name: text().notNull(),
     slug: text().notNull(),
     sortOrder: integer().notNull().default(0),
@@ -273,6 +283,7 @@ export const products = pgTable(
     storeId: storeId(),
     categoryId: uuid().references(() => categories.id, { onDelete: 'set null' }),
     brandId: uuid().references(() => brands.id, { onDelete: 'set null' }),
+    sizeChartId: uuid().references(() => sizeCharts.id, { onDelete: 'set null' }),
     name: text().notNull(),
     slug: text().notNull(),
     description: text().notNull().default(''),

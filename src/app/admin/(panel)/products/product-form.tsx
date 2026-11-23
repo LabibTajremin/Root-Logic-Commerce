@@ -1,4 +1,4 @@
-import type { Brand, Category, Product } from '@/modules/catalog'
+import type { Brand, Category, Product, SizeChart } from '@/modules/catalog'
 import { helpText } from '@/help'
 import { badgeTones, contentToText } from '@/modules/catalog'
 import type { Locale } from '@/i18n'
@@ -14,11 +14,13 @@ export const ProductForm = ({
   product,
   categories,
   brands,
+  charts,
   locale,
 }: {
   product?: Product
   categories: Category[]
   brands: Brand[]
+  charts: SizeChart[]
   locale: Locale
 }) => {
   const t = (k: string) => translate(locale, k)
@@ -209,6 +211,22 @@ export const ProductForm = ({
                     {b.name}
                   </option>
                 ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5 text-sm font-semibold">
+            <label htmlFor="sizeChartId">{t('field.sizeChart')}</label>
+            <select
+              id="sizeChartId"
+              name="sizeChartId"
+              defaultValue={product?.sizeChartId ?? ''}
+              className={`${select} font-normal`}
+            >
+              <option value="">{t('common.none')}</option>
+              {charts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
           <Button type="submit" icon="check">

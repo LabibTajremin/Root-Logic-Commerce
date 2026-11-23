@@ -9,6 +9,7 @@ import {
   type CategoryInput,
   type ProductInput,
 } from '../domain/rules'
+import { sizeChartInput, type SizeChartInput } from '../domain/size-chart'
 import { uniqueSlug } from '../domain/slug'
 import {
   mergeMatrix,
@@ -46,6 +47,12 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
   const mustProduct = async (storeId: string, id: string): Promise<Product> =>
     (await repo.getProduct(storeId, id)) ?? Promise.reject(new DomainError('product.not_found'))
 
+  const assertChart = async (storeId: string, chartId: string | null) => {
+    if (chartId && !(await repo.listSizeCharts(storeId)).some((c) => c.id === chartId)) {
+      throw new DomainError('size_chart.not_found')
+    }
+  }
+
   const assertCategory = async (storeId: string, categoryId: string | null) => {
     if (categoryId && !(await repo.listCategories(storeId)).some((c) => c.id === categoryId)) {
       throw new DomainError('category.not_found')
@@ -58,6 +65,7 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
     async createCategory(storeId: string, input: CategoryInput) {
       const d = validate(categoryInput, input)
       await assertParent(storeId, null, d.parentId)
+      await assertChart(storeId, d.sizeChartId)
       return repo.insertCategory(storeId, {
         ...d,
         slug: await categorySlug(storeId, d.name, d.slug),
@@ -69,6 +77,7 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       if (!(await repo.listCategories(storeId)).some((c) => c.id === id))
         throw new DomainError('category.not_found')
       await assertParent(storeId, id, d.parentId)
+      await assertChart(storeId, d.sizeChartId)
       await repo.updateCategory(storeId, id, {
         ...d,
         slug: await categorySlug(storeId, d.name, d.slug, id),
@@ -79,6 +88,23 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       repo.updateCategory(storeId, id, { archived: true }),
     reorderCategories: (storeId: string, ids: string[]) =>
       repo.setCategoryOrder(storeId, toSortOrders(ids)),
+
+    listSizeCharts: (storeId: string) => repo.listSizeCharts(storeId),
+    async createSizeChart(storeId: string, input: SizeChartInput) {
+      return repo.insertSizeChart(storeId, validate(sizeChartInput, input))
+    },
+    async updateSizeChart(storeId: string, id: string, input: SizeChartInput) {
+      const d = validate(sizeChartInput, input)
+      await assertChart(storeId, id)
+      await repo.updateSizeChart(storeId, id, d)
+    },
+    deleteSizeChart: (storeId: string, id: string) => repo.deleteSizeChart(storeId, id),
+    // The product's own chart, else its category's.
+    async sizeChartFor(storeId: string, p: Product) {
+      const cat = (await repo.listCategories(storeId)).find((c) => c.id === p.categoryId)
+      const id = p.sizeChartId ?? cat?.sizeChartId
+      return (await repo.listSizeCharts(storeId)).find((c) => c.id === id) ?? null
+    },
 
     listBrands: (storeId: string) => repo.listBrands(storeId),
     async createBrand(storeId: string, input: BrandInput) {
@@ -110,6 +136,7 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       const d = validate(productInput, input)
       await assertCategory(storeId, d.categoryId)
       await assertBrand(storeId, d.brandId)
+      await assertChart(storeId, d.sizeChartId)
       return repo.insertProduct(storeId, { ...d, slug: await productSlug(storeId, d.name, d.slug) })
     },
 
@@ -118,6 +145,7 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       const current = await mustProduct(storeId, id)
       await assertCategory(storeId, d.categoryId)
       await assertBrand(storeId, d.brandId)
+      await assertChart(storeId, d.sizeChartId)
       await repo.updateProduct(storeId, id, {
         ...d,
         // With variants, stock lives on the variants; the product keeps their total.

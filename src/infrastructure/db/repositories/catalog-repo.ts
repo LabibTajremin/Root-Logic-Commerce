@@ -11,7 +11,7 @@ import {
 } from 'drizzle-orm'
 import type { CatalogRepo, SortOrder } from '@/modules/catalog'
 import type { Db } from '../client'
-import { brands, categories, products, productVariants } from '../schema'
+import { brands, categories, products, productVariants, sizeCharts } from '../schema'
 
 const catCols = {
   id: categories.id,
@@ -22,7 +22,9 @@ const catCols = {
   archived: categories.archived,
   seoTitle: categories.seoTitle,
   seoDescription: categories.seoDescription,
+  sizeChartId: categories.sizeChartId,
 }
+const chartCols = { id: sizeCharts.id, name: sizeCharts.name, rows: sizeCharts.rows }
 const { storeId, createdAt, updatedAt, ...prodCols } = getTableColumns(products)
 const brandCols = {
   id: brands.id,
@@ -93,6 +95,28 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
   },
   setCategoryOrder: (storeId, orders) => reorder(db, categories, storeId, orders),
   categorySlugTaken: (storeId, slug, exceptId) => taken(db, categories, storeId, slug, exceptId),
+  listSizeCharts: (storeId) =>
+    db
+      .select(chartCols)
+      .from(sizeCharts)
+      .where(eq(sizeCharts.storeId, storeId))
+      .orderBy(asc(sizeCharts.name)),
+  insertSizeChart: async (storeId, data) =>
+    (
+      await db
+        .insert(sizeCharts)
+        .values({ ...data, storeId })
+        .returning(chartCols)
+    )[0]!,
+  updateSizeChart: async (storeId, id, data) => {
+    await db
+      .update(sizeCharts)
+      .set(data)
+      .where(and(eq(sizeCharts.storeId, storeId), eq(sizeCharts.id, id)))
+  },
+  deleteSizeChart: async (storeId, id) => {
+    await db.delete(sizeCharts).where(and(eq(sizeCharts.storeId, storeId), eq(sizeCharts.id, id)))
+  },
   listBrands: (storeId) =>
     db.select(brandCols).from(brands).where(eq(brands.storeId, storeId)).orderBy(asc(brands.name)),
   insertBrand: async (storeId, data) =>

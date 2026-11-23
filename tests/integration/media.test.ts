@@ -35,6 +35,7 @@ describe('media repo', () => {
           status: 'active',
           categoryId: null,
           brandId: null,
+          sizeChartId: null,
           videoUrl: null,
           seoTitle: null,
           seoDescription: null,

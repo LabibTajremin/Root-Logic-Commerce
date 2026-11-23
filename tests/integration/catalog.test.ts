@@ -228,3 +228,55 @@ describe('variants (A1)', () => {
     await expect(catalog.updateVariants(other, p.id, [])).rejects.toThrow('product.not_found')
   })
 })
+
+describe('size charts (A5)', () => {
+  const rows = [
+    ['Size', 'Chest'],
+    ['M', '38'],
+  ]
+
+  it('creates, edits and deletes charts; a product uses its own chart, else its category one', async () => {
+    const a = await catalog.createSizeChart(store, { name: 'Kurta', rows })
+    const b = await catalog.createSizeChart(store, { name: 'Shirt', rows })
+    await catalog.updateSizeChart(store, b.id, { name: 'Shirts', rows: [...rows, ['L', '40']] })
+    expect((await catalog.listSizeCharts(store)).map((c) => [c.name, c.rows.length])).toEqual([
+      ['Kurta', 2],
+      ['Shirts', 3],
+    ])
+    expect(await catalog.listSizeCharts(other)).toEqual([])
+    const cat = await catalog.createCategory(store, { name: 'Tops', sizeChartId: a.id })
+    const own = await catalog.createProduct(store, {
+      name: 'Own',
+      price: 1,
+      categoryId: cat.id,
+      sizeChartId: b.id,
+    })
+    const inherit = await catalog.createProduct(store, {
+      name: 'Inherit',
+      price: 1,
+      categoryId: cat.id,
+    })
+    const none = await catalog.createProduct(store, { name: 'None', price: 1 })
+    expect((await catalog.sizeChartFor(store, own))?.name).toBe('Shirts')
+    expect((await catalog.sizeChartFor(store, inherit))?.name).toBe('Kurta')
+    expect(await catalog.sizeChartFor(store, none)).toBeNull()
+    await catalog.deleteSizeChart(store, a.id)
+    expect(
+      await catalog.sizeChartFor(store, (await catalog.getProduct(store, inherit.id))!),
+    ).toBeNull()
+  })
+
+  it('rejects charts from another store and bad tables', async () => {
+    const foreign = await catalog.createSizeChart(other, { name: 'X', rows })
+    await expect(
+      catalog.createProduct(store, { name: 'P', price: 1, sizeChartId: foreign.id }),
+    ).rejects.toThrow('size_chart.not_found')
+    await expect(
+      catalog.createCategory(store, { name: 'C', sizeChartId: foreign.id }),
+    ).rejects.toThrow('size_chart.not_found')
+    await expect(catalog.updateSizeChart(store, foreign.id, { name: 'Y', rows })).rejects.toThrow(
+      'size_chart.not_found',
+    )
+    await expect(catalog.createSizeChart(store, { name: 'Z', rows: [['Size']] })).rejects.toThrow()
+  })
+})
