@@ -711,7 +711,8 @@ test('product images: upload checks, Drive links, removal, and the shop shows th
   await expect(images).toHaveCount(2)
 
   await page.goto(`/p/${slug(name)}`)
-  const gallery = page.locator('article img')
+  // Slides only: each photo also shows as a thumbnail.
+  const gallery = page.getByRole('list', { name: 'Photos' }).locator('img')
   await expect(gallery).toHaveCount(2)
   await expect(gallery.first()).toHaveJSProperty('complete', true)
   expect(await gallery.first().evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0)
