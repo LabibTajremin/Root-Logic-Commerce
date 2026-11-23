@@ -1,6 +1,6 @@
 import type { Category, Product } from '@/modules/catalog'
 import { helpText } from '@/help'
-import { badgeTones } from '@/modules/catalog'
+import { badgeTones, contentToText } from '@/modules/catalog'
 import type { Locale } from '@/i18n'
 import { translate } from '@/i18n'
 import { ActionForm } from '@/ui/action-form'
@@ -34,6 +34,7 @@ export const ProductForm = ({
     />
   )
   const select = 'min-h-11 rounded-control border border-line bg-surface px-3'
+  const tabs = product && contentToText(product.content)
   return (
     <ActionForm action={saveProduct} className="grid gap-5 lg:grid-cols-[1fr_360px]">
       {product && <input type="hidden" name="id" value={product.id} />}
@@ -60,6 +61,27 @@ export const ProductForm = ({
               className="rounded-control border border-line bg-surface p-3"
             />
           </div>
+        </Card>
+        <Card className="flex flex-col gap-4">
+          <h2 className="font-semibold">{t('field.tabs')}</h2>
+          {(['specs', 'howTo', 'faq', 'benefits', 'whyBuy'] as const).map((k) => (
+            <div key={k} className="flex flex-col gap-1.5">
+              <label htmlFor={`tab-${k}`} className="text-sm font-semibold">
+                {t(`field.tab_${k}`)}
+              </label>
+              <p id={`tab-${k}-hint`} className="text-xs text-muted">
+                {t(`field.tab_${k}Hint`)}
+              </p>
+              <textarea
+                id={`tab-${k}`}
+                name={`tab-${k}`}
+                rows={k === 'faq' ? 6 : 3}
+                aria-describedby={`tab-${k}-hint`}
+                defaultValue={tabs?.[k]}
+                className="rounded-control border border-line bg-surface p-3"
+              />
+            </div>
+          ))}
         </Card>
         <Card className="flex flex-col gap-4">
           {f('seoTitle', 'field.seoTitle', {

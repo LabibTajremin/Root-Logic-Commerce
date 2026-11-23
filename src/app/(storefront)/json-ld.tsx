@@ -19,6 +19,16 @@ export const organizationLd = (base: string, name: string, socials: { url: strin
   ...(socials.length > 0 && { sameAs: socials.map((s) => s.url) }),
 })
 
+export const faqLd = (faq: { q: string; a: string }[]) => ({
+  '@context': context,
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+})
+
 // JSON.stringify output with `<` escaped cannot close the script tag.
 export const serializeLd = (data: object) => JSON.stringify(data).replace(/</g, '\\u003c')
 

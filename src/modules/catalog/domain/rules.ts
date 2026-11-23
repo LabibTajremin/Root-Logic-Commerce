@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { DomainError } from '@/modules/shared'
+import { productContent } from './content'
 
 export type CategoryNode = { id: string; parentId: string | null }
 
@@ -45,6 +46,7 @@ export const productInput = z
     seoTitle: z.string().max(70).nullable().default(null),
     seoDescription: z.string().max(170).nullable().default(null),
     badge: productBadge.nullable().default(null),
+    content: productContent,
   })
   .refine((p) => p.compareAtPrice === null || p.compareAtPrice > p.price, {
     path: ['compareAtPrice'],

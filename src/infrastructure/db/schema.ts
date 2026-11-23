@@ -14,6 +14,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import type { ProductContent } from '@/modules/catalog'
 
 const id = () => uuid().primaryKey().defaultRandom()
 const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow()
@@ -273,6 +274,11 @@ export const products = pgTable(
     seoDescription: text(),
     // A3: owner's badge { text, tone } — validated by the catalog schema.
     badge: jsonb().$type<{ text: string; tone: 'accent' | 'success' | 'danger' | 'neutral' }>(),
+    // A6 content tabs (specs, how-to, FAQ, benefits, why buy) — validated by the catalog schema.
+    content: jsonb()
+      .$type<ProductContent>()
+      .notNull()
+      .default({ specs: [], howTo: [], faq: [], benefits: [], whyBuy: [] }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

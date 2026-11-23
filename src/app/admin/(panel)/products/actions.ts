@@ -1,6 +1,6 @@
 'use server'
 
-import type { BadgeTone } from '@/modules/catalog'
+import { contentFromText, type BadgeTone } from '@/modules/catalog'
 import { act, type ActionState } from '../act'
 
 // Every key below is an input of the product form, so `get` never returns null here.
@@ -26,6 +26,13 @@ const readProduct = (f: FormData) => ({
   badge: field(f, 'badgeText').trim()
     ? { text: field(f, 'badgeText'), tone: field(f, 'badgeTone') as BadgeTone }
     : null,
+  content: contentFromText({
+    specs: field(f, 'tab-specs'),
+    howTo: field(f, 'tab-howTo'),
+    faq: field(f, 'tab-faq'),
+    benefits: field(f, 'tab-benefits'),
+    whyBuy: field(f, 'tab-whyBuy'),
+  }),
 })
 
 export async function saveProduct(_: ActionState, form: FormData) {

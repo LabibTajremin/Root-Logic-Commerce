@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "content" jsonb DEFAULT '{"specs":[],"howTo":[],"faq":[],"benefits":[],"whyBuy":[]}'::jsonb NOT NULL;

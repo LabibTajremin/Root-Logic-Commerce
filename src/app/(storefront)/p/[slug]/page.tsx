@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { GaEvent } from '../../ga'
-import { breadcrumbLd, JsonLd } from '../../json-ld'
+import { breadcrumbLd, faqLd, JsonLd } from '../../json-ld'
 import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
+import { ProductTabs } from './product-tabs'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -56,6 +57,7 @@ export default async function ProductPage({ params }: Props) {
           { name: p.name, path: `/p/${p.slug}` },
         ])}
       />
+      {p.content.faq.length > 0 && <JsonLd data={faqLd(p.content.faq)} />}
       <GaEvent
         name="view_item"
         params={{
@@ -81,7 +83,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
-        <div className="whitespace-pre-line text-muted">{p.description}</div>
+        <ProductTabs description={p.description} content={p.content} t={t} />
       </div>
     </article>
   )

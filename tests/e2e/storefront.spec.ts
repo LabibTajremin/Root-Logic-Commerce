@@ -269,6 +269,49 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await expect(page.getByLabel('Order number')).toHaveValue('')
 })
 
+test('product content tabs: owner fills them, the page shows them, FAQ feeds JSON-LD', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Tabbed ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '650', stock: '8', description: 'Hand-woven.' })
+  await editProduct(page, name)
+  await page.getByLabel('Specifications').fill('Fabric: Cotton\nLength: 12 haat')
+  await page.getByLabel('How to use').fill('Wash cold\nDry in shade')
+  await page
+    .getByLabel('FAQ')
+    .fill('Does it shrink?\nNo, it is pre-washed.\n\nIs COD available?\nYes')
+  await page.getByLabel('Key benefits').fill('Breathable')
+  await page.getByLabel('Why buy from us').fill('Free exchange in 7 days')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await editProduct(page, name)
+  await expect(page.getByLabel('Specifications')).toHaveValue('Fabric: Cotton\nLength: 12 haat')
+  await a11y()
+
+  await page.goto(`/p/${slug(name)}`)
+  const tab = (t: string) => page.locator('details > summary').filter({ hasText: t })
+  await expect(page.locator('details[open]').getByText('Hand-woven.')).toBeVisible()
+  await tab('Specifications').click()
+  await expect(page.getByRole('definition').filter({ hasText: '12 haat' })).toBeVisible()
+  await tab('How to use').click()
+  await expect(page.getByRole('listitem').filter({ hasText: 'Dry in shade' })).toBeVisible()
+  await tab('Key benefits').click()
+  await expect(page.getByText('Breathable')).toBeVisible()
+  await tab('Why buy from us').click()
+  await expect(page.getByText('Free exchange in 7 days')).toBeVisible()
+  await tab('Questions & answers').click()
+  await expect(page.getByRole('heading', { name: 'Is COD available?' })).toBeVisible()
+  const faq = JSON.parse(await ld(page, 'FAQPage'))
+  expect(faq.mainEntity[0]).toEqual({
+    '@type': 'Question',
+    name: 'Does it shrink?',
+    acceptedAnswer: { '@type': 'Answer', text: 'No, it is pre-washed.' },
+  })
+  await a11y()
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

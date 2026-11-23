@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { breadcrumbLd, JsonLd, organizationLd, serializeLd } from './json-ld'
+import { breadcrumbLd, faqLd, JsonLd, organizationLd, serializeLd } from './json-ld'
 
 describe('storefront JSON-LD', () => {
   it('breadcrumbs number their items from 1 with absolute URLs', () => {
@@ -15,6 +15,20 @@ describe('storefront JSON-LD', () => {
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://shop.test/' },
         { '@type': 'ListItem', position: 2, name: 'Tea', item: 'https://shop.test/c/tea' },
+      ],
+    })
+  })
+
+  it('FAQ answers become a FAQPage (A6)', () => {
+    expect(faqLd([{ q: 'COD?', a: 'Yes' }])).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'COD?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Yes' },
+        },
       ],
     })
   })
