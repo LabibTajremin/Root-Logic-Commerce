@@ -453,6 +453,9 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
     .click()
   await expect(page.getByText(`${kurta} (M / Red)`)).toBeVisible()
   await expect(page.getByText(`${kurta} (L / Red)`)).toBeVisible()
+  // Leave no pending order behind: the dashboard test counts them.
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
 })
 
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
