@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 12 (Catalog) — spec docs/BUILD_SPEC.md
-Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency. NEXT: A6 product content tabs (details/specs/how-to/FAQ + FAQ JSON-LD) + A2 brands → A1 variants + A16 multi-pick → A5 size chart → A11 listing UX → A12 gallery/share → A8 related/FBT → A7 reviews → A10 wishlist → A15 CSV → B5/B6/B12 → J3 switch dialog with demo packs → products in the activity log.
+Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency, A6 content tabs (+ FAQPage JSON-LD), A2 brands (logo, brand page, product field; verify 237/237 at 100%). NEXT: A1 variants + A16 multi-pick → A5 size chart → A11 listing UX → A12 gallery/share → A8 related/FBT → A7 reviews → A10 wishlist → A15 CSV → B5/B6/B12 → J3 switch dialog with demo packs → products in the activity log.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
