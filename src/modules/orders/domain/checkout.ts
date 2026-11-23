@@ -3,15 +3,27 @@ import { normalizeBdPhone } from '@/modules/customers'
 
 export type DeliveryZone = { id: string; label: string; charge: number }
 
+const bdPhone = z
+  .string()
+  .transform(
+    (p, ctx) =>
+      normalizeBdPhone(p) ?? (ctx.addIssue({ code: 'custom', message: 'phone.invalid' }), z.NEVER),
+  )
+
+export const preferredTimes = ['any', 'morning', 'afternoon', 'evening'] as const
+
 export const checkoutInput = z.object({
   name: z.string().trim().min(2).max(100),
-  phone: z
-    .string()
-    .transform(
-      (p, ctx) =>
-        normalizeBdPhone(p) ??
-        (ctx.addIssue({ code: 'custom', message: 'phone.invalid' }), z.NEVER),
-    ),
+  phone: bdPhone,
+  // C6 extra fields (which ones show is a shop setting).
+  altPhone: z
+    .literal('')
+    .transform(() => null)
+    .or(bdPhone)
+    .nullable()
+    .default(null),
+  preferredTime: z.enum(preferredTimes).default('any'),
+  giftWrap: z.boolean().default(false),
   email: z.email().nullable().default(null),
   address: z.string().trim().min(5).max(300),
   area: z.string().trim().min(2).max(80),

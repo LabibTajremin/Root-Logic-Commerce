@@ -26,6 +26,21 @@ const KEYS = [
   'otpSent',
   'otpCode',
   'verify',
+  'emailRequired',
+  'altPhone',
+  'preferredTime',
+  'time_any',
+  'time_morning',
+  'time_afternoon',
+  'time_evening',
+  'giftWrap',
+  'qty',
+  'remove',
+  'removeSure',
+  'placing',
+  'trustCod',
+  'trustCheck',
+  'trustReturn',
 ]
 
 export default async function CheckoutPage() {
@@ -40,7 +55,12 @@ export default async function CheckoutPage() {
     <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
       <GaEvent name="begin_checkout" params={{ currency: 'BDT' }} />
       <h1 className="font-heading text-3xl">{t('checkout.title')}</h1>
-      <CheckoutForm zones={business.deliveryZones} labels={labels} moneyFormat={moneyFormat} />
+      <CheckoutForm
+        zones={business.deliveryZones}
+        labels={labels}
+        moneyFormat={moneyFormat}
+        fields={business.checkout}
+      />
     </section>
   )
 }

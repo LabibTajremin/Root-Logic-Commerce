@@ -34,14 +34,24 @@ const Section = ({ title, children }: { title?: string; children: ReactNode }) =
   </fieldset>
 )
 
+type Fields = {
+  email: 'off' | 'optional' | 'required'
+  altPhone: boolean
+  preferredTime: boolean
+  giftWrap: boolean
+}
+
 export const CheckoutForm = ({
   zones,
   labels: L,
   moneyFormat,
+  fields,
 }: {
   zones: Zone[]
   labels: Record<string, string>
   moneyFormat: MoneyFormat
+  /** C6: the extra fields this shop asks for. */
+  fields: Fields
 }) => {
   const items = useCart()
   const router = useRouter()
@@ -49,6 +59,8 @@ export const CheckoutForm = ({
   const [error, setError] = useState('')
   const [otpTo, setOtpTo] = useState('')
   const [pending, start] = useTransition()
+  // C18: removing a line asks once more (the button turns into "Tap again to remove").
+  const [removing, setRemoving] = useState('')
   const money = (m: number) => formatMoney(m, moneyFormat)
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
   const charge = zones.find((z) => z.id === zoneId)!.charge
@@ -96,7 +108,24 @@ export const CheckoutForm = ({
             autoComplete="tel"
             placeholder="01XXXXXXXXX"
           />
-          <Input id="email" label={L.email} type="email" autoComplete="email" />
+          {fields.email !== 'off' && (
+            <Input
+              id="email"
+              label={fields.email === 'required' ? L.emailRequired : L.email}
+              type="email"
+              autoComplete="email"
+              required={fields.email === 'required'}
+            />
+          )}
+          {fields.altPhone && (
+            <Input
+              id="altPhone"
+              label={L.altPhone}
+              type="tel"
+              inputMode="tel"
+              placeholder="01XXXXXXXXX"
+            />
+          )}
         </Section>
         <Section title={L.address}>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -111,6 +140,30 @@ export const CheckoutForm = ({
             autoComplete="street-address"
           />
           <Input id="note" label={L.note} maxLength={500} />
+          {fields.preferredTime && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="preferredTime" className="text-sm font-semibold">
+                {L.preferredTime}
+              </label>
+              <select
+                id="preferredTime"
+                name="preferredTime"
+                className="min-h-11 rounded-control border border-line bg-surface px-3"
+              >
+                {(['any', 'morning', 'afternoon', 'evening'] as const).map((p) => (
+                  <option key={p} value={p}>
+                    {L[`time_${p}`]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {fields.giftWrap && (
+            <label className="flex min-h-11 items-center gap-3 text-sm font-semibold">
+              <input type="checkbox" name="giftWrap" className="size-5" />
+              {L.giftWrap}
+            </label>
+          )}
         </Section>
         <Section title={L.zone}>
           {zones.map((z) => (
@@ -138,11 +191,42 @@ export const CheckoutForm = ({
         <h2 className="font-heading text-lg">{L.summary}</h2>
         <ul className="flex flex-col gap-2 text-sm">
           {items.map((l) => (
-            <li key={l.id} className="flex justify-between gap-2">
-              <span>
-                {l.name} × {l.qty}
+            <li key={l.id} className="flex flex-col gap-1 border-b border-line pb-2">
+              <span className="flex justify-between gap-2">
+                <span>{l.name}</span>
+                <span>{money(l.price * l.qty)}</span>
               </span>
-              <span>{money(l.price * l.qty)}</span>
+              {/* C18: change the order without leaving checkout. */}
+              <span
+                role="group"
+                aria-label={`${L.qty}: ${l.name}`}
+                className="flex items-center gap-1"
+              >
+                <button
+                  type="button"
+                  aria-label="−"
+                  onClick={() => cart.setQty(l.id, l.qty - 1)}
+                  className="size-9 rounded-control border border-line"
+                >
+                  −
+                </button>
+                <output className="w-6 text-center">{l.qty}</output>
+                <button
+                  type="button"
+                  aria-label="+"
+                  onClick={() => cart.setQty(l.id, l.qty + 1)}
+                  className="size-9 rounded-control border border-line"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() => (removing === l.id ? cart.remove(l.id) : setRemoving(l.id))}
+                  className="ms-auto min-h-9 px-2 text-danger underline"
+                >
+                  {removing === l.id ? L.removeSure : L.remove}
+                </button>
+              </span>
             </li>
           ))}
         </ul>
@@ -185,12 +269,18 @@ export const CheckoutForm = ({
             {error}
           </p>
         )}
+        {/* C19: one big button; disabled while placing, so a double tap can't order twice. */}
         <button
           disabled={pending}
-          className="inline-flex min-h-12 items-center justify-center rounded-control bg-button px-4 font-semibold text-button-text disabled:opacity-60"
+          className="inline-flex min-h-14 items-center justify-center rounded-control bg-button px-4 text-lg font-semibold text-button-text disabled:opacity-60"
         >
-          {otpTo ? L.verify : L.place}
+          {pending ? L.placing : otpTo ? L.verify : L.place}
         </button>
+        <ul className="flex flex-col gap-1 text-xs text-muted">
+          {[L.trustCod, L.trustCheck, L.trustReturn].map((x) => (
+            <li key={x}>✓ {x}</li>
+          ))}
+        </ul>
         <p className="text-xs text-muted">{L.guest}</p>
       </aside>
     </form>

@@ -235,6 +235,20 @@ describe('status flow with stock', () => {
     expect(await order(p.id, l.id, 4)).toMatchObject({ orderNo: expect.any(Number) })
   })
 
+  it('keeps the extra checkout fields: second phone, preferred time, gift wrap (C6)', async () => {
+    const p = await product(store)
+    const { id } = await orders.placeOrder(
+      store,
+      { ...checkout(p.id), altPhone: '01812345678', preferredTime: 'evening', giftWrap: true },
+      zones,
+    )
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      shipAltPhone: '01812345678',
+      preferredTime: 'evening',
+      giftWrap: true,
+    })
+  })
+
   it('returns after delivery restock; cancelling an unconfirmed order does not', async () => {
     const p = await product(store, { stock: 2 })
     const a = await orders.placeOrder(store, checkout(p.id), zones)

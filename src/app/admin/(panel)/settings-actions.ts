@@ -58,6 +58,12 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           warranty: String(form.get('trust.warranty')),
         },
         budgetBands: bandsFromText(String(form.get('budgetBands'))),
+        checkout: {
+          email: String(form.get('checkout.email')) as 'optional',
+          altPhone: form.get('checkout.altPhone') === 'on',
+          preferredTime: form.get('checkout.preferredTime') === 'on',
+          giftWrap: form.get('checkout.giftWrap') === 'on',
+        },
       }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },

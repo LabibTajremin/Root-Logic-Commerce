@@ -161,3 +161,14 @@ describe('budget bands (B12)', () => {
     expect(bandsFromText(bandsToText(bands))).toEqual(bands)
   })
 })
+
+describe('checkout fields (C6)', () => {
+  it('older saves ask for an optional email and a second phone only', () => {
+    expect(businessSchema.parse({}).checkout).toEqual({
+      email: 'optional',
+      altPhone: true,
+      preferredTime: false,
+      giftWrap: false,
+    })
+  })
+})

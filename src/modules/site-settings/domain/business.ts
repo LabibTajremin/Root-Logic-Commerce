@@ -42,6 +42,15 @@ export const businessSchema = z.object({
       warranty: z.string().trim().max(200).default(''),
     })
     .prefault({}),
+  // C6: which extra fields checkout asks for.
+  checkout: z
+    .object({
+      email: z.enum(['off', 'optional', 'required']).default('optional'),
+      altPhone: z.boolean().default(true),
+      preferredTime: z.boolean().default(false),
+      giftWrap: z.boolean().default(false),
+    })
+    .prefault({}),
   // B12 "Shop by budget": owner-named price caps (minor units), cheapest first.
   budgetBands: z
     .array(z.object({ label: z.string().trim().min(1).max(40), max: z.number().int().positive() }))

@@ -40,7 +40,17 @@ describe('checkout', () => {
       phone: '01712345678',
       paymentMethod: 'COD',
       note: null,
+      altPhone: null,
+      preferredTime: 'any',
+      giftWrap: false,
     })
+    // C6: a second phone is normalized like the first; a bad one is refused.
+    expect(checkoutInput.parse({ ...valid, altPhone: '+880 1812-345678' }).altPhone).toBe(
+      '01812345678',
+    )
+    expect(checkoutInput.parse({ ...valid, altPhone: '' }).altPhone).toBeNull()
+    expect(checkoutInput.safeParse({ ...valid, altPhone: '123' }).success).toBe(false)
+    expect(checkoutInput.safeParse({ ...valid, preferredTime: 'midnight' }).success).toBe(false)
   })
   it('rejects an invalid BD phone', () => {
     const r = checkoutInput.safeParse({ ...valid, phone: '12345' })

@@ -1264,6 +1264,81 @@ test('home builder: new sections, order, category row count; trust strip and bud
   await expect(row('trust-strip')).toContainText('Off')
 })
 
+test('checkout: extra fields from Shop info, edit lines in checkout, the big button (C6, C18, C19)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const [a, b] = [`Checkout A ${id}`, `Checkout B ${id}`]
+  await signedIn(page)
+  const fields = async (email: string, on: boolean) => {
+    await page.goto('/admin/store')
+    await page.getByLabel('Email at checkout').selectOption(email)
+    for (const l of ['Ask for a preferred delivery time', 'Offer gift wrap'])
+      await page.getByLabel(l).setChecked(on)
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  await fields('required', true)
+  await createProduct(page, { name: a, price: '100', stock: '5' })
+  await createProduct(page, { name: b, price: '250', stock: '5' })
+  const url = (n: string) => `/p/${n.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+  await page.goto(url(a))
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.goto(url(b))
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+
+  const total = page.getByTestId('checkout-total')
+  await expect(total).toHaveText('৳410')
+  const line = (n: string) => page.getByRole('group', { name: `Quantity: ${n}` })
+  await line(b).getByRole('button', { name: '+' }).click()
+  await expect(total).toHaveText('৳660')
+  await line(b).getByRole('button', { name: '−' }).click()
+  await line(a).getByRole('button', { name: 'Remove' }).click()
+  await expect(line(a).getByRole('button', { name: 'Tap again to remove' })).toBeVisible()
+  await line(a).getByRole('button', { name: 'Tap again to remove' }).click()
+  await expect(line(a)).toHaveCount(0)
+  await expect(total).toHaveText('৳310')
+  await a11y()
+
+  await fillCheckout(page)
+  // The browser asks for the email too; without it the server still says so.
+  await page.getByLabel('Email', { exact: true }).evaluate((e) => e.removeAttribute('required'))
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'Please add your email.' })).toBeVisible()
+  await page.getByLabel('Email', { exact: true }).fill('rahim@example.com')
+  await page.getByLabel('Second phone (optional)').fill('01812345678')
+  await page.getByLabel('Preferred delivery time').selectOption('evening')
+  await page.getByLabel('Gift wrap this order').check()
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  const extras = page.getByTestId('order-extras')
+  await expect(extras).toContainText('01812345678')
+  await expect(extras).toContainText('Evening (5–9)')
+  await expect(extras).toContainText('Gift wrap')
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  await fields('optional', false)
+  await page.goto('/admin/store')
+  await page.getByLabel('Email at checkout').selectOption('off')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await page.goto(url(a))
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await expect(page.getByLabel(/^Email/)).toHaveCount(0)
+  await fields('optional', false)
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

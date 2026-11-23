@@ -29,7 +29,16 @@ export type OrderLine = {
 }
 export type NewOrder = {
   customer: { phone: string; name: string; email: string | null }
-  ship: { name: string; phone: string; address: string; area: string; district: string }
+  ship: {
+    name: string
+    phone: string
+    altPhone: string | null
+    address: string
+    area: string
+    district: string
+  }
+  preferredTime: string
+  giftWrap: boolean
   note: string | null
   deliveryZone: string
   paymentMethod: string
@@ -59,6 +68,9 @@ export type OrderDetail = OrderSummary & {
   shipAddress: string
   shipArea: string
   shipDistrict: string
+  shipAltPhone: string | null
+  preferredTime: string
+  giftWrap: boolean
   note: string | null
   paymentMethod: string
   paymentStatus: string

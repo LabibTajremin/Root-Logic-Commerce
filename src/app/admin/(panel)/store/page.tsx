@@ -44,6 +44,40 @@ export default async function StorePage() {
             />
           </label>
           <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('store.checkoutFields')}</legend>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="checkout.email" className="text-sm font-semibold">
+                {t('store.emailField')}
+              </label>
+              <select
+                id="checkout.email"
+                name="checkout.email"
+                defaultValue={business.checkout.email}
+                className="min-h-11 rounded-control border border-line bg-surface px-3"
+              >
+                {(['off', 'optional', 'required'] as const).map((v) => (
+                  <option key={v} value={v}>
+                    {t(`store.email_${v}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {(['altPhone', 'preferredTime', 'giftWrap'] as const).map((k) => (
+              <label
+                key={k}
+                className="flex min-h-11 items-center justify-between gap-3 text-sm font-semibold"
+              >
+                {t(`store.ask${k[0]!.toUpperCase()}${k.slice(1)}`)}
+                <input
+                  type="checkbox"
+                  name={`checkout.${k}`}
+                  defaultChecked={business.checkout[k]}
+                  className="size-6 accent-[var(--color-accent)]"
+                />
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('trust.title')}</legend>
             <p className="text-sm text-muted">{t('trust.hint')}</p>
             {(['tradeLicence', 'tin', 'bin', 'dbid', 'warranty'] as const).map((k) => (

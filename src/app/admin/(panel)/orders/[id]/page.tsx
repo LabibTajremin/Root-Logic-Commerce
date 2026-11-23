@@ -111,6 +111,29 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <p className="text-sm text-muted">
               {o.shipAddress}, {o.shipArea}, {o.shipDistrict}
             </p>
+            {/* C6 extras; only the ones the shopper filled in. */}
+            <dl
+              className="grid grid-cols-[auto_1fr] gap-x-3 text-sm empty:hidden"
+              data-testid="order-extras"
+            >
+              {(
+                [
+                  ['altPhone', o.shipAltPhone],
+                  [
+                    'preferredTime',
+                    o.preferredTime === 'any' ? '' : t(`checkout.time_${o.preferredTime}`),
+                  ],
+                  ['giftWrap', o.giftWrap ? t('common.yes') : ''],
+                ] as const
+              )
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={k} className="contents">
+                    <dt className="text-muted">{t(`order.${k}`)}</dt>
+                    <dd className="font-semibold">{v}</dd>
+                  </div>
+                ))}
+            </dl>
             <div className="flex gap-2">
               <a
                 href={`tel:${o.shipPhone}`}

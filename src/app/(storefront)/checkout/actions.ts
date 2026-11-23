@@ -18,6 +18,8 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
   try {
     limits.checkout.assert(`${store.id}:${ip}`)
     const email = optional(f('email'))
+    if (business.checkout.email === 'required' && !email)
+      return { error: t('error.checkout.email') }
     // With a verification channel on, the first submit only sends the code.
     const check = otpTarget(business.otp, { phone: f('phone'), email })
     if (check) {
@@ -31,6 +33,9 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
       {
         name: f('name'),
         phone: f('phone'),
+        altPhone: f('altPhone'),
+        preferredTime: (f('preferredTime') || 'any') as 'any',
+        giftWrap: form.get('giftWrap') === 'on',
         email,
         district: f('district'),
         area: f('area'),

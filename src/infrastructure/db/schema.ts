@@ -370,6 +370,10 @@ export const orders = pgTable(
     shipAddress: text().notNull(),
     shipArea: text().notNull(),
     shipDistrict: text().notNull(),
+    // C6 extra checkout fields.
+    shipAltPhone: text(),
+    preferredTime: text().notNull().default('any'),
+    giftWrap: boolean().notNull().default(false),
     note: text(),
     paymentMethod: text().notNull().default('COD'),
     paymentStatus: paymentStatusEnum().notNull().default('unpaid'),
