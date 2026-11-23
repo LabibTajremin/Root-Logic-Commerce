@@ -1,5 +1,5 @@
-IN_PROGRESS: Phase 12 (Catalog) — spec docs/BUILD_SPEC.md
-Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency, A6 content tabs (+ FAQPage JSON-LD), A2 brands (logo, brand page, product field), A1 variants (options → matrix, per-variant price/stock, chips, variant lines in orders), A16 multi-pick (selected list, steppers, total, add all), A5 size charts (CI green 284b493 https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45202131904; 245/245 at 100%), A11 listing UX (filters, sort, per-page 6/12/24/48, pages, grid 2/3/4, breadcrumbs), A12 gallery/share/qty (swipe+arrows+thumbs, fit + thumbs position settings, hover zoom, FB/WhatsApp/Messenger links, copy link, qty stepper), A8 related + bought together (owner picks, same-category / co-purchase fallback, checkbox total, add selected; CI green fa40f34 https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45242034752), A7 reviews (order-proof form at /review, moderation + reply, approved reviews + AggregateRating; screenshot reviews strip), A10 wishlist (device-local, header count, /wishlist move to cart, feature switch; CI green 7b72c3d https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45257366410), A15 CSV import/export (dry run + row errors, create/update by slug, variant rows, Drive images, export), B5 home builder sections + order + row counts, B6 trust strip (numbers; certificate images later), B12 shop by budget (CI green 732d495 https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45271633111), J3 switch dialog + demo packs (CI green b9b1b23 https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45274005552), F3 product activity (in verify). NEXT: products in the activity log.
+IN_PROGRESS: Phase 13 (Checkout & orders) — spec docs/BUILD_SPEC.md
+Now: Phase 13 Checkout & orders — starting. Carried in from Phase 12: B6 certificate images + trust strip on checkout/thank-you/footer; J1 checkout & thank-you tabs; products in CSV/variant/bulk switch actions are not yet in the activity log.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
@@ -23,7 +23,8 @@ Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency, A6 conte
 ## Phases 10–19 (docs/BUILD_SPEC.md §9, no approval stop)
 - [x] Phase 10 — Single merged Figma design — done (Figma 1NGfJz6PU8rxZ5pHgIcrsr; 187 Core screens + 5 theme pages; design/README.md) (9-page rule; first attempt rejected: no reel cover-flow, missing admin screens, v1/v2 pages duplicated)
 - [x] Phase 11 — Foundations — phase 11 done d547b1d (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45178997698; 232/232 files 100%)
-- [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
+- [x] Phase 12 — Catalog — phase 12 done 9d9228f (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45276390548; 277/277 files 100%)
+- [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
 - Feature IDs done (§13): —
 - Also done earlier: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
 
