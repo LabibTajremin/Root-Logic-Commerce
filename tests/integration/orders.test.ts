@@ -210,9 +210,9 @@ describe('status flow with stock', () => {
     await expect(orders.changeStatus(store, b.id, 'CONFIRMED', 'u1')).rejects.toThrow(
       'stock.insufficient',
     )
-    await expect(stock.adjustStock(store, p.id, { delta: 1, note: 'found one' }, 'u1')).rejects.toThrow(
-      'stock.has_variants',
-    )
+    await expect(
+      stock.adjustStock(store, p.id, { delta: 1, note: 'found one' }, 'u1'),
+    ).rejects.toThrow('stock.has_variants')
   })
 
   it('variants: a product with options needs one of its own variants, in stock', async () => {
