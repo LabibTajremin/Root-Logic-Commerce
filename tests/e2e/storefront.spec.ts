@@ -394,7 +394,7 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
     await createProduct(page, { name, price: '1200', stock: '0' })
     await editProduct(page, name)
     await page.getByLabel('Options', { exact: true }).fill(options)
-    await page.getByRole('button', { name: 'Save options' }).click()
+    await page.getByRole('button', { name: 'Apply options' }).click()
     await expect(page.getByRole('rowheader').first()).toBeVisible()
   }
   await withOptions(kurta, 'Size: M, L\nColour: Red, Blue')
@@ -405,15 +405,15 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
     'L / Blue',
   ])
   const set = async (row: string, field: string, value: string) =>
-    page.getByLabel(`${field} — ${row}`).fill(value)
+    page.getByLabel(`${field} — ${row}`, { exact: true }).fill(value)
   await set('M / Red', 'Price (৳)', '1500')
   await set('M / Red', 'Compare-at price (৳)', '1800')
   await set('M / Red', 'Stock quantity', '2')
   await set('M / Red', 'SKU (optional)', `K-MR-${id}`)
   await set('L / Red', 'Stock quantity', '1')
-  await page.getByRole('button', { name: 'Save prices and stock' }).click()
+  await page.getByRole('button', { name: 'Update prices and stock' }).click()
   await page.reload()
-  await expect(page.getByLabel('Price (৳) — M / Red')).toHaveValue('1500')
+  await expect(page.getByLabel('Price (৳) — M / Red', { exact: true })).toHaveValue('1500')
   await expect(page.getByLabel('Stock quantity', { exact: true })).toHaveValue('3')
   await a11y()
   await withOptions(gone, 'Size: S')
