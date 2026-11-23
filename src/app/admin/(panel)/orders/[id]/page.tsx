@@ -78,6 +78,16 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 {t('order.delivery')} · {o.deliveryZone}
               </dt>
               <dd className="text-right">{money(o.deliveryCharge)}</dd>
+              {o.discount > 0 && (
+                <>
+                  <dt className="text-muted">
+                    {t('order.discount')} · {o.couponCode}
+                  </dt>
+                  <dd className="text-right" data-testid="order-discount">
+                    −{money(o.discount)}
+                  </dd>
+                </>
+              )}
               <dt className="font-semibold">
                 {t('order.total')} · {t('order.cod')}
               </dt>

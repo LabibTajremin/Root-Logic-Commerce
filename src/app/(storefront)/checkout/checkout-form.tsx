@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart } from '../cart-store'
-import { placeOrder } from './actions'
+import { placeOrder, quoteOrder, type Quote } from './actions'
 
 type Zone = { id: string; label: string; charge: number }
 
@@ -46,12 +46,15 @@ export const CheckoutForm = ({
   labels: L,
   moneyFormat,
   fields,
+  coupons,
 }: {
   zones: Zone[]
   labels: Record<string, string>
   moneyFormat: MoneyFormat
   /** C6: the extra fields this shop asks for. */
   fields: Fields
+  /** C2: show the "Have a code?" box (the coupons module is on). */
+  coupons: boolean
 }) => {
   const items = useCart()
   const router = useRouter()
@@ -64,6 +67,15 @@ export const CheckoutForm = ({
   const money = (m: number) => formatMoney(m, moneyFormat)
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
   const charge = zones.find((z) => z.id === zoneId)!.charge
+  const payload = JSON.stringify(
+    items.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.qty })),
+  )
+  // A quote is only shown for the cart and zone it was made for; placing re-prices anyway.
+  const [quote, setQuote] = useState<{ for: string; q: Quote } | null>(null)
+  const shown = quote?.for === payload + zoneId ? quote.q : null
+  const discount = shown && 'discount' in shown ? shown.discount : 0
+  const applyCode = (form: HTMLFormElement) =>
+    start(async () => setQuote({ for: payload + zoneId, q: await quoteOrder(new FormData(form)) }))
 
   if (items.length === 0)
     return (
@@ -238,17 +250,46 @@ export const CheckoutForm = ({
           <span>{L.zone}</span>
           <span>{money(charge)}</span>
         </p>
+        {discount > 0 && (
+          <p className="flex justify-between text-sm text-success" data-testid="checkout-discount">
+            <span>
+              {L.discount} ({(shown as { couponCode: string }).couponCode})
+            </span>
+            <span>−{money(discount)}</span>
+          </p>
+        )}
         <p className="flex justify-between text-lg font-semibold">
           <span>{L.total}</span>
-          <span data-testid="checkout-total">{money(subtotal + charge)}</span>
+          <span data-testid="checkout-total">{money(subtotal + charge - discount)}</span>
         </p>
-        <input
-          type="hidden"
-          name="items"
-          value={JSON.stringify(
-            items.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.qty })),
-          )}
-        />
+        <input type="hidden" name="items" value={payload} />
+        {coupons && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="couponCode" className="text-sm font-semibold">
+              {L.haveCode}
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="couponCode"
+                name="couponCode"
+                autoComplete="off"
+                className="min-h-11 min-w-0 flex-1 rounded-control border border-line bg-surface px-3 uppercase"
+              />
+              <button
+                type="button"
+                onClick={(e) => applyCode(e.currentTarget.form!)}
+                className="min-h-11 rounded-control border border-line px-3 text-sm font-semibold"
+              >
+                {L.applyCode}
+              </button>
+            </div>
+            {shown && 'error' in shown && (
+              <p role="alert" className="text-sm text-danger">
+                {shown.error}
+              </p>
+            )}
+          </div>
+        )}
         {otpTo && (
           <div className="flex flex-col gap-2 rounded-control bg-soft p-3">
             <p className="font-semibold">{L.otpTitle}</p>

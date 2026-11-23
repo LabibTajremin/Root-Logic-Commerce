@@ -6,6 +6,7 @@ import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
 
 export type PlaceResult = { error: string } | { otp: string } | { orderNo: number }
+export type Quote = { error: string } | { discount: number; couponCode: string | null }
 
 const optional = (v: string) => v.trim() || null
 
@@ -42,6 +43,7 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         address: f('address'),
         note: optional(f('note')),
         zoneId: f('zoneId'),
+        couponCode: f('couponCode'),
         items: JSON.parse(f('items')),
       },
       business.deliveryZones,
@@ -49,5 +51,31 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
     return { orderNo: order.orderNo }
   } catch (e) {
     return actionError(t, e, 'checkout')
+  }
+}
+
+/** C2: the discount a code (or, with none typed, the best automatic coupon) gives this cart. */
+export const quoteOrder = async (form: FormData): Promise<Quote> => {
+  const { orders, store, business, t } = await storefront()
+  const f = (k: string) => String(form.get(k) ?? '')
+  try {
+    const q = await orders.quote(
+      store.id,
+      {
+        // Only the cart, zone and code matter for the price; the rest is a placeholder.
+        name: 'Quote',
+        phone: f('phone') || '01700000000',
+        district: 'Dhaka',
+        area: 'Dhaka',
+        address: 'Quote only',
+        zoneId: f('zoneId'),
+        couponCode: f('couponCode'),
+        items: JSON.parse(f('items')),
+      },
+      business.deliveryZones,
+    )
+    return { discount: q.discount, couponCode: q.couponCode }
+  } catch (e) {
+    return actionError(t, e, 'quote')
   }
 }

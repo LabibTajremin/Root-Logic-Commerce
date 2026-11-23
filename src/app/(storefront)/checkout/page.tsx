@@ -41,10 +41,13 @@ const KEYS = [
   'trustCod',
   'trustCheck',
   'trustReturn',
+  'discount',
+  'haveCode',
+  'applyCode',
 ]
 
 export default async function CheckoutPage() {
-  const { business, moneyFormat, t } = await storefront()
+  const { business, moneyFormat, t, on } = await storefront()
   const labels = {
     ...Object.fromEntries(KEYS.map((k) => [k, t(`checkout.${k}`)])),
     subtotal: t('shop.subtotal'),
@@ -60,6 +63,7 @@ export default async function CheckoutPage() {
         labels={labels}
         moneyFormat={moneyFormat}
         fields={business.checkout}
+        coupons={on('coupons')}
       />
     </section>
   )

@@ -1339,6 +1339,118 @@ test('checkout: extra fields from Shop info, edit lines in checkout, the big but
   await fields('optional', false)
 })
 
+test('coupons: percent, fixed and automatic free delivery; checkout code box, order and invoice show the discount (C2)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+    .replace(/[^a-z0-9]/gi, '')
+    .slice(-6)
+    .toUpperCase()
+  const name = `Coupon item ${id}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '500', stock: '9' })
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' })
+  const add = async (fill: () => Promise<void>) => {
+    await page.goto('/admin/coupons')
+    await expect(page.getByRole('heading', { name: 'Add coupon' })).toBeVisible()
+    await fill()
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page).toHaveURL(/\/admin\/coupons$/)
+  }
+  await add(async () => {
+    await page.getByLabel(/^Code/).fill(`save10-${id}`)
+    await page.getByLabel('How much (percent or ৳)').fill('10')
+    await page.getByLabel('Minimum order (৳, optional)').fill('100')
+    await page.getByLabel('Starts').fill(today)
+    await page.getByLabel('Ends').fill('2099-12-31')
+    await page.getByLabel('Total uses (optional)').fill('5')
+    await page.getByLabel('Uses per phone (optional)').fill('2')
+    await page.getByLabel('Only these products (optional)').selectOption({ label: name })
+  })
+  await add(async () => {
+    await page.getByLabel(/^Code/).fill(`FLAT-${id}`)
+    await page.getByLabel('Type').selectOption('fixed')
+    await page.getByLabel('How much (percent or ৳)').fill('50')
+  })
+  await add(async () => {
+    await page.getByLabel(/^Code/).fill(`SHIP-${id}`)
+    await page.getByLabel('Type').selectOption('free_shipping')
+    await page.getByLabel('Apply automatically (no code needed)').check()
+  })
+  const row = (code: string) => page.getByRole('link', { name: new RegExp(code) })
+  await expect(row(`SAVE10-${id}`)).toContainText('10%')
+  await expect(row(`FLAT-${id}`)).toContainText('৳50')
+  await expect(row(`SHIP-${id}`)).toContainText('Free delivery')
+  await a11y()
+  await row(`SAVE10-${id}`).click()
+  await expect(page.getByLabel('Ends')).toHaveValue('2099-12-31')
+  await expect(page.getByLabel('Total uses (optional)')).toHaveValue('5')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/coupons$/)
+  await row(`FLAT-${id}`).click()
+  await expect(page.getByLabel('How much (percent or ৳)')).toHaveValue('50')
+  await expect(page.getByLabel('Starts')).toHaveValue('')
+
+  await page.goto(`/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  const total = page.getByTestId('checkout-total')
+  const apply = page.getByRole('button', { name: 'Apply', exact: true })
+  // No code typed: the automatic free delivery.
+  await apply.click()
+  await expect(page.getByTestId('checkout-discount')).toContainText(`SHIP-${id}`)
+  await expect(total).toHaveText('৳500')
+  await page.getByLabel('Have a code?').fill('nope')
+  await apply.click()
+  await expect(page.getByRole('alert').filter({ hasText: 'That code doesn’t work' })).toBeVisible()
+  await fillCheckout(page, '01633' + String(Date.now()).slice(-6))
+  await page.getByLabel('Have a code?').fill(`save10-${id}`)
+  await apply.click()
+  await expect(page.getByTestId('checkout-discount')).toContainText('−৳50')
+  await expect(total).toHaveText('৳510')
+  await a11y()
+  // A changed cart drops the old quote; placing re-prices anyway.
+  await page
+    .getByRole('group', { name: `Quantity: ${name}` })
+    .getByRole('button', { name: '+' })
+    .click()
+  await expect(page.getByTestId('checkout-discount')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  await expect(page.getByTestId('order-discount')).toHaveText('−৳100')
+  await expect(page.getByTestId('order-total')).toHaveText('৳960')
+  await page.getByRole('link', { name: 'Print invoice' }).click()
+  await expect(page.getByText(`Discount (SAVE10-${id})`)).toBeVisible()
+  await page.goBack()
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  // Back to normal for later tests: the automatic coupon off; the module switch works.
+  await page.goto('/admin/coupons')
+  await row(`SHIP-${id}`).click()
+  await page.getByLabel('Active').uncheck()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(row(`SHIP-${id}`)).toContainText('Off')
+  const toggle = async (to: 'Turn off' | 'Turn on') => {
+    await page.goto('/admin/features')
+    await page.getByTestId('module-coupons').getByRole('button', { name: to }).click()
+    await expect(page.getByTestId('module-coupons')).toContainText(to === 'Turn off' ? 'Off' : 'On')
+  }
+  await toggle('Turn off')
+  await page.goto(`/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await expect(page.getByTestId('checkout-total')).toBeVisible()
+  await expect(page.getByLabel('Have a code?')).toHaveCount(0)
+  await toggle('Turn on')
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

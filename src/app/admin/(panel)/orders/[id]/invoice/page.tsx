@@ -51,6 +51,14 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
             </td>
             <td className="pt-2 text-right">{money(o.deliveryCharge)}</td>
           </tr>
+          {o.discount > 0 && (
+            <tr>
+              <td colSpan={2} className="pt-1 text-right text-muted">
+                {t('order.discount')} ({o.couponCode})
+              </td>
+              <td className="pt-1 text-right">−{money(o.discount)}</td>
+            </tr>
+          )}
           <tr>
             <td colSpan={2} className="pt-1 text-right font-semibold">
               {t('order.total')} ({t('order.cod')})
