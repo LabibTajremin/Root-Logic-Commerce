@@ -22,6 +22,8 @@ const readProduct = (f: FormData) => ({
   categoryId: field(f, 'categoryId') || null,
   brandId: field(f, 'brandId') || null,
   sizeChartId: field(f, 'sizeChartId') || null,
+  relatedIds: f.getAll('relatedIds').map(String),
+  fbtIds: f.getAll('fbtIds').map(String),
   seoTitle: field(f, 'seoTitle') || null,
   seoDescription: field(f, 'seoDescription') || null,
   // An empty badge text means "no badge".

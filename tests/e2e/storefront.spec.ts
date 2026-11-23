@@ -637,6 +637,47 @@ test('listing: filters, sort, page size, pages, grid columns and breadcrumbs (A1
   await expect(page.locator('input[type=hidden][name=cols]')).toHaveValue('3')
 })
 
+test('related products and frequently bought together (A8)', async ({ page, a11y }) => {
+  const id = uid()
+  const cat = `Rel ${id}`
+  const [a, b, c] = [`Teapot ${id}`, `Cups ${id}`, `Tray ${id}`]
+  await signedIn(page)
+  await createCategory(page, cat)
+  await createProduct(page, { name: a, price: '300', stock: '5', category: cat })
+  await createProduct(page, { name: b, price: '200', stock: '5', category: cat })
+  await createProduct(page, { name: c, price: '150', stock: '5' })
+  const pick = async (product: string, field: string, other: string) => {
+    await editProduct(page, product)
+    await page.getByLabel(field).selectOption({ label: other })
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page).toHaveURL(/\/admin\/products$/)
+    await editProduct(page, product)
+    await expect(page.getByLabel(field).locator('option:checked')).toHaveText(other)
+  }
+  await pick(a, 'Frequently bought together (optional)', c)
+  await pick(b, 'You may also like (optional)', c)
+
+  await page.goto(`/p/${slug(a)}`)
+  await page.waitForLoadState('networkidle')
+  const related = page.getByRole('region', { name: 'You may also like' })
+  await expect(related.getByRole('link', { name: b }).first()).toBeVisible()
+  const together = page.getByRole('region', { name: 'Frequently bought together' })
+  await expect(together.getByRole('checkbox')).toHaveCount(2)
+  const total = page.getByTestId('together-total')
+  await expect(total).toHaveText('৳450')
+  await together.getByRole('checkbox', { name: c }).uncheck()
+  await expect(total).toHaveText('৳300')
+  await together.getByRole('checkbox', { name: c }).check()
+  await a11y()
+  await together.getByRole('button', { name: 'Add selected to cart' }).click()
+  await expect(page.getByTestId('cart-subtotal')).toHaveText('৳450')
+
+  await page.goto(`/p/${slug(b)}`)
+  await expect(
+    page.getByRole('region', { name: 'You may also like' }).locator('.rlc-card').first(),
+  ).toContainText(c)
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

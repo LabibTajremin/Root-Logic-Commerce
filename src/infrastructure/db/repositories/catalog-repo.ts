@@ -1,6 +1,7 @@
 import {
   and,
   asc,
+  desc,
   eq,
   getTableColumns,
   ilike,
@@ -229,5 +230,26 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
           .groupBy(orderItems.productId)
       ).map((r) => [r.id!, r.n]),
     ),
+  coPurchased: async (storeId, productId) => {
+    const mine = db
+      .select({ orderId: orderItems.orderId })
+      .from(orderItems)
+      .where(eq(orderItems.productId, productId))
+    const rows = await db
+      .select({ id: orderItems.productId })
+      .from(orderItems)
+      .innerJoin(orders, eq(orders.id, orderItems.orderId))
+      .where(
+        and(
+          eq(orders.storeId, storeId),
+          inArray(orders.status, ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED']),
+          inArray(orderItems.orderId, mine),
+          ne(orderItems.productId, productId),
+        ),
+      )
+      .groupBy(orderItems.productId)
+      .orderBy(desc(sql`count(*)`))
+    return rows.map((r) => r.id!)
+  },
   productSlugTaken: (storeId, slug, exceptId) => taken(db, products, storeId, slug, exceptId),
 })

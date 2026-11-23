@@ -9,6 +9,7 @@ import {
   type CategoryInput,
   type ProductInput,
 } from '../domain/rules'
+import { pickBoughtTogether, pickRelated } from '../domain/related'
 import { sizeChartInput, type SizeChartInput } from '../domain/size-chart'
 import { uniqueSlug } from '../domain/slug'
 import {
@@ -184,6 +185,15 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
         ...validate(variantInput, { ...v, ...byId.get(v.id), options: v.options }),
       }))
       await repo.saveVariants(storeId, productId, p.options, rows)
+    },
+
+    /** A8: "You may also like" and "Frequently bought together" for a product page. */
+    async recommendationsFor(storeId: string, p: Product) {
+      const [all, co] = await Promise.all([
+        repo.listProducts(storeId, { status: 'active' }),
+        repo.coPurchased(storeId, p.id),
+      ])
+      return { related: pickRelated(p, all, 4), together: pickBoughtTogether(p, all, co, 3) }
     },
 
     /** A11: what a list filters and sorts on — cheapest variant price, values, units sold. */

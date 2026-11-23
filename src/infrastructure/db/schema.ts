@@ -284,6 +284,9 @@ export const products = pgTable(
     categoryId: uuid().references(() => categories.id, { onDelete: 'set null' }),
     brandId: uuid().references(() => brands.id, { onDelete: 'set null' }),
     sizeChartId: uuid().references(() => sizeCharts.id, { onDelete: 'set null' }),
+    // A8 owner picks (ids may go stale; the storefront only shows live products).
+    relatedIds: jsonb().$type<string[]>().notNull().default([]),
+    fbtIds: jsonb().$type<string[]>().notNull().default([]),
     name: text().notNull(),
     slug: text().notNull(),
     description: text().notNull().default(''),

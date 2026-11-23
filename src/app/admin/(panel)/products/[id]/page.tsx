@@ -22,6 +22,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
         categories={await catalog.listCategories(store.id)}
         brands={await catalog.listBrands(store.id)}
         charts={await catalog.listSizeCharts(store.id)}
+        others={(await catalog.listProducts(store.id)).filter((o) => o.id !== product.id)}
         locale={locale}
       />
       <ProductImages productId={product.id} />

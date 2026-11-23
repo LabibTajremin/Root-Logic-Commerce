@@ -7,6 +7,8 @@ import { faqLd, JsonLd } from '../../json-ld'
 import { QtyBuy } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
+import { ProductGrid } from '../../product-grid'
+import { BoughtTogether } from './bought-together'
 import { ProductTabs } from './product-tabs'
 import { Share } from './share'
 import { SizeChartButton } from './size-chart'
@@ -45,6 +47,15 @@ export default async function ProductPage({ params }: Props) {
     price: p.price,
   }
   const chart = await catalog.sizeChartFor(store.id, p)
+  const recs = await catalog.recommendationsFor(store.id, p)
+  const asItem = (x: typeof p) => ({
+    id: x.id,
+    productId: x.id,
+    variantId: null,
+    slug: x.slug,
+    name: x.name,
+    price: x.price,
+  })
   const variants = (await catalog.listVariants(store.id, [p.id])).map((x) => {
     const shown = view({ ...p, price: x.price, compareAtPrice: x.compareAtPrice }, images)
     const label = variantLabel(p.options, x.options)
@@ -177,6 +188,29 @@ export default async function ProductPage({ params }: Props) {
         />
         <ProductTabs description={p.description} content={p.content} t={t} />
       </div>
+      {recs.together.length > 0 && (
+        <div className="md:col-span-2">
+          <BoughtTogether
+            me={asItem(p)}
+            others={recs.together.map(asItem)}
+            labels={{
+              title: t('shop.together'),
+              total: t('shop.togetherTotal'),
+              add: t('shop.addSelected'),
+              thisItem: t('shop.thisItem'),
+            }}
+            moneyFormat={moneyFormat}
+          />
+        </div>
+      )}
+      {recs.related.length > 0 && (
+        <section aria-labelledby="related" className="flex flex-col gap-4 md:col-span-2">
+          <h2 id="related" className="font-heading text-2xl">
+            {t('shop.related')}
+          </h2>
+          <ProductGrid products={recs.related} />
+        </section>
+      )}
     </article>
   )
 }

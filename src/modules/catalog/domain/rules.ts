@@ -44,6 +44,9 @@ export const productInput = z
     categoryId: z.uuid().nullable().default(null),
     brandId: z.uuid().nullable().default(null),
     sizeChartId: z.uuid().nullable().default(null),
+    // A8: the owner’s own picks; empty means automatic.
+    relatedIds: z.array(z.uuid()).max(12).default([]),
+    fbtIds: z.array(z.uuid()).max(4).default([]),
     videoUrl: z.url().nullable().default(null),
     seoTitle: z.string().max(70).nullable().default(null),
     seoDescription: z.string().max(170).nullable().default(null),

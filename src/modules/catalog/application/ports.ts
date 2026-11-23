@@ -74,5 +74,7 @@ export type CatalogRepo = {
   setProductOrder(storeId: string, orders: SortOrder[]): Promise<void>
   /** Units sold per product (confirmed and later, not cancelled or returned). */
   soldCounts(storeId: string): Promise<Map<string, number>>
+  /** Products that shared confirmed orders with this one, most often first. */
+  coPurchased(storeId: string, productId: string): Promise<string[]>
   productSlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
 }

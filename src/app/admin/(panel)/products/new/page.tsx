@@ -14,6 +14,7 @@ export default async function NewProduct() {
         categories={await catalog.listCategories(store.id)}
         brands={await catalog.listBrands(store.id)}
         charts={await catalog.listSizeCharts(store.id)}
+        others={await catalog.listProducts(store.id)}
         locale={locale}
       />
       <Card className="flex flex-col gap-2">

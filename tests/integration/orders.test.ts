@@ -379,3 +379,53 @@ describe('listing data (A11)', () => {
     ])
   })
 })
+
+describe('recommendations (A8)', () => {
+  it('related falls back to the category; bought-together to what shared confirmed orders', async () => {
+    const catalog = createCatalog({ repo: createCatalogRepo(db), shortId: () => 'x' })
+    const cat = await catalog.createCategory(store, { name: 'Tea' })
+    const me = await catalog.createProduct(store, {
+      name: 'Me',
+      price: 100,
+      stock: 5,
+      status: 'active',
+      categoryId: cat.id,
+    })
+    const sib = await catalog.createProduct(store, {
+      name: 'Sib',
+      price: 100,
+      stock: 5,
+      status: 'active',
+      categoryId: cat.id,
+    })
+    const pal = await catalog.createProduct(store, {
+      name: 'Pal',
+      price: 100,
+      stock: 5,
+      status: 'active',
+    })
+    const both = await orders.placeOrder(
+      store,
+      {
+        ...checkout(me.id),
+        items: [
+          { productId: me.id, variantId: null, quantity: 1 },
+          { productId: pal.id, variantId: null, quantity: 1 },
+        ],
+      },
+      zones,
+    )
+    await orders.changeStatus(store, both.id, 'CONFIRMED', 'u1')
+    const r = await catalog.recommendationsFor(store, me)
+    expect([r.related.map((x) => x.id), r.together.map((x) => x.id)]).toEqual([[sib.id], [pal.id]])
+    const mine = await catalog.recommendationsFor(store, {
+      ...me,
+      relatedIds: [pal.id],
+      fbtIds: [sib.id],
+    })
+    expect([mine.related.map((x) => x.id), mine.together.map((x) => x.id)]).toEqual([
+      [pal.id, sib.id],
+      [sib.id],
+    ])
+  })
+})

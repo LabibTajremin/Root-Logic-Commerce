@@ -15,12 +15,15 @@ export const ProductForm = ({
   categories,
   brands,
   charts,
+  others,
   locale,
 }: {
   product?: Product
   categories: Category[]
   brands: Brand[]
   charts: SizeChart[]
+  /** Other products, for the A8 related / bought-together picks. */
+  others: { id: string; name: string }[]
   locale: Locale
 }) => {
   const t = (k: string) => translate(locale, k)
@@ -229,6 +232,28 @@ export const ProductForm = ({
               ))}
             </select>
           </div>
+          {(['relatedIds', 'fbtIds'] as const).map((k) => (
+            <div key={k} className="flex flex-col gap-1.5 text-sm font-semibold">
+              <label htmlFor={k}>{t(`field.${k}`)}</label>
+              <p id={`${k}-hint`} className="text-xs font-normal text-muted">
+                {t(`field.${k}Hint`)}
+              </p>
+              <select
+                id={k}
+                name={k}
+                multiple
+                aria-describedby={`${k}-hint`}
+                defaultValue={product?.[k]}
+                className="min-h-24 rounded-control border border-line bg-surface p-2 font-normal"
+              >
+                {others.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
           <Button type="submit" icon="check">
             {t('common.save')}
           </Button>
