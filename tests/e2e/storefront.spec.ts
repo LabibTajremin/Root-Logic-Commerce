@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { signedIn } from './admin'
@@ -750,7 +751,8 @@ test('products CSV: check, import (create + update + image link), export; the ex
   playwright,
   a11y,
 }) => {
-  test.info().annotations.push({ type: 'allow-status', description: '403' })
+  // 403: the signed-out export; 404: the Drive photo is a fake link in tests.
+  test.info().annotations.push({ type: 'allow-status', description: '403,404' })
   const id = uid()
   const sku = `CSV-${id}`
   const s = slug(`Csv ${id}`)
@@ -792,7 +794,10 @@ test('products CSV: check, import (create + update + image link), export; the ex
   await send([`${s}-2,Csv two ${id},,90,,,1,,draft,,,https://example.com/photo.jpg`], 'Import')
   await expect(page.getByRole('alert')).toBeVisible()
 
-  const csv = await (await page.request.get('/admin/products/export')).text()
+  await page.goto('/admin/products/import')
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download all products as CSV' }).click()
+  const csv = readFileSync((await (await download).path())!, 'utf8')
   expect(csv.split('\r\n')[0]).toBe(head)
   expect(csv).toContain(`${s},Csv ${id},,275,,0,6,${sku},active,${cat},From a sheet,`)
   const anon = await playwright.request.newContext({ baseURL: page.url() })
