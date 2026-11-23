@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 12 (Catalog) — spec docs/BUILD_SPEC.md
-Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency, A6 content tabs (+ FAQPage JSON-LD), A2 brands (logo, brand page, product field), A1 variants (options → matrix, per-variant price/stock, chips, variant lines in orders), A16 multi-pick (selected list, steppers, total, add all; verify 241/241 at 100%). NEXT: A5 size chart → A11 listing UX → A12 gallery/share → A8 related/FBT → A7 reviews → A10 wishlist → A15 CSV → B5/B6/B12 → J3 switch dialog with demo packs → products in the activity log.
+Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency, A6 content tabs (+ FAQPage JSON-LD), A2 brands (logo, brand page, product field), A1 variants (options → matrix, per-variant price/stock, chips, variant lines in orders), A16 multi-pick (selected list, steppers, total, add all), A5 size charts (CI green 284b493 https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45202131904; 245/245 at 100%), A11 listing UX (in verify). NEXT: A12 gallery/share → A8 related/FBT → A7 reviews → A10 wishlist → A15 CSV → B5/B6/B12 → J3 switch dialog with demo packs → products in the activity log.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
