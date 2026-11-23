@@ -149,3 +149,15 @@ describe('business', () => {
     expect(businessSchema.safeParse({ ga4MeasurementId: 'G-7Q2XK1PL0Z' }).success).toBe(true)
   })
 })
+
+describe('budget bands (B12)', () => {
+  it('reads "label: taka" lines, cheapest first, skipping bad lines', async () => {
+    const { bandsFromText, bandsToText } = await import('./business')
+    const bands = bandsFromText('Under ৳1,000: 1000\nUnder ৳500 : 500\nno price\nBad: x\n: 9')
+    expect(bands).toEqual([
+      { label: 'Under ৳500', max: 50000 },
+      { label: 'Under ৳1,000', max: 100000 },
+    ])
+    expect(bandsFromText(bandsToText(bands))).toEqual(bands)
+  })
+})

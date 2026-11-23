@@ -1,10 +1,23 @@
 import type { Metadata } from 'next'
 import { currentSettings } from '@/server/request'
-import { layoutOf, presetIds, presetLayout, resolveSections } from '@/sections/registry'
+import {
+  layoutOf,
+  presetIds,
+  presetLayout,
+  resolveSections,
+  withAllSections,
+} from '@/sections/registry'
+import { SortableList } from '@/ui/sortable-list'
 import { ActionForm } from '@/ui/action-form'
 import { Badge } from '@/ui/primitives'
 import { adminContext } from '../context'
-import { applyLayout, previewLayout, toggleSection } from './actions'
+import {
+  applyLayout,
+  previewLayout,
+  reorderSections,
+  sectionSettings,
+  toggleSection,
+} from './actions'
 
 export const metadata: Metadata = { title: 'Layouts' }
 
@@ -25,26 +38,48 @@ export default async function LayoutsPage() {
       <section className="flex flex-col gap-3 rounded-card border border-line bg-surface p-5">
         <h2 className="font-heading text-xl">{t('layouts.sections')}</h2>
         <p className="text-sm text-muted">{t('layouts.sectionsHint')}</p>
-        <ul className="flex flex-col divide-y divide-line">
-          {layout.home.map((r, i) => (
-            <li
-              key={`${r.sectionId}-${i}`}
-              data-testid={`section-${r.sectionId}`}
-              className="flex min-h-14 items-center gap-3"
-            >
-              <span className="flex-1 font-semibold">{t(`sections.${r.sectionId}`)}</span>
-              <Badge tone={r.enabled ? 'success' : 'accent'}>
-                {t(r.enabled ? 'features.on' : 'features.off')}
-              </Badge>
-              <ActionForm action={toggleSection}>
-                <input type="hidden" name="index" value={i} />
-                <button className={button}>
-                  {t(r.enabled ? 'features.turnOff' : 'features.turnOn')}
-                </button>
-              </ActionForm>
-            </li>
-          ))}
-        </ul>
+        <SortableList
+          handleLabel={t('common.reorder')}
+          onReorder={reorderSections}
+          items={withAllSections(layout).map((r) => ({
+            id: r.sectionId,
+            content: (
+              <div
+                data-testid={`section-${r.sectionId}`}
+                className="flex min-h-14 flex-1 flex-wrap items-center gap-3"
+              >
+                <span className="flex-1 font-semibold">{t(`sections.${r.sectionId}`)}</span>
+                {r.sectionId === 'category-rows' && (
+                  <ActionForm action={sectionSettings} className="flex items-center gap-2">
+                    <input type="hidden" name="section" value={r.sectionId} />
+                    <label className="flex items-center gap-2 text-sm" htmlFor="rows-count">
+                      {t('layouts.count')}
+                      <input
+                        id="rows-count"
+                        name="count"
+                        type="number"
+                        min={2}
+                        max={8}
+                        defaultValue={(r.settings as { count?: number }).count ?? 4}
+                        className="min-h-11 w-16 rounded-control border border-line bg-surface px-2"
+                      />
+                    </label>
+                    <button className={button}>{t('layouts.saveCount')}</button>
+                  </ActionForm>
+                )}
+                <Badge tone={r.enabled ? 'success' : 'accent'}>
+                  {t(r.enabled ? 'features.on' : 'features.off')}
+                </Badge>
+                <ActionForm action={toggleSection}>
+                  <input type="hidden" name="section" value={r.sectionId} />
+                  <button className={button}>
+                    {t(r.enabled ? 'features.turnOff' : 'features.turnOn')}
+                  </button>
+                </ActionForm>
+              </div>
+            ),
+          }))}
+        />
       </section>
       <h2 className="font-heading text-xl">{t('layouts.gallery')}</h2>
       <ul className="grid gap-4 md:grid-cols-2">

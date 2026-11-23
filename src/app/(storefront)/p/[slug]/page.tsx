@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
@@ -13,6 +12,8 @@ import { BoughtTogether } from './bought-together'
 import { ProductTabs } from './product-tabs'
 import { Share } from './share'
 import { WishButton } from './wish-button'
+import { ScreenshotStrip } from '../../screenshot-strip'
+import { TrustStrip } from '../../trust-strip'
 import { SizeChartButton } from './size-chart'
 import { VariantPicker } from './variant-picker'
 import { variantLabel } from '@/modules/catalog'
@@ -46,6 +47,7 @@ export default async function ProductPage({ params }: Props) {
     design,
     reviews,
     on,
+    business,
   } = await storefront()
   const { ProductGallery } = theme.slots
   const images = (await imagesOf([p])).get(p.id)!
@@ -200,6 +202,7 @@ export default async function ProductPage({ params }: Props) {
           />
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
+        <TrustStrip trust={business.trust} t={t} />
         {on('wishlist') && (
           <WishButton item={item} labels={{ add: t('wishlist.add'), saved: t('wishlist.saved') }} />
         )}
@@ -269,36 +272,9 @@ export default async function ProductPage({ params }: Props) {
           </ul>
         </section>
       )}
-      {shots.length > 0 && (
-        <section aria-labelledby="shots-title" className="flex flex-col gap-3 md:col-span-2">
-          <h2 id="shots-title" className="font-heading text-2xl">
-            {t('shots.shop')}
-          </h2>
-          {/* Focusable so keyboard users can scroll the strip. */}
-          <ul
-            tabIndex={0}
-            aria-labelledby="shots-title"
-            className="flex snap-x gap-3 overflow-x-auto pb-2 outline-offset-2"
-          >
-            {shots.map((s) => (
-              <li key={s.id} className="w-40 shrink-0 snap-start">
-                <figure className="flex flex-col gap-1">
-                  <span className="relative aspect-[9/16] overflow-hidden rounded-card bg-soft">
-                    <Image
-                      src={`/api/media/${s.mediaId}`}
-                      alt={t('shots.alt')}
-                      fill
-                      sizes="160px"
-                      className="object-cover"
-                    />
-                  </span>
-                  <figcaption className="text-xs text-muted">{s.caption}</figcaption>
-                </figure>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <div className="md:col-span-2">
+        <ScreenshotStrip shots={shots} labels={{ title: t('shots.shop'), alt: t('shots.alt') }} />
+      </div>
     </article>
   )
 }

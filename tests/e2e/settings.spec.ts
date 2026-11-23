@@ -1145,3 +1145,80 @@ test('wishlist: save on the product page, header count, move to cart, remove, fe
   await expect(page.getByRole('button', { name: /wishlist/ })).toHaveCount(0)
   await toggle('Turn on')
 })
+
+test('home builder: new sections, order, category row count; trust strip and budget bands (B5, B6, B12)', async ({
+  page,
+  a11y,
+}) => {
+  await signedIn(page)
+  await page.goto('/admin/layouts')
+  const row = (id: string) => page.getByTestId(`section-${id}`)
+  await expect(row('trust-strip')).toContainText('Off')
+  for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip']) {
+    await row(id).getByRole('button', { name: 'Turn on' }).click()
+    await expect(row(id)).toContainText('On')
+  }
+  await row('category-rows').getByLabel('Products per row').fill('2')
+  await row('category-rows').getByRole('button', { name: 'Save' }).click()
+  await page.reload()
+  await expect(row('category-rows').getByLabel('Products per row')).toHaveValue('2')
+  await a11y()
+  // Drag "Verified business" up one place; the order is saved.
+  const item = page.getByRole('listitem').filter({ has: row('trust-strip') })
+  const above = item.locator('xpath=preceding-sibling::li[1]')
+  const before = await above.getByTestId(/^section-/).getAttribute('data-testid')
+  const from = (await item.getByRole('button', { name: 'Drag to reorder' }).boundingBox())!
+  const to = (await above.boundingBox())!
+  const posted = page.waitForResponse((r) => r.request().method() === 'POST')
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(from.x + from.width / 2, to.y + to.height / 2, { steps: 12 })
+  await page.mouse.up()
+  expect((await posted).ok()).toBe(true)
+  await page.reload()
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ has: page.getByTestId(before!) })
+      .locator('xpath=preceding-sibling::li[1]'),
+  ).toContainText('Verified business')
+
+  // Nothing filled in yet: the trust strip and budget bands stay hidden.
+  await page.goto('/')
+  await expect(page.getByRole('region', { name: 'Verified business' })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Shop by budget' })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Shop by brand' })).toBeVisible()
+  const rows = page.locator('section[aria-labelledby^="row-"]')
+  await expect(rows.first()).toBeVisible()
+  expect(await rows.first().locator('.rlc-card').count()).toBeLessThanOrEqual(2)
+  await expect(rows.first().getByRole('link', { name: /^Shop .* →$/ })).toBeVisible()
+
+  await page.goto('/admin/store')
+  await page.getByLabel('Trade licence no.').fill('TRAD/DNCC/123456')
+  await page.getByLabel('TIN', { exact: true }).fill('123456789012')
+  await page.getByLabel('Warranty / replacement policy').fill('7-day replacement on damaged items')
+  await page.getByLabel('Shop by budget').fill('Under ৳500: 500\nUnder ৳200: 200')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await page.goto('/')
+  const trust = page.getByRole('region', { name: 'Verified business' })
+  await expect(trust).toContainText('TRAD/DNCC/123456')
+  await expect(trust).toContainText('7-day replacement')
+  await expect(page.getByRole('link', { name: 'Under ৳200' })).toHaveAttribute(
+    'href',
+    '/search?max=200',
+  )
+  await a11y()
+
+  // Back to how other tests expect the shop.
+  await page.goto('/admin/store')
+  for (const l of ['Trade licence no.', 'Warranty / replacement policy', 'Shop by budget'])
+    await page.getByLabel(l).fill('')
+  await page.getByLabel('TIN', { exact: true }).fill('')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await saved(page)
+  await page.goto('/admin/layouts')
+  for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip'])
+    await row(id).getByRole('button', { name: 'Turn off' }).click()
+  await expect(row('trust-strip')).toContainText('Off')
+})

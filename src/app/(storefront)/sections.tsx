@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { ResolvedSection, SectionId } from '@/sections/registry'
@@ -6,11 +7,16 @@ import { HeroSlider } from './hero-slider'
 import { Poster } from './poster'
 import { ProductGrid } from './product-grid'
 import { PromoBanners } from './promo-banners'
+import { ScreenshotStrip } from './screenshot-strip'
+import { TrustStrip } from './trust-strip'
 import type { storefront } from './storefront'
 
 type Ctx = Awaited<ReturnType<typeof storefront>>
 
-const renderers: Record<SectionId, (p: { ctx: Ctx }) => ReactNode | Promise<ReactNode>> = {
+type Render = (p: { ctx: Ctx; settings: Record<string, unknown> }) => ReactNode | Promise<ReactNode>
+const wrap = 'mx-auto flex w-full max-w-6xl flex-col gap-4 px-4'
+
+const renderers: Record<SectionId, Render> = {
   'promo-banners': () => <PromoBanners />,
   hero: async ({ ctx }) => {
     const { theme, store, design, t } = ctx
@@ -66,6 +72,101 @@ const renderers: Record<SectionId, (p: { ctx: Ctx }) => ReactNode | Promise<Reac
       <ProductGrid products={await catalog.listProducts(store.id, { status: 'active' })} />
     </section>
   ),
+  // B5: a row per top category that has products, each with "Shop X →".
+  'category-rows': async ({ ctx: { catalog, store, allCategories, t }, settings }) => {
+    const rows = await Promise.all(
+      allCategories
+        .filter((c) => !c.parentId)
+        .map(async (c) => ({
+          c,
+          products: (
+            await catalog.listProducts(store.id, { status: 'active', categoryId: c.id })
+          ).slice(0, settings.count as number),
+        })),
+    )
+    return rows
+      .filter((r) => r.products.length > 0)
+      .map(({ c, products }) => (
+        <section key={c.id} aria-labelledby={`row-${c.id}`} className={wrap}>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 id={`row-${c.id}`} className="font-heading text-2xl">
+              {c.name}
+            </h2>
+            <Link href={`/c/${c.slug}`} className="text-sm font-semibold underline">
+              {t('home.shopCategory', { name: c.name })}
+            </Link>
+          </div>
+          <ProductGrid products={products} />
+        </section>
+      ))
+  },
+  brands: async ({ ctx: { catalog, store, t } }) => {
+    const brands = (await catalog.listBrands(store.id)).filter((b) => !b.archived)
+    return (
+      // Hidden by CSS while there is nothing to show (no brands yet).
+      <section aria-labelledby="brands-title" className={`${wrap} has-[ul:empty]:hidden`}>
+        <h2 id="brands-title" className="font-heading text-2xl">
+          {t('home.brands')}
+        </h2>
+        <ul className="flex flex-wrap gap-3">
+          {brands.map((b) => (
+            <li key={b.id}>
+              <Link
+                href={`/b/${b.slug}`}
+                className="flex min-h-14 items-center gap-2 rounded-card border border-line bg-surface px-4 font-semibold"
+              >
+                {b.logoId && (
+                  <span className="relative size-10 overflow-hidden rounded-control">
+                    <Image
+                      src={`/api/media/${b.logoId}`}
+                      alt=""
+                      fill
+                      sizes="40px"
+                      className="object-contain"
+                    />
+                  </span>
+                )}
+                {b.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  },
+  // B12: owner-named price caps → the filtered product list.
+  'budget-bands': ({ ctx: { business, t } }) => (
+    <section aria-labelledby="budget-title" className={`${wrap} has-[ul:empty]:hidden`}>
+      <h2 id="budget-title" className="font-heading text-2xl">
+        {t('home.budget')}
+      </h2>
+      <ul className="flex flex-wrap gap-3">
+        {business.budgetBands.map((b) => (
+          <li key={b.max}>
+            <Link
+              href={`/search?max=${b.max / 100}`}
+              className="flex min-h-12 items-center rounded-full bg-button px-5 font-semibold text-button-text"
+            >
+              {b.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ),
+  'trust-strip': ({ ctx: { business, t } }) => (
+    <div className={wrap}>
+      <TrustStrip trust={business.trust} t={t} />
+    </div>
+  ),
+  'screenshot-reviews': async ({ ctx: { reviews, store, t } }) => {
+    const shots = await reviews.screenshots(store.id)
+    return (
+      <div className={wrap}>
+        <ScreenshotStrip shots={shots} labels={{ title: t('shots.shop'), alt: t('shots.alt') }} />
+      </div>
+    )
+  },
 }
 
 /** Renders a page's resolved sections in order. */
@@ -73,7 +174,7 @@ export const Sections = ({ sections, ctx }: { sections: ResolvedSection[]; ctx: 
   <div className="flex flex-col gap-6">
     {sections.map((s, i) => {
       const Section = renderers[s.id]
-      return <Section key={`${s.id}-${i}`} ctx={ctx} />
+      return <Section key={`${s.id}-${i}`} ctx={ctx} settings={s.settings} />
     })}
   </div>
 )

@@ -9,6 +9,12 @@ export const sectionSchemas = {
   hero: none,
   'category-nav': none,
   'product-grid': none,
+  // B5: one row per top category, `count` products each, with "Shop X →".
+  'category-rows': z.object({ count: z.number().int().min(2).max(8).default(4) }).strict(),
+  brands: none,
+  'budget-bands': none,
+  'trust-strip': none,
+  'screenshot-reviews': none,
 } as const
 
 export type SectionId = keyof typeof sectionSchemas
@@ -34,6 +40,17 @@ export const presetLayout = (preset: PresetId): Layout => ({
   preset,
   home: [...layoutPresets[preset]],
 })
+
+/**
+ * B5 builder view: the stored order, then every section the layout doesn't hold yet
+ * (new ones arrive switched off, so a deploy never changes a live home page).
+ */
+export const withAllSections = (layout: Layout): SectionRef[] => [
+  ...layout.home.filter((r) => isSectionId(r.sectionId)),
+  ...(Object.keys(sectionSchemas) as SectionId[])
+    .filter((id) => !layout.home.some((r) => r.sectionId === id))
+    .map(off),
+]
 
 /** A previewed preset that still exists (presets can be retired between deploys). */
 export const previewPreset = (id: string | null) => (id !== null && isPresetId(id) ? id : null)

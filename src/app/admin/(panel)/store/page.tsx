@@ -4,6 +4,7 @@ import { currentSettings } from '@/server/request'
 import { ActionForm } from '@/ui/action-form'
 import { Button, Card, Field } from '@/ui/primitives'
 import { adminContext } from '../context'
+import { bandsToText } from '@/modules/site-settings'
 import { saveBusiness } from '../settings-actions'
 
 export const metadata: Metadata = { title: 'Shop info' }
@@ -42,6 +43,38 @@ export default async function StorePage() {
               className="size-6 accent-[var(--color-accent)]"
             />
           </label>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('trust.title')}</legend>
+            <p className="text-sm text-muted">{t('trust.hint')}</p>
+            {(['tradeLicence', 'tin', 'bin', 'dbid', 'warranty'] as const).map((k) => (
+              <Field
+                key={k}
+                id={`trust.${k}`}
+                name={`trust.${k}`}
+                defaultValue={business.trust[k]}
+                maxLength={k === 'warranty' ? 200 : 60}
+                label={t(`trust.${k}`)}
+                help={helpText(locale, `trust.${k}`)}
+                helpLabel={t('common.help')}
+              />
+            ))}
+          </fieldset>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="budgetBands" className="font-semibold">
+              {t('home.budget')}
+            </label>
+            <p id="budgetBands-hint" className="text-sm text-muted">
+              {t('store.budgetHint')}
+            </p>
+            <textarea
+              id="budgetBands"
+              name="budgetBands"
+              rows={3}
+              aria-describedby="budgetBands-hint"
+              defaultValue={bandsToText(business.budgetBands)}
+              className="rounded-control border border-line bg-surface p-3"
+            />
+          </div>
           <Button type="submit" icon="check" className="self-start">
             {t('common.save')}
           </Button>

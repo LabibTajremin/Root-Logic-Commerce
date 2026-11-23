@@ -4,6 +4,7 @@ import { locales, storefrontKeys } from '@/i18n'
 import { act, type ActionState } from './act'
 import { cookies } from 'next/headers'
 import { currentLocale, currentSettings } from '@/server/request'
+import { bandsFromText } from '@/modules/site-settings'
 
 /** Merges a partial business-settings patch from a form into the saved settings (version-locked). */
 export async function saveBusiness(_: ActionState, form: FormData) {
@@ -49,6 +50,14 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           mapUrl: String(form.get('contact.mapUrl')).trim(),
         },
         showStockLeft: form.get('showStockLeft') === 'on',
+        trust: {
+          tradeLicence: String(form.get('trust.tradeLicence')),
+          tin: String(form.get('trust.tin')),
+          bin: String(form.get('trust.bin')),
+          dbid: String(form.get('trust.dbid')),
+          warranty: String(form.get('trust.warranty')),
+        },
+        budgetBands: bandsFromText(String(form.get('budgetBands'))),
       }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },

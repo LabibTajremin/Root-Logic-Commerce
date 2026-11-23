@@ -8,6 +8,7 @@ import {
   presetLayout,
   previewPreset,
   resolveSections,
+  withAllSections,
 } from './registry'
 
 describe('sections registry', () => {
@@ -49,5 +50,29 @@ describe('sections registry', () => {
     expect(previewPreset('gadget')).toBe('gadget')
     expect(previewPreset('retired')).toBeNull()
     expect(previewPreset(null)).toBeNull()
+  })
+
+  it('the builder lists stored sections first, then new ones switched off (B5)', () => {
+    const all = withAllSections({
+      preset: 'general',
+      home: [
+        { sectionId: 'brands', enabled: true, settings: {} },
+        { sectionId: 'gone', enabled: true, settings: {} },
+      ],
+    })
+    expect(all[0]).toEqual({ sectionId: 'brands', enabled: true, settings: {} })
+    expect(all.find((r) => r.sectionId === 'trust-strip')).toEqual({
+      sectionId: 'trust-strip',
+      enabled: false,
+      settings: {},
+    })
+    expect(all.map((r) => r.sectionId)).not.toContain('gone')
+    expect(new Set(all.map((r) => r.sectionId)).size).toBe(all.length)
+  })
+
+  it('category rows default to 4 per row', () => {
+    expect(resolveSections([{ sectionId: 'category-rows', enabled: true, settings: {} }])).toEqual([
+      { id: 'category-rows', settings: { count: 4 } },
+    ])
   })
 })
