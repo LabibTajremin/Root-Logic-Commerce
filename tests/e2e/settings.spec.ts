@@ -1154,7 +1154,13 @@ test('home builder: new sections, order, category row count; trust strip and bud
   await page.goto('/admin/layouts')
   const row = (id: string) => page.getByTestId(`section-${id}`)
   await expect(row('trust-strip')).toContainText('Off')
-  for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip']) {
+  for (const id of [
+    'category-rows',
+    'brands',
+    'budget-bands',
+    'trust-strip',
+    'screenshot-reviews',
+  ]) {
     await row(id).getByRole('button', { name: 'Turn on' }).click()
     await expect(row(id)).toContainText('On')
   }
@@ -1218,7 +1224,7 @@ test('home builder: new sections, order, category row count; trust strip and bud
   await page.getByRole('button', { name: 'Save' }).click()
   await saved(page)
   await page.goto('/admin/layouts')
-  for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip'])
+  for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip', 'screenshot-reviews'])
     await row(id).getByRole('button', { name: 'Turn off' }).click()
   await expect(row('trust-strip')).toContainText('Off')
 })
