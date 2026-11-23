@@ -9,6 +9,7 @@ import { AnnouncementBar } from './announcement-bar'
 import { BottomNav } from './bottom-nav'
 import { CartButton, CartDrawer } from './cart-drawer'
 import { HelpBubble } from './help-bubble'
+import { WishlistLink } from './wishlist-buttons'
 import { helpLinks } from './help-links'
 import { MiniCart } from './mini-cart'
 import { exitPreview } from './preview-actions'
@@ -81,6 +82,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         actions={
           <>
             {business.language.switcher && <LangToggle locale={locale} />}
+            {on('wishlist') && <WishlistLink label={t('wishlist.title')} />}
             <span className="rlc-header-cart">
               <CartButton label={t('shop.cart')} />
             </span>

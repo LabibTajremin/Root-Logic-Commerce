@@ -12,6 +12,7 @@ import { ProductGrid } from '../../product-grid'
 import { BoughtTogether } from './bought-together'
 import { ProductTabs } from './product-tabs'
 import { Share } from './share'
+import { WishButton } from '../../wishlist-buttons'
 import { SizeChartButton } from './size-chart'
 import { VariantPicker } from './variant-picker'
 import { variantLabel } from '@/modules/catalog'
@@ -33,8 +34,19 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
 export default async function ProductPage({ params }: Props) {
   const p = await product((await params).slug)
-  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat, design, reviews } =
-    await storefront()
+  const {
+    theme,
+    view,
+    imagesOf,
+    t,
+    allCategories,
+    catalog,
+    store,
+    moneyFormat,
+    design,
+    reviews,
+    on,
+  } = await storefront()
   const { ProductGallery } = theme.slots
   const images = (await imagesOf([p])).get(p.id)!
   const v = view(p, images)
@@ -188,6 +200,9 @@ export default async function ProductPage({ params }: Props) {
           />
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
+        {on('wishlist') && (
+          <WishButton item={item} labels={{ add: t('wishlist.add'), saved: t('wishlist.saved') }} />
+        )}
         <Share
           url={`${base}/p/${p.slug}`}
           labels={{

@@ -1087,3 +1087,59 @@ test('screenshot reviews: owner uploads chat screenshots, product pages show the
   await page.goto(url)
   await expect(page.getByRole('region', { name: 'What customers say' })).toHaveCount(0)
 })
+
+test('wishlist: save on the product page, header count, move to cart, remove, feature switch (A10)', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  const name = `Wish ${uid()}`
+  const url = `/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '320', stock: '4' })
+  await page.goto(url)
+  await page.waitForLoadState('networkidle')
+  const save = page.getByRole('button', { name: /wishlist/ })
+  const count = (n: number) => page.getByRole('link', { name: `Wishlist (${n})` })
+  await expect(count(0)).toBeVisible()
+  await save.click()
+  await expect(save).toHaveAttribute('aria-pressed', 'true')
+  await expect(save).toHaveText('Saved to wishlist')
+  await expect(count(1)).toBeVisible()
+  await save.click()
+  await expect(count(0)).toBeVisible()
+  await save.click()
+  await a11y()
+
+  await page.goto('/wishlist')
+  const list = page.locator('main li')
+  await expect(list.getByRole('link', { name })).toBeVisible()
+  await a11y()
+  await list.getByRole('button', { name: 'Move to cart' }).click()
+  await expect(page.getByTestId('cart-subtotal')).toHaveText('৳320')
+  await page.keyboard.press('Escape')
+  await expect(page.getByText('Nothing saved yet')).toBeVisible()
+
+  await page.goto(url)
+  await page.waitForLoadState('networkidle')
+  await save.click()
+  await page.goto('/wishlist')
+  await list.getByRole('button', { name: 'Remove' }).click()
+  await expect(page.getByText('Nothing saved yet')).toBeVisible()
+  await page.evaluate(() => localStorage.setItem('rlc-wishlist', '{oops'))
+  await page.reload()
+  await expect(page.getByText('Nothing saved yet')).toBeVisible()
+
+  const toggle = async (to: 'Turn off' | 'Turn on') => {
+    await page.goto('/admin/features')
+    await page.getByTestId('module-wishlist').getByRole('button', { name: to }).click()
+    await expect(page.getByTestId('module-wishlist')).toContainText(
+      to === 'Turn off' ? 'Off' : 'On',
+    )
+  }
+  await toggle('Turn off')
+  expect((await page.goto('/wishlist'))!.status()).toBe(404)
+  await page.goto(url)
+  await expect(page.getByRole('button', { name: /wishlist/ })).toHaveCount(0)
+  await toggle('Turn on')
+})
