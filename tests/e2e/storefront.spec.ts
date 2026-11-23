@@ -745,6 +745,61 @@ test('reviews: a delivered order reviews its item, the owner approves and replie
   await a11y()
 })
 
+test('products CSV: check, import (create + update + image link), export; the export needs sign-in (A15)', async ({
+  page,
+  playwright,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '403' })
+  const id = uid()
+  const sku = `CSV-${id}`
+  const s = slug(`Csv ${id}`)
+  const cat = `Csv cat ${id}`
+  const head =
+    'slug,name,variant,price,compare_at,cost,stock,sku,status,category,description,images'
+  const drive = 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz012345/view'
+  await signedIn(page)
+  await createCategory(page, cat)
+  const send = async (rows: string[], button: 'Check the file' | 'Import') => {
+    await page.getByLabel('CSV file').setInputFiles({
+      name: 'products.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from([head, ...rows].join('\n')),
+    })
+    await page.getByRole('button', { name: button, exact: true }).click()
+  }
+  await page.goto('/admin/products')
+  await page.getByRole('link', { name: 'Import / export' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Import products' })).toBeVisible()
+  const result = page.getByRole('status')
+  await send(['Bad Slug,X,,abc,,,1,,,,,'], 'Check the file')
+  await expect(result).toContainText('Fix the rows below')
+  await expect(result).toContainText('slug (a-z, 0-9, -), price')
+  const row = `${s},Csv ${id},,250,,,6,${sku},active,${cat},From a sheet,${drive}`
+  await send([row], 'Check the file')
+  await expect(result).toContainText('No problems')
+  await expect(result.getByRole('cell', { name: 'create' })).toBeVisible()
+  await a11y()
+  await send([row], 'Import')
+  await expect(result).toContainText('Imported.')
+  await editProduct(page, `Csv ${id}`)
+  await expect(page.getByLabel('Price (৳)', { exact: true })).toHaveValue('250')
+  await expect(page.getByTestId('product-images').getByRole('listitem')).toHaveCount(1)
+
+  await page.goto('/admin/products/import')
+  await send([row.replace(',250,', ',275,')], 'Import')
+  await expect(result.getByRole('cell', { name: 'update' })).toBeVisible()
+  await send([`${s}-2,Csv two ${id},,90,,,1,,draft,,,https://example.com/photo.jpg`], 'Import')
+  await expect(page.getByRole('alert')).toBeVisible()
+
+  const csv = await (await page.request.get('/admin/products/export')).text()
+  expect(csv.split('\r\n')[0]).toBe(head)
+  expect(csv).toContain(`${s},Csv ${id},,275,,0,6,${sku},active,${cat},From a sheet,`)
+  const anon = await playwright.request.newContext({ baseURL: page.url() })
+  expect((await anon.get('/admin/products/export')).status()).toBe(403)
+  await anon.dispose()
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

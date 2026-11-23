@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createCatalog, optionsFromText, type Catalog } from '@/modules/catalog'
+import { createCatalog, optionsFromText, parseCsv, type Catalog } from '@/modules/catalog'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
@@ -278,5 +278,119 @@ describe('size charts (A5)', () => {
       'size_chart.not_found',
     )
     await expect(catalog.createSizeChart(store, { name: 'Z', rows: [['Size']] })).rejects.toThrow()
+  })
+})
+
+describe('CSV import/export (A15)', () => {
+  const head =
+    'slug,name,variant,price,compare_at,cost,stock,sku,status,category,description,images'
+
+  it('dry-runs with row errors, then creates and updates; variant rows set existing combos; exports back', async () => {
+    const cat = await catalog.createCategory(store, { name: 'Drinks' })
+    const kurta = await catalog.createProduct(store, {
+      name: 'Kurta',
+      slug: 'kurta',
+      price: 1000,
+      stock: 0,
+    })
+    await catalog.setOptions(store, kurta.id, optionsFromText('Size: M, L'))
+    await catalog.createProduct(store, {
+      name: 'Old',
+      slug: 'old',
+      price: 100,
+      stock: 1,
+      badge: { text: 'Hot', tone: 'danger' },
+    })
+    const good = [
+      head,
+      'tea,Tea,,120,,50,5,TEA-1,active,Drinks,"Fresh, strong",https://drive.google.com/file/d/abc/view',
+      'old,Old renamed,,150,200,,2,,active,,,',
+      'kurta,Kurta,Size=L,1300,,,4,K-L,,,,',
+    ].join('\n')
+    const bad = [
+      head,
+      'BAD,,,x,,,1,,,,,',
+      'ghost,Ghost,Size=M,1,,,1,,,,,',
+      'tea,Tea,,1,,,1,,,Nope,,',
+      'kurta,Kurta,Size=XL,1,,,1,,,,,',
+      'x,,,1,,,1,,,,,',
+    ].join('\n')
+
+    const dry = await catalog.importCsv(store, bad, false)
+    expect(dry.ok).toBe(false)
+    expect(dry.rows.map((r) => [r.line, r.errors])).toEqual([
+      [2, ['slug', 'price']],
+      [3, ['product']],
+      [4, ['category']],
+      [5, ['variant']],
+      [6, ['name']],
+    ])
+    expect((await catalog.importCsv(store, bad, true)).ok).toBe(false)
+    expect(await catalog.getProductBySlug(store, 'ghost')).toBeNull()
+
+    const preview = await catalog.importCsv(store, good, false)
+    expect(preview.rows.map((r) => r.action)).toEqual(['create', 'update', 'variant'])
+    expect(await catalog.getProductBySlug(store, 'tea')).toBeNull()
+    const done = await catalog.importCsv(store, good, true)
+    expect(done.ok).toBe(true)
+    const tea = (await catalog.getProductBySlug(store, 'tea'))!
+    expect(tea).toMatchObject({
+      name: 'Tea',
+      price: 12000,
+      costPrice: 5000,
+      stock: 5,
+      sku: 'TEA-1',
+      categoryId: cat.id,
+      description: 'Fresh, strong',
+    })
+    expect(done.rows[0]!.images).toEqual({
+      productId: tea.id,
+      links: ['https://drive.google.com/file/d/abc/view'],
+    })
+    expect(done.rows[1]!.images).toBeNull()
+    expect(await catalog.getProductBySlug(store, 'old')).toMatchObject({
+      name: 'Old renamed',
+      price: 15000,
+      compareAtPrice: 20000,
+      badge: { text: 'Hot', tone: 'danger' },
+    })
+    const vs = await catalog.listVariants(store, [kurta.id])
+    expect(vs.map((v) => [v.options.Size, v.price, v.stock, v.sku])).toEqual([
+      ['M', 1000, 0, null],
+      ['L', 130000, 4, 'K-L'],
+    ])
+
+    const out = parseCsv(await catalog.exportCsv(store))
+    expect(out[0]!.join(',')).toBe(head)
+    expect(out.find((r) => r[0] === 'kurta' && r[2] === 'Size=L')).toEqual([
+      'kurta',
+      'Kurta',
+      'Size=L',
+      '1300',
+      '',
+      '0',
+      '4',
+      'K-L',
+      'draft',
+      '',
+      '',
+      '',
+    ])
+    expect(out.find((r) => r[0] === 'tea')).toEqual([
+      'tea',
+      'Tea',
+      '',
+      '120',
+      '',
+      '50',
+      '5',
+      'TEA-1',
+      'active',
+      'Drinks',
+      'Fresh, strong',
+      '',
+    ])
+    expect(out.find((r) => r[0] === 'old')![4]).toBe('200')
+    expect(await catalog.importCsv(store, '', false)).toEqual({ ok: false, rows: [] })
   })
 })

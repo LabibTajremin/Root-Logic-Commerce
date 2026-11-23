@@ -17,6 +17,9 @@ export default async function ProductsPage() {
     <>
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-3xl">{t('products.title')}</h1>
+        <Link href="/admin/products/import" className="ms-auto text-sm font-semibold underline">
+          {t('csv.link')}
+        </Link>
         <Link
           href="/admin/products/new"
           className="inline-flex min-h-11 items-center gap-2 rounded-control bg-button px-4 text-sm font-semibold text-button-text"

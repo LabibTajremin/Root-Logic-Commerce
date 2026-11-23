@@ -9,11 +9,13 @@ import {
   type CategoryInput,
   type ProductInput,
 } from '../domain/rules'
+import { csvColumns, parseCsv, readRow, toCsv } from '../domain/csv'
 import { pickBoughtTogether, pickRelated } from '../domain/related'
 import { sizeChartInput, type SizeChartInput } from '../domain/size-chart'
 import { uniqueSlug } from '../domain/slug'
 import {
   mergeMatrix,
+  variantLabel,
   productOptions,
   variantInput,
   type ProductOptions,
@@ -194,6 +196,138 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
         repo.coPurchased(storeId, p.id),
       ])
       return { related: pickRelated(p, all, 4), together: pickBoughtTogether(p, all, co, 3) }
+    },
+
+    getProductBySlug: (storeId: string, slug: string) => repo.getProductBySlug(storeId, slug),
+
+    /**
+     * A15 import: every row is checked first (dry run); `apply` writes only a sheet with
+     * no errors. Product rows create or update by slug (fields not in the sheet are kept);
+     * variant rows set price/stock of a combination the product already has. Image links
+     * of newly created products are handed back for the media module to attach.
+     */
+    async importCsv(storeId: string, text: string, apply: boolean) {
+      const [head = [], ...body] = parseCsv(text)
+      const [products, cats] = await Promise.all([
+        repo.listProducts(storeId, {}),
+        repo.listCategories(storeId),
+      ])
+      const bySlug = new Map(products.map((p) => [p.slug, p]))
+      const variants = await repo.listVariants(
+        storeId,
+        products.map((p) => p.id),
+      )
+      const plan = body.map((cells, i) => {
+        const line = i + 2
+        const r = readRow(head, cells)
+        if (!r.ok) return { line, action: null, errors: r.errors, run: null }
+        const v = r.value
+        const p = bySlug.get(v.slug)
+        if (v.variant) {
+          const label = p && variantLabel(p.options, v.variant)
+          const hit = variants.find(
+            (x) => x.productId === p?.id && variantLabel(p.options, x.options) === label,
+          )
+          const errors = !p ? ['product'] : !hit ? ['variant'] : []
+          const run = async () => {
+            await this.updateVariants(storeId, p!.id, [
+              {
+                id: hit!.id,
+                price: v.price,
+                compareAtPrice: v.compareAtPrice,
+                costPrice: v.costPrice,
+                stock: v.stock,
+                sku: v.sku,
+              },
+            ])
+            return null
+          }
+          return { line, action: 'variant' as const, errors, run }
+        }
+        const cat = v.category ? cats.find((c) => c.name === v.category) : null
+        const input = {
+          ...(p && {
+            ...p,
+            id: undefined,
+            sortOrder: undefined,
+            options: undefined,
+            createdAt: undefined,
+          }),
+          name: v.name,
+          slug: v.slug,
+          price: v.price,
+          compareAtPrice: v.compareAtPrice,
+          costPrice: v.costPrice,
+          stock: v.stock,
+          sku: v.sku,
+          status: v.status,
+          categoryId: cat ? cat.id : (p?.categoryId ?? null),
+          description: v.description || (p?.description ?? ''),
+        }
+        const checked = productInput.safeParse(input)
+        const errors = [
+          ...(cat === undefined ? ['category'] : []),
+          ...(checked.success
+            ? []
+            : [...new Set(checked.error.issues.map((x) => String(x.path[0])))]),
+        ]
+        const run = async () =>
+          p
+            ? (await this.updateProduct(storeId, p.id, input), null)
+            : { productId: (await this.createProduct(storeId, input)).id, links: v.images }
+        return { line, action: p ? ('update' as const) : ('create' as const), errors, run }
+      })
+      const ok = plan.length > 0 && plan.every((x) => x.errors.length === 0)
+      const rows = []
+      for (const { run, ...row } of plan)
+        rows.push({ ...row, images: ok && apply ? await run!() : null })
+      return { ok, rows }
+    },
+
+    /** A15 export: one row per product, then one per variant. */
+    async exportCsv(storeId: string) {
+      const [products, cats] = await Promise.all([
+        repo.listProducts(storeId, {}),
+        repo.listCategories(storeId),
+      ])
+      const variants = await repo.listVariants(
+        storeId,
+        products.map((p) => p.id),
+      )
+      const taka = (m: number | null) => (m === null ? '' : String(m / 100))
+      const rows = products.flatMap((p) => [
+        [
+          p.slug,
+          p.name,
+          '',
+          taka(p.price),
+          taka(p.compareAtPrice),
+          taka(p.costPrice),
+          String(p.stock),
+          p.sku ?? '',
+          p.status,
+          cats.find((c) => c.id === p.categoryId)?.name ?? '',
+          p.description,
+          '',
+        ],
+        ...variants
+          .filter((v) => v.productId === p.id)
+          .map((v) => [
+            p.slug,
+            p.name,
+            p.options.map((o) => `${o.name}=${v.options[o.name]}`).join(' | '),
+            taka(v.price),
+            taka(v.compareAtPrice),
+            taka(v.costPrice),
+            String(v.stock),
+            v.sku ?? '',
+            p.status,
+            '',
+            '',
+            '',
+          ]),
+      ])
+      return toCsv([[...csvColumns], ...rows])
     },
 
     /** A11: what a list filters and sorts on — cheapest variant price, values, units sold. */
