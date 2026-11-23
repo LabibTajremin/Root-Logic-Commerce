@@ -793,7 +793,10 @@ test('products CSV: check, import (create + update + image link), export; the ex
   await send([row.replace(',250,', ',275,')], 'Import')
   await expect(result.getByRole('cell', { name: 'update' })).toBeVisible()
   await send([`${s}-2,Csv two ${id},,90,,,1,,draft,,,https://example.com/photo.jpg`], 'Import')
-  await expect(page.getByRole('alert')).toBeVisible()
+  // A non-Drive image link: the products before it are saved, the owner is told.
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'doesn’t look like a Google Drive file link' }),
+  ).toBeVisible()
 
   await page.goto('/admin/products/import')
   const download = page.waitForEvent('download')
