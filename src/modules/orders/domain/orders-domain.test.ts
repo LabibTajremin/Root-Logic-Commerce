@@ -55,13 +55,15 @@ describe('checkout', () => {
     })
     expect(
       mergeItems([
-        { productId: 'a', quantity: 1 },
-        { productId: 'b', quantity: 1 },
-        { productId: 'a', quantity: 2 },
+        { productId: 'a', variantId: null, quantity: 1 },
+        { productId: 'b', variantId: 'm', quantity: 1 },
+        { productId: 'a', variantId: null, quantity: 2 },
+        { productId: 'b', variantId: 'l', quantity: 1 },
       ]),
     ).toEqual([
-      { productId: 'a', quantity: 3 },
-      { productId: 'b', quantity: 1 },
+      { productId: 'a', variantId: null, quantity: 3 },
+      { productId: 'b', variantId: 'm', quantity: 1 },
+      { productId: 'b', variantId: 'l', quantity: 1 },
     ])
   })
 })

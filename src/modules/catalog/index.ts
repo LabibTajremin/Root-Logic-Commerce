@@ -6,9 +6,20 @@ export type {
   CategoryData,
   Product,
   ProductFilter,
+  ProductWrite,
+  Variant,
   SortOrder,
 } from './application/ports'
 export { slugify } from './domain/slug'
 export { cardBadges, stockLeft, type CardBadge } from './domain/merchandising'
 export { badgeTones, type BadgeTone, type BrandInput } from './domain/rules'
 export { contentFromText, contentToText, type ProductContent } from './domain/content'
+export {
+  mergeMatrix,
+  optionsFromText,
+  optionsToText,
+  variantLabel,
+  type ProductOptions,
+  type VariantData,
+  type VariantOptions,
+} from './domain/variants'

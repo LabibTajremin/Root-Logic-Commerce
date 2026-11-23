@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createCatalog, type Catalog } from '@/modules/catalog'
+import { createCatalog, optionsFromText, type Catalog } from '@/modules/catalog'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
@@ -154,5 +154,77 @@ describe('brands (A2)', () => {
       'brand.not_found',
     )
     await expect(catalog.createBrand(store, { name: ' ' })).rejects.toThrow()
+  })
+})
+
+describe('variants (A1)', () => {
+  const opts = (text: string) => optionsFromText(text)
+
+  it('builds the matrix from options, keeps priced rows, and stock is the sum', async () => {
+    const p = await catalog.createProduct(store, { name: 'Kurta', price: 1200, stock: 9 })
+    await catalog.setOptions(store, p.id, opts('Size: S, M'))
+    let vs = await catalog.listVariants(store, [p.id])
+    expect(vs.map((v) => [v.options.Size, v.price, v.stock])).toEqual([
+      ['S', 1200, 0],
+      ['M', 1200, 0],
+    ])
+    await catalog.updateVariants(store, p.id, [
+      { id: vs[1]!.id, price: 1500, compareAtPrice: 1800, costPrice: 700, stock: 4, sku: 'K-M' },
+      {
+        id: '00000000-0000-0000-0000-000000000000',
+        price: 1,
+        compareAtPrice: null,
+        costPrice: 0,
+        stock: 1,
+        sku: null,
+      },
+    ])
+    expect((await catalog.getProduct(store, p.id))?.stock).toBe(4)
+    await catalog.setOptions(store, p.id, opts('Size: M, L\nColour: Red'))
+    vs = await catalog.listVariants(store, [p.id])
+    expect(vs.map((v) => [v.options.Size, v.options.Colour, v.price, v.stock])).toEqual([
+      ['M', 'Red', 1200, 0],
+      ['L', 'Red', 1200, 0],
+    ])
+    await catalog.setOptions(store, p.id, opts('Size: M, L'))
+    await catalog.updateVariants(store, p.id, [
+      {
+        id: (await catalog.listVariants(store, [p.id]))[0]!.id,
+        price: 1300,
+        compareAtPrice: null,
+        costPrice: 0,
+        stock: 2,
+        sku: null,
+      },
+    ])
+    vs = await catalog.listVariants(store, [p.id])
+    expect(vs.map((v) => [v.options.Size, v.price, v.stock])).toEqual([
+      ['M', 1300, 2],
+      ['L', 1200, 0],
+    ])
+    // A product edit keeps the variants' stock total and the options.
+    await catalog.updateProduct(store, p.id, { name: 'Kurta', price: 1200, stock: 99 })
+    expect(await catalog.getProduct(store, p.id)).toMatchObject({
+      stock: 2,
+      options: [{ name: 'Size', values: ['M', 'L'] }],
+    })
+    // Removing every option goes back to a plain product.
+    await catalog.setOptions(store, p.id, [])
+    expect(await catalog.listVariants(store, [p.id])).toEqual([])
+    expect(await catalog.listVariants(other, [p.id])).toEqual([])
+  })
+
+  it('rejects bad variant prices and unknown products', async () => {
+    const p = await catalog.createProduct(store, { name: 'Shirt', price: 800 })
+    await catalog.setOptions(store, p.id, opts('Size: S'))
+    const [v] = await catalog.listVariants(store, [p.id])
+    await expect(
+      catalog.updateVariants(store, p.id, [
+        { id: v!.id, price: 900, compareAtPrice: 800, costPrice: 0, stock: 1, sku: null },
+      ]),
+    ).rejects.toThrow()
+    const ghost = '00000000-0000-0000-0000-000000000000'
+    await expect(catalog.setOptions(store, ghost, [])).rejects.toThrow('product.not_found')
+    await expect(catalog.updateVariants(other, p.id, [])).rejects.toThrow('product.not_found')
   })
 })

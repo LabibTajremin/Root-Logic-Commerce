@@ -1,4 +1,5 @@
 import type { ProductData } from '../domain/rules'
+import type { ProductOptions, VariantData } from '../domain/variants'
 
 export type Category = {
   id: string
@@ -18,7 +19,16 @@ export type Brand = {
   logoId: string | null
   archived: boolean
 }
-export type Product = Omit<ProductData, 'slug'> & { id: string; slug: string; sortOrder: number }
+export type Product = Omit<ProductData, 'slug'> & {
+  id: string
+  slug: string
+  sortOrder: number
+  options: ProductOptions
+}
+/** What a product create/edit writes: options and variants are saved on their own. */
+export type ProductWrite = Omit<Product, 'id' | 'sortOrder' | 'options'>
+export type Variant = VariantData & { id: string; productId: string }
+export type VariantWrite = VariantData & { id?: string }
 export type ProductFilter = {
   status?: Product['status']
   categoryId?: string
@@ -41,8 +51,16 @@ export type CatalogRepo = {
   insertBrand(storeId: string, data: Omit<Brand, 'id' | 'archived'>): Promise<Brand>
   updateBrand(storeId: string, id: string, patch: Partial<Omit<Brand, 'id'>>): Promise<void>
   brandSlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
-  insertProduct(storeId: string, data: Omit<Product, 'id' | 'sortOrder'>): Promise<Product>
-  updateProduct(storeId: string, id: string, data: Omit<Product, 'id' | 'sortOrder'>): Promise<void>
+  insertProduct(storeId: string, data: ProductWrite): Promise<Product>
+  updateProduct(storeId: string, id: string, data: ProductWrite): Promise<void>
+  listVariants(storeId: string, productIds: string[]): Promise<Variant[]>
+  /** Atomic: options + the full variant list (rows without id are new) + stock = sum. */
+  saveVariants(
+    storeId: string,
+    productId: string,
+    options: ProductOptions,
+    rows: VariantWrite[],
+  ): Promise<void>
   getProduct(storeId: string, id: string): Promise<Product | null>
   getProductBySlug(storeId: string, slug: string): Promise<Product | null>
   listProducts(storeId: string, filter: ProductFilter): Promise<Product[]>

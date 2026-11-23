@@ -10,7 +10,14 @@ import {
   type ProductInput,
 } from '../domain/rules'
 import { uniqueSlug } from '../domain/slug'
-import type { CatalogRepo, ProductFilter } from './ports'
+import {
+  mergeMatrix,
+  productOptions,
+  variantInput,
+  type ProductOptions,
+  type VariantData,
+} from '../domain/variants'
+import type { CatalogRepo, Product, ProductFilter } from './ports'
 
 type Deps = { repo: CatalogRepo; shortId: () => string }
 
@@ -35,6 +42,9 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       throw new DomainError('brand.not_found')
     }
   }
+
+  const mustProduct = async (storeId: string, id: string): Promise<Product> =>
+    (await repo.getProduct(storeId, id)) ?? Promise.reject(new DomainError('product.not_found'))
 
   const assertCategory = async (storeId: string, categoryId: string | null) => {
     if (categoryId && !(await repo.listCategories(storeId)).some((c) => c.id === categoryId)) {
@@ -105,13 +115,47 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
 
     async updateProduct(storeId: string, id: string, input: ProductInput) {
       const d = validate(productInput, input)
-      if (!(await repo.getProduct(storeId, id))) throw new DomainError('product.not_found')
+      const current = await mustProduct(storeId, id)
       await assertCategory(storeId, d.categoryId)
       await assertBrand(storeId, d.brandId)
       await repo.updateProduct(storeId, id, {
         ...d,
+        // With variants, stock lives on the variants; the product keeps their total.
+        stock: current.options.length > 0 ? current.stock : d.stock,
         slug: await productSlug(storeId, d.name, d.slug, id),
       })
+    },
+
+    listVariants: (storeId: string, productIds: string[]) => repo.listVariants(storeId, productIds),
+
+    // Changing options rebuilds the combinations; rows already priced are kept.
+    async setOptions(storeId: string, productId: string, input: ProductOptions) {
+      const options = validate(productOptions, input)
+      const p = await mustProduct(storeId, productId)
+      const rows = mergeMatrix(options, await repo.listVariants(storeId, [productId]), {
+        productId,
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        costPrice: p.costPrice,
+        stock: 0,
+        sku: null,
+      })
+      await repo.saveVariants(storeId, productId, options, rows)
+    },
+
+    /** Prices/stock per variant; ids that are not this product's variants are ignored. */
+    async updateVariants(
+      storeId: string,
+      productId: string,
+      patches: (Omit<VariantData, 'options'> & { id: string })[],
+    ) {
+      const p = await mustProduct(storeId, productId)
+      const byId = new Map(patches.map((x) => [x.id, x]))
+      const rows = (await repo.listVariants(storeId, [productId])).map((v) => ({
+        id: v.id,
+        ...validate(variantInput, { ...v, ...byId.get(v.id), options: v.options }),
+      }))
+      await repo.saveVariants(storeId, productId, p.options, rows)
     },
 
     reorderProducts: (storeId: string, ids: string[]) =>

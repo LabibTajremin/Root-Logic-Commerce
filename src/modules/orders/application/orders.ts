@@ -1,3 +1,4 @@
+import { variantLabel } from '@/modules/catalog'
 import { normalizeBdPhone } from '@/modules/customers'
 import { DomainError, validate, type EventBus } from '@/modules/shared'
 import {
@@ -30,13 +31,37 @@ export const createOrders = ({ repo, bus }: Deps) => ({
         )
       ).map((p) => [p.id, p]),
     )
-    const lines = items.map(({ productId, quantity }) => {
+    const variants = new Map(
+      (
+        await repo.variantsForOrder(
+          storeId,
+          items.flatMap((i) => (i.variantId ? [i.variantId] : [])),
+        )
+      ).map((v) => [v.id, v]),
+    )
+    const lines = items.map(({ productId, variantId, quantity }) => {
       const p = products.get(productId)
-      if (!p || p.status !== 'active') throw new DomainError('product.unavailable', { productId })
+      const v = variants.get(variantId ?? '')
+      // A product with options is bought as one of its own variants; a plain one never is.
+      if (
+        !p ||
+        p.status !== 'active' ||
+        (p.options.length > 0 ? v?.productId !== p.id : variantId !== null)
+      )
+        throw new DomainError('product.unavailable', { productId })
+      const unit = v ?? p
       // Soft check only: the hard, atomic check happens when the order is confirmed.
-      if (p.stock < quantity)
-        throw new DomainError('stock.insufficient', { productId, available: p.stock })
-      return { productId, name: p.name, unitPrice: p.price, unitCost: p.costPrice, quantity }
+      if (unit.stock < quantity)
+        throw new DomainError('stock.insufficient', { productId, available: unit.stock })
+      return {
+        productId,
+        variantId,
+        variantLabel: v ? variantLabel(p.options, v.options) : null,
+        name: p.name,
+        unitPrice: unit.price,
+        unitCost: unit.costPrice,
+        quantity,
+      }
     })
     const created = await repo.create(storeId, {
       customer: { phone: d.phone, name: d.name, email: d.email },

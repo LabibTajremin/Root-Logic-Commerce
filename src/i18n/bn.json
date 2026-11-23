@@ -57,6 +57,7 @@
   "error.order.conflict": "অন্য কেউ এইমাত্র অর্ডারটি বদলেছেন। রিলোড করে আবার চেষ্টা করুন।",
   "error.order.not_found": "অর্ডার পাওয়া যায়নি।",
   "error.category.cycle": "ক্যাটাগরি নিজের ভেতরে রাখা যাবে না।",
+  "error.stock.has_variants": "এই পণ্যের সাইজ/রং আছে — পণ্যের পাতায় প্রতিটি ভ্যারিয়েন্টের স্টক বদলান।",
   "error.category.parent_not_found": "মূল ক্যাটাগরি পাওয়া যায়নি।",
   "error.category.not_found": "ক্যাটাগরি পাওয়া যায়নি।",
   "error.product.not_found": "পণ্য পাওয়া যায়নি।",

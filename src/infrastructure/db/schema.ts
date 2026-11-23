@@ -14,7 +14,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import type { ProductContent } from '@/modules/catalog'
+import type { ProductContent, ProductOptions, VariantOptions } from '@/modules/catalog'
 
 const id = () => uuid().primaryKey().defaultRandom()
 const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow()
@@ -294,6 +294,8 @@ export const products = pgTable(
       .$type<ProductContent>()
       .notNull()
       .default({ specs: [], howTo: [], faq: [], benefits: [], whyBuy: [] }),
+    // A1 options (size, colour…); with options, stock is the sum of the variants' stock.
+    options: jsonb().$type<ProductOptions>().notNull().default([]),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -364,6 +366,26 @@ export const orders = pgTable(
   ],
 )
 
+// A1: one row per option combination of a product.
+export const productVariants = pgTable(
+  'product_variants',
+  {
+    id: id(),
+    storeId: storeId(),
+    productId: uuid()
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    options: jsonb().$type<VariantOptions>().notNull(),
+    price: integer().notNull(),
+    compareAtPrice: integer(),
+    costPrice: integer().notNull().default(0),
+    stock: integer().notNull().default(0),
+    sku: text(),
+    sortOrder: integer().notNull().default(0),
+  },
+  (t) => [index('product_variants_product_idx').on(t.productId, t.sortOrder)],
+)
+
 export const orderItems = pgTable(
   'order_items',
   {
@@ -372,7 +394,10 @@ export const orderItems = pgTable(
       .notNull()
       .references(() => orders.id, { onDelete: 'cascade' }),
     productId: uuid().references(() => products.id, { onDelete: 'set null' }),
+    variantId: uuid().references(() => productVariants.id, { onDelete: 'set null' }),
     name: text().notNull(),
+    // "M / Red" at the time of the order — the variant may change or go later.
+    variantLabel: text(),
     unitPrice: integer().notNull(),
     unitCost: integer().notNull(),
     quantity: integer().notNull(),
@@ -404,6 +429,7 @@ export const stockMovements = pgTable(
     productId: uuid()
       .notNull()
       .references(() => products.id, { onDelete: 'cascade' }),
+    variantId: uuid().references(() => productVariants.id, { onDelete: 'set null' }),
     delta: integer().notNull(),
     reason: stockReasonEnum().notNull(),
     note: text(),

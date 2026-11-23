@@ -2,7 +2,15 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, lte, or, sql, type SQL 
 import { DomainError } from '@/modules/shared'
 import type { OrderDetail, OrdersRepo } from '@/modules/orders'
 import type { Db } from '../client'
-import { customers, orderEvents, orderItems, orders, products, stores } from '../schema'
+import {
+  customers,
+  orderEvents,
+  orderItems,
+  orders,
+  products,
+  productVariants,
+  stores,
+} from '../schema'
 import { applyStock } from './stock-repo'
 
 const summary = {
@@ -39,6 +47,8 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
     const items = await db
       .select({
         productId: orderItems.productId,
+        variantId: orderItems.variantId,
+        variantLabel: orderItems.variantLabel,
         name: orderItems.name,
         unitPrice: orderItems.unitPrice,
         unitCost: orderItems.unitCost,
@@ -109,9 +119,22 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           costPrice: products.costPrice,
           stock: products.stock,
           status: products.status,
+          options: products.options,
         })
         .from(products)
         .where(and(eq(products.storeId, storeId), inArray(products.id, ids))),
+    variantsForOrder: (storeId, ids) =>
+      db
+        .select({
+          id: productVariants.id,
+          productId: productVariants.productId,
+          options: productVariants.options,
+          price: productVariants.price,
+          costPrice: productVariants.costPrice,
+          stock: productVariants.stock,
+        })
+        .from(productVariants)
+        .where(and(eq(productVariants.storeId, storeId), inArray(productVariants.id, ids))),
 
     create: insert,
 
@@ -157,11 +180,15 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
         if (!row) throw new DomainError('order.conflict')
         if (ch.stock) {
           const items = await tx
-            .select({ productId: orderItems.productId, quantity: orderItems.quantity })
+            .select({
+              productId: orderItems.productId,
+              variantId: orderItems.variantId,
+              quantity: orderItems.quantity,
+            })
             .from(orderItems)
             .where(eq(orderItems.orderId, id))
           const moves = items.filter(
-            (i): i is { productId: string; quantity: number } => i.productId !== null,
+            (i): i is typeof i & { productId: string } => i.productId !== null,
           )
           await applyStock(tx, storeId, moves, ch.stock === 'deduct' ? -1 : 1, {
             reason: ch.stock === 'deduct' ? 'order_confirmed' : 'order_restocked',

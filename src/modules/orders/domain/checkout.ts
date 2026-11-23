@@ -20,7 +20,13 @@ export const checkoutInput = z.object({
   zoneId: z.string().min(1),
   paymentMethod: z.literal('COD').default('COD'),
   items: z
-    .array(z.object({ productId: z.uuid(), quantity: z.number().int().min(1).max(99) }))
+    .array(
+      z.object({
+        productId: z.uuid(),
+        variantId: z.uuid().nullable().default(null),
+        quantity: z.number().int().min(1).max(99),
+      }),
+    )
     .min(1)
     .max(50),
 })
@@ -36,9 +42,13 @@ export const computeTotals = (
   return { subtotal, deliveryCharge, total: subtotal + deliveryCharge }
 }
 
-// Same product twice in a cart becomes one line with the summed quantity.
-export const mergeItems = (items: { productId: string; quantity: number }[]) => {
-  const m = new Map<string, number>()
-  for (const i of items) m.set(i.productId, (m.get(i.productId) ?? 0) + i.quantity)
-  return [...m].map(([productId, quantity]) => ({ productId, quantity }))
+type Item = { productId: string; variantId: string | null; quantity: number }
+// Same product (and variant) twice in a cart becomes one line with the summed quantity.
+export const mergeItems = (items: Item[]) => {
+  const m = new Map<string, Item>()
+  for (const i of items) {
+    const key = `${i.productId}:${i.variantId}`
+    m.set(key, { ...i, quantity: (m.get(key)?.quantity ?? 0) + i.quantity })
+  }
+  return [...m.values()]
 }

@@ -2,10 +2,10 @@ import { and, desc, eq, gte, lte, sql } from 'drizzle-orm'
 import { DomainError } from '@/modules/shared'
 import type { StockRepo } from '@/modules/stock'
 import type { Db } from '../client'
-import { products, stockMovements } from '../schema'
+import { products, productVariants, stockMovements } from '../schema'
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
-type Move = { productId: string; quantity: number }
+type Move = { productId: string; variantId?: string | null; quantity: number }
 
 // Conditional UPDATE is the oversell guard: two confirms racing for the last unit
 // cannot both succeed, because the second sees stock < quantity and matches no row.
@@ -24,6 +24,21 @@ export const applyStock = async (
   const levels: number[] = []
   for (const m of moves) {
     const delta = sign * m.quantity
+    // A variant carries its own stock (guarded the same way); the product keeps the total.
+    if (m.variantId) {
+      const [v] = await tx
+        .update(productVariants)
+        .set({ stock: sql`${productVariants.stock} + ${delta}` })
+        .where(
+          and(
+            eq(productVariants.storeId, storeId),
+            eq(productVariants.id, m.variantId),
+            gte(productVariants.stock, -delta),
+          ),
+        )
+        .returning({ id: productVariants.id })
+      if (!v) throw new DomainError('stock.insufficient', { productId: m.productId })
+    }
     const [row] = await tx
       .update(products)
       .set({ stock: sql`${products.stock} + ${delta}` })
@@ -36,7 +51,13 @@ export const applyStock = async (
       )
       .returning({ stock: products.stock })
     if (!row) throw new DomainError('stock.insufficient', { productId: m.productId })
-    await tx.insert(stockMovements).values({ storeId, productId: m.productId, delta, ...meta })
+    await tx.insert(stockMovements).values({
+      storeId,
+      productId: m.productId,
+      variantId: m.variantId ?? null,
+      delta,
+      ...meta,
+    })
     levels.push(row.stock)
   }
   return levels
@@ -46,10 +67,12 @@ export const createStockRepo = (db: Db): StockRepo => ({
   adjust: (storeId, productId, delta, note, actorId) =>
     db.transaction(async (tx) => {
       const [p] = await tx
-        .select({ id: products.id })
+        .select({ options: products.options })
         .from(products)
         .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
       if (!p) throw new DomainError('product.not_found')
+      // Variant stock is set per variant on the product page; a product-level change would break the total.
+      if (p.options.length > 0) throw new DomainError('stock.has_variants')
       const [level] = await applyStock(
         tx,
         storeId,

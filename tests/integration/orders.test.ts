@@ -5,7 +5,7 @@ import { createStock, type Stock } from '@/modules/stock'
 import { createEventBus } from '@/modules/shared'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
-import { products } from '@/infrastructure/db/schema'
+import { products, productVariants } from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
@@ -35,6 +35,42 @@ const product = async (s: string, o: Partial<typeof products.$inferInsert> = {})
   )[0]!
 const stockOf = async (id: string) =>
   (await db.select({ s: products.stock }).from(products).where(eq(products.id, id)))[0]!.s
+const variantProduct = async () => {
+  const p = await product(store, {
+    stock: 5,
+    options: [{ name: 'Size', values: ['M', 'L'] }],
+  })
+  const [m, l] = await db
+    .insert(productVariants)
+    .values([
+      {
+        storeId: store,
+        productId: p.id,
+        options: { Size: 'M' },
+        price: 40000,
+        costPrice: 20000,
+        stock: 1,
+        sortOrder: 0,
+      },
+      {
+        storeId: store,
+        productId: p.id,
+        options: { Size: 'L' },
+        price: 45000,
+        stock: 4,
+        sortOrder: 1,
+      },
+    ])
+    .returning()
+  return { p, m: m!, l: l! }
+}
+const variantStock = async (id: string) =>
+  (
+    await db
+      .select({ s: productVariants.stock })
+      .from(productVariants)
+      .where(eq(productVariants.id, id))
+  )[0]!.s
 const checkout = (productId: string, quantity = 1, phone = '01712345678') => ({
   name: 'Rahima Khatun',
   phone,
@@ -84,7 +120,15 @@ describe('placing orders', () => {
       stockDeducted: false,
     })
     expect(o.items).toEqual([
-      { productId: p.id, name: 'Door Bell', unitPrice: 34900, unitCost: 19000, quantity: 2 },
+      {
+        productId: p.id,
+        variantId: null,
+        variantLabel: null,
+        name: 'Door Bell',
+        unitPrice: 34900,
+        unitCost: 19000,
+        quantity: 2,
+      },
     ])
     expect(o.events.map((e) => e.toStatus)).toEqual(['PENDING'])
     expect(await stockOf(p.id)).toBe(5) // not deducted on placement
@@ -133,6 +177,60 @@ describe('status flow with stock', () => {
     ])
     expect(events).toContain('order.confirmed#1001')
     expect(events).toContain('order.cancelled#1001')
+  })
+
+  it('variants: price and label from the variant, stock moves on the variant (A1)', async () => {
+    const { p, m, l } = await variantProduct()
+    const items = [
+      { productId: p.id, variantId: l.id, quantity: 2 },
+      { productId: p.id, variantId: m.id, quantity: 1 },
+    ]
+    const { id } = await orders.placeOrder(store, { ...checkout(p.id), items }, zones)
+    const o = (await orders.getOrder(store, id))!
+    expect(o.items.map((i) => [i.variantLabel, i.unitPrice, i.quantity])).toEqual([
+      ['L', 45000, 2],
+      ['M', 40000, 1],
+    ])
+    expect(o.subtotal).toBe(130000)
+    await orders.changeStatus(store, id, 'CONFIRMED', 'u1')
+    expect([await variantStock(m.id), await variantStock(l.id), await stockOf(p.id)]).toEqual([
+      0, 2, 2,
+    ])
+    expect((await stock.history(store, p.id)).map((m) => m.delta).sort((a, b) => a - b)).toEqual([
+      -2, -1,
+    ])
+    await orders.changeStatus(store, id, 'CANCELLED', 'u1')
+    expect([await variantStock(m.id), await variantStock(l.id), await stockOf(p.id)]).toEqual([
+      1, 4, 5,
+    ])
+    // The last M is gone once another order takes it: confirming a second one fails.
+    const a = await orders.placeOrder(store, { ...checkout(p.id), items: [items[1]!] }, zones)
+    const b = await orders.placeOrder(store, { ...checkout(p.id), items: [items[1]!] }, zones)
+    await orders.changeStatus(store, a.id, 'CONFIRMED', 'u1')
+    await expect(orders.changeStatus(store, b.id, 'CONFIRMED', 'u1')).rejects.toThrow(
+      'stock.insufficient',
+    )
+    await expect(stock.adjustStock(store, p.id, { delta: 1, note: 'found one' }, 'u1')).rejects.toThrow(
+      'stock.has_variants',
+    )
+  })
+
+  it('variants: a product with options needs one of its own variants, in stock', async () => {
+    const { p, m, l } = await variantProduct()
+    const plain = await product(store)
+    const order = (productId: string, variantId: string | null, quantity = 1) =>
+      orders.placeOrder(
+        store,
+        { ...checkout(p.id), items: [{ productId, variantId, quantity }] },
+        zones,
+      )
+    await expect(order(p.id, null)).rejects.toThrow('product.unavailable')
+    await expect(order(plain.id, m.id)).rejects.toThrow('product.unavailable')
+    await expect(order(p.id, '00000000-0000-0000-0000-000000000000')).rejects.toThrow(
+      'product.unavailable',
+    )
+    await expect(order(p.id, m.id, 2)).rejects.toThrow('stock.insufficient')
+    expect(await order(p.id, l.id, 4)).toMatchObject({ orderNo: expect.any(Number) })
   })
 
   it('returns after delivery restock; cancelling an unconfirmed order does not', async () => {

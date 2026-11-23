@@ -1,3 +1,4 @@
+import type { ProductOptions, VariantOptions } from '@/modules/catalog'
 import type { OrderStatus, StockEffect } from '../domain/status'
 
 export type OrderProduct = {
@@ -7,9 +8,20 @@ export type OrderProduct = {
   costPrice: number
   stock: number
   status: string
+  options: ProductOptions
+}
+export type OrderVariant = {
+  id: string
+  productId: string
+  options: VariantOptions
+  price: number
+  costPrice: number
+  stock: number
 }
 export type OrderLine = {
   productId: string
+  variantId: string | null
+  variantLabel: string | null
   name: string
   unitPrice: number
   unitCost: number
@@ -73,6 +85,7 @@ export type StatusChange = {
 
 export type OrdersRepo = {
   productsForOrder(storeId: string, ids: string[]): Promise<OrderProduct[]>
+  variantsForOrder(storeId: string, ids: string[]): Promise<OrderVariant[]>
   create(storeId: string, order: NewOrder): Promise<{ id: string; orderNo: number }>
   get(storeId: string, id: string): Promise<OrderDetail | null>
   findForTracking(storeId: string, orderNo: number, phone: string): Promise<OrderDetail | null>

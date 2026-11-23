@@ -57,6 +57,7 @@
   "error.order.conflict": "Someone else just changed this order. Reload and try again.",
   "error.order.not_found": "Order not found.",
   "error.category.cycle": "A category cannot be moved inside itself.",
+  "error.stock.has_variants": "This product has sizes/colours — change stock per variant on the product page.",
   "error.category.parent_not_found": "Parent category not found.",
   "error.category.not_found": "Category not found.",
   "error.product.not_found": "Product not found.",

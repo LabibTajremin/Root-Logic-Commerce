@@ -1,7 +1,17 @@
-import { and, asc, eq, getTableColumns, ilike, ne, type SQL } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  ne,
+  notInArray,
+  type SQL,
+} from 'drizzle-orm'
 import type { CatalogRepo, SortOrder } from '@/modules/catalog'
 import type { Db } from '../client'
-import { brands, categories, products } from '../schema'
+import { brands, categories, products, productVariants } from '../schema'
 
 const catCols = {
   id: categories.id,
@@ -21,6 +31,7 @@ const brandCols = {
   logoId: brands.logoId,
   archived: brands.archived,
 }
+const { storeId: _s, sortOrder: _o, ...variantCols } = getTableColumns(productVariants)
 type SlugTable = typeof categories | typeof products | typeof brands
 
 const taken = async (
@@ -137,6 +148,37 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
       .where(and(...where))
       .orderBy(asc(products.sortOrder), asc(products.name))
   },
+  listVariants: (storeId, ids) =>
+    db
+      .select(variantCols)
+      .from(productVariants)
+      .where(and(eq(productVariants.storeId, storeId), inArray(productVariants.productId, ids)))
+      .orderBy(asc(productVariants.sortOrder)),
+  saveVariants: (storeId, productId, options, rows) =>
+    db.transaction(async (tx) => {
+      const mine = and(
+        eq(productVariants.storeId, storeId),
+        eq(productVariants.productId, productId),
+      )
+      const kept = rows.flatMap((r) => (r.id ? [r.id] : []))
+      await tx.delete(productVariants).where(and(mine, notInArray(productVariants.id, kept)))
+      for (const [
+        sortOrder,
+        { id, options: o, price, compareAtPrice, costPrice, stock, sku },
+      ] of rows.entries()) {
+        const v = { options: o, price, compareAtPrice, costPrice, stock, sku, sortOrder }
+        if (id)
+          await tx
+            .update(productVariants)
+            .set(v)
+            .where(and(mine, eq(productVariants.id, id)))
+        else await tx.insert(productVariants).values({ ...v, storeId, productId })
+      }
+      await tx
+        .update(products)
+        .set({ options, stock: rows.reduce((n, r) => n + r.stock, 0), updatedAt: new Date() })
+        .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
+    }),
   setProductOrder: (storeId, orders) => reorder(db, products, storeId, orders),
   productSlugTaken: (storeId, slug, exceptId) => taken(db, products, storeId, slug, exceptId),
 })
