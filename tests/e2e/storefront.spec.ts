@@ -613,10 +613,10 @@ test('listing: filters, sort, page size, pages, grid columns and breadcrumbs (A1
     await expect(count).toHaveText(`${n} products`)
   }
   await filters(async () => {
-    await page.getByLabel('From').fill('200')
-    await page.getByLabel('To').fill('400')
+    await page.getByLabel('From', { exact: true }).fill('200')
+    await page.getByLabel('To', { exact: true }).fill('400')
   }, 3)
-  await expect(page.getByLabel('From')).toHaveValue('200')
+  await expect(page.getByLabel('From', { exact: true })).toHaveValue('200')
   await filters(async () => {
     await page.getByLabel('Brand', { exact: true }).selectOption({ label: brand })
   }, 1)
