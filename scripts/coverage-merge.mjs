@@ -17,6 +17,7 @@ const EXCLUDED = [
   /\.d\.ts$/,
   /\.css$/,
   /\.json$/,
+  /\.(svg|png|ico|jpe?g|webp)$/,
   /\/migrations\//,
   /\/ports\.ts$/,
   /registry\.gen\.ts$/,
