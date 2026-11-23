@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { changedPaths } from '@/modules/activity'
+import { changedPaths, isUndoable } from '@/modules/activity'
 import { ActionForm } from '@/ui/action-form'
 import { Badge, Button, Card } from '@/ui/primitives'
 import { adminContext } from '../context'
@@ -88,16 +88,18 @@ export default async function ActivityPage({ searchParams }: { searchParams: Sea
                   {t('activity.changed')}: {changedPaths(r.before, r.after).join(', ')}
                 </p>
               </div>
-              {/* Only settings changes are logged so far, all undoable; the server re-checks. */}
+              {/* Only undoable changes offer the button; the server re-checks. */}
               {r.undoneAt ? (
                 <Badge tone="neutral">{t('activity.undone')}</Badge>
               ) : (
-                <ActionForm action={undoActivity}>
-                  <input type="hidden" name="id" value={r.id} />
-                  <Button type="submit" variant="secondary">
-                    {t('activity.undo')}
-                  </Button>
-                </ActionForm>
+                isUndoable(r.action) && (
+                  <ActionForm action={undoActivity}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <Button type="submit" variant="secondary">
+                      {t('activity.undo')}
+                    </Button>
+                  </ActionForm>
+                )
               )}
             </li>
           ))}
