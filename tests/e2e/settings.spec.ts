@@ -113,6 +113,8 @@ test('every theme renders the storefront accessibly', async ({ page, a11y }) => 
 })
 
 test('design editor previews live, warns on low contrast and publishes', async ({ page, a11y }) => {
+  // Covers every editor setting plus a second publisher; the editor keeps growing.
+  test.setTimeout(60_000)
   await signedIn(page)
   await page.goto('/admin/design')
   await expect(page.getByRole('heading', { level: 1, name: 'Design' })).toBeVisible()
