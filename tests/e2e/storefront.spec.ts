@@ -419,7 +419,8 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
   await withOptions(gone, 'Size: S')
 
   await page.goto(`/search?q=${encodeURIComponent(id)}`)
-  await expect(page.getByRole('link', { name: 'Choose options' })).toHaveCount(2)
+  // Sold-out cards carry no button; the in-stock one sends shoppers to pick an option.
+  await expect(page.getByRole('link', { name: 'Choose options' })).toHaveCount(1)
   await page.goto(`/p/${slug(gone)}`)
   await expect(page.getByText('Sold out')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Add to cart' })).toHaveCount(0)
