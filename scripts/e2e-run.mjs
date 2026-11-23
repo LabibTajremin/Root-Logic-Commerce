@@ -25,7 +25,7 @@ for (let i = 0; i < 120; i++) {
   } catch {}
   await wait(500)
 }
-const e2e = spawnSync(`pnpm e2e ${process.argv.slice(2).join(" ")}`, {
+const e2e = spawnSync(`pnpm e2e ${process.argv.slice(2).join(' ')}`, {
   shell: true,
   stdio: 'inherit',
   env: { ...process.env, E2E_PORT: port },
