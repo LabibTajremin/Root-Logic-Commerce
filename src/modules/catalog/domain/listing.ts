@@ -86,6 +86,14 @@ export const applyListing = <T extends ListItem>(items: T[], q: Listing) => {
   return { items: hit.slice((page - 1) * q.per, page * q.per), total: hit.length, page, pages }
 }
 
+/** Any filter set — the filter panel then starts open. */
+export const hasFilters = (q: Listing) =>
+  q.min !== null ||
+  q.max !== null ||
+  q.brand !== null ||
+  q.inStock ||
+  Object.keys(q.opts).length > 0
+
 /** A link to the same list with some settings changed; defaults are left out of the URL. */
 export const listingHref = (
   path: string,

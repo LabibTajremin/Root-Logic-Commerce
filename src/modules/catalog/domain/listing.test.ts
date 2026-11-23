@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyListing, listingHref, parseListing, type ListItem } from './listing'
+import { applyListing, hasFilters, listingHref, parseListing, type ListItem } from './listing'
 
 const item = (id: string, o: Partial<ListItem> = {}): ListItem => ({
   id,
@@ -87,6 +87,12 @@ describe('listing query (A11)', () => {
     const paged = applyListing(items, parseListing({ per: '12', page: '9' }))
     expect([paged.page, paged.pages, paged.total, paged.items.length]).toEqual([1, 1, 3, 3])
     expect(applyListing([], parseListing({})).pages).toBe(1)
+  })
+
+  it('knows when any filter is set', () => {
+    expect(hasFilters(parseListing({ sort: 'new', page: '2' }))).toBe(false)
+    for (const p of [{ min: '1' }, { max: '1' }, { brand: 'b' }, { stock: '1' }, { opt: 'Size:M' }])
+      expect(hasFilters(parseListing(p))).toBe(true)
   })
 
   it('builds links that keep the other filters', () => {

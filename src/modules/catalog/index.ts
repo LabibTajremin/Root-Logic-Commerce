@@ -28,6 +28,7 @@ export { chartFromText, chartToText, type SizeChartInput } from './domain/size-c
 export {
   applyListing,
   gridCols,
+  hasFilters,
   listingHref,
   listingSorts,
   parseListing,

@@ -1,6 +1,7 @@
 import {
   applyListing,
   gridCols,
+  hasFilters,
   listingHref,
   listingSorts,
   parseListing,
@@ -53,7 +54,7 @@ export const ProductListing = async ({
         {Object.entries(extra).map(([k, v]) => (
           <input key={k} type="hidden" name={k} value={v} />
         ))}
-        <details className="rounded-card border border-line p-3" open={false}>
+        <details className="rounded-card border border-line p-3" open={hasFilters(q)}>
           <summary className="min-h-11 cursor-pointer content-center font-semibold">
             {t('list.filters')}
           </summary>
