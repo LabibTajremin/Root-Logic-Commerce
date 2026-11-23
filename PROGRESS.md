@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 13 (Checkout & orders) — spec docs/BUILD_SPEC.md
-Now: Phase 13 Checkout & orders — starting. Carried in from Phase 12: B6 certificate images + trust strip on checkout/thank-you/footer; J1 checkout & thank-you tabs; products in CSV/variant/bulk switch actions are not yet in the activity log.
+Now: Phase 13 Checkout & orders — done so far: C6 extra fields, C18 checkout line edit, C19 big CTA (277/277 at 100%). NEXT: C2 coupons → C3 free shipping → C7 limits → C1 incomplete orders → C4/C17 district-thana → C5 location → C10 thank-you → C12 manual order → C13/C21 statuses → C14 returns → C15 source → C16 invoices → D1/D3/D4/D5 → F4 → F12 → B2. Carried in from Phase 12: B6 certificate images + trust strip on checkout/thank-you/footer; J1 checkout & thank-you tabs; products in CSV/variant/bulk switch actions are not yet in the activity log.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
