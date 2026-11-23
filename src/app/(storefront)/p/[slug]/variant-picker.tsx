@@ -93,8 +93,8 @@ export const VariantPicker = ({
       {chosen.stock > 0 ? (
         <div className="flex flex-col gap-2 sm:max-w-sm">
           <p className="text-sm font-semibold">{labels.inStock}</p>
-          <AddToCart item={chosen.item} label={labels.addToCart} />
-          <OrderNow item={chosen.item} label={labels.orderNow} />
+          <AddToCart item={chosen.item} qty={1} label={labels.addToCart} />
+          <OrderNow item={chosen.item} qty={1} label={labels.orderNow} />
           <button type="button" onClick={pick} className="min-h-11 text-sm font-semibold underline">
             {labels.addToList}
           </button>

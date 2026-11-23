@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { DeepPartial, Design } from '@/modules/site-settings'
+import type { GalleryLabels } from '@/ui/gallery'
 
 /** Colors a theme owns; brand colors (accent, button, header, text, bg) come from the Design. */
 export type Palette = {
@@ -58,7 +59,7 @@ export type Slots = {
     action: ReactNode
     labels: { soldOut: string; left: string }
   }>
-  ProductGallery: ComponentType<{ name: string; images: ImageView[] }>
+  ProductGallery: ComponentType<{ name: string; images: ImageView[]; labels: GalleryLabels }>
   CategoryNav: ComponentType<{ categories: CategoryView[]; active?: string; allLabel: string }>
   EmptyState: ComponentType<{ title: string; body: string; action?: ReactNode; level: 1 | 2 }>
 }

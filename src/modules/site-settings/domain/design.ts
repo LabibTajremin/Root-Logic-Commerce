@@ -90,6 +90,13 @@ export const designSchema = z.object({
       shape: z.enum(cardShapes).default('theme'),
     })
     .prefault({}),
+  // J1 product page (A12): gallery picture fit and where the thumbnails sit.
+  gallery: z
+    .object({
+      fit: z.enum(['cover', 'contain']).default('cover'),
+      thumbs: z.enum(['below', 'side']).default('below'),
+    })
+    .prefault({}),
   // J1 floating buttons (B9): help bubble side and which channels it lists.
   floating: z
     .object({
@@ -162,6 +169,7 @@ export const baseDesign: Design = {
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
   productCard: { badges: true, oldPrice: true, button: true },
   grid: { mobile: 2, desktop: 4, shape: 'theme' },
+  gallery: { fit: 'cover', thumbs: 'below' },
   floating: { side: 'right', whatsapp: true, messenger: true, call: true, top: true },
   mobileNav: { search: true, track: true, cart: true },
   heroSlider: { enabled: false, interval: 5, effect: 'slide' },

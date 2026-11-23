@@ -41,8 +41,9 @@ describe('design', () => {
   })
 
   it('older saves without floating-button or mobile-menu settings keep everything on', () => {
-    const { floating: _f, mobileNav: _m, ...old } = baseDesign
+    const { floating: _f, mobileNav: _m, gallery: _g, ...old } = baseDesign
     const d = designSchema.parse(old)
+    expect(d.gallery).toEqual({ fit: 'cover', thumbs: 'below' })
     expect(d.floating).toEqual({
       side: 'right',
       whatsapp: true,

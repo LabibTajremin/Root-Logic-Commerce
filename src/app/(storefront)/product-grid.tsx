@@ -68,6 +68,7 @@ export const ProductGrid = async ({
                     name: p.name,
                     price: p.price,
                   }}
+                  qty={1}
                   label={t('shop.addToCart')}
                 />
               ))

@@ -983,3 +983,69 @@ test('promotions: every banner kind, the video lock, embeds that load on tap, an
   }
   await expect(page.getByText('No banners yet')).toBeVisible()
 })
+
+test('product page: gallery arrows and thumbnails, fit and thumbnail settings, share, quantity (A12)', async ({
+  page,
+  context,
+  a11y,
+}) => {
+  const id = uid()
+  const [two, one] = [`Gallery ${id}`, `Single ${id}`]
+  await signedIn(page)
+  await createProduct(page, { name: two, price: '250', stock: '3' })
+  await editProduct(page, two)
+  await uploadPhoto(page)
+  await uploadPhoto(page, '#a8763e')
+  await createProduct(page, { name: one, price: '90', stock: '1' })
+  await editProduct(page, one)
+  await uploadPhoto(page)
+
+  const design = async (fit: string, thumbs: string) => {
+    await page.goto('/admin/design')
+    await page.getByLabel('Picture fit').selectOption(fit)
+    await page.getByLabel('Thumbnails').selectOption(thumbs)
+    await page.getByRole('button', { name: 'Publish' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+  }
+  await design('contain', 'side')
+  const url = (name: string) => `/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+  await page.goto(url(two))
+  await page.waitForLoadState('networkidle')
+  await expect(page.locator('[data-fit="contain"][data-thumbs="side"]')).toHaveCount(1)
+  const prev = page.getByRole('button', { name: 'Previous photo' })
+  const next = page.getByRole('button', { name: 'Next photo' })
+  await expect(prev).toBeDisabled()
+  await next.click()
+  await expect(page.getByRole('button', { name: 'Photo 2' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await expect(next).toBeDisabled()
+  await prev.click()
+  await expect(page.getByRole('button', { name: 'Photo 1' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await page.getByRole('button', { name: 'Photo 2' }).click()
+  await expect(prev).toBeEnabled()
+  await a11y()
+
+  const share = page.getByRole('group', { name: 'Share' })
+  await expect(share.getByRole('link', { name: 'Share on WhatsApp' })).toHaveAttribute(
+    'href',
+    new RegExp(`^https://wa\\.me/\\?text=.*${encodeURIComponent(url(two))}$`),
+  )
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await share.getByRole('button', { name: 'Copy link' }).click()
+  await expect(share.getByText('Link copied')).toBeVisible()
+
+  const qty = page.getByRole('group', { name: 'Quantity', exact: true })
+  for (const b of ['+', '+', '+', '−'] as const) await qty.getByRole('button', { name: b }).click()
+  await expect(qty.locator('output')).toHaveText('2')
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await expect(page.getByTestId('cart-subtotal')).toHaveText('৳500')
+
+  await page.goto(url(one))
+  await expect(page.getByRole('button', { name: 'Next photo' })).toHaveCount(0)
+  await design('cover', 'below')
+})

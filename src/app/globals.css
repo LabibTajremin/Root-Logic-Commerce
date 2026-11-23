@@ -191,3 +191,26 @@ body {
 .rlc-stock-left {
   color: color-mix(in oklab, var(--color-warning) 45%, var(--color-text));
 }
+/* A12 gallery: picture fit, thumbnails beside on wide screens, hover zoom where hover exists. */
+[data-fit='contain'] .rlc-gallery img {
+  object-fit: contain;
+}
+@media (min-width: 768px) {
+  [data-thumbs='side'] .rlc-gallery {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+  }
+  [data-thumbs='side'] .rlc-thumbs {
+    order: -1;
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+}
+@media (hover: hover) {
+  .rlc-zoom img {
+    transition: transform 0.3s;
+  }
+  .rlc-zoom:hover img {
+    transform: scale(1.5);
+  }
+}

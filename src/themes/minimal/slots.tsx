@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { BrandLogo } from '@/ui/brand-logo'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
+import { Gallery } from '@/ui/gallery'
 import { ProductImage } from '@/ui/product-image'
 import type { Slots } from '../_contract'
 
@@ -149,7 +150,7 @@ export const ProductCard: Slots['ProductCard'] = ({ product, action, labels }) =
   </article>
 )
 
-export const ProductGallery: Slots['ProductGallery'] = ({ name, images }) =>
+export const ProductGallery: Slots['ProductGallery'] = ({ name, images, labels }) =>
   images.length === 0 ? (
     <div
       aria-hidden
@@ -157,24 +158,14 @@ export const ProductGallery: Slots['ProductGallery'] = ({ name, images }) =>
     >
       {initial(name)}
     </div>
-  ) : (
-    <div className="flex flex-col gap-3">
-      <div className="relative aspect-square overflow-hidden rounded-card bg-soft">
+  ) : images.length === 1 ? (
+    <div className="rlc-gallery">
+      <div className="rlc-zoom relative aspect-square overflow-hidden rounded-card bg-soft">
         <ProductImage image={images[0]!} sizes="(min-width: 768px) 50vw, 100vw" priority />
       </div>
-      {images.length > 1 && (
-        <ul className="grid grid-cols-4 gap-2">
-          {images.slice(1).map((i) => (
-            <li
-              key={i.src}
-              className="relative aspect-square overflow-hidden rounded-control bg-soft"
-            >
-              <ProductImage image={i} sizes="160px" />
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
+  ) : (
+    <Gallery images={images} labels={labels} />
   )
 
 export const CategoryNav: Slots['CategoryNav'] = ({ categories, active, allLabel }) => (

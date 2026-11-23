@@ -248,6 +248,15 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             </Fragment>
           ))}
         </fieldset>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-semibold">{L.gallery}</legend>
+          {select('galleryFit', L.galleryFit!, d.gallery.fit, ['cover', 'contain'], (v) =>
+            set('gallery', { fit: v as 'cover' }),
+          )}
+          {select('galleryThumbs', L.galleryThumbs!, d.gallery.thumbs, ['below', 'side'], (v) =>
+            set('gallery', { thumbs: v as 'below' }),
+          )}
+        </fieldset>
         <fieldset className="flex flex-col">
           <legend className="mb-1 text-sm font-semibold">{L.floating}</legend>
           {select('floatSide', L.floatSide!, d.floating.side, ['right', 'left'], (v) =>

@@ -4,10 +4,11 @@ import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { GaEvent } from '../../ga'
 import { Breadcrumbs } from '../../breadcrumbs'
 import { faqLd, JsonLd } from '../../json-ld'
-import { AddToCart, OrderNow } from '../../cart-buttons'
+import { QtyBuy } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 import { ProductTabs } from './product-tabs'
+import { Share } from './share'
 import { SizeChartButton } from './size-chart'
 import { VariantPicker } from './variant-picker'
 import { variantLabel } from '@/modules/catalog'
@@ -29,7 +30,7 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
 export default async function ProductPage({ params }: Props) {
   const p = await product((await params).slug)
-  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat } =
+  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat, design } =
     await storefront()
   const { ProductGallery } = theme.slots
   const images = (await imagesOf([p])).get(p.id)!
@@ -96,7 +97,18 @@ export default async function ProductPage({ params }: Props) {
           items: [{ item_id: p.id, item_name: p.name, price: p.price / 100 }],
         }}
       />
-      <ProductGallery name={p.name} images={images} />
+      <div data-fit={design.gallery.fit} data-thumbs={design.gallery.thumbs}>
+        <ProductGallery
+          name={p.name}
+          images={images}
+          labels={{
+            photos: t('shop.photos'),
+            prev: t('shop.prevPhoto'),
+            next: t('shop.nextPhoto'),
+            photo: t('shop.photo'),
+          }}
+        />
+      </div>
       <div className="flex flex-col gap-4">
         <ProductBadges badges={v.badges} className="flex-row" />
         <h1 className="font-heading text-3xl md:text-4xl">{p.name}</h1>
@@ -133,10 +145,15 @@ export default async function ProductPage({ params }: Props) {
             </p>
             <StockLeft n={v.left} label={t('shop.left')} />
             {v.inStock && (
-              <div className="flex flex-col gap-2 sm:max-w-sm">
-                <AddToCart item={item} label={t('shop.addToCart')} />
-                <OrderNow item={item} label={t('shop.orderNow')} />
-              </div>
+              <QtyBuy
+                item={item}
+                max={p.stock}
+                labels={{
+                  qty: t('shop.qty'),
+                  addToCart: t('shop.addToCart'),
+                  orderNow: t('shop.orderNow'),
+                }}
+              />
             )}
           </>
         )}
@@ -147,6 +164,17 @@ export default async function ProductPage({ params }: Props) {
           />
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
+        <Share
+          url={`${base}/p/${p.slug}`}
+          labels={{
+            share: t('shop.share'),
+            facebook: t('shop.shareFacebook'),
+            whatsapp: t('shop.shareWhatsapp'),
+            messenger: t('shop.shareMessenger'),
+            copy: t('shop.copyLink'),
+            copied: t('shop.copied'),
+          }}
+        />
         <ProductTabs description={p.description} content={p.content} t={t} />
       </div>
     </article>
