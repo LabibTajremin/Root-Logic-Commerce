@@ -777,7 +777,8 @@ test('products CSV: check, import (create + update + image link), export; the ex
   await send(['Bad Slug,X,,abc,,,1,,,,,'], 'Check the file')
   await expect(result).toContainText('Fix the rows below')
   await expect(result).toContainText('slug (a-z, 0-9, -), price')
-  const row = `${s},Csv ${id},,250,,,6,${sku},active,${cat},From a sheet,${drive}`
+  // Draft: its fake Drive photo must not reach other tests' shop pages.
+  const row = `${s},Csv ${id},,250,,,6,${sku},draft,${cat},From a sheet,${drive}`
   await send([row], 'Check the file')
   await expect(result).toContainText('No problems')
   await expect(result.getByRole('cell', { name: 'create' })).toBeVisible()
@@ -799,7 +800,7 @@ test('products CSV: check, import (create + update + image link), export; the ex
   await page.getByRole('button', { name: 'Download all products as CSV' }).click()
   const csv = readFileSync((await (await download).path())!, 'utf8')
   expect(csv.split('\r\n')[0]).toBe(head)
-  expect(csv).toContain(`${s},Csv ${id},,275,,0,6,${sku},active,${cat},From a sheet,`)
+  expect(csv).toContain(`${s},Csv ${id},,275,,0,6,${sku},draft,${cat},From a sheet,`)
   const anon = await playwright.request.newContext({ baseURL: page.url() })
   expect((await anon.get('/admin/products/export')).status()).toBe(403)
   await anon.dispose()
