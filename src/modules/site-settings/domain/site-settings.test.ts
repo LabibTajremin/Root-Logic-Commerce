@@ -40,6 +40,19 @@ describe('design', () => {
     expect(mergeDesign({ a: [1, 2] }, { a: [3] })).toEqual({ a: [3] })
   })
 
+  it('older saves without floating-button or mobile-menu settings keep everything on', () => {
+    const { floating: _f, mobileNav: _m, ...old } = baseDesign
+    const d = designSchema.parse(old)
+    expect(d.floating).toEqual({
+      side: 'right',
+      whatsapp: true,
+      messenger: true,
+      call: true,
+      top: true,
+    })
+    expect(d.mobileNav).toEqual({ search: true, track: true, cart: true })
+  })
+
   it('older saves without product-card toggles show everything', () => {
     const { productCard: _, grid: __, ...old } = baseDesign
     const parsed = designSchema.parse(old)

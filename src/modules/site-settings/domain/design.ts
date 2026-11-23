@@ -90,6 +90,24 @@ export const designSchema = z.object({
       shape: z.enum(cardShapes).default('theme'),
     })
     .prefault({}),
+  // J1 floating buttons (B9): help bubble side and which channels it lists.
+  floating: z
+    .object({
+      side: z.enum(['right', 'left']).default('right'),
+      whatsapp: z.boolean().default(true),
+      messenger: z.boolean().default(true),
+      call: z.boolean().default(true),
+      top: z.boolean().default(true),
+    })
+    .prefault({}),
+  // J1 mobile menu (B10): optional items beside Home on the phone bottom bar.
+  mobileNav: z
+    .object({
+      search: z.boolean().default(true),
+      track: z.boolean().default(true),
+      cart: z.boolean().default(true),
+    })
+    .prefault({}),
   // B3: active poster banners shown as an autoplaying slider in place of the welcome hero.
   heroSlider: z
     .object({
@@ -144,6 +162,8 @@ export const baseDesign: Design = {
   style: { card: 'bordered', showcase: 'grid', hover: 'lift', motion: 'subtle' },
   productCard: { badges: true, oldPrice: true, button: true },
   grid: { mobile: 2, desktop: 4, shape: 'theme' },
+  floating: { side: 'right', whatsapp: true, messenger: true, call: true, top: true },
+  mobileNav: { search: true, track: true, cart: true },
   heroSlider: { enabled: false, interval: 5, effect: 'slide' },
   announcement: { messages: [], mode: 'rotate', link: '', closable: true },
   footer: {

@@ -108,9 +108,10 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       />
       {on('helpBubble') && (
         <HelpBubble
-          links={helpLinks(business.contact, t)}
+          links={helpLinks(business.contact, d.floating, t)}
           label={t('shop.help')}
-          top={t('shop.backToTop')}
+          top={d.floating.top ? t('shop.backToTop') : null}
+          side={d.floating.side}
         />
       )}
       {on('miniCart') && (
@@ -132,6 +133,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
             track: t('shop.track'),
             cart: t('shop.cart'),
           }}
+          items={d.mobileNav}
         />
       )}
       <Analytics ga4={business.ga4MeasurementId} />

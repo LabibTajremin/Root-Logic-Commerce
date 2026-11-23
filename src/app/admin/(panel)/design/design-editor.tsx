@@ -248,6 +248,29 @@ export const DesignEditor = ({ initial, version: v0, themes, labels: L }: Props)
             </Fragment>
           ))}
         </fieldset>
+        <fieldset className="flex flex-col">
+          <legend className="mb-1 text-sm font-semibold">{L.floating}</legend>
+          {select('floatSide', L.floatSide!, d.floating.side, ['right', 'left'], (v) =>
+            set('floating', { side: v as 'right' }),
+          )}
+          {(['whatsapp', 'messenger', 'call', 'top'] as const).map((k) => (
+            <Fragment key={k}>
+              {check(`float-${k}`, L[`float_${k}`]!, d.floating[k], (b) =>
+                set('floating', { [k]: b }),
+              )}
+            </Fragment>
+          ))}
+        </fieldset>
+        <fieldset className="flex flex-col">
+          <legend className="mb-1 text-sm font-semibold">{L.mobileNav}</legend>
+          {(['search', 'track', 'cart'] as const).map((k) => (
+            <Fragment key={k}>
+              {check(`mnav-${k}`, L[`mnav_${k}`]!, d.mobileNav[k], (b) =>
+                set('mobileNav', { [k]: b }),
+              )}
+            </Fragment>
+          ))}
+        </fieldset>
         {select('footerStyle', L.footerStyle!, d.footer.style, footerStyles, (v) =>
           set('footer', { style: v as 'classic' }),
         )}

@@ -595,6 +595,37 @@ test('shop info feeds the help bubble; help bubble and bottom nav follow their f
   await expect(page.locator('nav[aria-label="Quick links"]')).toHaveCount(0)
   await toggle('helpBubble', 'Turn on')
   await toggle('bottomNav', 'Turn on')
+
+  // J1 floating buttons + mobile menu tabs.
+  const design = async (side: 'left' | 'right', on: boolean) => {
+    await page.goto('/admin/design')
+    await page.getByLabel('Button side').selectOption(side)
+    for (const l of ['List WhatsApp', 'Show Back to top', 'Show Search', 'Show Cart'])
+      await page.getByLabel(l).setChecked(on)
+    await page.getByRole('button', { name: 'Publish' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Published' })).toBeVisible()
+    await page.goto('/')
+  }
+  await design('left', false)
+  await expect(page.getByRole('complementary', { name: 'Help' })).toHaveAttribute(
+    'data-side',
+    'left',
+  )
+  await page.locator('details > summary').filter({ hasText: 'Help' }).click()
+  await expect(page.getByRole('link', { name: 'Chat on WhatsApp' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Back to top' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Call us' })).toBeVisible()
+  const quick = page.locator('nav[aria-label="Quick links"]')
+  await expect(quick.locator('a[href="/search"]')).toHaveCount(0)
+  await expect(quick.locator('a[href="/track"]')).toHaveCount(1)
+  await expect(quick.getByRole('button')).toHaveCount(0)
+  await a11y()
+  await design('right', true)
+  await expect(page.getByRole('complementary', { name: 'Help' })).toHaveAttribute(
+    'data-side',
+    'right',
+  )
+  await expect(quick.locator('a[href="/search"]')).toHaveCount(1)
 })
 
 test('announcement bar: messages scroll or rotate, link and close are optional, empty hides it', async ({
