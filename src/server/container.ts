@@ -10,6 +10,7 @@ import { createOrders, type OrderEvents } from '@/modules/orders'
 import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
 import { auditActor } from './audit-context'
+import { createCoupons } from '@/modules/coupons'
 import { createPages } from '@/modules/pages'
 import { createReviews, lookupFromTracking } from '@/modules/reviews'
 import { createFeatures, createPlans } from '@/modules/plans'
@@ -29,6 +30,7 @@ import { unavailableStorage } from '@/infrastructure/storage/unavailable'
 import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
+import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
 import { createPagesRepo } from '@/infrastructure/db/repositories/pages-repo'
 import { createReviewsRepo } from '@/infrastructure/db/repositories/reviews-repo'
 import { createActivityRepo } from '@/infrastructure/db/repositories/activity-repo'
@@ -73,7 +75,8 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     await activity.record(storeId, { action, before, after, actorId, actorIp: ip })
   }
   const settings = createSiteSettings({ repo: createSettingsRepo(db), audit })
-  const orders = createOrders({ repo: createOrdersRepo(db), bus })
+  const coupons = createCoupons({ repo: createCouponsRepo(db) })
+  const orders = createOrders({ repo: createOrdersRepo(db), bus, coupons })
   const secrets = createSecretBox(config.settingsKey)
   const plans = createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements })
   const storeSettings = (storeId: string) => settings.get(storeId, { storeName: config.store.name })
@@ -152,6 +155,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
       audit,
     }),
     orders,
+    coupons,
     stock: createStock({ repo: createStockRepo(db) }),
     plans,
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),

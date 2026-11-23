@@ -1,3 +1,5 @@
+import { createCoupons, type Coupons } from '@/modules/coupons'
+import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createCatalog } from '@/modules/catalog'
@@ -12,7 +14,7 @@ import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
 type TestDb = Awaited<ReturnType<typeof createTestDb>>
-let db: TestDb, orders: Orders, stock: Stock, store: string, other: string
+let db: TestDb, orders: Orders, coupons: Coupons, stock: Stock, store: string, other: string
 let events: string[]
 const zones = [
   { id: 'dhaka', label: 'Inside Dhaka', charge: 6000 },
@@ -89,7 +91,8 @@ beforeEach(async () => {
   const bus = createEventBus<OrderEvents>(vi.fn())
   for (const e of ['order.placed', 'order.confirmed', 'order.cancelled', 'order.returned'] as const)
     bus.on(e, (p) => void events.push(`${e}#${p.orderNo}`))
-  orders = createOrders({ repo: createOrdersRepo(db), bus })
+  coupons = createCoupons({ repo: createCouponsRepo(db) })
+  orders = createOrders({ repo: createOrdersRepo(db), bus, coupons })
   stock = createStock({ repo: createStockRepo(db) })
   store = await seedStore(db)
   other = await seedStore(db, 'other')
@@ -449,5 +452,115 @@ describe('recommendations (A8)', () => {
       [pal.id, sib.id],
       [sib.id],
     ])
+  })
+})
+
+describe('coupons at checkout (C2)', () => {
+  it('takes the code off, stores it, counts uses per phone and in total', async () => {
+    const p = await product(store, { price: 50000, stock: 20 })
+    await coupons.create(store, {
+      code: 'eid10',
+      kind: 'percent',
+      value: 10,
+      perPhoneLimit: 1,
+      totalLimit: 2,
+    })
+    const q = await orders.quote(store, { ...checkout(p.id), couponCode: ' Eid10 ' }, zones)
+    expect(q).toMatchObject({ subtotal: 50000, discount: 5000, total: 51000, couponCode: 'EID10' })
+    const { id } = await orders.placeOrder(store, { ...checkout(p.id), couponCode: 'EID10' }, zones)
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      discount: 5000,
+      couponCode: 'EID10',
+      total: 51000,
+    })
+    await expect(
+      orders.placeOrder(store, { ...checkout(p.id), couponCode: 'EID10' }, zones),
+    ).rejects.toThrow('coupon.phone_limit')
+    await orders.placeOrder(
+      store,
+      { ...checkout(p.id, 1, '01812345678'), couponCode: 'EID10' },
+      zones,
+    )
+    await expect(
+      orders.placeOrder(store, { ...checkout(p.id, 1, '01912345678'), couponCode: 'EID10' }, zones),
+    ).rejects.toThrow('coupon.used_up')
+    await expect(
+      orders.placeOrder(store, { ...checkout(p.id), couponCode: 'NOPE' }, zones),
+    ).rejects.toThrow('coupon.invalid')
+  })
+
+  it('the last use goes to one order only, even when two race', async () => {
+    const p = await product(store, { price: 10000, stock: 20 })
+    const c = await coupons.create(store, {
+      code: 'LAST1',
+      kind: 'fixed',
+      value: 1000,
+      totalLimit: 1,
+    })
+    // Both pass the early check (used 0 < 1); the transaction lets only one redeem.
+    const results = await Promise.allSettled([
+      orders.placeOrder(store, { ...checkout(p.id, 1, '01712345678'), couponCode: 'LAST1' }, zones),
+      orders.placeOrder(store, { ...checkout(p.id, 1, '01812345678'), couponCode: 'LAST1' }, zones),
+    ])
+    expect(results.map((r) => r.status).sort()).toEqual(['fulfilled', 'rejected'])
+    expect((await coupons.list(store)).find((x) => x.id === c.id)!.used).toBe(1)
+  })
+
+  it('applies the best automatic coupon when no code is typed; free shipping waives delivery', async () => {
+    const p = await product(store, { price: 30000, stock: 20 })
+    await coupons.create(store, {
+      code: 'SHIPFREE',
+      kind: 'free_shipping',
+      value: 0,
+      autoApply: true,
+    })
+    await coupons.create(store, { code: 'SMALL', kind: 'fixed', value: 100, autoApply: true })
+    await coupons.create(store, {
+      code: 'BIGOFF',
+      kind: 'fixed',
+      value: 99999,
+      autoApply: true,
+      minSubtotal: 999999,
+    })
+    await coupons.create(store, {
+      code: 'OFFLINE',
+      kind: 'fixed',
+      value: 9999,
+      autoApply: true,
+      active: false,
+    })
+    const q = await orders.quote(store, checkout(p.id), zones)
+    expect(q).toMatchObject({ discount: 6000, total: 30000, couponCode: 'SHIPFREE' })
+    expect(
+      await orders.quote(store, checkout(p.id), [{ id: 'dhaka', label: 'Free', charge: 0 }]),
+    ).toMatchObject({
+      discount: 100,
+      couponCode: 'SMALL',
+    })
+  })
+
+  it('owner coupons: unique codes per store, edits, unknown ids', async () => {
+    const a = await coupons.create(store, { code: 'ONE', kind: 'fixed', value: 1 })
+    await coupons.create(store, { code: 'TWO', kind: 'fixed', value: 1 })
+    await coupons.create(other, { code: 'ONE', kind: 'fixed', value: 1 })
+    await expect(coupons.create(store, { code: 'one', kind: 'fixed', value: 1 })).rejects.toThrow(
+      'coupon.code_taken',
+    )
+    await coupons.update(store, a.id, { code: 'ONE', kind: 'percent', value: 5 })
+    await expect(
+      coupons.update(store, a.id, { code: 'TWO', kind: 'fixed', value: 1 }),
+    ).rejects.toThrow('coupon.code_taken')
+    await expect(
+      coupons.update(store, '00000000-0000-0000-0000-000000000000', {
+        code: 'NEW',
+        kind: 'fixed',
+        value: 1,
+      }),
+    ).rejects.toThrow('coupon.not_found')
+    expect((await coupons.list(store)).map((c) => [c.code, c.kind])).toEqual([
+      ['ONE', 'percent'],
+      ['TWO', 'fixed'],
+    ])
+    expect(await coupons.find(store, ' two ')).toMatchObject({ code: 'TWO' })
   })
 })

@@ -58,10 +58,11 @@ describe('checkout', () => {
     expect(r.error?.issues[0]?.message).toBe('phone.invalid')
   })
   it('computes totals in poisha and merges duplicate lines', () => {
-    expect(computeTotals([{ unitPrice: 34900, quantity: 2 }], 6000)).toEqual({
+    expect(computeTotals([{ unitPrice: 34900, quantity: 2 }], 6000, 800)).toEqual({
       subtotal: 69800,
       deliveryCharge: 6000,
-      total: 75800,
+      discount: 800,
+      total: 75000,
     })
     expect(
       mergeItems([

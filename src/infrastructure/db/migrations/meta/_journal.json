@@ -113,6 +113,13 @@
       "when": 1795473737897,
       "tag": "0015_checkout_extras",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795475042933,
+      "tag": "0016_coupons",
+      "breakpoints": true
     }
   ]
 }

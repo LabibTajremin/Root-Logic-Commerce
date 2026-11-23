@@ -1,3 +1,5 @@
+import { createCoupons } from '@/modules/coupons'
+import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createOrders, type OrderEvents, type Orders } from '@/modules/orders'
 import { createReviews, type Reviews } from '@/modules/reviews'
@@ -18,7 +20,11 @@ let db: Awaited<ReturnType<typeof createTestDb>>,
 
 beforeEach(async () => {
   db = await createTestDb()
-  orders = createOrders({ repo: createOrdersRepo(db), bus: createEventBus<OrderEvents>(vi.fn()) })
+  orders = createOrders({
+    repo: createOrdersRepo(db),
+    bus: createEventBus<OrderEvents>(vi.fn()),
+    coupons: createCoupons({ repo: createCouponsRepo(db) }),
+  })
   reviews = createReviews({
     repo: createReviewsRepo(db),
     lookup: async (s, no, phone) => {

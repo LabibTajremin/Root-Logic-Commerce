@@ -9,6 +9,7 @@ export type OrderProduct = {
   stock: number
   status: string
   options: ProductOptions
+  categoryId: string | null
 }
 export type OrderVariant = {
   id: string
@@ -42,7 +43,9 @@ export type NewOrder = {
   note: string | null
   deliveryZone: string
   paymentMethod: string
-  totals: { subtotal: number; deliveryCharge: number; total: number }
+  totals: { subtotal: number; deliveryCharge: number; discount: number; total: number }
+  /** C2: redeemed in the same transaction (the total limit is re-checked there). */
+  coupon: { id: string; code: string; totalLimit: number | null } | null
   items: OrderLine[]
 }
 export type OrderSummary = {
@@ -64,6 +67,8 @@ export type OrderEvent = {
 export type OrderDetail = OrderSummary & {
   subtotal: number
   deliveryCharge: number
+  discount: number
+  couponCode: string | null
   deliveryZone: string
   shipAddress: string
   shipArea: string

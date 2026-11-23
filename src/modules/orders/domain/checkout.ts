@@ -30,6 +30,15 @@ export const checkoutInput = z.object({
   district: z.string().trim().min(2).max(80),
   note: z.string().trim().max(500).nullable().default(null),
   zoneId: z.string().min(1),
+  // C2: an empty "Have a code?" box means none.
+  couponCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .max(24)
+    .transform((v) => v || null)
+    .nullable()
+    .default(null),
   paymentMethod: z.literal('COD').default('COD'),
   items: z
     .array(
@@ -49,9 +58,10 @@ export const lineTotal = (l: { unitPrice: number; quantity: number }) => l.unitP
 export const computeTotals = (
   lines: { unitPrice: number; quantity: number }[],
   deliveryCharge: number,
+  discount: number,
 ) => {
   const subtotal = lines.reduce((s, l) => s + lineTotal(l), 0)
-  return { subtotal, deliveryCharge, total: subtotal + deliveryCharge }
+  return { subtotal, deliveryCharge, discount, total: subtotal + deliveryCharge - discount }
 }
 
 /** How an order line reads everywhere: "Kurta (M / Red)" for a variant. */

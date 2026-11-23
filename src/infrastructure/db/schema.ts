@@ -363,6 +363,9 @@ export const orders = pgTable(
     status: orderStatusEnum().notNull().default('PENDING'),
     subtotal: integer().notNull(),
     deliveryCharge: integer().notNull(),
+    // C2: what the coupon took off (goods or delivery), and its code.
+    discount: integer().notNull().default(0),
+    couponCode: text(),
     total: integer().notNull(),
     deliveryZone: text().notNull(),
     shipName: text().notNull(),
@@ -406,6 +409,47 @@ export const productVariants = pgTable(
     sortOrder: integer().notNull().default(0),
   },
   (t) => [index('product_variants_product_idx').on(t.productId, t.sortOrder)],
+)
+
+// C2: owner-made discount codes; `used` is bumped atomically when an order redeems one.
+export const coupons = pgTable(
+  'coupons',
+  {
+    id: id(),
+    storeId: storeId(),
+    code: text().notNull(),
+    kind: text().$type<'percent' | 'fixed' | 'free_shipping'>().notNull(),
+    value: integer().notNull(),
+    minSubtotal: integer().notNull().default(0),
+    productIds: jsonb().$type<string[]>().notNull().default([]),
+    categoryIds: jsonb().$type<string[]>().notNull().default([]),
+    startsAt: timestamp({ withTimezone: true }),
+    endsAt: timestamp({ withTimezone: true }),
+    totalLimit: integer(),
+    perPhoneLimit: integer(),
+    autoApply: boolean().notNull().default(false),
+    active: boolean().notNull().default(true),
+    used: integer().notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('coupons_store_code_uq').on(t.storeId, t.code)],
+)
+
+export const couponRedemptions = pgTable(
+  'coupon_redemptions',
+  {
+    id: id(),
+    storeId: storeId(),
+    couponId: uuid()
+      .notNull()
+      .references(() => coupons.id, { onDelete: 'cascade' }),
+    orderId: uuid()
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    phone: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('coupon_redemptions_coupon_phone_idx').on(t.couponId, t.phone)],
 )
 
 export const orderItems = pgTable(

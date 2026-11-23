@@ -1,8 +1,24 @@
-import { and, asc, count, desc, eq, gte, ilike, inArray, lte, or, sql, type SQL } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lt,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm'
 import { DomainError } from '@/modules/shared'
 import type { OrderDetail, OrdersRepo } from '@/modules/orders'
 import type { Db } from '../client'
 import {
+  couponRedemptions,
+  coupons,
   customers,
   orderEvents,
   orderItems,
@@ -26,6 +42,8 @@ const detail = {
   ...summary,
   subtotal: orders.subtotal,
   deliveryCharge: orders.deliveryCharge,
+  discount: orders.discount,
+  couponCode: orders.couponCode,
   deliveryZone: orders.deliveryZone,
   shipAddress: orders.shipAddress,
   shipArea: orders.shipArea,
@@ -106,9 +124,27 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           deliveryZone: o.deliveryZone,
           paymentMethod: o.paymentMethod,
           ...o.totals,
+          couponCode: o.coupon?.code ?? null,
         })
         .returning({ id: orders.id, orderNo: orders.orderNo })
       await tx.insert(orderItems).values(o.items.map((i) => ({ ...i, orderId: created!.id })))
+      // C2: the total limit is re-checked here, so two last-use orders can't both win.
+      if (o.coupon) {
+        const [hit] = await tx
+          .update(coupons)
+          .set({ used: sql`${coupons.used} + 1` })
+          .where(
+            and(
+              eq(coupons.id, o.coupon.id),
+              o.coupon.totalLimit === null ? undefined : lt(coupons.used, o.coupon.totalLimit),
+            ),
+          )
+          .returning({ id: coupons.id })
+        if (!hit) throw new DomainError('coupon.used_up')
+        await tx
+          .insert(couponRedemptions)
+          .values({ storeId, couponId: o.coupon.id, orderId: created!.id, phone: o.customer.phone })
+      }
       await tx
         .insert(orderEvents)
         .values({ orderId: created!.id, toStatus: 'PENDING', note: 'Order placed' })
@@ -126,6 +162,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           stock: products.stock,
           status: products.status,
           options: products.options,
+          categoryId: products.categoryId,
         })
         .from(products)
         .where(and(eq(products.storeId, storeId), inArray(products.id, ids))),
