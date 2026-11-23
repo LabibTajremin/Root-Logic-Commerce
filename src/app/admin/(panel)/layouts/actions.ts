@@ -32,11 +32,29 @@ export async function previewLayout(_: ActionState, form: FormData) {
   })
 }
 
-export async function applyLayout(_: ActionState, form: FormData) {
-  return act('settings.manage', async ({ settings, store }) => {
+/** J3: apply a layout and decide what happens to the products. */
+export async function switchLayout(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ settings, store, catalog }) => {
+    const preset = presetOf(form)
+    const choice = String(form.get('choice'))
+    // Start fresh deletes the owner's products: the box and the typed word must both agree.
+    if (choice === 'fresh' && !(form.get('sure') === 'on' && form.get('confirm') === 'FRESH'))
+      throw new DomainError('layouts.confirm')
     const { version } = await currentSettings()
-    await settings.saveLayout(store.id, presetLayout(presetOf(form)), version)
+    await settings.saveLayout(store.id, presetLayout(preset), version)
+    if (choice !== 'mine') await catalog.addDemoPack(store.id, preset)
+    if (choice === 'demo') await catalog.hideMine(store.id)
+    if (choice === 'fresh') await catalog.startFresh(store.id)
     ;(await cookies()).delete(PREVIEW_COOKIE)
+    revalidateTag(`store:${store.id}`, 'max')
+    return '/admin/layouts'
+  })
+}
+
+export async function undoSwitch(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ catalog, store }) => {
+    if (form.get('undo') === 'restore') await catalog.restoreMine(store.id)
+    else await catalog.removeDemo(store.id)
     revalidateTag(`store:${store.id}`, 'max')
   })
 }

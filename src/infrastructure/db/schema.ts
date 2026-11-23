@@ -298,6 +298,9 @@ export const products = pgTable(
     lowStockThreshold: integer().notNull().default(5),
     sku: text(),
     status: productStatusEnum().notNull().default('draft'),
+    // J3: a sample from a demo pack; parkedStatus is the status "hide mine" saved.
+    demo: boolean().notNull().default(false),
+    parkedStatus: productStatusEnum(),
     sortOrder: integer().notNull().default(0),
     videoUrl: text(),
     seoTitle: text(),

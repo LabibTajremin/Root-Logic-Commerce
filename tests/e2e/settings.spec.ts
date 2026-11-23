@@ -16,6 +16,14 @@ const lastCode = (to: string) => {
     .filter((m) => m.to === to)
   return /code is (\d{6})/.exec(mine.at(-1)!.text)![1]!
 }
+/** J3: "Use this layout" asks what happens to the products first. */
+const useLayout = async (page: Page, preset: string, choice: string) => {
+  await page.goto('/admin/layouts')
+  await page.getByTestId(`layout-${preset}`).getByRole('link', { name: 'Use this layout' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: /^Switch to / })).toBeVisible()
+  await page.getByRole('button', { name: choice }).click()
+  await page.waitForURL(/\/admin\/layouts$/)
+}
 const saved = (page: Page) =>
   expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 const otpToggles = async (page: Page, sms: boolean, email: boolean) => {
@@ -349,13 +357,13 @@ test('layouts: owner previews a niche layout privately, then switches the home p
   await expect(page.locator('a[href="#products"]')).toHaveCount(1)
 
   await page.goto('/admin/layouts')
-  await page.getByTestId('layout-grocery').getByRole('button', { name: 'Use this layout' }).click()
+  await useLayout(page, 'grocery', 'Switch, keep mine')
   await expect(page.getByTestId('layout-grocery')).toContainText('In use')
   await page.goto('/')
   await expect(page.locator('a[href="#products"]')).toHaveCount(0)
 
   await page.goto('/admin/layouts')
-  await page.getByTestId('layout-general').getByRole('button', { name: 'Use this layout' }).click()
+  await useLayout(page, 'general', 'Switch, keep mine')
   await expect(page.getByTestId('layout-general')).toContainText('In use')
 
   // Any section can be switched off and back on.
@@ -1227,4 +1235,46 @@ test('home builder: new sections, order, category row count; trust strip and bud
   for (const id of ['category-rows', 'brands', 'budget-bands', 'trust-strip', 'screenshot-reviews'])
     await row(id).getByRole('button', { name: 'Turn off' }).click()
   await expect(row('trust-strip')).toContainText('Off')
+})
+
+// Last in the file: "start fresh" deletes the owner's products.
+test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  await signedIn(page)
+  expect((await page.goto('/admin/layouts/switch?preset=nope'))!.status()).toBe(404)
+  await page.goto('/admin/layouts/switch?preset=fashion')
+  await expect(page.getByTestId('switch-counts')).toContainText('demo pack has 3')
+  await a11y()
+
+  await useLayout(page, 'fashion', 'Switch, add demo')
+  await expect(page.getByTestId('layout-fashion')).toContainText('In use')
+  await expect(page.getByRole('button', { name: 'Remove demo products (3)' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Bring my products back/ })).toHaveCount(0)
+
+  await useLayout(page, 'fashion', 'Switch, show demo')
+  await page.goto('/search?q=')
+  await expect(page.getByRole('link', { name: 'Jamdani Saree' }).first()).toBeVisible()
+  // Only the demo pack shows; the owner's products are drafts now.
+  await expect(page.locator('.rlc-card')).toHaveCount(3)
+  await page.goto('/admin/layouts')
+  await page.getByRole('button', { name: /^Bring my products back/ }).click()
+  await expect(page.getByRole('button', { name: /^Bring my products back/ })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Remove demo products (3)' }).click()
+  await expect(page.getByRole('button', { name: /^Remove demo products/ })).toHaveCount(0)
+
+  // Start fresh needs the box and the typed word.
+  await page.goto('/admin/layouts/switch?preset=grocery')
+  await page.getByRole('button', { name: 'Delete mine and switch' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'type FRESH' })).toBeVisible()
+  await page.getByRole('checkbox', { name: /products will be deleted/ }).check()
+  await page.getByLabel('Type FRESH to confirm').fill('FRESH')
+  await page.getByRole('button', { name: 'Delete mine and switch' }).click()
+  await page.waitForURL(/\/admin\/layouts$/)
+  await page.goto('/search?q=')
+  await expect(page.locator('.rlc-card')).toHaveCount(3)
+  await expect(page.getByRole('link', { name: 'Mustard Oil 1 L' }).first()).toBeVisible()
+  await useLayout(page, 'general', 'Switch, keep mine')
 })

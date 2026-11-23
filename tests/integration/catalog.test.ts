@@ -394,3 +394,32 @@ describe('CSV import/export (A15)', () => {
     expect(await catalog.importCsv(store, '', false)).toEqual({ ok: false, rows: [] })
   })
 })
+
+describe('layout switch with demo packs (J3)', () => {
+  it('counts, adds a demo pack once, hides and brings back mine, removes the demo, starts fresh', async () => {
+    const live = await catalog.createProduct(store, { name: 'Mine', price: 100, status: 'active' })
+    const draft = await catalog.createProduct(store, { name: 'Draft', price: 100 })
+    expect(await catalog.demoCounts(store)).toEqual({ mine: 2, demo: 0, hidden: 0 })
+    await catalog.addDemoPack(store, 'fashion')
+    await catalog.addDemoPack(store, 'fashion')
+    expect(await catalog.demoCounts(store)).toEqual({ mine: 2, demo: 3, hidden: 0 })
+    expect((await catalog.listProducts(store, { status: 'active' })).map((p) => p.name)).toContain(
+      'Jamdani Saree',
+    )
+
+    await catalog.hideMine(store)
+    expect((await catalog.getProduct(store, live.id))?.status).toBe('draft')
+    expect(await catalog.demoCounts(store)).toEqual({ mine: 2, demo: 3, hidden: 2 })
+    await catalog.restoreMine(store)
+    expect((await catalog.getProduct(store, live.id))?.status).toBe('active')
+    expect((await catalog.getProduct(store, draft.id))?.status).toBe('draft')
+    expect((await catalog.demoCounts(store)).hidden).toBe(0)
+
+    await catalog.removeDemo(store)
+    expect(await catalog.demoCounts(store)).toEqual({ mine: 2, demo: 0, hidden: 0 })
+    await catalog.addDemoPack(store, 'grocery')
+    await catalog.startFresh(store)
+    expect(await catalog.demoCounts(store)).toEqual({ mine: 0, demo: 3, hidden: 0 })
+    expect(await catalog.demoCounts(other)).toEqual({ mine: 0, demo: 0, hidden: 0 })
+  })
+})

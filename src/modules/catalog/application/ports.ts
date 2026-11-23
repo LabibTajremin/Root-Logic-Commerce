@@ -27,9 +27,14 @@ export type Product = Omit<ProductData, 'slug'> & {
   sortOrder: number
   options: ProductOptions
   createdAt: Date
+  demo: boolean
+  parkedStatus: ProductData['status'] | null
 }
 /** What a product create/edit writes: options and variants are saved on their own. */
-export type ProductWrite = Omit<Product, 'id' | 'sortOrder' | 'options' | 'createdAt'>
+export type ProductWrite = Omit<
+  Product,
+  'id' | 'sortOrder' | 'options' | 'createdAt' | 'demo' | 'parkedStatus'
+>
 export type Variant = VariantData & { id: string; productId: string }
 export type VariantWrite = VariantData & { id?: string }
 export type ProductFilter = {
@@ -76,5 +81,10 @@ export type CatalogRepo = {
   soldCounts(storeId: string): Promise<Map<string, number>>
   /** Products that shared confirmed orders with this one, most often first. */
   coPurchased(storeId: string, productId: string): Promise<string[]>
+  /** J3 bulk moves: mark demo rows, park/unpark the owner's own, delete one side. */
+  markDemo(storeId: string, ids: string[]): Promise<void>
+  parkMine(storeId: string): Promise<void>
+  unparkMine(storeId: string): Promise<void>
+  deleteProducts(storeId: string, demo: boolean): Promise<void>
   productSlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
 }

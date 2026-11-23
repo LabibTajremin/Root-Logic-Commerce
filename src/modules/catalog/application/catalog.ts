@@ -10,6 +10,7 @@ import {
   type ProductInput,
 } from '../domain/rules'
 import { csvColumns, parseCsv, readRow, toCsv } from '../domain/csv'
+import { demoPacks } from '../domain/demo-packs'
 import { pickBoughtTogether, pickRelated } from '../domain/related'
 import { sizeChartInput, type SizeChartInput } from '../domain/size-chart'
 import { uniqueSlug } from '../domain/slug'
@@ -199,6 +200,32 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
     },
 
     getProductBySlug: (storeId: string, slug: string) => repo.getProductBySlug(storeId, slug),
+
+    /** J3: what a layout switch would touch — the owner's products, demo ones, hidden ones. */
+    async demoCounts(storeId: string) {
+      const all = await repo.listProducts(storeId, {})
+      return {
+        mine: all.filter((p) => !p.demo).length,
+        demo: all.filter((p) => p.demo).length,
+        hidden: all.filter((p) => p.parkedStatus !== null).length,
+      }
+    },
+    /** Adds a niche's sample products (once — names already there are skipped). */
+    async addDemoPack(storeId: string, pack: keyof typeof demoPacks) {
+      const have = new Set(
+        (await repo.listProducts(storeId, {})).filter((p) => p.demo).map((p) => p.name),
+      )
+      const ids = []
+      for (const d of demoPacks[pack].filter((x) => !have.has(x.name)))
+        ids.push((await this.createProduct(storeId, { ...d, stock: 10, status: 'active' })).id)
+      await repo.markDemo(storeId, ids)
+    },
+    /** Hide mine, show demo: the owner's products turn draft; nothing is deleted. */
+    hideMine: (storeId: string) => repo.parkMine(storeId),
+    restoreMine: (storeId: string) => repo.unparkMine(storeId),
+    removeDemo: (storeId: string) => repo.deleteProducts(storeId, true),
+    /** Start fresh: the owner's own products are deleted (the page asks twice). */
+    startFresh: (storeId: string) => repo.deleteProducts(storeId, false),
 
     /**
      * A15 import: every row is checked first (dry run); `apply` writes only a sheet with

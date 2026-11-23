@@ -11,12 +11,13 @@ import { SortableList } from '@/ui/sortable-list'
 import { ActionForm } from '@/ui/action-form'
 import { Badge } from '@/ui/primitives'
 import { adminContext } from '../context'
+import Link from 'next/link'
 import {
-  applyLayout,
   previewLayout,
   reorderSections,
   sectionSettings,
   toggleSection,
+  undoSwitch,
 } from './actions'
 
 export const metadata: Metadata = { title: 'Layouts' }
@@ -24,13 +25,14 @@ export const metadata: Metadata = { title: 'Layouts' }
 const button = 'min-h-11 rounded-control border border-line px-4 text-sm font-semibold'
 
 export default async function LayoutsPage() {
-  const [{ allowed, t }, settings] = await Promise.all([
+  const [{ allowed, t, catalog, store }, settings] = await Promise.all([
     adminContext('settings.manage'),
     currentSettings(),
   ])
   if (!allowed) return <p className="text-muted">{t('error.access.denied')}</p>
   const layout = layoutOf(settings.layout)
   const current = layout.preset
+  const counts = await catalog.demoCounts(store.id)
   return (
     <>
       <h1 className="font-heading text-3xl">{t('layouts.title')}</h1>
@@ -81,6 +83,19 @@ export default async function LayoutsPage() {
           }))}
         />
       </section>
+      {/* J3: a switch can be undone (except "start fresh"). */}
+      <ActionForm action={undoSwitch} className="flex flex-wrap gap-2 empty:hidden">
+        {counts.hidden > 0 && (
+          <button name="undo" value="restore" className={button}>
+            {t('layouts.restoreMine', { n: counts.hidden })}
+          </button>
+        )}
+        {counts.demo > 0 && (
+          <button name="undo" value="demo" className={button}>
+            {t('layouts.removeDemo', { n: counts.demo })}
+          </button>
+        )}
+      </ActionForm>
       <h2 className="font-heading text-xl">{t('layouts.gallery')}</h2>
       <ul className="grid gap-4 md:grid-cols-2">
         {presetIds.map((id) => (
@@ -107,12 +122,13 @@ export default async function LayoutsPage() {
                 <input type="hidden" name="preset" value={id} />
                 <button className={button}>{t('layouts.preview')}</button>
               </ActionForm>
-              <ActionForm action={applyLayout} saved={t('common.saved')}>
-                <input type="hidden" name="preset" value={id} />
-                <button className={`${button} bg-button text-button-text`}>
-                  {t('layouts.use')}
-                </button>
-              </ActionForm>
+              {/* J3: switching asks what to do with the products first. */}
+              <Link
+                href={`/admin/layouts/switch?preset=${id}`}
+                className={`${button} inline-flex items-center bg-button text-button-text`}
+              >
+                {t('layouts.use')}
+              </Link>
             </div>
           </li>
         ))}

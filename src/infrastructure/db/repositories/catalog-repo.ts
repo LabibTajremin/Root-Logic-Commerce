@@ -6,6 +6,8 @@ import {
   getTableColumns,
   ilike,
   inArray,
+  isNotNull,
+  isNull,
   ne,
   notInArray,
   sql,
@@ -250,6 +252,29 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
       .groupBy(orderItems.productId)
       .orderBy(desc(sql`count(*)`))
     return rows.map((r) => r.id!)
+  },
+  markDemo: async (storeId, ids) => {
+    await db
+      .update(products)
+      .set({ demo: true })
+      .where(and(eq(products.storeId, storeId), inArray(products.id, ids)))
+  },
+  parkMine: async (storeId) => {
+    await db
+      .update(products)
+      .set({ parkedStatus: sql`${products.status}`, status: 'draft' })
+      .where(
+        and(eq(products.storeId, storeId), eq(products.demo, false), isNull(products.parkedStatus)),
+      )
+  },
+  unparkMine: async (storeId) => {
+    await db
+      .update(products)
+      .set({ status: sql`${products.parkedStatus}`, parkedStatus: null })
+      .where(and(eq(products.storeId, storeId), isNotNull(products.parkedStatus)))
+  },
+  deleteProducts: async (storeId, demo) => {
+    await db.delete(products).where(and(eq(products.storeId, storeId), eq(products.demo, demo)))
   },
   productSlugTaken: (storeId, slug, exceptId) => taken(db, products, storeId, slug, exceptId),
 })

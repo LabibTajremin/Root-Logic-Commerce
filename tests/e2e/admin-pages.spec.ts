@@ -194,6 +194,7 @@ test('owner invites staff; staff cannot reach owner-only settings', async ({
     '/admin/promotions',
     '/admin/features',
     '/admin/layouts',
+    '/admin/layouts/switch?preset=general',
     '/admin/texts',
     '/admin/pages',
     '/admin/activity',
