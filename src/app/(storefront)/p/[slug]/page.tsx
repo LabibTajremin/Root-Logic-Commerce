@@ -32,7 +32,7 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
 export default async function ProductPage({ params }: Props) {
   const p = await product((await params).slug)
-  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat, design } =
+  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat, design, reviews } =
     await storefront()
   const { ProductGallery } = theme.slots
   const images = (await imagesOf([p])).get(p.id)!
@@ -47,6 +47,7 @@ export default async function ProductPage({ params }: Props) {
     price: p.price,
   }
   const chart = await catalog.sizeChartFor(store.id, p)
+  const { reviews: said, summary } = await reviews.forProduct(store.id, p.id)
   const recs = await catalog.recommendationsFor(store.id, p)
   const asItem = (x: typeof p) => ({
     id: x.id,
@@ -78,6 +79,10 @@ export default async function ProductPage({ params }: Props) {
     category: cat?.name,
     brand: brand && { '@type': 'Brand', name: brand.name },
     image: images.map((i) => `${base}${i.src}/1024`),
+    // A7: only real, approved reviews — never a made-up rating.
+    aggregateRating: summary
+      ? { '@type': 'AggregateRating', ratingValue: summary.average, reviewCount: summary.count }
+      : undefined,
     offers: {
       '@type': 'Offer',
       priceCurrency: 'BDT',
@@ -123,6 +128,12 @@ export default async function ProductPage({ params }: Props) {
       <div className="flex flex-col gap-4">
         <ProductBadges badges={v.badges} className="flex-row" />
         <h1 className="font-heading text-3xl md:text-4xl">{p.name}</h1>
+        {summary && (
+          <a href="#reviews" className="text-sm font-semibold" data-testid="rating">
+            <span aria-hidden>★</span>{' '}
+            {t('reviews.summary', { avg: summary.average, n: summary.count })}
+          </a>
+        )}
         {brand && (
           <a href={`/b/${brand.slug}`} className="text-sm font-semibold text-muted underline">
             {t('shop.brand')}: {brand.name}
@@ -209,6 +220,36 @@ export default async function ProductPage({ params }: Props) {
             {t('shop.related')}
           </h2>
           <ProductGrid products={recs.related} />
+        </section>
+      )}
+      {said.length > 0 && (
+        <section
+          id="reviews"
+          aria-labelledby="reviews-title"
+          className="flex flex-col gap-3 md:col-span-2"
+        >
+          <h2 id="reviews-title" className="font-heading text-2xl">
+            {t('reviews.title')}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {said.map((r) => (
+              <li key={r.id} className="rounded-card border border-line p-4">
+                <p className="font-semibold">
+                  <span aria-label={t('reviews.stars', { n: r.rating })}>
+                    {'★'.repeat(r.rating)}
+                    <span className="text-muted">{'★'.repeat(5 - r.rating)}</span>
+                  </span>{' '}
+                  {r.name}
+                </p>
+                <p className="whitespace-pre-line text-muted">{r.body}</p>
+                {r.reply && (
+                  <p className="mt-2 rounded-control bg-soft p-3 text-sm">
+                    <span className="font-semibold">{t('reviews.reply')}:</span> {r.reply}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </article>

@@ -678,6 +678,73 @@ test('related products and frequently bought together (A8)', async ({ page, a11y
   ).toContainText(c)
 })
 
+test('reviews: a delivered order reviews its item, the owner approves and replies, the page shows it (A7)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const name = `Reviewed ${id}`
+  const phone = '01755' + String(Date.now()).slice(-6)
+  await signedIn(page)
+  await createProduct(page, { name, price: '400', stock: '5' })
+  await page.goto(`/p/${slug(name)}`)
+  await expect(page.getByTestId('rating')).toHaveCount(0)
+  expect(JSON.parse(await ld(page)).aggregateRating).toBeUndefined()
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await fillCheckout(page, phone)
+  const no = await placeOrder(page)
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  for (const step of ['Confirm order', 'Start processing', 'Mark shipped', 'Mark delivered']) {
+    await page.getByRole('button', { name: step }).click()
+    await expect(page.getByRole('button', { name: step })).toHaveCount(0)
+  }
+
+  await page.goto('/review')
+  await page.getByLabel('Order number').fill(no)
+  await page.getByLabel('Phone number').fill('01999999999')
+  await page.getByRole('button', { name: 'Find my order' }).click()
+  await alert(page, 'No delivered order found with that number and phone.')
+  await page.getByLabel('Phone number').fill(phone)
+  await page.getByRole('button', { name: 'Find my order' }).click()
+  await expect(page.getByRole('heading', { name })).toBeVisible()
+  await page.getByLabel('4★').check()
+  await page.getByLabel('Your review (optional)').fill('Fresh and well packed.')
+  await page.getByLabel('Your name').fill('Rahima')
+  await a11y()
+  await page.getByRole('button', { name: 'Send review' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Thanks!' })).toBeVisible()
+  await page.getByLabel('Your name').fill('Rahima')
+  await page.getByRole('button', { name: 'Send review' }).click()
+  await alert(page, 'You already reviewed this item.')
+
+  await page.goto('/admin/reviews?status=pending')
+  const card = page.getByRole('listitem').filter({ hasText: name })
+  await expect(card).toContainText('Fresh and well packed.')
+  await a11y()
+  await card.getByRole('button', { name: 'Approve' }).click()
+  await page.goto('/admin/reviews?status=approved')
+  await card.getByLabel('Your reply (optional)').fill('Thank you, Rahima!')
+  await card.getByRole('button', { name: 'Save reply' }).click()
+  await expect(card.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+  await page.goto('/admin/reviews')
+  await expect(card.getByLabel('Your reply (optional)')).toHaveValue('Thank you, Rahima!')
+
+  await page.goto(`/p/${slug(name)}`)
+  await expect(page.getByTestId('rating')).toContainText('4 (1 reviews)')
+  const reviews = page.getByRole('region', { name: 'Customer reviews' })
+  await expect(reviews).toContainText('Fresh and well packed.')
+  await expect(reviews).toContainText('Thank you, Rahima!')
+  expect(JSON.parse(await ld(page)).aggregateRating).toEqual({
+    '@type': 'AggregateRating',
+    ratingValue: 4,
+    reviewCount: 1,
+  })
+  await a11y()
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

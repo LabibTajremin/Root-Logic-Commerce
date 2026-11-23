@@ -95,6 +95,7 @@ describe('reviews (A7)', () => {
     expect((await r.forProduct('s', 'p1')).reviews[0]!.reply).toBeNull()
     expect((await r.queue('s', 'pending')).length).toBe(1)
     await expect(r.moderate('s', 'nope', 'rejected')).rejects.toThrow('review.not_found')
+    await expect(r.moderate('s', a.id, 'evil' as 'approved')).rejects.toThrow('validation')
     await expect(r.reply('s', 'nope', 'x')).rejects.toThrow('review.not_found')
   })
 

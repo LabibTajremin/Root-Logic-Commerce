@@ -1,5 +1,11 @@
 import { DomainError, validate } from '@/modules/shared'
-import { reviewInput, summarize, type ReviewInput, type ReviewStatus } from '../domain/reviews'
+import {
+  reviewInput,
+  reviewStatuses,
+  summarize,
+  type ReviewInput,
+  type ReviewStatus,
+} from '../domain/reviews'
 import type { OrderLookup, ReviewsRepo } from './ports'
 
 type Submit = ReviewInput & { orderNo: number; phone: string; productId: string }
@@ -35,8 +41,11 @@ export const createReviews = ({ repo, lookup }: { repo: ReviewsRepo; lookup: Ord
       return { reviews, summary: summarize(reviews.map((r) => r.rating)) }
     },
     queue: (storeId: string, status?: ReviewStatus) => repo.list(storeId, { status }),
-    moderate: (storeId: string, id: string, status: ReviewStatus) =>
-      mustUpdate(storeId, id, { status }),
+    async moderate(storeId: string, id: string, status: ReviewStatus) {
+      // The status arrives from a form: anything unknown is refused.
+      if (!reviewStatuses.includes(status)) throw new DomainError('validation')
+      await mustUpdate(storeId, id, { status })
+    },
     reply: (storeId: string, id: string, text: string) =>
       mustUpdate(storeId, id, { reply: text.trim() || null }),
   }
