@@ -1,4 +1,4 @@
-export { createCatalog, type Catalog } from './application/catalog'
+export { createCatalog, type Catalog, type CatalogAudit } from './application/catalog'
 export type {
   Brand,
   CatalogRepo,
@@ -13,7 +13,7 @@ export type {
 } from './application/ports'
 export { slugify } from './domain/slug'
 export { cardBadges, stockLeft, type CardBadge } from './domain/merchandising'
-export { badgeTones, type BadgeTone, type BrandInput } from './domain/rules'
+export { badgeTones, type BadgeTone, type BrandInput, type ProductInput } from './domain/rules'
 export { contentFromText, contentToText, type ProductContent } from './domain/content'
 export {
   mergeMatrix,

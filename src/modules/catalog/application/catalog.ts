@@ -24,9 +24,16 @@ import {
 } from '../domain/variants'
 import type { CatalogRepo, Product, ProductFilter } from './ports'
 
-type Deps = { repo: CatalogRepo; shortId: () => string }
+/** F3: product changes go to the activity log (before → after). */
+export type CatalogAudit = (
+  storeId: string,
+  action: 'product.create' | 'product.update',
+  before: unknown,
+  after: unknown,
+) => Promise<void>
+type Deps = { repo: CatalogRepo; shortId: () => string; audit: CatalogAudit }
 
-export const createCatalog = ({ repo, shortId }: Deps) => {
+export const createCatalog = ({ repo, shortId, audit }: Deps) => {
   const categorySlug = (storeId: string, name: string, wanted?: string, exceptId?: string) =>
     uniqueSlug(wanted ?? name, (s) => repo.categorySlugTaken(storeId, s, exceptId), shortId)
   const productSlug = (storeId: string, name: string, wanted?: string, exceptId?: string) =>
@@ -141,7 +148,12 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       await assertCategory(storeId, d.categoryId)
       await assertBrand(storeId, d.brandId)
       await assertChart(storeId, d.sizeChartId)
-      return repo.insertProduct(storeId, { ...d, slug: await productSlug(storeId, d.name, d.slug) })
+      const p = await repo.insertProduct(storeId, {
+        ...d,
+        slug: await productSlug(storeId, d.name, d.slug),
+      })
+      await audit(storeId, 'product.create', null, p)
+      return p
     },
 
     async updateProduct(storeId: string, id: string, input: ProductInput) {
@@ -150,12 +162,14 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       await assertCategory(storeId, d.categoryId)
       await assertBrand(storeId, d.brandId)
       await assertChart(storeId, d.sizeChartId)
-      await repo.updateProduct(storeId, id, {
+      const next = {
         ...d,
         // With variants, stock lives on the variants; the product keeps their total.
         stock: current.options.length > 0 ? current.stock : d.stock,
         slug: await productSlug(storeId, d.name, d.slug, id),
-      })
+      }
+      await repo.updateProduct(storeId, id, next)
+      await audit(storeId, 'product.update', current, { ...current, ...next })
     },
 
     listVariants: (storeId: string, productIds: string[]) => repo.listVariants(storeId, productIds),

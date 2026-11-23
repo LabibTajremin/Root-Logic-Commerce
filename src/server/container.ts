@@ -67,13 +67,12 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     now: () => new Date(),
     retentionDays: 30,
   })
-  const settings = createSiteSettings({
-    repo: createSettingsRepo(db),
-    audit: async (storeId, action, before, after) => {
-      const { actorId, ip } = auditActor()
-      await activity.record(storeId, { action, before, after, actorId, actorIp: ip })
-    },
-  })
+  // F3: every audited change is logged against the actor of the current admin action.
+  const audit = async (storeId: string, action: string, before: unknown, after: unknown) => {
+    const { actorId, ip } = auditActor()
+    await activity.record(storeId, { action, before, after, actorId, actorIp: ip })
+  }
+  const settings = createSiteSettings({ repo: createSettingsRepo(db), audit })
   const orders = createOrders({ repo: createOrdersRepo(db), bus })
   const secrets = createSecretBox(config.settingsKey)
   const plans = createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements })
@@ -150,6 +149,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     catalog: createCatalog({
       repo: createCatalogRepo(db),
       shortId: () => randomBytes(3).toString('hex'),
+      audit,
     }),
     orders,
     stock: createStock({ repo: createStockRepo(db) }),

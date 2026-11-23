@@ -1,5 +1,10 @@
 /** Actions the owner can take back from the activity log (F3). */
-export const undoableActions = ['settings.design', 'settings.business', 'settings.layout'] as const
+export const undoableActions = [
+  'settings.design',
+  'settings.business',
+  'settings.layout',
+  'product.update',
+] as const
 export type UndoableAction = (typeof undoableActions)[number]
 export const isUndoable = (a: string): a is UndoableAction =>
   (undoableActions as readonly string[]).includes(a)

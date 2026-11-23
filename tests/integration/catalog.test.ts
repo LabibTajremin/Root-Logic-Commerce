@@ -5,12 +5,18 @@ import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
 let catalog: Catalog
+let audits: { action: string; before: unknown; after: unknown }[]
 let store: string
 let other: string
 
 beforeEach(async () => {
   const db = await createTestDb()
-  catalog = createCatalog({ repo: createCatalogRepo(db), shortId: () => 'abc1' })
+  audits = []
+  catalog = createCatalog({
+    repo: createCatalogRepo(db),
+    shortId: () => 'abc1',
+    audit: async (_s, action, before, after) => void audits.push({ action, before, after }),
+  })
   store = await seedStore(db)
   other = await seedStore(db, 'other')
 })
@@ -421,5 +427,17 @@ describe('layout switch with demo packs (J3)', () => {
     await catalog.startFresh(store)
     expect(await catalog.demoCounts(store)).toEqual({ mine: 0, demo: 3, hidden: 0 })
     expect(await catalog.demoCounts(other)).toEqual({ mine: 0, demo: 0, hidden: 0 })
+  })
+})
+
+describe('product changes in the activity log (F3)', () => {
+  it('logs a create and an update with before and after', async () => {
+    const p = await catalog.createProduct(store, { name: 'Tea', price: 100 })
+    await catalog.updateProduct(store, p.id, { name: 'Green tea', price: 120 })
+    expect(audits.map((a) => a.action)).toEqual(['product.create', 'product.update'])
+    expect(audits[1]).toMatchObject({
+      before: { name: 'Tea', price: 100 },
+      after: { name: 'Green tea', price: 120 },
+    })
   })
 })

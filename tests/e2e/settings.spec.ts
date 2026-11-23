@@ -560,6 +560,33 @@ test('activity log: a design change is logged with who and where, filtered, and 
   await expect(page.getByLabel('Footer text')).toHaveValue(before)
 })
 
+test('activity log: product added and changed are logged; a product change is undone (F3)', async ({
+  page,
+}) => {
+  const name = `Logged ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '100', stock: '2' })
+  await editProduct(page, name)
+  await page.getByLabel('Price (৳)', { exact: true }).fill('140')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+
+  await page.goto('/admin/activity?action=product.update')
+  const row = page.getByTestId('activity-row').first()
+  await expect(row).toContainText('Product changed')
+  await expect(row).toContainText('price')
+  await page.goto('/admin/activity?action=product.create')
+  await expect(page.getByTestId('activity-row').first()).toContainText('Product added')
+  await expect(
+    page.getByTestId('activity-row').first().getByRole('button', { name: 'Undo this change' }),
+  ).toHaveCount(0)
+  await page.goto('/admin/activity?action=product.update')
+  await row.getByRole('button', { name: 'Undo this change' }).click()
+  await expect(page.getByTestId('activity-row').filter({ hasText: 'Undone' }).first()).toBeVisible()
+  await editProduct(page, name)
+  await expect(page.getByLabel('Price (৳)', { exact: true })).toHaveValue('100')
+})
+
 test('shop info feeds the help bubble; help bubble and bottom nav follow their feature switches', async ({
   page,
   a11y,

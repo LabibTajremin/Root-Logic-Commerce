@@ -356,7 +356,11 @@ describe('manual stock', () => {
 
 describe('listing data (A11)', () => {
   it('counts units sold on confirmed orders only and lists the cheapest variant price', async () => {
-    const catalog = createCatalog({ repo: createCatalogRepo(db), shortId: () => 'x' })
+    const catalog = createCatalog({
+      repo: createCatalogRepo(db),
+      shortId: () => 'x',
+      audit: async () => {},
+    })
     const { p, m } = await variantProduct()
     const plain = await product(store, { price: 30000 })
     const sold = await orders.placeOrder(
@@ -382,7 +386,11 @@ describe('listing data (A11)', () => {
 
 describe('recommendations (A8)', () => {
   it('related falls back to the category; bought-together to what shared confirmed orders', async () => {
-    const catalog = createCatalog({ repo: createCatalogRepo(db), shortId: () => 'x' })
+    const catalog = createCatalog({
+      repo: createCatalogRepo(db),
+      shortId: () => 'x',
+      audit: async () => {},
+    })
     const cat = await catalog.createCategory(store, { name: 'Tea' })
     const me = await catalog.createProduct(store, {
       name: 'Me',

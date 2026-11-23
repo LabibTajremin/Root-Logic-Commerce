@@ -590,6 +590,8 @@
   "activity.action.settings.design": "Design changed",
   "activity.action.settings.business": "Business settings changed",
   "activity.action.settings.layout": "Home layout changed",
+  "activity.action.product.create": "Product added",
+  "activity.action.product.update": "Product changed",
   "error.activity.not_found": "That change is no longer in the log.",
   "error.activity.not_undoable": "This change was already undone or can't be undone.",
   "store.title": "Shop info",

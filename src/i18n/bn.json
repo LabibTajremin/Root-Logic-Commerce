@@ -590,6 +590,8 @@
   "activity.action.settings.design": "ডিজাইন বদলানো হয়েছে",
   "activity.action.settings.business": "ব্যবসার সেটিংস বদলানো হয়েছে",
   "activity.action.settings.layout": "হোম লেআউট বদলানো হয়েছে",
+  "activity.action.product.create": "পণ্য যোগ হয়েছে",
+  "activity.action.product.update": "পণ্য বদলানো হয়েছে",
   "error.activity.not_found": "পরিবর্তনটি আর লগে নেই।",
   "error.activity.not_undoable": "এই পরিবর্তন আগেই ফেরানো হয়েছে বা ফেরানো যায় না।",
   "store.title": "দোকানের তথ্য",
