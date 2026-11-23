@@ -64,7 +64,8 @@ export default async function CouponsPage({
           <p className="hidden text-muted peer-empty:block">{t('coupons.empty')}</p>
         </Card>
         <Card>
-          <ActionForm action={saveCoupon} className="flex flex-col gap-3">
+          {/* Keyed so opening another coupon remounts the fields with its saved values. */}
+          <ActionForm key={c?.id ?? 'new'} action={saveCoupon} className="flex flex-col gap-3">
             <h2 className="font-semibold">{t(c ? 'coupons.edit' : 'coupons.add')}</h2>
             <input type="hidden" name="id" value={c?.id ?? ''} />
             {field(

@@ -1434,6 +1434,9 @@ test('coupons: percent, fixed and automatic free delivery; checkout code box, or
   await page.goto('/admin/coupons')
   await row(`SHIP-${id}`).click()
   await expect(page.getByRole('heading', { name: 'Edit coupon' })).toBeVisible()
+  // The form shows this coupon's saved values, not the last one opened.
+  await expect(page.getByLabel('Type')).toHaveValue('free_shipping')
+  await expect(page.getByLabel('Apply automatically (no code needed)')).toBeChecked()
   await page.getByLabel('Active').uncheck()
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(row(`SHIP-${id}`)).toContainText('Off')
