@@ -555,6 +555,86 @@ test('size charts: owner builds one, links it to a category and a product; shopp
   }
 })
 
+test('listing: filters, sort, page size, pages, grid columns and breadcrumbs (A11)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const cat = `List ${id}`
+  const brand = `Lb ${id}`
+  await signedIn(page)
+  await createCategory(page, cat)
+  await page.goto('/admin/brands')
+  await page.getByLabel('Brand name').fill(brand)
+  await page.getByRole('button', { name: 'Add brand' }).click()
+  await expect(page.getByRole('link', { name: brand })).toBeVisible()
+  for (let n = 1; n <= 6; n++)
+    await createProduct(page, {
+      name: `Item ${n} ${id}`,
+      price: String(n * 100),
+      stock: n === 6 ? '0' : '1',
+      category: cat,
+    })
+  const top = `Item 7 ${id}`
+  await createProduct(page, { name: top, price: '700', stock: '0', category: cat })
+  await editProduct(page, top)
+  await page.getByLabel('Brand', { exact: true }).selectOption({ label: brand })
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await editProduct(page, top)
+  await page.getByLabel('Options', { exact: true }).fill('Size: XL')
+  await page.getByRole('button', { name: 'Apply options' }).click()
+  await expect(page.getByRole('rowheader', { name: 'XL' })).toBeVisible()
+
+  const list = `/c/${slug(cat)}`
+  const cards = page.locator('.rlc-card')
+  const count = page.getByTestId('list-count')
+  await page.goto(`${list}?per=6`)
+  await expect(
+    page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Home' }),
+  ).toBeVisible()
+  await expect(cards).toHaveCount(6)
+  const pages = page.getByRole('navigation', { name: 'Pages' })
+  await expect(pages.getByRole('link')).toHaveText(['1', '2'])
+  await a11y()
+  await page.goto((await pages.getByRole('link', { name: '2' }).getAttribute('href'))!)
+  await expect(cards).toHaveCount(1)
+
+  await page.goto(list)
+  await page.getByLabel('Sort by').selectOption('price_desc')
+  await page.getByRole('button', { name: 'Apply' }).click()
+  await expect(page).toHaveURL(/sort=price_desc/)
+  await expect(cards.first()).toContainText(top)
+  const filters = async (fill: () => Promise<void>, n: number) => {
+    await page.goto(list)
+    await page.locator('details > summary').filter({ hasText: 'Filters' }).click()
+    await fill()
+    await page.getByRole('button', { name: 'Apply' }).click()
+    await expect(count).toHaveText(`${n} products`)
+  }
+  await filters(async () => {
+    await page.getByLabel('From').fill('200')
+    await page.getByLabel('To').fill('400')
+  }, 3)
+  await expect(page.getByLabel('From')).toHaveValue('200')
+  await filters(async () => {
+    await page.getByLabel('Brand', { exact: true }).selectOption({ label: brand })
+  }, 1)
+  await expect(page.getByLabel('Brand', { exact: true }).locator('option:checked')).toHaveText(
+    brand,
+  )
+  await filters(() => page.getByRole('checkbox', { name: 'XL' }).check(), 1)
+  await expect(page.getByRole('checkbox', { name: 'XL' })).toBeChecked()
+  await filters(() => page.getByRole('checkbox', { name: 'In stock only' }).check(), 5)
+  await a11y()
+
+  const cols = page.getByRole('navigation', { name: 'Products per row' })
+  await expect(cols).toBeVisible({ visible: page.viewportSize()!.width >= 768 })
+  await page.goto((await cols.getByRole('link', { name: '3' }).getAttribute('href'))!)
+  await expect(page.locator('.rlc-grid')).toHaveAttribute('style', /--cols-desktop:\s*3/)
+  await expect(page.locator('input[type=hidden][name=cols]')).toHaveValue('3')
+})
+
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
   const name = `Mapped ${uid()}`
   await signedIn(page)

@@ -186,6 +186,31 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       await repo.saveVariants(storeId, productId, p.options, rows)
     },
 
+    /** A11: what a list filters and sorts on — cheapest variant price, values, units sold. */
+    async listingItems(storeId: string, products: Product[]) {
+      const [variants, sold] = await Promise.all([
+        repo.listVariants(
+          storeId,
+          products.map((p) => p.id),
+        ),
+        repo.soldCounts(storeId),
+      ])
+      return products.map((p) => {
+        const prices = variants.filter((v) => v.productId === p.id).map((v) => v.price)
+        return {
+          id: p.id,
+          product: p,
+          price: prices.length > 0 ? Math.min(...prices) : p.price,
+          inStock: p.stock > 0,
+          brandId: p.brandId,
+          options: Object.fromEntries(p.options.map((o) => [o.name, o.values])),
+          sold: sold.get(p.id) ?? 0,
+          createdAt: p.createdAt,
+          sortOrder: p.sortOrder,
+        }
+      })
+    },
+
     reorderProducts: (storeId: string, ids: string[]) =>
       repo.setProductOrder(storeId, toSortOrders(ids)),
     listProducts: (storeId: string, filter: ProductFilter = {}) =>

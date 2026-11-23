@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { GaEvent } from '../../ga'
-import { breadcrumbLd, faqLd, JsonLd } from '../../json-ld'
+import { Breadcrumbs } from '../../breadcrumbs'
+import { faqLd, JsonLd } from '../../json-ld'
 import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
@@ -75,13 +76,17 @@ export default async function ProductPage({ params }: Props) {
   return (
     <article className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-2">
       <JsonLd data={jsonLd} />
-      <JsonLd
-        data={breadcrumbLd(base, [
-          { name: t('nav.home'), path: '/' },
-          ...(cat ? [{ name: cat.name, path: `/c/${cat.slug}` }] : []),
-          { name: p.name, path: `/p/${p.slug}` },
-        ])}
-      />
+      <div className="md:col-span-2">
+        <Breadcrumbs
+          base={base}
+          label={t('list.breadcrumb')}
+          items={[
+            { name: t('nav.home'), path: '/' },
+            ...(cat ? [{ name: cat.name, path: `/c/${cat.slug}` }] : []),
+            { name: p.name, path: `/p/${p.slug}` },
+          ]}
+        />
+      </div>
       {p.content.faq.length > 0 && <JsonLd data={faqLd(p.content.faq)} />}
       <GaEvent
         name="view_item"

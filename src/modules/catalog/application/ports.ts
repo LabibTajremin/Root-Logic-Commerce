@@ -26,9 +26,10 @@ export type Product = Omit<ProductData, 'slug'> & {
   slug: string
   sortOrder: number
   options: ProductOptions
+  createdAt: Date
 }
 /** What a product create/edit writes: options and variants are saved on their own. */
-export type ProductWrite = Omit<Product, 'id' | 'sortOrder' | 'options'>
+export type ProductWrite = Omit<Product, 'id' | 'sortOrder' | 'options' | 'createdAt'>
 export type Variant = VariantData & { id: string; productId: string }
 export type VariantWrite = VariantData & { id?: string }
 export type ProductFilter = {
@@ -71,5 +72,7 @@ export type CatalogRepo = {
   getProductBySlug(storeId: string, slug: string): Promise<Product | null>
   listProducts(storeId: string, filter: ProductFilter): Promise<Product[]>
   setProductOrder(storeId: string, orders: SortOrder[]): Promise<void>
+  /** Units sold per product (confirmed and later, not cancelled or returned). */
+  soldCounts(storeId: string): Promise<Map<string, number>>
   productSlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
 }

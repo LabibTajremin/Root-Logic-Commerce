@@ -7,11 +7,20 @@ import {
   inArray,
   ne,
   notInArray,
+  sql,
   type SQL,
 } from 'drizzle-orm'
 import type { CatalogRepo, SortOrder } from '@/modules/catalog'
 import type { Db } from '../client'
-import { brands, categories, products, productVariants, sizeCharts } from '../schema'
+import {
+  brands,
+  categories,
+  orderItems,
+  orders,
+  products,
+  productVariants,
+  sizeCharts,
+} from '../schema'
 
 const catCols = {
   id: categories.id,
@@ -25,7 +34,7 @@ const catCols = {
   sizeChartId: categories.sizeChartId,
 }
 const chartCols = { id: sizeCharts.id, name: sizeCharts.name, rows: sizeCharts.rows }
-const { storeId, createdAt, updatedAt, ...prodCols } = getTableColumns(products)
+const { storeId, updatedAt, ...prodCols } = getTableColumns(products)
 const brandCols = {
   id: brands.id,
   name: brands.name,
@@ -204,5 +213,21 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
         .where(and(eq(products.storeId, storeId), eq(products.id, productId)))
     }),
   setProductOrder: (storeId, orders) => reorder(db, products, storeId, orders),
+  soldCounts: async (storeId) =>
+    new Map(
+      (
+        await db
+          .select({ id: orderItems.productId, n: sql<number>`sum(${orderItems.quantity})::int` })
+          .from(orderItems)
+          .innerJoin(orders, eq(orders.id, orderItems.orderId))
+          .where(
+            and(
+              eq(orders.storeId, storeId),
+              inArray(orders.status, ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED']),
+            ),
+          )
+          .groupBy(orderItems.productId)
+      ).map((r) => [r.id!, r.n]),
+    ),
   productSlugTaken: (storeId, slug, exceptId) => taken(db, products, storeId, slug, exceptId),
 })

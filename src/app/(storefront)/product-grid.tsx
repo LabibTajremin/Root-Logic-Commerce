@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 import type { Product } from '@/modules/catalog'
 import type { Design } from '@/modules/site-settings'
 import type { ProductView } from '@/themes'
@@ -11,7 +12,14 @@ const cardView = (v: ProductView, show: Design['productCard']): ProductView => (
   compareAt: show.oldPrice ? v.compareAt : null,
 })
 
-export const ProductGrid = async ({ products }: { products: Product[] }) => {
+export const ProductGrid = async ({
+  products,
+  cols = null,
+}: {
+  products: Product[]
+  /** A11 grid toggle: products per row on wide screens, over the design setting. */
+  cols?: number | null
+}) => {
   const { theme, design, view, imagesOf, t } = await storefront()
   const { ProductCard, EmptyState } = theme.slots
   if (products.length === 0)
@@ -32,6 +40,7 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
   return (
     <ul
       data-showcase={design.style.showcase}
+      style={cols ? ({ '--cols-desktop': cols } as CSSProperties) : undefined}
       className="rlc-grid grid grid-cols-[repeat(var(--cols-mobile),minmax(0,1fr))] gap-4 md:grid-cols-[repeat(var(--cols-desktop),minmax(0,1fr))]"
     >
       {products.map((p) => (

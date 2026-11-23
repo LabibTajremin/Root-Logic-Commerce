@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
+import { createCatalog } from '@/modules/catalog'
+import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
 import { createOrders, type OrderEvents, type Orders } from '@/modules/orders'
 import { createStock, type Stock } from '@/modules/stock'
 import { createEventBus } from '@/modules/shared'
@@ -348,6 +350,32 @@ describe('manual stock', () => {
       'sold offline',
       'restock',
       'damaged',
+    ])
+  })
+})
+
+describe('listing data (A11)', () => {
+  it('counts units sold on confirmed orders only and lists the cheapest variant price', async () => {
+    const catalog = createCatalog({ repo: createCatalogRepo(db), shortId: () => 'x' })
+    const { p, m } = await variantProduct()
+    const plain = await product(store, { price: 30000 })
+    const sold = await orders.placeOrder(
+      store,
+      { ...checkout(p.id), items: [{ productId: p.id, variantId: m.id, quantity: 1 }] },
+      zones,
+    )
+    await orders.changeStatus(store, sold.id, 'CONFIRMED', 'u1')
+    const cancelled = await orders.placeOrder(store, checkout(plain.id, 2), zones)
+    await orders.changeStatus(store, cancelled.id, 'CONFIRMED', 'u1')
+    await orders.changeStatus(store, cancelled.id, 'CANCELLED', 'u1')
+    await orders.placeOrder(store, checkout(plain.id), zones) // pending: not sold yet
+    const items = await catalog.listingItems(store, [
+      (await catalog.getProduct(store, p.id))!,
+      (await catalog.getProduct(store, plain.id))!,
+    ])
+    expect(items.map((i) => [i.price, i.sold, i.inStock, i.options])).toEqual([
+      [40000, 1, true, { Size: ['M', 'L'] }],
+      [30000, 0, true, {}],
     ])
   })
 })

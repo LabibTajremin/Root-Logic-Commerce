@@ -1,10 +1,11 @@
-import { ProductGrid } from '../product-grid'
+import { ProductListing } from '../product-listing'
 import { storefront } from '../storefront'
 
-type Props = { searchParams: Promise<{ q?: string | string[] }> }
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const q = String((await searchParams).q ?? '').trim()
+  const params = await searchParams
+  const q = String(params.q ?? '').trim()
   const { store, catalog, theme, categories, t } = await storefront()
   const { CategoryNav } = theme.slots
   const products = await catalog.listProducts(store.id, {
@@ -37,7 +38,7 @@ export default async function SearchPage({ searchParams }: Props) {
       ) : (
         <CategoryNav categories={categories} allLabel={t('shop.all')} />
       )}
-      <ProductGrid products={products} />
+      <ProductListing products={products} path="/search" params={params} extra={q ? { q } : {}} />
     </section>
   )
 }
