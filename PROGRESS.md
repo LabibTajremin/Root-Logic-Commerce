@@ -1,5 +1,5 @@
-IN_PROGRESS: Phase 11 (Foundations) — spec docs/BUILD_SPEC.md
-Now: Phase 11 — storefront batch done & green (231/231 files 100%): Shop info page, module switches on the storefront (J5), B1 announcement bar, B9 help bubble, B10 phone bottom nav, B15 mini-cart, B3 hero slider (posters). J1 product card toggles (badges/old price/add-to-cart) + layout (per row phone/computer, picture shape) done; default favicon moved to public/. NEXT: J1 remaining editor tabs (B2 product-page buttons, checkout and thank-you tabs land with Phase 13; floating buttons, product page, checkout, thank-you, mobile menu) → Drive uploads storage gap → J3 switch dialog with demo packs → activity log for products/orders → Phase 11 wrap-up (PR body section, CI green) → Phase 12 Catalog.
+IN_PROGRESS: Phase 12 (Catalog) — spec docs/BUILD_SPEC.md
+Now: Phase 12 Catalog — done so far: A3 badges, A4 low-stock urgency. NEXT: A6 product content tabs (details/specs/how-to/FAQ + FAQ JSON-LD) + A2 brands → A1 variants + A16 multi-pick → A5 size chart → A11 listing UX → A12 gallery/share → A8 related/FBT → A7 reviews → A10 wishlist → A15 CSV → B5/B6/B12 → J3 switch dialog with demo packs → products in the activity log.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
@@ -22,7 +22,8 @@ Now: Phase 11 — storefront batch done & green (231/231 files 100%): Shop info 
 
 ## Phases 10–19 (docs/BUILD_SPEC.md §9, no approval stop)
 - [x] Phase 10 — Single merged Figma design — done (Figma 1NGfJz6PU8rxZ5pHgIcrsr; 187 Core screens + 5 theme pages; design/README.md) (9-page rule; first attempt rejected: no reel cover-flow, missing admin screens, v1/v2 pages duplicated)
-- [ ] Phase 11 — Foundations · [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
+- [x] Phase 11 — Foundations — phase 11 done d547b1d (CI https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45178997698; 232/232 files 100%)
+- [ ] 12 Catalog · [ ] 13 Checkout & orders · [ ] 14 Courier · [ ] 15 Marketing · [ ] 16 AI · [ ] 17 Growth & business · [ ] 18 Extended modules · [ ] 19 Hardening & docs
 - Feature IDs done (§13): —
 - Also done earlier: CI split into lint / unit / integration / e2e jobs + full verify gate (`test:unit`, `test:integration`, `test:e2e`).
 
