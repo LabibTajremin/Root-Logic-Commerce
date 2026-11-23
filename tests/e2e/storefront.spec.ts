@@ -411,6 +411,8 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
   await set('M / Red', 'Stock quantity', '2')
   await set('M / Red', 'SKU (optional)', `K-MR-${id}`)
   await set('L / Red', 'Stock quantity', '1')
+  // A blank cost counts as 0.
+  await set('L / Red', 'Cost price (৳)', '')
   await page.getByRole('button', { name: 'Update prices and stock' }).click()
   await page.reload()
   await expect(page.getByLabel('Price (৳) — M / Red', { exact: true })).toHaveValue('1500')
