@@ -855,6 +855,12 @@ test('order tracking is rate limited per connection', async ({ page }) => {
     await answered
   }
   await expect(page.getByRole('alert').filter({ hasText: 'Too many tries' })).toBeVisible()
+  // Review lookups share the same per-connection limit (they also take number + phone).
+  await page.goto('/review')
+  await page.getByLabel('Order number').fill('999999')
+  await page.getByLabel('Phone number').fill('01712345678')
+  await page.getByRole('button', { name: 'Find my order' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'Too many tries' })).toBeVisible()
 })
 
 test('TLS ask endpoint approves only store domains', async ({ request }) => {

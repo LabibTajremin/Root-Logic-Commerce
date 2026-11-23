@@ -6,7 +6,23 @@ import {
   type ReviewInput,
   type ReviewStatus,
 } from '../domain/reviews'
-import type { OrderLookup, ReviewsRepo } from './ports'
+import type { OrderLookup, ReviewsRepo, TrackedOrder } from './ports'
+
+/** Order tracking (number + phone) as the reviews' order lookup. */
+export const lookupFromTracking =
+  (
+    track: (storeId: string, orderNo: number, phone: string) => Promise<TrackedOrder | null>,
+  ): OrderLookup =>
+  async (storeId, orderNo, phone) => {
+    const o = await track(storeId, orderNo, phone)
+    return (
+      o && {
+        id: o.id,
+        delivered: o.status === 'DELIVERED',
+        productIds: o.items.map((i) => i.productId),
+      }
+    )
+  }
 
 type Submit = ReviewInput & { orderNo: number; phone: string; productId: string }
 

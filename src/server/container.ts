@@ -11,7 +11,7 @@ import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
 import { auditActor } from './audit-context'
 import { createPages } from '@/modules/pages'
-import { createReviews } from '@/modules/reviews'
+import { createReviews, lookupFromTracking } from '@/modules/reviews'
 import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
 import { createSiteSettings } from '@/modules/site-settings'
@@ -159,16 +159,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     reviews: createReviews({
       repo: createReviewsRepo(db),
       // A7: the shopper proves the order with its number + phone, as on tracking.
-      lookup: async (storeId, orderNo, phone) => {
-        const o = await orders.trackOrder(storeId, orderNo, phone)
-        return (
-          o && {
-            id: o.id,
-            delivered: o.status === 'DELIVERED',
-            productIds: o.items.map((i) => i.productId),
-          }
-        )
-      },
+      lookup: lookupFromTracking(orders.trackOrder),
     }),
     notifications,
     activity,

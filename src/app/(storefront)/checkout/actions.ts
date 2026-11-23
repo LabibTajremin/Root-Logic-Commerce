@@ -1,7 +1,7 @@
 'use server'
 
 import { otpTarget } from '@/modules/messages'
-import { isDomainError } from '@/modules/shared'
+import { actionError } from '../action-error'
 import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
 
@@ -43,8 +43,6 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
     )
     return { orderNo: order.orderNo }
   } catch (e) {
-    // Never a 500 at checkout: unknown failures are logged and shown as a retry hint.
-    if (!isDomainError(e)) console.error('[checkout]', e)
-    return { error: t(isDomainError(e) ? `error.${e.code}` : 'error.unexpected') }
+    return actionError(t, e, 'checkout')
   }
 }

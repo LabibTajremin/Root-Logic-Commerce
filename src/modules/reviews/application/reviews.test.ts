@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { summarize } from '../domain/reviews'
-import { createReviews } from './reviews'
+import { createReviews, lookupFromTracking } from './reviews'
 import type { OrderLookup, Review, ReviewsRepo } from './ports'
 
 const setup = () => {
@@ -102,5 +102,19 @@ describe('reviews (A7)', () => {
   it('averages to one decimal', () => {
     expect(summarize([5, 4, 4])).toEqual({ count: 3, average: 4.3 })
     expect(summarize([])).toBeNull()
+  })
+
+  it('reads delivery and items from order tracking', async () => {
+    const lookup = lookupFromTracking(async (_s, no) =>
+      no === 1
+        ? { id: 'o1', status: 'DELIVERED', items: [{ productId: 'p1' }, { productId: null }] }
+        : null,
+    )
+    expect(await lookup('s', 1, 'x')).toEqual({
+      id: 'o1',
+      delivered: true,
+      productIds: ['p1', null],
+    })
+    expect(await lookup('s', 2, 'x')).toBeNull()
   })
 })

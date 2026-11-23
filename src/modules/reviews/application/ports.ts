@@ -34,3 +34,10 @@ export type OrderLookup = (
   orderNo: number,
   phone: string,
 ) => Promise<{ id: string; delivered: boolean; productIds: (string | null)[] } | null>
+
+/** What order tracking returns, as far as reviews care. */
+export type TrackedOrder = {
+  id: string
+  status: string
+  items: { productId: string | null }[]
+}

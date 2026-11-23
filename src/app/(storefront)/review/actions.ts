@@ -1,6 +1,6 @@
 'use server'
 
-import { isDomainError } from '@/modules/shared'
+import { actionError } from '../action-error'
 import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
 
@@ -46,7 +46,6 @@ export const submitReview = async (_: unknown, form: FormData) => {
     })
     return { ok: true }
   } catch (e) {
-    if (!isDomainError(e)) console.error('[review]', e)
-    return { error: t(isDomainError(e) ? `error.${e.code}` : 'error.unexpected') }
+    return actionError(t, e, 'review')
   }
 }
