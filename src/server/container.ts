@@ -11,6 +11,7 @@ import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
 import { auditActor } from './audit-context'
 import { createPages } from '@/modules/pages'
+import { createReviews } from '@/modules/reviews'
 import { createFeatures, createPlans } from '@/modules/plans'
 import { createEventBus, createRateLimiter, formatMoney } from '@/modules/shared'
 import { createSiteSettings } from '@/modules/site-settings'
@@ -29,6 +30,7 @@ import { createOtpRepo } from '@/infrastructure/db/repositories/otp-repo'
 import { createEntitlementsRepo } from '@/infrastructure/db/repositories/entitlements-repo'
 import { createFeaturesRepo } from '@/infrastructure/db/repositories/features-repo'
 import { createPagesRepo } from '@/infrastructure/db/repositories/pages-repo'
+import { createReviewsRepo } from '@/infrastructure/db/repositories/reviews-repo'
 import { createActivityRepo } from '@/infrastructure/db/repositories/activity-repo'
 import { createNotificationsRepo } from '@/infrastructure/db/repositories/notifications-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
@@ -154,6 +156,20 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     plans,
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),
     pages: createPages({ repo: createPagesRepo(db) }),
+    reviews: createReviews({
+      repo: createReviewsRepo(db),
+      // A7: the shopper proves the order with its number + phone, as on tracking.
+      lookup: async (storeId, orderNo, phone) => {
+        const o = await orders.trackOrder(storeId, orderNo, phone)
+        return (
+          o && {
+            id: o.id,
+            delivered: o.status === 'DELIVERED',
+            productIds: o.items.map((i) => i.productId),
+          }
+        )
+      },
+    }),
     notifications,
     activity,
     settings,

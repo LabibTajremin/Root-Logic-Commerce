@@ -41,6 +41,7 @@ export const stockReasonEnum = pgEnum('stock_reason', [
   'order_restocked',
   'manual',
 ])
+export const reviewStatusEnum = pgEnum('review_status', ['pending', 'approved', 'rejected'])
 export const outboxStatusEnum = pgEnum('outbox_status', ['pending', 'sent', 'failed'])
 export const channelEnum = pgEnum('channel', ['email', 'sms', 'whatsapp'])
 
@@ -417,6 +418,31 @@ export const orderItems = pgTable(
     quantity: integer().notNull(),
   },
   (t) => [index('order_items_order_id_idx').on(t.orderId)],
+)
+
+// A7: one review per delivered order and product; shown once approved.
+export const reviews = pgTable(
+  'reviews',
+  {
+    id: id(),
+    storeId: storeId(),
+    productId: uuid()
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    orderId: uuid()
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    name: text().notNull(),
+    rating: integer().notNull(),
+    body: text().notNull(),
+    status: reviewStatusEnum().notNull().default('pending'),
+    reply: text(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('reviews_order_product_uq').on(t.orderId, t.productId),
+    index('reviews_store_product_idx').on(t.storeId, t.productId, t.status),
+  ],
 )
 
 export const orderEvents = pgTable(
