@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
@@ -48,6 +49,7 @@ export default async function ProductPage({ params }: Props) {
   }
   const chart = await catalog.sizeChartFor(store.id, p)
   const { reviews: said, summary } = await reviews.forProduct(store.id, p.id)
+  const shots = await reviews.screenshots(store.id)
   const recs = await catalog.recommendationsFor(store.id, p)
   const asItem = (x: typeof p) => ({
     id: x.id,
@@ -247,6 +249,34 @@ export default async function ProductPage({ params }: Props) {
                     <span className="font-semibold">{t('reviews.reply')}:</span> {r.reply}
                   </p>
                 )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {shots.length > 0 && (
+        <section aria-labelledby="shots-title" className="flex flex-col gap-3 md:col-span-2">
+          <h2 id="shots-title" className="font-heading text-2xl">
+            {t('shots.shop')}
+          </h2>
+          {/* Focusable so keyboard users can scroll the strip. */}
+          <ul
+            tabIndex={0}
+            aria-labelledby="shots-title"
+            className="flex snap-x gap-3 overflow-x-auto pb-2 outline-offset-2"
+          >
+            {shots.map((s) => (
+              <li key={s.id} className="flex w-40 shrink-0 snap-start flex-col gap-1">
+                <span className="relative aspect-[9/16] overflow-hidden rounded-card bg-soft">
+                  <Image
+                    src={`/api/media/${s.mediaId}`}
+                    alt={s.caption}
+                    fill
+                    sizes="160px"
+                    className="object-cover"
+                  />
+                </span>
+                <span className="text-xs text-muted">{s.caption}</span>
               </li>
             ))}
           </ul>

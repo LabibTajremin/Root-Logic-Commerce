@@ -5,7 +5,19 @@ import type { OrderLookup, Review, ReviewsRepo } from './ports'
 
 const setup = () => {
   const rows: (Review & { storeId: string })[] = []
+  const shots: { storeId: string; id: string; mediaId: string; caption: string }[] = []
   const repo: ReviewsRepo = {
+    listShots: async (storeId) => shots.filter((x) => x.storeId === storeId),
+    addShot: async (storeId, shot) => {
+      const row = { ...shot, storeId, id: `s${shots.length}` }
+      shots.push(row)
+      return row
+    },
+    removeShot: async (storeId, id) =>
+      void shots.splice(
+        shots.findIndex((x) => x.storeId === storeId && x.id === id),
+        1,
+      ),
     insert: async (storeId, r) => {
       if (rows.some((x) => x.orderId === r.orderId && x.productId === r.productId)) return null
       const row = {
@@ -116,5 +128,14 @@ describe('reviews (A7)', () => {
       productIds: ['p1', null],
     })
     expect(await lookup('s', 2, 'x')).toBeNull()
+  })
+
+  it('keeps the owner’s screenshot reviews with a short caption', async () => {
+    const r = setup()
+    const shot = await r.addScreenshot('s', 'm1', `  ${'x'.repeat(200)} `)
+    expect(shot.caption).toHaveLength(120)
+    expect(await r.screenshots('s')).toHaveLength(1)
+    await r.removeScreenshot('s', shot.id)
+    expect(await r.screenshots('s')).toEqual([])
   })
 })

@@ -1,7 +1,7 @@
 import { and, desc, eq, type SQL } from 'drizzle-orm'
 import type { ReviewsRepo } from '@/modules/reviews'
 import type { Db } from '../client'
-import { reviews } from '../schema'
+import { reviews, reviewScreenshots } from '../schema'
 
 const cols = {
   id: reviews.id,
@@ -15,7 +15,31 @@ const cols = {
   createdAt: reviews.createdAt,
 }
 
+const shotCols = {
+  id: reviewScreenshots.id,
+  mediaId: reviewScreenshots.mediaId,
+  caption: reviewScreenshots.caption,
+}
+
 export const createReviewsRepo = (db: Db): ReviewsRepo => ({
+  listShots: (storeId) =>
+    db
+      .select(shotCols)
+      .from(reviewScreenshots)
+      .where(eq(reviewScreenshots.storeId, storeId))
+      .orderBy(desc(reviewScreenshots.createdAt)),
+  addShot: async (storeId, shot) =>
+    (
+      await db
+        .insert(reviewScreenshots)
+        .values({ ...shot, storeId })
+        .returning(shotCols)
+    )[0]!,
+  removeShot: async (storeId, id) => {
+    await db
+      .delete(reviewScreenshots)
+      .where(and(eq(reviewScreenshots.storeId, storeId), eq(reviewScreenshots.id, id)))
+  },
   insert: async (storeId, r) =>
     (
       await db

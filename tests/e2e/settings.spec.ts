@@ -1049,3 +1049,41 @@ test('product page: gallery arrows and thumbnails, fit and thumbnail settings, s
   await expect(page.getByRole('button', { name: 'Next photo' })).toHaveCount(0)
   await design('cover', 'below')
 })
+
+test('screenshot reviews: owner uploads chat screenshots, product pages show them (A7)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Proof ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '120', stock: '2' })
+  await page.goto('/admin/reviews')
+  const shots = page.getByTestId('screenshots').getByRole('listitem')
+  for (const [caption, color] of [
+    ['From WhatsApp', '#25d366'],
+    ['', '#0084ff'],
+  ]) {
+    const n = await shots.count()
+    await page.getByLabel(/^Screenshot \(/).setInputFiles(await photo(color))
+    await page.getByLabel('Caption (optional)').fill(caption!)
+    await page.getByRole('button', { name: 'Upload screenshot' }).click()
+    await expect(shots).toHaveCount(n + 1)
+  }
+  await a11y()
+
+  const url = `/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+  await page.goto(url)
+  const strip = page.getByRole('region', { name: 'What customers say' })
+  await expect(strip.locator('img')).toHaveCount(2)
+  await expect(strip).toContainText('From WhatsApp')
+  await a11y()
+
+  await page.goto('/admin/reviews')
+  while ((await shots.count()) > 0) {
+    const n = await shots.count()
+    await shots.first().getByRole('button', { name: 'Remove' }).click()
+    await expect(shots).toHaveCount(n - 1)
+  }
+  await page.goto(url)
+  await expect(page.getByRole('region', { name: 'What customers say' })).toHaveCount(0)
+})

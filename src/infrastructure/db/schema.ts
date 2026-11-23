@@ -445,6 +445,17 @@ export const reviews = pgTable(
   ],
 )
 
+// A7: chat screenshots the owner shows as "What customers say".
+export const reviewScreenshots = pgTable('review_screenshots', {
+  id: id(),
+  storeId: storeId(),
+  mediaId: uuid()
+    .notNull()
+    .references(() => media.id, { onDelete: 'cascade' }),
+  caption: text().notNull().default(''),
+  createdAt: createdAt(),
+})
+
 export const orderEvents = pgTable(
   'order_events',
   {

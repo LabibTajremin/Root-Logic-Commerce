@@ -4,11 +4,12 @@ import { createReviews, type Reviews } from '@/modules/reviews'
 import { createEventBus } from '@/modules/shared'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createReviewsRepo } from '@/infrastructure/db/repositories/reviews-repo'
-import { products } from '@/infrastructure/db/schema'
+import { media, products } from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
-let orders: Orders,
+let db: Awaited<ReturnType<typeof createTestDb>>,
+  orders: Orders,
   reviews: Reviews,
   store: string,
   other: string,
@@ -16,7 +17,7 @@ let orders: Orders,
   orderNo: number
 
 beforeEach(async () => {
-  const db = await createTestDb()
+  db = await createTestDb()
   orders = createOrders({ repo: createOrdersRepo(db), bus: createEventBus<OrderEvents>(vi.fn()) })
   reviews = createReviews({
     repo: createReviewsRepo(db),
@@ -85,5 +86,21 @@ describe('reviews repo (A7)', () => {
       reviews: [{ rating: 4, reply: 'Thanks', status: 'approved' }],
       summary: { count: 1, average: 4 },
     })
+  })
+
+  it('keeps screenshot reviews per store, newest first', async () => {
+    const [m] = await db
+      .insert(media)
+      .values({ storeId: store, kind: 'local', ref: 'x' })
+      .returning()
+    const a = await reviews.addScreenshot(store, m!.id, 'From WhatsApp')
+    expect(await reviews.screenshots(store)).toEqual([
+      { id: a.id, mediaId: m!.id, caption: 'From WhatsApp' },
+    ])
+    expect(await reviews.screenshots(other)).toEqual([])
+    await reviews.removeScreenshot(other, a.id)
+    expect(await reviews.screenshots(store)).toHaveLength(1)
+    await reviews.removeScreenshot(store, a.id)
+    expect(await reviews.screenshots(store)).toEqual([])
   })
 })

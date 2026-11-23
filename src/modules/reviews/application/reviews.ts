@@ -57,6 +57,11 @@ export const createReviews = ({ repo, lookup }: { repo: ReviewsRepo; lookup: Ord
       return { reviews, summary: summarize(reviews.map((r) => r.rating)) }
     },
     queue: (storeId: string, status?: ReviewStatus) => repo.list(storeId, { status }),
+    /** A7 screenshot reviews: owner-uploaded chat screenshots, newest first. */
+    screenshots: (storeId: string) => repo.listShots(storeId),
+    addScreenshot: (storeId: string, mediaId: string, caption: string) =>
+      repo.addShot(storeId, { mediaId, caption: caption.trim().slice(0, 120) }),
+    removeScreenshot: (storeId: string, id: string) => repo.removeShot(storeId, id),
     async moderate(storeId: string, id: string, status: ReviewStatus) {
       // The status arrives from a form: anything unknown is refused.
       if (!reviewStatuses.includes(status)) throw new DomainError('validation')

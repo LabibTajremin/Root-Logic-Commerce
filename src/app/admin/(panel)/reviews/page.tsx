@@ -4,7 +4,8 @@ import { reviewStatuses, type ReviewStatus } from '@/modules/reviews'
 import { ActionForm } from '@/ui/action-form'
 import { Badge, Button, Card } from '@/ui/primitives'
 import { adminContext } from '../context'
-import { moderateReview, replyReview } from './actions'
+import Image from 'next/image'
+import { addScreenshot, moderateReview, removeScreenshot, replyReview } from './actions'
 
 export const metadata: Metadata = { title: 'Reviews' }
 
@@ -19,9 +20,10 @@ export default async function ReviewsPage({
   const { status } = await searchParams
   const { reviews, catalog, store, t } = await adminContext('products.manage')
   const filter = reviewStatuses.find((s) => s === status)
-  const [list, products] = await Promise.all([
+  const [list, products, shots] = await Promise.all([
     reviews.queue(store.id, filter),
     catalog.listProducts(store.id),
+    reviews.screenshots(store.id),
   ])
   const nameOf = new Map(products.map((p) => [p.id, p.name]))
   const tabs: (ReviewStatus | undefined)[] = [undefined, ...reviewStatuses]
@@ -88,6 +90,59 @@ export default async function ReviewsPage({
         ))}
       </ul>
       <p className="hidden text-muted peer-empty:block">{t('reviews.empty')}</p>
+      <Card className="flex flex-col gap-4">
+        <h2 className="font-semibold">{t('shots.title')}</h2>
+        <p className="text-sm text-muted">{t('shots.hint')}</p>
+        <ActionForm action={addScreenshot} className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1 text-sm font-semibold" htmlFor="shot-file">
+            {t('shots.file')}
+            <input
+              id="shot-file"
+              name="file"
+              type="file"
+              required
+              accept="image/png,image/jpeg,image/webp"
+              className="text-sm font-normal"
+            />
+          </label>
+          <label
+            className="flex flex-1 flex-col gap-1 text-sm font-semibold"
+            htmlFor="shot-caption"
+          >
+            {t('shots.caption')}
+            <input
+              id="shot-caption"
+              name="caption"
+              maxLength={120}
+              className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+            />
+          </label>
+          <Button type="submit" icon="upload">
+            {t('shots.add')}
+          </Button>
+        </ActionForm>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="screenshots">
+          {shots.map((s) => (
+            <li key={s.id} className="flex flex-col gap-2">
+              <span className="relative aspect-[9/16] overflow-hidden rounded-control bg-soft">
+                <Image
+                  src={`/api/media/${s.mediaId}`}
+                  alt={s.caption}
+                  fill
+                  sizes="160px"
+                  className="object-cover"
+                />
+              </span>
+              <ActionForm action={removeScreenshot}>
+                <input type="hidden" name="id" value={s.id} />
+                <button className="min-h-11 text-sm text-danger underline">
+                  {t('media.remove')}
+                </button>
+              </ActionForm>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </>
   )
 }

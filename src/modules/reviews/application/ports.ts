@@ -13,7 +13,12 @@ export type Review = {
 }
 export type ReviewFilter = { productId?: string; status?: ReviewStatus }
 
+export type Screenshot = { id: string; mediaId: string; caption: string }
+
 export type ReviewsRepo = {
+  listShots(storeId: string): Promise<Screenshot[]>
+  addShot(storeId: string, shot: Omit<Screenshot, 'id'>): Promise<Screenshot>
+  removeShot(storeId: string, id: string): Promise<void>
   /** Null when this order already reviewed this product. */
   insert(
     storeId: string,
