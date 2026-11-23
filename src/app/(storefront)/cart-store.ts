@@ -46,13 +46,13 @@ const save = (next: CartLine[]) => {
 }
 
 export const cart = {
-  add(item: Item) {
+  add(item: Item, qty: number) {
     // Append a zero line, bump whichever line matches first (the existing one, else the
     // new one), then drop the unused zero line: order is kept, no special cases.
     const next = [...snapshot(), { ...item, qty: 0 }]
     const i = next.findIndex((l) => l.id === item.id)
     save(
-      next.with(i, { ...next[i]!, qty: Math.min(99, next[i]!.qty + 1) }).filter((l) => l.qty > 0),
+      next.with(i, { ...next[i]!, qty: Math.min(99, next[i]!.qty + qty) }).filter((l) => l.qty > 0),
     )
   },
   // Only called for lines shown in the drawer, so the id is always in the cart.

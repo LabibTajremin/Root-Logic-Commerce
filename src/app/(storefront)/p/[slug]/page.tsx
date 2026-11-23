@@ -27,7 +27,8 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
 export default async function ProductPage({ params }: Props) {
   const p = await product((await params).slug)
-  const { theme, view, imagesOf, t, allCategories, catalog, store } = await storefront()
+  const { theme, view, imagesOf, t, allCategories, catalog, store, moneyFormat } =
+    await storefront()
   const { ProductGallery } = theme.slots
   const images = (await imagesOf([p])).get(p.id)!
   const v = view(p, images)
@@ -106,7 +107,13 @@ export default async function ProductPage({ params }: Props) {
               soldOut: t('shop.soldOut'),
               addToCart: t('shop.addToCart'),
               orderNow: t('shop.orderNow'),
+              addToList: t('shop.addToList'),
+              selected: t('shop.selected'),
+              total: t('shop.selectedTotal'),
+              addAll: t('shop.addAll'),
+              remove: t('shop.remove'),
             }}
+            moneyFormat={moneyFormat}
           />
         ) : (
           <>

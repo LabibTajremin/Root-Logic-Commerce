@@ -458,6 +458,37 @@ test('variants: owner sets options and per-variant prices; shopper picks, carts 
   // Leave no pending order behind: the dashboard test counts them.
   await page.getByRole('button', { name: 'Cancel order' }).click()
   await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  // A16: several combinations at once, with quantities and a running total.
+  await page.goto(`/p/${slug(kurta)}`)
+  await page.waitForLoadState('networkidle')
+  const size = (v: string) =>
+    page.getByRole('group', { name: /^Size/ }).getByText(v, { exact: true }).click()
+  const toList = () => page.getByRole('button', { name: '+ Add this to my list' }).click()
+  await size('L')
+  await toList()
+  await size('M')
+  await toList()
+  await toList()
+  const list = page.getByRole('region', { name: 'Selected' })
+  const step = (line: string, b: '+' | '−') =>
+    list
+      .getByRole('group', { name: `${kurta} (${line})` })
+      .getByRole('button', { name: b })
+      .click()
+  await step('M / Red', '+') // only 2 in stock: stays 2
+  await step('L / Red', '−') // never below 1
+  await expect(page.getByTestId('picks-total')).toHaveText('৳4,200')
+  await a11y()
+  await list
+    .getByRole('listitem')
+    .filter({ hasText: 'L / Red' })
+    .getByRole('button', { name: 'Remove' })
+    .click()
+  await expect(page.getByTestId('picks-total')).toHaveText('৳3,000')
+  await list.getByRole('button', { name: 'Add all to cart' }).click()
+  await expect(page.getByTestId('cart-subtotal')).toHaveText('৳3,000')
+  await expect(list).toHaveCount(0)
 })
 
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {
