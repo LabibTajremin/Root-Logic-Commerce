@@ -15,15 +15,16 @@ export type Reviewable = {
 // POST, like tracking: the phone never lands in a URL.
 export const findReviewable = async (_: Reviewable, form: FormData): Promise<Reviewable> => {
   const [{ reviews, catalog, store, limits }, ip] = await Promise.all([storefront(), currentIp()])
+  // Echoed back so a retry starts from what the shopper typed (React resets the form).
+  const no = String(form.get('no'))
+  const phone = String(form.get('phone'))
   try {
     limits.track.assert(`${store.id}:${ip}`)
   } catch {
-    return { limited: true }
+    return { no, phone, limited: true }
   }
-  const no = String(form.get('no'))
-  const phone = String(form.get('phone'))
   const r = await reviews.reviewable(store.id, Number(no), phone)
-  if (!r) return { notFound: true }
+  if (!r) return { no, phone, notFound: true }
   const all = await catalog.listProducts(store.id)
   return {
     no,

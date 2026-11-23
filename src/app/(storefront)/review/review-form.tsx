@@ -28,11 +28,25 @@ export const ReviewForm = ({ labels }: { labels: Labels }) => {
       <form action={find} className="flex flex-col gap-3 sm:max-w-sm">
         <label className="flex flex-col gap-1 text-sm font-semibold" htmlFor="no">
           {labels.orderNo}
-          <input id="no" name="no" inputMode="numeric" required className={`${box} font-normal`} />
+          <input
+            id="no"
+            name="no"
+            inputMode="numeric"
+            required
+            defaultValue={state.no}
+            className={`${box} font-normal`}
+          />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold" htmlFor="phone">
           {labels.phone}
-          <input id="phone" name="phone" type="tel" required className={`${box} font-normal`} />
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            defaultValue={state.phone}
+            className={`${box} font-normal`}
+          />
         </label>
         <button
           disabled={pending}
