@@ -303,7 +303,7 @@ test('product content tabs: owner fills them, the page shows them, FAQ feeds JSO
   await tab('Why buy from us').click()
   await expect(page.getByText('Free exchange in 7 days')).toBeVisible()
   await tab('Questions & answers').click()
-  await expect(page.getByRole('heading', { name: 'Is COD available?' })).toBeVisible()
+  await expect(page.getByRole('term').filter({ hasText: 'Is COD available?' })).toBeVisible()
   const faq = JSON.parse(await ld(page, 'FAQPage'))
   expect(faq.mainEntity[0]).toEqual({
     '@type': 'Question',
@@ -330,6 +330,7 @@ test('brands: owner adds one with a logo, links products; archived brands leave 
   }
   await addBrand(`First ${id}`)
   await page.getByRole('link', { name: `First ${id}` }).click()
+  await expect(page.getByRole('heading', { name: 'Edit brand' })).toBeVisible()
   await page.getByLabel('Brand name').fill(maker)
   await page.getByLabel(/^Brand logo/).setInputFiles(await photo('#aa3311'))
   await page.getByRole('button', { name: 'Save' }).click()
@@ -338,7 +339,9 @@ test('brands: owner adds one with a logo, links products; archived brands leave 
   await a11y()
   // Saving without a new file keeps the logo.
   await page.getByRole('link', { name: maker }).click()
+  await expect(page.getByRole('heading', { name: 'Edit brand' })).toBeVisible()
   await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/brands$/)
   await expect(page.getByRole('link', { name: maker }).locator('img')).toBeVisible()
   await addBrand(old)
 
@@ -354,6 +357,7 @@ test('brands: owner adds one with a logo, links products; archived brands leave 
   }
   await page.goto('/admin/brands')
   await page.getByRole('link', { name: old }).click()
+  await expect(page.getByRole('heading', { name: 'Edit brand' })).toBeVisible()
   await page.getByRole('button', { name: 'Archive' }).click()
   await expect(page.getByRole('link', { name: old })).toContainText('Archived')
   // An archived brand stays on the products that use it, but is not offered for new ones.

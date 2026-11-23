@@ -72,14 +72,14 @@ export const ProductTabs = ({
     )}
     {c.faq.length > 0 && (
       <Tab title={t('shop.tabFaq')}>
-        <div className="flex flex-col gap-3">
+        <dl className="flex flex-col gap-3">
           {c.faq.map((f) => (
             <div key={f.q}>
-              <h3 className="font-semibold">{f.q}</h3>
-              <p className="whitespace-pre-line text-muted">{f.a}</p>
+              <dt className="font-semibold">{f.q}</dt>
+              <dd className="whitespace-pre-line text-muted">{f.a}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </Tab>
     )}
   </div>
