@@ -26,10 +26,12 @@ export const Gallery = ({ images, labels }: { images: ImageView[]; labels: Galle
         <ul
           ref={track}
           aria-label={labels.photos}
+          // Keyboard users scroll the strip with the arrow keys once it has focus.
+          tabIndex={0}
           onScroll={(e) =>
             setAt(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))
           }
-          className="flex snap-x snap-mandatory overflow-x-auto rounded-card [scrollbar-width:none]"
+          className="flex snap-x snap-mandatory overflow-x-auto rounded-card outline-offset-2 [scrollbar-width:none]"
         >
           {images.map((img, i) => (
             <li
