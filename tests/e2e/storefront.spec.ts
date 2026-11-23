@@ -630,7 +630,9 @@ test('listing: filters, sort, page size, pages, grid columns and breadcrumbs (A1
 
   const cols = page.getByRole('navigation', { name: 'Products per row' })
   await expect(cols).toBeVisible({ visible: page.viewportSize()!.width >= 768 })
-  await page.goto((await cols.getByRole('link', { name: '3' }).getAttribute('href'))!)
+  // Hidden on phones (one or two per row there); the link still carries the setting.
+  const three = page.locator('nav[aria-label="Products per row"] a', { hasText: '3' })
+  await page.goto((await three.getAttribute('href'))!)
   await expect(page.locator('.rlc-grid')).toHaveAttribute('style', /--cols-desktop:\s*3/)
   await expect(page.locator('input[type=hidden][name=cols]')).toHaveValue('3')
 })
