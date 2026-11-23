@@ -28,7 +28,7 @@ export default async function ImportPage() {
       <h1 className="font-heading text-3xl">{t('csv.title')}</h1>
       <Card className="flex flex-col gap-3">
         <p className="text-sm">{t('csv.hint')}</p>
-        <code className="overflow-x-auto rounded-control bg-soft p-2 text-xs">
+        <code className="break-all rounded-control bg-soft p-2 text-xs">
           {csvColumns.join(',')}
         </code>
         {/* A plain GET form: the response is a file download, not a page. */}
