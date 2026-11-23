@@ -192,8 +192,9 @@ export const ProductForm = ({
               ))}
             </select>
           </div>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="brandId">
-            {t('field.brand')}
+          {/* Label beside the select: wrapped, the option names join its accessible name. */}
+          <div className="flex flex-col gap-1.5 text-sm font-semibold">
+            <label htmlFor="brandId">{t('field.brand')}</label>
             <select
               id="brandId"
               name="brandId"
@@ -209,7 +210,7 @@ export const ProductForm = ({
                   </option>
                 ))}
             </select>
-          </label>
+          </div>
           <Button type="submit" icon="check">
             {t('common.save')}
           </Button>
