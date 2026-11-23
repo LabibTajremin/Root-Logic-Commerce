@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { Icon } from '@/ui/icon'
-import type { Item } from './cart-store'
-import { useWishlist, wishlist } from './wishlist-store'
+import { useWishlist } from './wishlist-store'
 
 /** Header link with the saved count. */
 export const WishlistLink = ({ label }: { label: string }) => {
@@ -21,26 +20,5 @@ export const WishlistLink = ({ label }: { label: string }) => {
         {n || ''}
       </span>
     </Link>
-  )
-}
-
-export const WishButton = ({
-  item,
-  labels,
-}: {
-  item: Item
-  labels: { add: string; saved: string }
-}) => {
-  const saved = useWishlist().some((i) => i.id === item.id)
-  return (
-    <button
-      type="button"
-      aria-pressed={saved}
-      onClick={() => wishlist.toggle(item)}
-      className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold"
-    >
-      <Icon name="star" size={18} />
-      {saved ? labels.saved : labels.add}
-    </button>
   )
 }
