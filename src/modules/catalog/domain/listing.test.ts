@@ -101,5 +101,8 @@ describe('listing query (A11)', () => {
       '/c/tea?min=10&opt=Size%3AM&sort=new&page=3&cols=3',
     )
     expect(listingHref('/search', parseListing({}), {}, { q: 'tea' })).toBe('/search?q=tea')
+    expect(listingHref('/b/x', parseListing({}), {})).toBe('/b/x')
+    const full = parseListing({ max: ['50', '9'], brand: 'b1', stock: '1', per: '6' })
+    expect(listingHref('/b/x', full, {})).toBe('/b/x?max=50&brand=b1&stock=1&per=6')
   })
 })
