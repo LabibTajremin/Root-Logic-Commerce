@@ -3,6 +3,7 @@
 import { formatDate } from '@/modules/shared'
 import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
+import { lineName } from '@/modules/orders'
 
 export type Tracked = {
   orderNo: number
@@ -36,7 +37,7 @@ export const trackOrder = async (_: TrackState, form: FormData): Promise<TrackSt
         banglaDigits: business.banglaDigits,
       }),
       items: o.items.map((i) => ({
-        name: i.name,
+        name: lineName(i),
         qty: i.quantity,
         total: money(i.unitPrice * i.quantity),
       })),

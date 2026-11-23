@@ -161,7 +161,9 @@ export const CheckoutForm = ({
         <input
           type="hidden"
           name="items"
-          value={JSON.stringify(items.map((l) => ({ productId: l.id, quantity: l.qty })))}
+          value={JSON.stringify(
+            items.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.qty })),
+          )}
         />
         {otpTo && (
           <div className="flex flex-col gap-2 rounded-control bg-soft p-3">

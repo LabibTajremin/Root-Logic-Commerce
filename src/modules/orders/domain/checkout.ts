@@ -42,6 +42,10 @@ export const computeTotals = (
   return { subtotal, deliveryCharge, total: subtotal + deliveryCharge }
 }
 
+/** How an order line reads everywhere: "Kurta (M / Red)" for a variant. */
+export const lineName = (i: { name: string; variantLabel: string | null }) =>
+  i.variantLabel ? `${i.name} (${i.variantLabel})` : i.name
+
 type Item = { productId: string; variantId: string | null; quantity: number }
 // Same product (and variant) twice in a cart becomes one line with the summed quantity.
 export const mergeItems = (items: Item[]) => {

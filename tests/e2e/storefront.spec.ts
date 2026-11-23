@@ -249,8 +249,8 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await page.getByRole('button', { name: 'Place order' }).click()
   await alert(page, 'Something went wrong. Please try again.')
   await page.evaluate(() => {
-    const lines = JSON.parse(localStorage.getItem('rlc-cart')!) as { id: string }[]
-    lines[0]!.id = '00000000-0000-4000-8000-000000000000'
+    const lines = JSON.parse(localStorage.getItem('rlc-cart')!) as { productId: string }[]
+    lines[0]!.productId = '00000000-0000-4000-8000-000000000000'
     localStorage.setItem('rlc-cart', JSON.stringify(lines))
   })
   await page.reload()
@@ -381,6 +381,75 @@ test('brands: owner adds one with a logo, links products; archived brands leave 
   expect(JSON.parse(await ld(page)).brand).toBeUndefined()
   const gone = await page.goto(`/b/${slug(old)}`)
   expect(gone!.status()).toBe(404)
+})
+
+test('variants: owner sets options and per-variant prices; shopper picks, carts and orders them', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const [kurta, gone] = [`Kurta ${id}`, `Gone ${id}`]
+  await signedIn(page)
+  const withOptions = async (name: string, options: string) => {
+    await createProduct(page, { name, price: '1200', stock: '0' })
+    await editProduct(page, name)
+    await page.getByLabel('Options', { exact: true }).fill(options)
+    await page.getByRole('button', { name: 'Save options' }).click()
+    await expect(page.getByRole('rowheader').first()).toBeVisible()
+  }
+  await withOptions(kurta, 'Size: M, L\nColour: Red, Blue')
+  await expect(page.getByRole('rowheader')).toHaveText([
+    'M / Red',
+    'M / Blue',
+    'L / Red',
+    'L / Blue',
+  ])
+  const set = async (row: string, field: string, value: string) =>
+    page.getByLabel(`${field} — ${row}`).fill(value)
+  await set('M / Red', 'Price (৳)', '1500')
+  await set('M / Red', 'Compare-at price (৳)', '1800')
+  await set('M / Red', 'Stock quantity', '2')
+  await set('M / Red', 'SKU (optional)', `K-MR-${id}`)
+  await set('L / Red', 'Stock quantity', '1')
+  await page.getByRole('button', { name: 'Save prices and stock' }).click()
+  await page.reload()
+  await expect(page.getByLabel('Price (৳) — M / Red')).toHaveValue('1500')
+  await expect(page.getByLabel('Stock quantity', { exact: true })).toHaveValue('3')
+  await a11y()
+  await withOptions(gone, 'Size: S')
+
+  await page.goto(`/search?q=${encodeURIComponent(id)}`)
+  await expect(page.getByRole('link', { name: 'Choose options' })).toHaveCount(2)
+  await page.goto(`/p/${slug(gone)}`)
+  await expect(page.getByText('Sold out')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Add to cart' })).toHaveCount(0)
+
+  await page.goto(`/p/${slug(kurta)}`)
+  await page.waitForLoadState('networkidle')
+  const price = page.getByTestId('variant-price')
+  await expect(price).toContainText('৳1,500')
+  await expect(price.locator('s')).toHaveText('৳1,800')
+  await expect(page.getByRole('radio', { name: 'Blue' })).toBeDisabled()
+  await a11y()
+  await page.getByRole('radio', { name: 'L' }).check()
+  await expect(price).toHaveText('৳1,200')
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await expect(drawer(page).getByText(`${kurta} (L / Red)`)).toBeVisible()
+  await drawer(page).getByRole('button', { name: 'Continue shopping' }).click()
+  await page.getByRole('radio', { name: 'M' }).check()
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await expect(page.getByTestId('checkout-total')).toHaveText('৳2,760')
+  await fillCheckout(page)
+  const no = await placeOrder(page)
+
+  await page.goto('/admin/orders')
+  await page
+    .getByRole('link', { name: new RegExp(`#${no}`) })
+    .first()
+    .click()
+  await expect(page.getByText(`${kurta} (M / Red)`)).toBeVisible()
+  await expect(page.getByText(`${kurta} (L / Red)`)).toBeVisible()
 })
 
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {

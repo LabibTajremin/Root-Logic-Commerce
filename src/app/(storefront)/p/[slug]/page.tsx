@@ -7,6 +7,8 @@ import { AddToCart, OrderNow } from '../../cart-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 import { ProductTabs } from './product-tabs'
+import { VariantPicker } from './variant-picker'
+import { variantLabel } from '@/modules/catalog'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -30,7 +32,25 @@ export default async function ProductPage({ params }: Props) {
   const images = (await imagesOf([p])).get(p.id)!
   const v = view(p, images)
   const base = await origin()
-  const item = { id: p.id, slug: p.slug, name: p.name, price: p.price }
+  const item = {
+    id: p.id,
+    productId: p.id,
+    variantId: null,
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+  }
+  const variants = (await catalog.listVariants(store.id, [p.id])).map((x) => {
+    const shown = view({ ...p, price: x.price, compareAtPrice: x.compareAtPrice }, images)
+    const label = variantLabel(p.options, x.options)
+    return {
+      options: x.options,
+      price: shown.price,
+      compareAt: shown.compareAt,
+      stock: x.stock,
+      item: { ...item, id: x.id, variantId: x.id, name: `${p.name} (${label})`, price: x.price },
+    }
+  })
   const cat = allCategories.find((c) => c.id === p.categoryId)
   const brand = (await catalog.listBrands(store.id)).find((b) => b.id === p.brandId && !b.archived)
   const jsonLd = {
@@ -77,17 +97,34 @@ export default async function ProductPage({ params }: Props) {
             {t('shop.brand')}: {brand.name}
           </a>
         )}
-        <p className="flex items-baseline gap-3 text-2xl font-semibold">
-          {v.price}
-          {v.compareAt && <s className="text-base font-normal text-muted">{v.compareAt}</s>}
-        </p>
-        <p className="text-sm font-semibold">{v.inStock ? t('shop.inStock') : t('shop.soldOut')}</p>
-        <StockLeft n={v.left} label={t('shop.left')} />
-        {v.inStock && (
-          <div className="flex flex-col gap-2 sm:max-w-sm">
-            <AddToCart item={item} label={t('shop.addToCart')} />
-            <OrderNow item={item} label={t('shop.orderNow')} />
-          </div>
+        {variants.length > 0 ? (
+          <VariantPicker
+            options={p.options}
+            variants={variants}
+            labels={{
+              inStock: t('shop.inStock'),
+              soldOut: t('shop.soldOut'),
+              addToCart: t('shop.addToCart'),
+              orderNow: t('shop.orderNow'),
+            }}
+          />
+        ) : (
+          <>
+            <p className="flex items-baseline gap-3 text-2xl font-semibold">
+              {v.price}
+              {v.compareAt && <s className="text-base font-normal text-muted">{v.compareAt}</s>}
+            </p>
+            <p className="text-sm font-semibold">
+              {v.inStock ? t('shop.inStock') : t('shop.soldOut')}
+            </p>
+            <StockLeft n={v.left} label={t('shop.left')} />
+            {v.inStock && (
+              <div className="flex flex-col gap-2 sm:max-w-sm">
+                <AddToCart item={item} label={t('shop.addToCart')} />
+                <OrderNow item={item} label={t('shop.orderNow')} />
+              </div>
+            )}
+          </>
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
         <ProductTabs description={p.description} content={p.content} t={t} />

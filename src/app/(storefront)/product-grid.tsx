@@ -40,12 +40,28 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
             product={cardView(view(p, images.get(p.id)!), show)}
             labels={{ soldOut: t('shop.soldOut'), left: t('shop.left') }}
             action={
-              show.button && (
+              show.button &&
+              // A product with sizes/colours is added from its page, once one is picked.
+              (p.options.length > 0 ? (
+                <a
+                  href={`/p/${p.slug}`}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-control border border-line bg-surface px-4 text-sm font-semibold"
+                >
+                  {t('shop.chooseOptions')}
+                </a>
+              ) : (
                 <AddToCart
-                  item={{ id: p.id, slug: p.slug, name: p.name, price: p.price }}
+                  item={{
+                    id: p.id,
+                    productId: p.id,
+                    variantId: null,
+                    slug: p.slug,
+                    name: p.name,
+                    price: p.price,
+                  }}
                   label={t('shop.addToCart')}
                 />
-              )
+              ))
             }
           />
         </li>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { canTransition, nextStatuses, stockEffect } from './status'
-import { checkoutInput, computeTotals, mergeItems } from './checkout'
+import { checkoutInput, computeTotals, lineName, mergeItems } from './checkout'
 
 describe('status flow', () => {
   it('follows PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED', () => {
@@ -65,5 +65,10 @@ describe('checkout', () => {
       { productId: 'b', variantId: 'm', quantity: 1 },
       { productId: 'b', variantId: 'l', quantity: 1 },
     ])
+  })
+
+  it('names a variant line with its label', () => {
+    expect(lineName({ name: 'Kurta', variantLabel: 'M / Red' })).toBe('Kurta (M / Red)')
+    expect(lineName({ name: 'Kurta', variantLabel: null })).toBe('Kurta')
   })
 })

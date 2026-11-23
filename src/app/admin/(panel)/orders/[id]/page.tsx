@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { nextStatuses } from '@/modules/orders'
+import { lineName, nextStatuses } from '@/modules/orders'
 import { isUuid } from '@/modules/shared'
 import { ActionForm } from '@/ui/action-form'
 import { Icon } from '@/ui/icon'
@@ -60,9 +60,9 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <h2 className="mb-3 font-semibold">{t('order.items')}</h2>
             <ul className="divide-y divide-line">
               {o.items.map((i) => (
-                <li key={i.name} className="flex items-center justify-between gap-3 py-2">
+                <li key={lineName(i)} className="flex items-center justify-between gap-3 py-2">
                   <span>
-                    {i.name}
+                    {lineName(i)}
                     <span className="block text-xs text-muted">
                       {t('order.qty', { n: i.quantity })}
                     </span>

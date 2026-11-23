@@ -4,6 +4,7 @@ import { isUuid } from '@/modules/shared'
 import { adminContext } from '../../../context'
 import { PrintButton } from './print-button'
 import { currentSettings } from '@/server/request'
+import { lineName } from '@/modules/orders'
 
 export const metadata: Metadata = { title: 'Invoice' }
 
@@ -36,8 +37,8 @@ export default async function Invoice({ params }: { params: Promise<{ id: string
       <table className="w-full text-sm">
         <tbody>
           {o.items.map((i) => (
-            <tr key={i.name} className="border-b border-line">
-              <td className="py-2">{i.name}</td>
+            <tr key={lineName(i)} className="border-b border-line">
+              <td className="py-2">{lineName(i)}</td>
               <td className="py-2 text-right">× {i.quantity}</td>
               <td className="py-2 text-right">{money(i.unitPrice * i.quantity)}</td>
             </tr>

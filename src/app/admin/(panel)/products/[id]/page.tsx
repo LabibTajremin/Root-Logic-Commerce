@@ -4,6 +4,7 @@ import { isUuid } from '@/modules/shared'
 import { adminContext } from '../../context'
 import { ProductForm } from '../product-form'
 import { ProductImages } from './product-images'
+import { ProductVariants } from './variants'
 
 export const metadata: Metadata = { title: 'Edit product' }
 
@@ -23,6 +24,11 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
         locale={locale}
       />
       <ProductImages productId={product.id} />
+      <ProductVariants
+        product={product}
+        variants={await catalog.listVariants(store.id, [product.id])}
+        t={t}
+      />
     </>
   )
 }

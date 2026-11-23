@@ -2,7 +2,16 @@
 
 import { useSyncExternalStore } from 'react'
 const KEY = 'rlc-cart'
-export type CartLine = { id: string; slug: string; name: string; price: number; qty: number }
+/** `id` is the line key: the variant id for a variant, else the product id. */
+export type CartLine = {
+  id: string
+  productId: string
+  variantId: string | null
+  slug: string
+  name: string
+  price: number
+  qty: number
+}
 export type Item = Omit<CartLine, 'qty'>
 
 const EMPTY: CartLine[] = []
