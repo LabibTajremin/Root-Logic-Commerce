@@ -10,7 +10,11 @@ export default async function NewProduct() {
   return (
     <>
       <h1 className="font-heading text-3xl">{t('products.new')}</h1>
-      <ProductForm categories={await catalog.listCategories(store.id)} locale={locale} />
+      <ProductForm
+        categories={await catalog.listCategories(store.id)}
+        brands={await catalog.listBrands(store.id)}
+        locale={locale}
+      />
       <Card className="flex flex-col gap-2">
         <h2 className="font-semibold">{t('media.title')}</h2>
         <p className="text-sm text-muted">{t('media.saveFirst')}</p>

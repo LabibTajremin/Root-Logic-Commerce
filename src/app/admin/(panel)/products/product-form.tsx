@@ -1,4 +1,4 @@
-import type { Category, Product } from '@/modules/catalog'
+import type { Brand, Category, Product } from '@/modules/catalog'
 import { helpText } from '@/help'
 import { badgeTones, contentToText } from '@/modules/catalog'
 import type { Locale } from '@/i18n'
@@ -13,10 +13,12 @@ const taka = (minor: number | null | undefined) =>
 export const ProductForm = ({
   product,
   categories,
+  brands,
   locale,
 }: {
   product?: Product
   categories: Category[]
+  brands: Brand[]
   locale: Locale
 }) => {
   const t = (k: string) => translate(locale, k)
@@ -190,6 +192,24 @@ export const ProductForm = ({
               ))}
             </select>
           </div>
+          <label className="flex flex-col gap-1.5 text-sm font-semibold" htmlFor="brandId">
+            {t('field.brand')}
+            <select
+              id="brandId"
+              name="brandId"
+              defaultValue={product?.brandId ?? ''}
+              className={`${select} font-normal`}
+            >
+              <option value="">{t('common.none')}</option>
+              {brands
+                .filter((b) => !b.archived || b.id === product?.brandId)
+                .map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+            </select>
+          </label>
           <Button type="submit" icon="check">
             {t('common.save')}
           </Button>

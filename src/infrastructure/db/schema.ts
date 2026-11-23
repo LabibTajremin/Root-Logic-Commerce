@@ -252,12 +252,27 @@ export const categories = pgTable(
   ],
 )
 
+export const brands = pgTable(
+  'brands',
+  {
+    id: id(),
+    storeId: storeId(),
+    name: text().notNull(),
+    slug: text().notNull(),
+    logoId: uuid().references(() => media.id, { onDelete: 'set null' }),
+    archived: boolean().notNull().default(false),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('brands_store_slug_uq').on(t.storeId, t.slug)],
+)
+
 export const products = pgTable(
   'products',
   {
     id: id(),
     storeId: storeId(),
     categoryId: uuid().references(() => categories.id, { onDelete: 'set null' }),
+    brandId: uuid().references(() => brands.id, { onDelete: 'set null' }),
     name: text().notNull(),
     slug: text().notNull(),
     description: text().notNull().default(''),

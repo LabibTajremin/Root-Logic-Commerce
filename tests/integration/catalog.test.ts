@@ -123,3 +123,36 @@ describe('products', () => {
     ).rejects.toThrow('product.not_found')
   })
 })
+
+describe('brands (A2)', () => {
+  it('creates, renames, sets a logo, archives and filters products by brand', async () => {
+    const a = await catalog.createBrand(store, { name: 'Aarong' })
+    const b = await catalog.createBrand(store, { name: 'Aarong' })
+    expect([a.slug, b.slug, a.logoId]).toEqual(['aarong', 'aarong-2', null])
+    await catalog.updateBrand(store, b.id, { name: 'Bibi' })
+    await catalog.updateBrand(store, a.id, { name: 'Aarong', logoId: null })
+    await catalog.archiveBrand(store, a.id)
+    expect((await catalog.listBrands(store)).map((x) => [x.name, x.slug, x.archived])).toEqual([
+      ['Aarong', 'aarong', true],
+      ['Bibi', 'bibi', false],
+    ])
+    expect(await catalog.listBrands(other)).toEqual([])
+    const p = await catalog.createProduct(store, { name: 'Saree', price: 1, brandId: b.id })
+    await catalog.createProduct(store, { name: 'Plain', price: 1 })
+    expect((await catalog.listProducts(store, { brandId: b.id })).map((x) => x.id)).toEqual([p.id])
+    expect(await catalog.getBrandBySlug(store, 'bibi')).toMatchObject({ id: b.id })
+    expect(await catalog.getBrandBySlug(store, 'aarong')).toBeNull()
+    expect(await catalog.getBrandBySlug(other, 'bibi')).toBeNull()
+  })
+
+  it('rejects brands from another store and unknown brands', async () => {
+    const foreign = await catalog.createBrand(other, { name: 'X' })
+    await expect(
+      catalog.createProduct(store, { name: 'P', price: 1, brandId: foreign.id }),
+    ).rejects.toThrow('brand.not_found')
+    await expect(catalog.updateBrand(store, foreign.id, { name: 'Y' })).rejects.toThrow(
+      'brand.not_found',
+    )
+    await expect(catalog.createBrand(store, { name: ' ' })).rejects.toThrow()
+  })
+})

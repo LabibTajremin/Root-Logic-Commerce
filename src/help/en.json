@@ -15,6 +15,7 @@
   "product.seoTitle": "Title on Google. Up to 70 characters.",
   "product.seoDescription": "Short summary on Google. Up to 170 characters.",
   "category.name": "Shown in the store menu, e.g. “Rice” or “Gift Sets”.",
+  "brand.name": "The maker or label shoppers know, e.g. “Aarong” or “Walton”.",
   "category.parent": "Leave empty for a main category, or choose one to make this a sub-category.",
   "stock.product": "Which product's stock to change.",
   "stock.delta": "Use a positive number to add (e.g. 20) or negative to remove (e.g. -2).",

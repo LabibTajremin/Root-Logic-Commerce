@@ -1,7 +1,7 @@
 import { and, asc, eq, getTableColumns, ilike, ne, type SQL } from 'drizzle-orm'
 import type { CatalogRepo, SortOrder } from '@/modules/catalog'
 import type { Db } from '../client'
-import { categories, products } from '../schema'
+import { brands, categories, products } from '../schema'
 
 const catCols = {
   id: categories.id,
@@ -14,10 +14,18 @@ const catCols = {
   seoDescription: categories.seoDescription,
 }
 const { storeId, createdAt, updatedAt, ...prodCols } = getTableColumns(products)
+const brandCols = {
+  id: brands.id,
+  name: brands.name,
+  slug: brands.slug,
+  logoId: brands.logoId,
+  archived: brands.archived,
+}
+type SlugTable = typeof categories | typeof products | typeof brands
 
 const taken = async (
   db: Db,
-  table: typeof categories | typeof products,
+  table: SlugTable,
   storeId: string,
   slug: string,
   exceptId?: string,
@@ -74,6 +82,22 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
   },
   setCategoryOrder: (storeId, orders) => reorder(db, categories, storeId, orders),
   categorySlugTaken: (storeId, slug, exceptId) => taken(db, categories, storeId, slug, exceptId),
+  listBrands: (storeId) =>
+    db.select(brandCols).from(brands).where(eq(brands.storeId, storeId)).orderBy(asc(brands.name)),
+  insertBrand: async (storeId, data) =>
+    (
+      await db
+        .insert(brands)
+        .values({ ...data, storeId })
+        .returning(brandCols)
+    )[0]!,
+  updateBrand: async (storeId, id, patch) => {
+    await db
+      .update(brands)
+      .set(patch)
+      .where(and(eq(brands.storeId, storeId), eq(brands.id, id)))
+  },
+  brandSlugTaken: (storeId, slug, exceptId) => taken(db, brands, storeId, slug, exceptId),
   insertProduct: async (storeId, data) =>
     (
       await db
@@ -105,6 +129,7 @@ export const createCatalogRepo = (db: Db): CatalogRepo => ({
     const where: SQL[] = [eq(products.storeId, storeId)]
     if (f.status) where.push(eq(products.status, f.status))
     if (f.categoryId) where.push(eq(products.categoryId, f.categoryId))
+    if (f.brandId) where.push(eq(products.brandId, f.brandId))
     if (f.search) where.push(ilike(products.name, `%${f.search}%`))
     return db
       .select(prodCols)

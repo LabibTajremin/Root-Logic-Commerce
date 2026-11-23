@@ -19,6 +19,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
       <ProductForm
         product={product}
         categories={await catalog.listCategories(store.id)}
+        brands={await catalog.listBrands(store.id)}
         locale={locale}
       />
       <ProductImages productId={product.id} />

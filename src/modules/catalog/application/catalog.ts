@@ -1,9 +1,11 @@
 import { DomainError, validate } from '@/modules/shared'
 import {
   assertNoCycle,
+  brandInput,
   categoryInput,
   productInput,
   toSortOrders,
+  type BrandInput,
   type CategoryInput,
   type ProductInput,
 } from '../domain/rules'
@@ -24,6 +26,14 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
     const all = await repo.listCategories(storeId)
     if (!all.some((c) => c.id === parentId)) throw new DomainError('category.parent_not_found')
     if (id) assertNoCycle(all, id, parentId)
+  }
+
+  const brandSlug = (storeId: string, name: string, exceptId?: string) =>
+    uniqueSlug(name, (s) => repo.brandSlugTaken(storeId, s, exceptId), shortId)
+  const assertBrand = async (storeId: string, brandId: string | null) => {
+    if (brandId && !(await repo.listBrands(storeId)).some((b) => b.id === brandId)) {
+      throw new DomainError('brand.not_found')
+    }
   }
 
   const assertCategory = async (storeId: string, categoryId: string | null) => {
@@ -60,9 +70,36 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
     reorderCategories: (storeId: string, ids: string[]) =>
       repo.setCategoryOrder(storeId, toSortOrders(ids)),
 
+    listBrands: (storeId: string) => repo.listBrands(storeId),
+    async createBrand(storeId: string, input: BrandInput) {
+      const d = validate(brandInput, input)
+      return repo.insertBrand(storeId, {
+        name: d.name,
+        slug: await brandSlug(storeId, d.name),
+        // The logo is uploaded once the brand exists (edit form).
+        logoId: null,
+      })
+    },
+    async updateBrand(storeId: string, id: string, input: BrandInput) {
+      const d = validate(brandInput, input)
+      await assertBrand(storeId, id)
+      await repo.updateBrand(storeId, id, {
+        name: d.name,
+        slug: await brandSlug(storeId, d.name, id),
+        ...(d.logoId !== undefined && { logoId: d.logoId }),
+      })
+    },
+    archiveBrand: (storeId: string, id: string) =>
+      repo.updateBrand(storeId, id, { archived: true }),
+    // Storefront brand page: archived brands are gone for shoppers.
+    async getBrandBySlug(storeId: string, slug: string) {
+      return (await repo.listBrands(storeId)).find((b) => b.slug === slug && !b.archived) ?? null
+    },
+
     async createProduct(storeId: string, input: ProductInput) {
       const d = validate(productInput, input)
       await assertCategory(storeId, d.categoryId)
+      await assertBrand(storeId, d.brandId)
       return repo.insertProduct(storeId, { ...d, slug: await productSlug(storeId, d.name, d.slug) })
     },
 
@@ -70,6 +107,7 @@ export const createCatalog = ({ repo, shortId }: Deps) => {
       const d = validate(productInput, input)
       if (!(await repo.getProduct(storeId, id))) throw new DomainError('product.not_found')
       await assertCategory(storeId, d.categoryId)
+      await assertBrand(storeId, d.brandId)
       await repo.updateProduct(storeId, id, {
         ...d,
         slug: await productSlug(storeId, d.name, d.slug, id),

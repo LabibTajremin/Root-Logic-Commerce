@@ -11,8 +11,20 @@ export type Category = {
   seoDescription: string | null
 }
 export type CategoryData = Omit<Category, 'id' | 'sortOrder' | 'archived'>
+export type Brand = {
+  id: string
+  name: string
+  slug: string
+  logoId: string | null
+  archived: boolean
+}
 export type Product = Omit<ProductData, 'slug'> & { id: string; slug: string; sortOrder: number }
-export type ProductFilter = { status?: Product['status']; categoryId?: string; search?: string }
+export type ProductFilter = {
+  status?: Product['status']
+  categoryId?: string
+  brandId?: string
+  search?: string
+}
 export type SortOrder = { id: string; sortOrder: number }
 
 export type CatalogRepo = {
@@ -25,6 +37,10 @@ export type CatalogRepo = {
   ): Promise<void>
   setCategoryOrder(storeId: string, orders: SortOrder[]): Promise<void>
   categorySlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
+  listBrands(storeId: string): Promise<Brand[]>
+  insertBrand(storeId: string, data: Omit<Brand, 'id' | 'archived'>): Promise<Brand>
+  updateBrand(storeId: string, id: string, patch: Partial<Omit<Brand, 'id'>>): Promise<void>
+  brandSlugTaken(storeId: string, slug: string, exceptId?: string): Promise<boolean>
   insertProduct(storeId: string, data: Omit<Product, 'id' | 'sortOrder'>): Promise<Product>
   updateProduct(storeId: string, id: string, data: Omit<Product, 'id' | 'sortOrder'>): Promise<void>
   getProduct(storeId: string, id: string): Promise<Product | null>

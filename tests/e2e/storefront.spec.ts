@@ -6,6 +6,7 @@ import {
   createProduct,
   editProduct,
   fillCheckout,
+  photo,
   slug,
   uid,
   uploadPhoto,
@@ -310,6 +311,72 @@ test('product content tabs: owner fills them, the page shows them, FAQ feeds JSO
     acceptedAnswer: { '@type': 'Answer', text: 'No, it is pre-washed.' },
   })
   await a11y()
+})
+
+test('brands: owner adds one with a logo, links products; archived brands leave the shop', async ({
+  page,
+  a11y,
+}) => {
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  const id = uid()
+  const [maker, old] = [`Maker ${id}`, `Old ${id}`]
+  const [made, plain] = [`Made ${id}`, `Plain ${id}`]
+  await signedIn(page)
+  const addBrand = async (name: string) => {
+    await page.goto('/admin/brands')
+    await page.getByLabel('Brand name').fill(name)
+    await page.getByRole('button', { name: 'Add brand' }).click()
+    await expect(page.getByRole('link', { name })).toBeVisible()
+  }
+  await addBrand(`First ${id}`)
+  await page.getByRole('link', { name: `First ${id}` }).click()
+  await page.getByLabel('Brand name').fill(maker)
+  await page.getByLabel(/^Brand logo/).setInputFiles(await photo('#aa3311'))
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/brands$/)
+  await expect(page.getByRole('link', { name: maker }).locator('img')).toBeVisible()
+  await a11y()
+  // Saving without a new file keeps the logo.
+  await page.getByRole('link', { name: maker }).click()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByRole('link', { name: maker }).locator('img')).toBeVisible()
+  await addBrand(old)
+
+  for (const [product, brand] of [
+    [made, maker],
+    [plain, old],
+  ] as const) {
+    await createProduct(page, { name: product, price: '200', stock: '3' })
+    await editProduct(page, product)
+    await page.getByLabel('Brand', { exact: true }).selectOption({ label: brand })
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page).toHaveURL(/\/admin\/products$/)
+  }
+  await page.goto('/admin/brands')
+  await page.getByRole('link', { name: old }).click()
+  await page.getByRole('button', { name: 'Archive' }).click()
+  await expect(page.getByRole('link', { name: old })).toContainText('Archived')
+  // An archived brand stays on the products that use it, but is not offered for new ones.
+  await editProduct(page, plain)
+  await expect(page.getByLabel('Brand', { exact: true }).locator('option:checked')).toHaveText(old)
+  await page.goto('/admin/products/new')
+  await expect(
+    page.getByLabel('Brand', { exact: true }).getByRole('option', { name: old }),
+  ).toHaveCount(0)
+
+  await page.goto(`/p/${slug(made)}`)
+  const link = page.getByRole('link', { name: `Brand: ${maker}` })
+  expect(JSON.parse(await ld(page)).brand).toEqual({ '@type': 'Brand', name: maker })
+  await page.goto((await link.getAttribute('href'))!)
+  await expect(page.getByRole('heading', { level: 1, name: maker })).toBeVisible()
+  await expect(page.getByRole('link', { name: made }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: plain })).toHaveCount(0)
+  await a11y()
+  await page.goto(`/p/${slug(plain)}`)
+  await expect(page.getByRole('link', { name: /^Brand:/ })).toHaveCount(0)
+  expect(JSON.parse(await ld(page)).brand).toBeUndefined()
+  const gone = await page.goto(`/b/${slug(old)}`)
+  expect(gone!.status()).toBe(404)
 })
 
 test('robots.txt and sitemap.xml use the store origin', async ({ page, request }) => {

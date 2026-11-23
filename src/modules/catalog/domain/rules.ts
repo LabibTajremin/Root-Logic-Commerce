@@ -42,6 +42,7 @@ export const productInput = z
     sku: z.string().trim().max(64).nullable().default(null),
     status: z.enum(['draft', 'active', 'archived']).default('draft'),
     categoryId: z.uuid().nullable().default(null),
+    brandId: z.uuid().nullable().default(null),
     videoUrl: z.url().nullable().default(null),
     seoTitle: z.string().max(70).nullable().default(null),
     seoDescription: z.string().max(170).nullable().default(null),
@@ -68,3 +69,10 @@ export const categoryInput = z.object({
   seoDescription: z.string().max(170).nullable().default(null),
 })
 export type CategoryInput = z.input<typeof categoryInput>
+
+/** A2: a brand shoppers can filter by; the logo is an uploaded media id. */
+export const brandInput = z.object({
+  name: z.string().trim().min(1).max(120),
+  logoId: z.uuid().nullable().optional(),
+})
+export type BrandInput = z.input<typeof brandInput>
