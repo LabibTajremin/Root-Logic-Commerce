@@ -111,12 +111,14 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   await expect(page.getByTestId('track-status')).toHaveText('Pending')
   await expect(page.getByRole('region', { name: `#${no}` })).toContainText(`${tea} × 2`)
   await a11y()
-  await page.goto((await page.getByRole('link', { name: 'বাং' }).getAttribute('href'))!)
+  await page.goto(
+    (await page.getByRole('link', { name: 'বাং', exact: true }).getAttribute('href'))!,
+  )
   await page.getByLabel('অর্ডার নম্বর').fill(no)
   await page.getByLabel('ফোন নম্বর').fill('01712345678')
   await page.getByRole('button', { name: 'ট্র্যাক করুন' }).click()
   await expect(page.getByTestId('track-status')).toHaveText('অপেক্ষমাণ')
-  await page.goto((await page.getByRole('link', { name: 'EN' }).getAttribute('href'))!)
+  await page.goto((await page.getByRole('link', { name: 'EN', exact: true }).getAttribute('href'))!)
   await expect(page.getByRole('heading', { level: 1, name: 'Track my order' })).toBeVisible()
 
   await page.goto('/admin/orders')
@@ -274,6 +276,10 @@ test('robots.txt and sitemap.xml use the store origin', async ({ page, request }
   await createProduct(page, { name, price: '10', stock: '1' })
   const robots = await (await request.get('/robots.txt')).text()
   expect(robots).toContain('Disallow: /admin')
+  // Default favicon when the owner has not uploaded one.
+  const icon = await request.get('/icon.svg')
+  expect(icon.status()).toBe(200)
+  expect(icon.headers()['content-type']).toContain('image/svg+xml')
   expect(robots).toMatch(/Sitemap: http:\/\/127\.0\.0\.1:3100\/sitemap\.xml/)
   const res = await request.get('/sitemap.xml', { headers: { 'x-forwarded-proto': 'https' } })
   const xml = await res.text()

@@ -1,7 +1,15 @@
 import Link from 'next/link'
 import type { Product } from '@/modules/catalog'
+import type { Design } from '@/modules/site-settings'
+import type { ProductView } from '@/themes'
 import { AddToCart } from './cart-buttons'
 import { storefront } from './storefront'
+
+const cardView = (v: ProductView, show: Design['productCard']): ProductView => ({
+  ...v,
+  badges: show.badges ? v.badges : [],
+  compareAt: show.oldPrice ? v.compareAt : null,
+})
 
 export const ProductGrid = async ({ products }: { products: Product[] }) => {
   const { theme, design, view, imagesOf, t } = await storefront()
@@ -20,21 +28,24 @@ export const ProductGrid = async ({ products }: { products: Product[] }) => {
       />
     )
   const images = await imagesOf(products)
+  const show = design.productCard
   return (
     <ul
       data-showcase={design.style.showcase}
-      className="rlc-grid grid grid-cols-2 gap-4 md:grid-cols-4"
+      className="rlc-grid grid grid-cols-[repeat(var(--cols-mobile),minmax(0,1fr))] gap-4 md:grid-cols-[repeat(var(--cols-desktop),minmax(0,1fr))]"
     >
       {products.map((p) => (
         <li key={p.id}>
           <ProductCard
-            product={view(p, images.get(p.id)!)}
+            product={cardView(view(p, images.get(p.id)!), show)}
             labels={{ soldOut: t('shop.soldOut'), left: t('shop.left') }}
             action={
-              <AddToCart
-                item={{ id: p.id, slug: p.slug, name: p.name, price: p.price }}
-                label={t('shop.addToCart')}
-              />
+              show.button && (
+                <AddToCart
+                  item={{ id: p.id, slug: p.slug, name: p.name, price: p.price }}
+                  label={t('shop.addToCart')}
+                />
+              )
             }
           />
         </li>
