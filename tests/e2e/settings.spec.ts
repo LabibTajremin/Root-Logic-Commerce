@@ -1433,6 +1433,7 @@ test('coupons: percent, fixed and automatic free delivery; checkout code box, or
   // Back to normal for later tests: the automatic coupon off; the module switch works.
   await page.goto('/admin/coupons')
   await row(`SHIP-${id}`).click()
+  await expect(page.getByRole('heading', { name: 'Edit coupon' })).toBeVisible()
   await page.getByLabel('Active').uncheck()
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(row(`SHIP-${id}`)).toContainText('Off')
