@@ -643,6 +643,7 @@
   "shots.caption": "Caption (optional)",
   "shots.add": "Upload screenshot",
   "shots.shop": "What customers say",
+  "shots.alt": "Customer message screenshot",
   "nav.reviews": "Reviews",
   "reviews.adminTitle": "Reviews",
   "reviews.adminHint": "Shoppers review items from delivered orders at /review. Approve to show a review on the product page.",

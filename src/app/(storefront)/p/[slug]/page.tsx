@@ -266,17 +266,19 @@ export default async function ProductPage({ params }: Props) {
             className="flex snap-x gap-3 overflow-x-auto pb-2 outline-offset-2"
           >
             {shots.map((s) => (
-              <li key={s.id} className="flex w-40 shrink-0 snap-start flex-col gap-1">
-                <span className="relative aspect-[9/16] overflow-hidden rounded-card bg-soft">
-                  <Image
-                    src={`/api/media/${s.mediaId}`}
-                    alt={s.caption}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                  />
-                </span>
-                <span className="text-xs text-muted">{s.caption}</span>
+              <li key={s.id} className="w-40 shrink-0 snap-start">
+                <figure className="flex flex-col gap-1">
+                  <span className="relative aspect-[9/16] overflow-hidden rounded-card bg-soft">
+                    <Image
+                      src={`/api/media/${s.mediaId}`}
+                      alt={t('shots.alt')}
+                      fill
+                      sizes="160px"
+                      className="object-cover"
+                    />
+                  </span>
+                  <figcaption className="text-xs text-muted">{s.caption}</figcaption>
+                </figure>
               </li>
             ))}
           </ul>
