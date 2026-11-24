@@ -4,7 +4,7 @@ import { runtime } from '@/server/runtime'
 const same = (a: string, b: string) =>
   a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b))
 
-/** Sends due messages for every store trims old raw page views and drops checkout drafts past 30 days. Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`. */
+/** Sends due messages for every store trims old raw page views and drops checkout drafts past 30 days and applies the order status rules (C21). Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`. */
 export const GET = async (req: Request) => {
   const { config, container } = await runtime()
   const auth = req.headers.get('authorization') ?? ''
@@ -14,6 +14,7 @@ export const GET = async (req: Request) => {
     container.messaging.processDue(100),
     container.insights.purge(),
     container.drafts.purge(),
+    container.orders.runStatusRules(),
   ])
   return Response.json(result)
 }

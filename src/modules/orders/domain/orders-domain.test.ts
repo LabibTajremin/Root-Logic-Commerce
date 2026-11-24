@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canTransition, nextStatuses, stockEffect } from './status'
+import { canTransition, nextStatuses, stockEffect, undelivered } from './status'
 import { checkoutInput, computeTotals, lineName, mergeItems } from './checkout'
 
 describe('status flow', () => {
@@ -22,6 +22,31 @@ describe('status flow', () => {
     expect(stockEffect('RETURNED', true)).toBe('restock')
     expect(stockEffect('CANCELLED', false)).toBeNull()
     expect(stockEffect('SHIPPED', true)).toBeNull()
+    // C13: a courier return restocks only once received; partial delivery restocks the rest.
+    expect(stockEffect('RETURNING', true)).toBeNull()
+    expect(stockEffect('RETURN_MISSING', true)).toBeNull()
+    expect(stockEffect('RETURN_RECEIVED', true)).toBe('restock')
+    expect(stockEffect('PARTIAL_DELIVERED', true)).toBe('partial')
+    expect(stockEffect('PARTIAL_DELIVERED', false)).toBeNull()
+  })
+  it('holds, schedules and brings courier returns back (C13)', () => {
+    expect(nextStatuses('PENDING')).toEqual(['CONFIRMED', 'ON_HOLD', 'SCHEDULED', 'CANCELLED'])
+    expect(canTransition('ON_HOLD', 'PENDING')).toBe(true)
+    expect(canTransition('SCHEDULED', 'PENDING')).toBe(true)
+    expect(canTransition('SHIPPED', 'RETURNING')).toBe(true)
+    expect(canTransition('RETURNING', 'RETURN_MISSING')).toBe(true)
+    expect(canTransition('RETURN_MISSING', 'RETURN_RECEIVED')).toBe(true)
+    expect(canTransition('RETURNING', 'DELIVERED')).toBe(false)
+  })
+  it('works out the undelivered lines of a partial delivery', () => {
+    const items = [
+      { id: 'a', quantity: 2 },
+      { id: 'b', quantity: 1 },
+    ]
+    expect(undelivered(items, { a: 2 })).toEqual([{ itemId: 'b', quantity: 1 }])
+    expect(undelivered(items, { a: 1, b: 1 })).toEqual([{ itemId: 'a', quantity: 1 }])
+    const bad: Record<string, number>[] = [{}, { a: 2, b: 1 }, { a: 3 }, { a: -1 }, { a: 0.5 }]
+    for (const b of bad) expect(() => undelivered(items, b)).toThrow('order.partial_invalid')
   })
 })
 

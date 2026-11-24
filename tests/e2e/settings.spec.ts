@@ -793,6 +793,10 @@ test('insights: GA4 ecommerce events, first-party counts and the dashboard range
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
   await page.getByRole('button', { name: 'Order now' }).click()
   await page.waitForURL(/\/checkout$/)
+  // Enough units to rank first in today's top products whatever other tests sold.
+  const line = page.getByRole('group', { name: `Quantity: ${name}` })
+  for (let i = 1; i < 5; i++) await line.getByRole('button', { name: '+' }).click()
+  await expect(line.locator('output')).toHaveText('5')
   await fillCheckout(page)
   await page.getByRole('button', { name: 'Place order' }).click()
   await page.waitForURL(/\/order\/\d+$/)

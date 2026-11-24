@@ -13,6 +13,7 @@ export type { CheckoutInput, DeliveryZone } from './domain/checkout'
 export { lineName } from './domain/checkout'
 export {
   canTransition,
+  lostStatuses,
   nextStatuses,
   orderSources,
   orderStatuses,

@@ -28,6 +28,9 @@ describe('container', () => {
     })
     await c.bus.emit('order.placed', { storeId: store, orderId: 'x', orderNo: 1 })
     expect(onEventError).toHaveBeenCalledWith(expect.any(Error), 'order.placed')
+    // C21: a scheduled order falling due rings the admin bell.
+    await c.bus.emit('order.pending', { storeId: store, orderId: 'x', orderNo: 7 })
+    expect((await c.notifications.poll(store)).latest).toMatchObject({ data: { orderNo: 7 } })
     expect(Object.keys(c).sort()).toEqual([
       'access',
       'activity',

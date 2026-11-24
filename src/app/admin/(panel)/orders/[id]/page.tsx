@@ -7,7 +7,7 @@ import { ActionForm } from '@/ui/action-form'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../../context'
-import { changeStatus } from '../actions'
+import { changeStatus, restoreOrder, trashOrder } from '../actions'
 import { TONE } from '../tone'
 
 export const metadata: Metadata = { title: 'Order' }
@@ -24,6 +24,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="font-heading text-3xl">#{o.orderNo}</h1>
         <Badge tone={TONE[o.status]}>{t(`status.${o.status}`)}</Badge>
+        {o.scheduledFor && (
+          <span className="text-sm text-muted" data-testid="order-scheduled">
+            {t('order.scheduledFor', {
+              date: o.scheduledFor.toLocaleDateString('en-GB', { timeZone: 'Asia/Dhaka' }),
+            })}
+          </span>
+        )}
+        {o.deletedAt && <Badge tone="neutral">{t('order.inTrash')}</Badge>}
         <Link
           href={`/admin/orders/${o.id}/invoice`}
           className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-control border border-line px-4 text-sm font-semibold"
@@ -41,6 +49,35 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               )}
               <ActionForm action={changeStatus} className="flex flex-col gap-3">
                 <input type="hidden" name="id" value={o.id} />
+                {nextStatuses(o.status).includes('SCHEDULED') && (
+                  <div className="flex flex-col gap-1.5 text-sm font-semibold">
+                    <label htmlFor="scheduledFor">{t('order.scheduleFor')}</label>
+                    <input
+                      id="scheduledFor"
+                      name="scheduledFor"
+                      type="date"
+                      className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+                    />
+                  </div>
+                )}
+                {nextStatuses(o.status).includes('PARTIAL_DELIVERED') && (
+                  <fieldset className="flex flex-col gap-2 text-sm">
+                    <legend className="mb-1 font-semibold">{t('order.deliveredCounts')}</legend>
+                    {o.items.map((i) => (
+                      <label key={i.id} className="flex items-center justify-between gap-3">
+                        {lineName(i)}
+                        <input
+                          type="number"
+                          name={`delivered.${i.id}`}
+                          min={0}
+                          max={i.quantity}
+                          defaultValue={i.quantity}
+                          className="min-h-11 w-20 rounded-control border border-line bg-surface px-2"
+                        />
+                      </label>
+                    ))}
+                  </fieldset>
+                )}
                 <div className="flex flex-wrap gap-2">
                   {nextStatuses(o.status).map((s) => (
                     <button
@@ -53,6 +90,17 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                     </button>
                   ))}
                 </div>
+              </ActionForm>
+            </Card>
+          )}
+          {/* C13: cancelled orders can be tidied away to the Trash, and brought back. */}
+          {o.status === 'CANCELLED' && (
+            <Card>
+              <ActionForm action={o.deletedAt ? restoreOrder : trashOrder}>
+                <input type="hidden" name="id" value={o.id} />
+                <button className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold">
+                  {t(o.deletedAt ? 'order.restore' : 'order.trash')}
+                </button>
               </ActionForm>
             </Card>
           )}

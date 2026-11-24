@@ -14,14 +14,16 @@ import { checkLimits, freeShipping, type ShopRules } from '../domain/rules'
 import {
   canTransition,
   orderSources,
+  returnMissingDays,
   stockEffect,
+  undelivered,
   type OrderSource,
   type OrderStatus,
 } from '../domain/status'
 import type { OrderFilter, OrdersRepo } from './ports'
 
 type EventPayload = { storeId: string; orderId: string; orderNo: number }
-type StatusEventName = `order.${Lowercase<Exclude<OrderStatus, 'PENDING'>>}`
+type StatusEventName = `order.${Lowercase<OrderStatus>}`
 export type OrderEvents = { 'order.placed': EventPayload } & Record<StatusEventName, EventPayload>
 
 type Deps = {
@@ -176,26 +178,58 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
       return { ...created, phone: d.phone }
     },
 
+    /** `extra`: the date for SCHEDULED, delivered counts per line for PARTIAL_DELIVERED. */
     async changeStatus(
       storeId: string,
       id: string,
       to: OrderStatus,
       actorId: string | null,
       note: string | null = null,
+      extra: { scheduledFor?: Date; delivered?: Record<string, number> } = {},
     ) {
       const order = await repo.get(storeId, id)
       if (!order) throw new DomainError('order.not_found')
       if (!canTransition(order.status, to))
         throw new DomainError('order.invalid_transition', { from: order.status, to })
+      const when = extra.scheduledFor
+      if (to === 'SCHEDULED' && !(when && when.getTime() > Date.now()))
+        throw new DomainError('order.schedule_invalid')
+      const stock = stockEffect(to, order.stockDeducted)
       await repo.transition(storeId, id, {
         from: order.status,
         to,
         actorId,
         note,
-        stock: stockEffect(to, order.stockDeducted),
+        stock,
+        scheduledFor: to === 'SCHEDULED' ? when! : null,
+        ...(stock === 'partial' && { restock: undelivered(order.items, extra.delivered ?? {}) }),
       })
       const event = `order.${to.toLowerCase()}` as StatusEventName
       await bus.emit(event, { storeId, orderId: id, orderNo: order.orderNo })
+    },
+
+    async trash(storeId: string, id: string) {
+      if (!(await repo.trash(storeId, id))) throw new DomainError('order.trash_invalid')
+    },
+    restore: (storeId: string, id: string) => repo.restore(storeId, id),
+
+    /** C21 (cron): due SCHEDULED orders go back to PENDING; long RETURNING ones go missing. */
+    async runStatusRules(now = new Date()) {
+      const due = await repo.dueScheduled(now)
+      for (const o of due)
+        await this.changeStatus(o.storeId, o.id, 'PENDING', null, 'system: scheduled date reached')
+      const stale = await repo.staleReturning(
+        new Date(now.getTime() - returnMissingDays * 86_400_000),
+      )
+      for (const o of stale)
+        await this.changeStatus(
+          o.storeId,
+          o.id,
+          'RETURN_MISSING',
+          null,
+          'system: not received in time',
+        )
+      return { scheduled: due.length, missing: stale.length }
     },
 
     getOrder: (storeId: string, id: string) => repo.get(storeId, id),

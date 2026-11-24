@@ -1070,3 +1070,70 @@ test('share location: asked only on tap; a refusal is fine; the owner opens it i
   await page.getByRole('button', { name: 'Cancel order' }).click()
   await expect(page.getByTestId('order-events')).toContainText('Cancelled')
 })
+
+test('order statuses: hold, schedule, partial delivery, courier return, trash (C13)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Status ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '100', stock: '20' })
+  const order = async (qty: number) => {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    const line = page.getByRole('group', { name: `Quantity: ${name}` })
+    for (let i = 1; i < qty; i++) await line.getByRole('button', { name: '+' }).click()
+    await expect(line.locator('output')).toHaveText(String(qty))
+    await fillCheckout(page)
+    const no = await placeOrder(page)
+    await page.goto(`/admin/orders?q=${no}`)
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+    return page.url()
+  }
+  const to = async (action: string, status: string) => {
+    await page.getByRole('button', { name: action, exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1 }).locator('..')).toContainText(status)
+  }
+
+  await order(2)
+  await to('Put on hold', 'On hold')
+  await to('Back to pending', 'Pending')
+  await page.getByRole('button', { name: 'Schedule for the date' }).click()
+  await alert(page, 'Pick a date in the future.')
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10)
+  await page.getByLabel('Date (for “Schedule”)').fill(tomorrow)
+  await to('Schedule for the date', 'Scheduled')
+  await expect(page.getByTestId('order-scheduled')).toContainText('Scheduled for')
+  await a11y()
+  await to('Confirm order', 'Confirmed')
+  await to('Start processing', 'Processing')
+  await to('Mark shipped', 'Shipped')
+  await page.getByRole('button', { name: 'Partly delivered', exact: true }).click()
+  await alert(page, 'some, but not all')
+  await page.getByLabel(name).fill('1')
+  await to('Partly delivered', 'Partly delivered')
+
+  await order(1)
+  await to('Confirm order', 'Confirmed')
+  await to('Start processing', 'Processing')
+  await to('Mark shipped', 'Shipped')
+  await to('Courier is returning it', 'Returning')
+  await to('Return received', 'Return received')
+
+  const url = await order(1)
+  const no = (await page.getByRole('heading', { level: 1 }).textContent())!
+  await to('Cancel order', 'Cancelled')
+  await page.getByRole('button', { name: 'Move to Trash' }).click()
+  await expect(page.getByText('In Trash')).toBeVisible()
+  await page.goto('/admin/orders')
+  await expect(page.getByRole('link', { name: new RegExp(no) })).toHaveCount(0)
+  await page.goto('/admin/orders?trash=1')
+  await expect(page.getByRole('link', { name: new RegExp(no) })).toBeVisible()
+  await a11y()
+  await page.goto(url)
+  await page.getByRole('button', { name: 'Restore from Trash' }).click()
+  await expect(page.getByText('In Trash')).toHaveCount(0)
+})

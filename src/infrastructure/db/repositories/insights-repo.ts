@@ -1,3 +1,4 @@
+import { lostStatuses } from '@/modules/orders'
 import { and, between, desc, eq, gte, lt, notInArray, sql, sum } from 'drizzle-orm'
 import type { Counters, DayStats, InsightsRepo } from '@/modules/insights'
 import type { Db } from '../client'
@@ -70,7 +71,7 @@ export const createInsightsRepo = (db: Db): InsightsRepo => ({
           eq(orders.storeId, storeId),
           gte(orders.createdAt, from),
           lt(orders.createdAt, to),
-          notInArray(orders.status, ['CANCELLED', 'RETURNED']),
+          notInArray(orders.status, [...lostStatuses]),
         ),
       )
       .groupBy(orderItems.name)

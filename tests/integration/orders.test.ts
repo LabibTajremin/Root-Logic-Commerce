@@ -93,7 +93,13 @@ beforeEach(async () => {
   db = await createTestDb()
   events = []
   const bus = createEventBus<OrderEvents>(vi.fn())
-  for (const e of ['order.placed', 'order.confirmed', 'order.cancelled', 'order.returned'] as const)
+  for (const e of [
+    'order.placed',
+    'order.confirmed',
+    'order.cancelled',
+    'order.returned',
+    'order.pending',
+  ] as const)
     bus.on(e, (p) => void events.push(`${e}#${p.orderNo}`))
   coupons = createCoupons({ repo: createCouponsRepo(db) })
   orders = createOrders({ repo: createOrdersRepo(db), bus, coupons })
@@ -130,6 +136,7 @@ describe('placing orders', () => {
     })
     expect(o.items).toEqual([
       {
+        id: expect.any(String),
         productId: p.id,
         variantId: null,
         variantLabel: null,
@@ -310,6 +317,7 @@ describe('status flow with stock', () => {
         actorId: null,
         note: null,
         stock: null,
+        scheduledFor: null,
       }),
     ).rejects.toThrow('order.conflict')
   })
@@ -655,5 +663,96 @@ describe('manual orders and sources (C12, C15)', () => {
     })
     expect(await orders.lastForPhone(other, '01712345678')).toBeNull()
     expect(await orders.lastForPhone(store, '123')).toBeNull()
+  })
+})
+
+describe('more statuses, partial delivery, courier returns, trash (C13, C21)', () => {
+  const ship = async (id: string) => {
+    for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED'] as const)
+      await orders.changeStatus(store, id, s, null)
+  }
+
+  it('holds and schedules; a due scheduled order goes back to pending', async () => {
+    const p = await product(store)
+    const { id } = await orders.placeOrder(store, checkout(p.id), zones)
+    await orders.changeStatus(store, id, 'ON_HOLD', null)
+    await orders.changeStatus(store, id, 'PENDING', null)
+    for (const when of [undefined, new Date(Date.now() - 1000)])
+      await expect(
+        orders.changeStatus(store, id, 'SCHEDULED', null, null, { scheduledFor: when }),
+      ).rejects.toThrow('order.schedule_invalid')
+    const when = new Date(Date.now() + 86_400_000)
+    await orders.changeStatus(store, id, 'SCHEDULED', null, null, { scheduledFor: when })
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      status: 'SCHEDULED',
+      scheduledFor: when,
+    })
+    expect(await orders.runStatusRules()).toEqual({ scheduled: 0, missing: 0 })
+    expect(await orders.runStatusRules(new Date(Date.now() + 2 * 86_400_000))).toEqual({
+      scheduled: 1,
+      missing: 0,
+    })
+    const o = (await orders.getOrder(store, id))!
+    expect(o).toMatchObject({ status: 'PENDING', scheduledFor: null })
+    expect(o.events.at(-1)).toMatchObject({ actorId: null, note: 'system: scheduled date reached' })
+    expect(events).toContain(`order.pending#${o.orderNo}`)
+  })
+
+  it('a partial delivery restocks only the undelivered lines', async () => {
+    const a = await product(store, { stock: 5 })
+    const b = await product(store, { stock: 5 })
+    const { id } = await orders.placeOrder(
+      store,
+      {
+        ...checkout(a.id, 2),
+        items: [
+          { productId: a.id, quantity: 2 },
+          { productId: b.id, quantity: 1 },
+        ],
+      },
+      zones,
+    )
+    await ship(id)
+    const [la, lb] = (await orders.getOrder(store, id))!.items
+    await expect(
+      orders.changeStatus(store, id, 'PARTIAL_DELIVERED', null, null, { delivered: {} }),
+    ).rejects.toThrow('order.partial_invalid')
+    await expect(orders.changeStatus(store, id, 'PARTIAL_DELIVERED', null)).rejects.toThrow(
+      'order.partial_invalid',
+    )
+    await orders.changeStatus(store, id, 'PARTIAL_DELIVERED', null, null, {
+      delivered: { [la!.id]: 1, [lb!.id]: 1 },
+    })
+    expect([await stockOf(a.id), await stockOf(b.id)]).toEqual([4, 4])
+  })
+
+  it('a courier return restocks when received, not while returning; stale ones go missing', async () => {
+    const p = await product(store, { stock: 5 })
+    const { id } = await orders.placeOrder(store, checkout(p.id, 2), zones)
+    await ship(id)
+    await orders.changeStatus(store, id, 'RETURNING', null)
+    expect(await stockOf(p.id)).toBe(3)
+    expect(await orders.runStatusRules(new Date(Date.now() + 15 * 86_400_000))).toEqual({
+      scheduled: 0,
+      missing: 1,
+    })
+    expect((await orders.getOrder(store, id))!.status).toBe('RETURN_MISSING')
+    expect(await stockOf(p.id)).toBe(3)
+    await orders.changeStatus(store, id, 'RETURN_RECEIVED', null)
+    expect(await stockOf(p.id)).toBe(5)
+  })
+
+  it('only cancelled orders go to the trash, and come back', async () => {
+    const p = await product(store)
+    const { id } = await orders.placeOrder(store, checkout(p.id), zones)
+    await expect(orders.trash(store, id)).rejects.toThrow('order.trash_invalid')
+    await orders.changeStatus(store, id, 'CANCELLED', null)
+    await orders.trash(store, id)
+    await expect(orders.trash(store, id)).rejects.toThrow('order.trash_invalid')
+    expect((await orders.listOrders(store)).rows.map((r) => r.id)).not.toContain(id)
+    expect((await orders.listOrders(store, { trash: true })).rows.map((r) => r.id)).toEqual([id])
+    expect((await orders.getOrder(store, id))!.deletedAt).toBeInstanceOf(Date)
+    await orders.restore(store, id)
+    expect((await orders.listOrders(store)).rows.map((r) => r.id)).toContain(id)
   })
 })

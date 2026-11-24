@@ -35,6 +35,14 @@ export const orderStatusEnum = pgEnum('order_status', [
   'DELIVERED',
   'CANCELLED',
   'RETURNED',
+  // C13 (appended: Postgres enums only grow at the end without a rewrite).
+  'ON_HOLD',
+  'SCHEDULED',
+  'COURIER_HOLD',
+  'PARTIAL_DELIVERED',
+  'RETURNING',
+  'RETURN_RECEIVED',
+  'RETURN_MISSING',
 ])
 export const paymentStatusEnum = pgEnum('payment_status', ['unpaid', 'paid', 'refunded'])
 export const stockReasonEnum = pgEnum('stock_reason', [
@@ -364,6 +372,9 @@ export const orders = pgTable(
       .notNull()
       .references(() => customers.id, { onDelete: 'restrict' }),
     status: orderStatusEnum().notNull().default('PENDING'),
+    // C13: when a SCHEDULED order falls due; trashed orders are hidden, not deleted.
+    scheduledFor: timestamp({ withTimezone: true }),
+    deletedAt: timestamp({ withTimezone: true }),
     subtotal: integer().notNull(),
     deliveryCharge: integer().notNull(),
     // C2: what the coupon took off (goods or delivery), and its code.

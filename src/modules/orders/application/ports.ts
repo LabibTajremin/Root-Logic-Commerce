@@ -87,13 +87,17 @@ export type OrderDetail = OrderSummary & {
   paymentMethod: string
   paymentStatus: string
   stockDeducted: boolean
+  scheduledFor: Date | null
+  deletedAt: Date | null
   customerEmail: string | null
-  items: (Omit<OrderLine, 'productId'> & { productId: string | null })[]
+  items: (Omit<OrderLine, 'productId'> & { id: string; productId: string | null })[]
   events: OrderEvent[]
 }
 export type OrderFilter = {
   status?: OrderStatus
   source?: OrderSource
+  /** C13: the Trash instead of live orders. */
+  trash?: boolean
   from?: Date
   to?: Date
   search?: string
@@ -106,6 +110,10 @@ export type StatusChange = {
   actorId: string | null
   note: string | null
   stock: StockEffect
+  /** Set when the order is SCHEDULED, cleared otherwise. */
+  scheduledFor: Date | null
+  /** Partial delivery: the quantities going back on the shelf. */
+  restock?: { itemId: string; quantity: number }[]
 }
 
 export type OrdersRepo = {
@@ -117,6 +125,12 @@ export type OrdersRepo = {
   /** The newest order placed with this phone (C12 customer lookup). */
   latestForPhone(storeId: string, phone: string): Promise<OrderDetail | null>
   list(storeId: string, filter: OrderFilter): Promise<{ rows: OrderSummary[]; total: number }>
+  /** C13: hide a cancelled order (false when it isn't cancelled or is already trashed). */
+  trash(storeId: string, id: string): Promise<boolean>
+  restore(storeId: string, id: string): Promise<void>
+  /** C21, across stores: SCHEDULED orders now due, and RETURNING ones untouched since `before`. */
+  dueScheduled(now: Date): Promise<{ storeId: string; id: string }[]>
+  staleReturning(before: Date): Promise<{ storeId: string; id: string }[]>
   /** Atomic: status guard + stock effect + order_events row, or nothing. */
   transition(storeId: string, id: string, change: StatusChange): Promise<void>
 }

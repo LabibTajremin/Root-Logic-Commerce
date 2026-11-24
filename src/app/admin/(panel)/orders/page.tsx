@@ -8,16 +8,17 @@ import { TONE } from './tone'
 
 export const metadata: Metadata = { title: 'Orders' }
 
-type Search = Promise<{ status?: string; q?: string; source?: string }>
+type Search = Promise<{ status?: string; q?: string; source?: string; trash?: string }>
 
 export default async function OrdersPage({ searchParams }: { searchParams: Search }) {
-  const { status, q, source } = await searchParams
+  const { status, q, source, trash } = await searchParams
   const { orders, store, t, money } = await adminContext('orders.manage')
   const active = orderStatuses.find((s) => s === status) as OrderStatus | undefined
   const from = orderSources.find((s) => s === source) as OrderSource | undefined
   const { rows, total } = await orders.listOrders(store.id, {
     status: active,
     source: from,
+    trash: trash === '1',
     search: q || undefined,
   })
   const tabs: { key?: OrderStatus; label: string }[] = [
@@ -54,6 +55,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           className="min-h-11 shrink-0 border-b-2 border-transparent px-3 py-2.5 text-sm font-semibold text-muted"
         >
           {t('drafts.title')}
+        </Link>
+        <Link
+          href="/admin/orders?trash=1"
+          aria-current={trash === '1' ? 'page' : undefined}
+          className="min-h-11 shrink-0 border-b-2 border-transparent px-3 py-2.5 text-sm font-semibold text-muted aria-[current=page]:border-accent aria-[current=page]:text-text"
+        >
+          {t('orders.trash')}
         </Link>
       </nav>
       <form className="flex gap-2" role="search">

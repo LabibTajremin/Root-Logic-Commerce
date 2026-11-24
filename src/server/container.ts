@@ -122,6 +122,8 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     bus.on(`order.${s}`, (e) => messaging.onOrderEvent(`order.${s}`, e))
   const notifications = createNotifications({ repo: createNotificationsRepo(db) })
   bus.on('order.placed', (e) => notifications.onOrderPlaced(e))
+  // C21: a scheduled order falling due shows in the bell like a new one.
+  bus.on('order.pending', (e) => notifications.onOrderPlaced(e))
   const insights = createInsights({
     repo: createInsightsRepo(db),
     hash: (s) => createHmac('sha256', config.authSecret).update(s).digest('hex'),

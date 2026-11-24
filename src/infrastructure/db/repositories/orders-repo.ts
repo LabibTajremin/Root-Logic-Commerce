@@ -7,6 +7,8 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
+  isNull,
   lt,
   lte,
   or,
@@ -57,6 +59,8 @@ const detail = {
   paymentMethod: orders.paymentMethod,
   paymentStatus: orders.paymentStatus,
   stockDeducted: orders.stockDeducted,
+  scheduledFor: orders.scheduledFor,
+  deletedAt: orders.deletedAt,
 }
 
 export const createOrdersRepo = (db: Db): OrdersRepo => {
@@ -69,6 +73,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
     if (!o) return null
     const items = await db
       .select({
+        id: orderItems.id,
         productId: orderItems.productId,
         variantId: orderItems.variantId,
         variantLabel: orderItems.variantLabel,
@@ -207,6 +212,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
       const where: SQL[] = [eq(orders.storeId, storeId)]
       if (f.status) where.push(eq(orders.status, f.status))
       if (f.source) where.push(eq(orders.source, f.source))
+      where.push(f.trash ? isNotNull(orders.deletedAt) : isNull(orders.deletedAt))
       if (f.from) where.push(gte(orders.createdAt, f.from))
       if (f.to) where.push(lte(orders.createdAt, f.to))
       if (f.search) {
@@ -225,6 +231,38 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
       return { rows, total: n }
     },
 
+    async trash(storeId, id) {
+      const rows = await db
+        .update(orders)
+        .set({ deletedAt: new Date() })
+        .where(
+          and(
+            eq(orders.storeId, storeId),
+            eq(orders.id, id),
+            eq(orders.status, 'CANCELLED'),
+            isNull(orders.deletedAt),
+          ),
+        )
+        .returning({ id: orders.id })
+      return rows.length > 0
+    },
+    async restore(storeId, id) {
+      await db
+        .update(orders)
+        .set({ deletedAt: null })
+        .where(and(eq(orders.storeId, storeId), eq(orders.id, id)))
+    },
+    dueScheduled: (now) =>
+      db
+        .select({ storeId: orders.storeId, id: orders.id })
+        .from(orders)
+        .where(and(eq(orders.status, 'SCHEDULED'), lte(orders.scheduledFor, now))),
+    staleReturning: (before) =>
+      db
+        .select({ storeId: orders.storeId, id: orders.id })
+        .from(orders)
+        .where(and(eq(orders.status, 'RETURNING'), lt(orders.updatedAt, before))),
+
     transition: (storeId, id, ch) =>
       db.transaction(async (tx) => {
         const deducted = ch.stock === 'deduct' ? true : ch.stock === 'restock' ? false : undefined
@@ -232,6 +270,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           .update(orders)
           .set({
             status: ch.to,
+            scheduledFor: ch.scheduledFor,
             updatedAt: new Date(),
             ...(deducted === undefined ? {} : { stockDeducted: deducted }),
           })
@@ -241,15 +280,22 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
         if (ch.stock) {
           const items = await tx
             .select({
+              id: orderItems.id,
               productId: orderItems.productId,
               variantId: orderItems.variantId,
               quantity: orderItems.quantity,
             })
             .from(orderItems)
             .where(eq(orderItems.orderId, id))
-          const moves = items.filter(
-            (i): i is typeof i & { productId: string } => i.productId !== null,
-          )
+          // Partial delivery restocks only the given quantities; anything else moves whole lines.
+          const back = new Map((ch.restock ?? []).map((r) => [r.itemId, r.quantity]))
+          const moves = items
+            .filter((i): i is typeof i & { productId: string } => i.productId !== null)
+            .map((i) => ({
+              ...i,
+              quantity: ch.stock === 'partial' ? (back.get(i.id) ?? 0) : i.quantity,
+            }))
+            .filter((i) => i.quantity > 0)
           await applyStock(tx, storeId, moves, ch.stock === 'deduct' ? -1 : 1, {
             reason: ch.stock === 'deduct' ? 'order_confirmed' : 'order_restocked',
             orderId: id,
