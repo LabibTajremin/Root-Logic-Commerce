@@ -32,3 +32,30 @@ export async function restoreOrder(_: ActionState, form: FormData) {
     orders.restore(store.id, String(form.get('id'))),
   )
 }
+
+// Every key read is an input of the return form; a line left at 0 isn't coming back.
+export async function recordReturn(_: ActionState, form: FormData) {
+  return act('orders.manage', async ({ orders, store, actor }) => {
+    const f = (k: string) => String(form.get(k))
+    const swap = f('exchangeOrderNo').replace(/\D/g, '')
+    await orders.recordReturn(
+      store.id,
+      f('id'),
+      {
+        kind: f('kind') as 'return',
+        reason: f('reason') as 'other',
+        note: f('note'),
+        items: [...form.entries()].flatMap(([k, v]) =>
+          k.startsWith('ret.') && Number(v) > 0
+            ? [{ itemId: k.slice(4), quantity: Number(v) }]
+            : [],
+        ),
+        refund: Math.round(Number(f('refund')) * 100),
+        refundMethod: f('refundMethod'),
+        restock: form.get('restock') === 'on',
+        exchangeOrderNo: swap ? Number(swap) : null,
+      },
+      actor!.id,
+    )
+  })
+}

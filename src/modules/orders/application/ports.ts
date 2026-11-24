@@ -93,6 +93,22 @@ export type OrderDetail = OrderSummary & {
   items: (Omit<OrderLine, 'productId'> & { id: string; productId: string | null })[]
   events: OrderEvent[]
 }
+export type OrderReturn = {
+  id: string
+  kind: 'return' | 'exchange'
+  reason: string
+  note: string
+  items: { itemId: string; quantity: number }[]
+  refund: number
+  refundMethod: string
+  restocked: boolean
+  exchangeOrderId: string | null
+  exchangeOrderNo: number | null
+  createdAt: Date
+}
+export type NewReturn = Omit<OrderReturn, 'id' | 'restocked' | 'exchangeOrderNo' | 'createdAt'> & {
+  restock: boolean
+}
 export type OrderFilter = {
   status?: OrderStatus
   source?: OrderSource
@@ -131,6 +147,16 @@ export type OrdersRepo = {
   /** C21, across stores: SCHEDULED orders now due, and RETURNING ones untouched since `before`. */
   dueScheduled(now: Date): Promise<{ storeId: string; id: string }[]>
   staleReturning(before: Date): Promise<{ storeId: string; id: string }[]>
+  /** C14 */
+  listReturns(storeId: string, orderId: string): Promise<OrderReturn[]>
+  idByNo(storeId: string, orderNo: number): Promise<string | null>
+  /** Atomic: the return row and, when asked, the returned units back in stock. */
+  recordReturn(
+    storeId: string,
+    orderId: string,
+    r: NewReturn,
+    actorId: string | null,
+  ): Promise<void>
   /** Atomic: status guard + stock effect + order_events row, or nothing. */
   transition(storeId: string, id: string, change: StatusChange): Promise<void>
 }

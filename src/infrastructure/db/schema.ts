@@ -470,6 +470,29 @@ export const couponRedemptions = pgTable(
   (t) => [index('coupon_redemptions_coupon_phone_idx').on(t.couponId, t.phone)],
 )
 
+/** C14: a return or exchange recorded against a delivered order. */
+export const orderReturns = pgTable(
+  'order_returns',
+  {
+    id: id(),
+    storeId: storeId(),
+    orderId: uuid()
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    kind: text().$type<'return' | 'exchange'>().notNull(),
+    reason: text().notNull(),
+    note: text().notNull(),
+    items: jsonb().$type<{ itemId: string; quantity: number }[]>().notNull(),
+    refund: integer().notNull(),
+    refundMethod: text().notNull(),
+    restocked: boolean().notNull(),
+    exchangeOrderId: uuid().references(() => orders.id, { onDelete: 'set null' }),
+    actorId: uuid(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('order_returns_order_idx').on(t.orderId)],
+)
+
 /** C1: one per store + phone; replaced on every save, deleted when that phone orders. */
 export const checkoutDrafts = pgTable(
   'checkout_drafts',

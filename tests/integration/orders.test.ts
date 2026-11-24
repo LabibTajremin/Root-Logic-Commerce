@@ -756,3 +756,79 @@ describe('more statuses, partial delivery, courier returns, trash (C13, C21)', (
     expect((await orders.listOrders(store)).rows.map((r) => r.id)).toContain(id)
   })
 })
+
+describe('returns and exchanges (C14)', () => {
+  const deliver = async (id: string) => {
+    for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] as const)
+      await orders.changeStatus(store, id, s, null)
+  }
+
+  it('records returns with restock and refunds, and exchanges linked by number', async () => {
+    const a = await product(store, { stock: 5 })
+    const b = await product(store, { stock: 5 })
+    const { id } = await orders.placeOrder(
+      store,
+      {
+        ...checkout(a.id),
+        items: [
+          { productId: a.id, quantity: 2 },
+          { productId: b.id, quantity: 1 },
+        ],
+      },
+      zones,
+    )
+    const [la, lb] = (await orders.getOrder(store, id))!.items
+    const r = {
+      kind: 'return' as const,
+      reason: 'size' as const,
+      items: [{ itemId: la!.id, quantity: 1 }],
+    }
+    await expect(orders.recordReturn(store, id, r, null)).rejects.toThrow('return.not_delivered')
+    await expect(orders.recordReturn(other, id, r, null)).rejects.toThrow('order.not_found')
+    await deliver(id)
+    await orders.recordReturn(
+      store,
+      id,
+      { ...r, restock: true, refund: 34900, refundMethod: 'bKash' },
+      null,
+    )
+    expect(await stockOf(a.id)).toBe(4)
+    const swap = await orders.placeOrder(store, checkout(b.id), zones)
+    const swapNo = (await orders.getOrder(store, swap.id))!.orderNo
+    await expect(
+      orders.recordReturn(store, id, { ...r, kind: 'exchange', exchangeOrderNo: 999999 }, null),
+    ).rejects.toThrow('return.exchange_not_found')
+    // The product of line b is gone: its return is recorded but nothing is restocked.
+    await db.delete(products).where(eq(products.id, b.id))
+    await orders.recordReturn(
+      store,
+      id,
+      {
+        kind: 'exchange',
+        reason: 'damaged',
+        note: 'Cracked lid',
+        items: [{ itemId: lb!.id, quantity: 1 }],
+        restock: true,
+        exchangeOrderNo: swapNo,
+      },
+      null,
+    )
+    // Kept out of stock (e.g. damaged): the stock stays where it was.
+    await orders.recordReturn(store, id, r, null)
+    expect(await stockOf(a.id)).toBe(4)
+    await expect(
+      orders.recordReturn(store, id, { ...r, items: [{ itemId: la!.id, quantity: 2 }] }, null),
+    ).rejects.toThrow('return.too_many')
+    expect(await orders.listReturns(store, id)).toMatchObject([
+      {
+        kind: 'return',
+        refund: 34900,
+        refundMethod: 'bKash',
+        restocked: true,
+        exchangeOrderNo: null,
+      },
+      { kind: 'exchange', note: 'Cracked lid', exchangeOrderId: swap.id, exchangeOrderNo: swapNo },
+      { kind: 'return', restocked: false, refund: 0 },
+    ])
+  })
+})

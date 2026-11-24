@@ -11,6 +11,7 @@ import {
   type DeliveryZone,
 } from '../domain/checkout'
 import { checkLimits, freeShipping, type ShopRules } from '../domain/rules'
+import { checkReturn, returnInput, type ReturnInput } from '../domain/returns'
 import {
   canTransition,
   orderSources,
@@ -207,6 +208,26 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
       const event = `order.${to.toLowerCase()}` as StatusEventName
       await bus.emit(event, { storeId, orderId: id, orderNo: order.orderNo })
     },
+
+    /** C14: only delivered (or partly delivered) orders take returns and exchanges. */
+    async recordReturn(
+      storeId: string,
+      orderId: string,
+      input: ReturnInput,
+      actorId: string | null,
+    ) {
+      const r = validate(returnInput, input)
+      const order = await repo.get(storeId, orderId)
+      if (!order) throw new DomainError('order.not_found')
+      if (order.status !== 'DELIVERED' && order.status !== 'PARTIAL_DELIVERED')
+        throw new DomainError('return.not_delivered')
+      checkReturn(order, await repo.listReturns(storeId, orderId), r)
+      const swap = r.exchangeOrderNo === null ? null : await repo.idByNo(storeId, r.exchangeOrderNo)
+      if (r.exchangeOrderNo !== null && !swap) throw new DomainError('return.exchange_not_found')
+      const { exchangeOrderNo: _n, ...rest } = r
+      await repo.recordReturn(storeId, orderId, { ...rest, exchangeOrderId: swap }, actorId)
+    },
+    listReturns: (storeId: string, orderId: string) => repo.listReturns(storeId, orderId),
 
     async trash(storeId: string, id: string) {
       if (!(await repo.trash(storeId, id))) throw new DomainError('order.trash_invalid')

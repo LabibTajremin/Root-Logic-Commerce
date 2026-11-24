@@ -17,6 +17,7 @@ import {
 } from 'drizzle-orm'
 import { DomainError } from '@/modules/shared'
 import type { OrderDetail, OrdersRepo } from '@/modules/orders'
+import { alias } from 'drizzle-orm/pg-core'
 import type { Db } from '../client'
 import {
   couponRedemptions,
@@ -24,6 +25,7 @@ import {
   customers,
   orderEvents,
   orderItems,
+  orderReturns,
   orders,
   products,
   productVariants,
@@ -230,6 +232,62 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
       const [{ n }] = (await db.select({ n: count() }).from(orders).where(cond)) as [{ n: number }]
       return { rows, total: n }
     },
+
+    listReturns: async (storeId, orderId) => {
+      const swap = alias(orders, 'swap')
+      return db
+        .select({
+          id: orderReturns.id,
+          kind: orderReturns.kind,
+          reason: orderReturns.reason,
+          note: orderReturns.note,
+          items: orderReturns.items,
+          refund: orderReturns.refund,
+          refundMethod: orderReturns.refundMethod,
+          restocked: orderReturns.restocked,
+          exchangeOrderId: orderReturns.exchangeOrderId,
+          exchangeOrderNo: swap.orderNo,
+          createdAt: orderReturns.createdAt,
+        })
+        .from(orderReturns)
+        .leftJoin(swap, eq(swap.id, orderReturns.exchangeOrderId))
+        .where(and(eq(orderReturns.storeId, storeId), eq(orderReturns.orderId, orderId)))
+        .orderBy(asc(orderReturns.createdAt))
+    },
+    idByNo: async (storeId, orderNo) =>
+      (
+        await db
+          .select({ id: orders.id })
+          .from(orders)
+          .where(and(eq(orders.storeId, storeId), eq(orders.orderNo, orderNo)))
+      )[0]?.id ?? null,
+    recordReturn: (storeId, orderId, { restock, ...r }, actorId) =>
+      db.transaction(async (tx) => {
+        await tx
+          .insert(orderReturns)
+          .values({ ...r, storeId, orderId, restocked: restock, actorId })
+        if (!restock) return
+        const lines = new Map(
+          (
+            await tx
+              .select({
+                id: orderItems.id,
+                productId: orderItems.productId,
+                variantId: orderItems.variantId,
+              })
+              .from(orderItems)
+              .where(eq(orderItems.orderId, orderId))
+          ).map((l) => [l.id, l]),
+        )
+        // Lines whose product was deleted since have nothing to restock.
+        const moves = r.items.flatMap((i) => {
+          const l = lines.get(i.itemId)!
+          return l.productId
+            ? [{ productId: l.productId, variantId: l.variantId, quantity: i.quantity }]
+            : []
+        })
+        await applyStock(tx, storeId, moves, 1, { reason: 'order_restocked', orderId, actorId })
+      }),
 
     async trash(storeId, id) {
       const rows = await db

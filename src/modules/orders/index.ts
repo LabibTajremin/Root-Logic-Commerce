@@ -2,6 +2,7 @@ export { createDrafts, type Draft, type Drafts, type DraftsRepo } from './applic
 export { createOrders, type OrderEvents, type Orders } from './application/orders'
 export type {
   NewOrder,
+  OrderReturn,
   OrderDetail,
   OrderFilter,
   OrderProduct,
@@ -28,3 +29,4 @@ export {
   type ShopRules,
 } from './domain/rules'
 export { bdDistricts, type AddressRule } from './domain/districts'
+export { returnReasons, type ReturnInput } from './domain/returns'

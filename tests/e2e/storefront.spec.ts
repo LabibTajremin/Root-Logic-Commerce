@@ -1137,3 +1137,59 @@ test('order statuses: hold, schedule, partial delivery, courier return, trash (C
   await page.getByRole('button', { name: 'Restore from Trash' }).click()
   await expect(page.getByText('In Trash')).toHaveCount(0)
 })
+
+test('returns and exchanges on a delivered order: refund, restock, replacement link (C14)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Returnable ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '200', stock: '10' })
+  const order = async () => {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await page
+      .getByRole('group', { name: `Quantity: ${name}` })
+      .getByRole('button', { name: '+' })
+      .click()
+    await fillCheckout(page)
+    const no = await placeOrder(page)
+    await page.goto(`/admin/orders?q=${no}`)
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+    return { no, url: page.url() }
+  }
+  const swap = await order()
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+  await order()
+  for (const step of ['Confirm order', 'Start processing', 'Mark shipped', 'Mark delivered']) {
+    await page.getByRole('button', { name: step }).click()
+    await expect(page.getByRole('button', { name: step })).toHaveCount(0)
+  }
+  const returns = page.getByTestId('order-returns')
+  await page.getByLabel('Reason').selectOption({ label: 'Size or fit' })
+  await page.getByLabel(name).fill('1')
+  await page.getByLabel('Refund (৳, optional)').fill('200')
+  await page.getByLabel('Refunded by (e.g. bKash)').fill('bKash')
+  await page.getByLabel('Put the returned items back in stock').check()
+  await page.getByRole('button', { name: 'Save return' }).click()
+  await expect(returns).toContainText(`Return · Size or fit`)
+  await expect(returns).toContainText('Refunded ৳200 bKash · Back in stock')
+  await a11y()
+  await page.getByLabel('Type').selectOption({ label: 'Exchange' })
+  await page.getByLabel(name).fill('2')
+  await page.getByRole('button', { name: 'Save return' }).click()
+  await alert(page, 'More items than were bought (counting earlier returns).')
+  await page.getByLabel(name).fill('1')
+  await page.getByLabel('Replacement order no. (exchange)').fill(`#${swap.no}`)
+  await page.getByRole('button', { name: 'Save return' }).click()
+  await expect(
+    returns.getByRole('link', { name: `Replacement: order #${swap.no}` }),
+  ).toHaveAttribute('href', new URL(swap.url).pathname)
+  await page.getByRole('button', { name: 'Mark returned' }).click()
+  await expect(page.getByRole('button', { name: 'Save return' })).toHaveCount(0)
+  await expect(returns.locator('li')).toHaveCount(2)
+})
