@@ -924,5 +924,16 @@
   "badge.danger": "Red",
   "badge.neutral": "Plain",
   "stock.showLeft": "Show “Only N left” to shoppers when stock is low",
-  "error.draft.not_found": "That draft is gone (ordered or discarded)."
+  "error.draft.not_found": "That draft is gone (ordered or discarded).",
+  "checkout.zoneDetected": "Delivery area found: {{zone}}",
+  "checkout.thanaHint": "Include your thana or upazila so the courier finds you.",
+  "store.addressTitle": "Address at checkout",
+  "store.addressMode": "How shoppers type the district",
+  "store.address_text": "Free text",
+  "store.address_picker": "Text with a list of all 64 districts",
+  "store.zoneHint": "Checkout picks the delivery zone from the district it finds in the address; shoppers can still change it.",
+  "store.otherZone": "Zone for every other district",
+  "store.noGuess": "Don’t guess",
+  "store.zoneByDistrict": "Zone by district",
+  "store.anyOther": "Same as every other district"
 }

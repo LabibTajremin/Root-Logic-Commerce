@@ -4,6 +4,7 @@ import { currentSettings } from '@/server/request'
 import { ActionForm } from '@/ui/action-form'
 import { Button, Card, Field } from '@/ui/primitives'
 import { adminContext } from '../context'
+import { bdDistricts } from '@/modules/orders'
 import { bandsToText } from '@/modules/site-settings'
 import { saveBusiness } from '../settings-actions'
 
@@ -29,6 +30,24 @@ export default async function StorePage() {
         defaultValue={value}
         className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
       />
+    </div>
+  )
+  const zoneSelect = (id: string, label: string, value: string, none: string) => (
+    <div key={id} className="flex flex-col gap-1.5 text-sm font-semibold">
+      <label htmlFor={id}>{label}</label>
+      <select
+        id={id}
+        name={id}
+        defaultValue={value}
+        className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+      >
+        <option value="">{none}</option>
+        {business.deliveryZones.map((z) => (
+          <option key={z.id} value={z.id}>
+            {z.label}
+          </option>
+        ))}
+      </select>
     </div>
   )
   return (
@@ -95,6 +114,48 @@ export default async function StorePage() {
             <legend className="mb-1 font-semibold">{t('store.limits')}</legend>
             {num('limits.min', t('store.minOrder'), taka(business.orderLimits.minOrder))}
             {num('limits.max', t('store.maxOrder'), taka(business.orderLimits.maxOrder))}
+          </fieldset>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('store.addressTitle')}</legend>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="address.mode" className="text-sm font-semibold">
+                {t('store.addressMode')}
+              </label>
+              <select
+                id="address.mode"
+                name="address.mode"
+                defaultValue={business.address.mode}
+                className="min-h-11 rounded-control border border-line bg-surface px-3"
+              >
+                {(['text', 'picker'] as const).map((v) => (
+                  <option key={v} value={v}>
+                    {t(`store.address_${v}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="text-sm text-muted">{t('store.zoneHint')}</p>
+            {zoneSelect(
+              'zone.other',
+              t('store.otherZone'),
+              business.address.otherZone,
+              t('store.noGuess'),
+            )}
+            <details className="rounded-control border border-line p-3">
+              <summary className="min-h-11 cursor-pointer content-center text-sm font-semibold">
+                {t('store.zoneByDistrict')}
+              </summary>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {bdDistricts.map((d) =>
+                  zoneSelect(
+                    `zone.${d.en}`,
+                    `${d.en} · ${d.bn}`,
+                    business.address.districtZones[d.en] ?? '',
+                    t('store.anyOther'),
+                  ),
+                )}
+              </div>
+            </details>
           </fieldset>
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.checkoutFields')}</legend>

@@ -924,5 +924,16 @@
   "badge.danger": "লাল",
   "badge.neutral": "সাধারণ",
   "stock.showLeft": "স্টক কম হলে ক্রেতাদের “মাত্র Nটি বাকি” দেখান",
-  "error.draft.not_found": "খসড়াটি আর নেই (অর্ডার হয়েছে বা বাদ দেওয়া হয়েছে)।"
+  "error.draft.not_found": "খসড়াটি আর নেই (অর্ডার হয়েছে বা বাদ দেওয়া হয়েছে)।",
+  "checkout.zoneDetected": "ডেলিভারি এলাকা পাওয়া গেছে: {{zone}}",
+  "checkout.thanaHint": "কুরিয়ার যেন খুঁজে পায়, তাই থানা বা উপজেলা লিখুন।",
+  "store.addressTitle": "চেকআউটে ঠিকানা",
+  "store.addressMode": "ক্রেতা কীভাবে জেলা লিখবেন",
+  "store.address_text": "নিজে লিখবেন",
+  "store.address_picker": "লেখার সাথে ৬৪ জেলার তালিকা",
+  "store.zoneHint": "ঠিকানায় যে জেলা পাওয়া যায়, চেকআউট সেই অনুযায়ী ডেলিভারি এলাকা বেছে নেয়; ক্রেতা চাইলে বদলাতে পারেন।",
+  "store.otherZone": "বাকি সব জেলার এলাকা",
+  "store.noGuess": "অনুমান করবেন না",
+  "store.zoneByDistrict": "জেলা অনুযায়ী এলাকা",
+  "store.anyOther": "বাকি জেলাগুলোর মতো"
 }

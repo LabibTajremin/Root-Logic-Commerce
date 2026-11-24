@@ -19,3 +19,4 @@ export {
   type OrderLimits,
   type ShopRules,
 } from './domain/rules'
+export { bdDistricts, type AddressRule } from './domain/districts'

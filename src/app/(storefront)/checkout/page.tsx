@@ -46,6 +46,8 @@ const KEYS = [
   'applyCode',
   'draftConsent',
   'draftRestored',
+  'zoneDetected',
+  'thanaHint',
 ]
 
 export default async function CheckoutPage() {
@@ -67,6 +69,7 @@ export default async function CheckoutPage() {
         fields={business.checkout}
         coupons={on('coupons')}
         freeRule={business.freeShipping}
+        address={business.address}
       />
     </section>
   )

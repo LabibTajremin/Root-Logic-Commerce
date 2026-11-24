@@ -1,5 +1,6 @@
 'use server'
 
+import { bdDistricts } from '@/modules/orders'
 import { locales, storefrontKeys } from '@/i18n'
 import { act, type ActionState } from './act'
 import { cookies } from 'next/headers'
@@ -70,6 +71,17 @@ export async function saveBusiness(_: ActionState, form: FormData) {
         orderLimits: {
           minOrder: optionalMinor(form.get('limits.min')),
           maxOrder: optionalMinor(form.get('limits.max')),
+        },
+        address: {
+          mode: String(form.get('address.mode')) as 'text',
+          // Districts left on "Any other" are simply not listed.
+          districtZones: Object.fromEntries(
+            bdDistricts.flatMap((d) => {
+              const zone = String(form.get(`zone.${d.en}`))
+              return zone ? [[d.en, zone]] : []
+            }),
+          ),
+          otherZone: String(form.get('zone.other')),
         },
         checkout: {
           email: String(form.get('checkout.email')) as 'optional',

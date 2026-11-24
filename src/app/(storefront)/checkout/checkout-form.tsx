@@ -4,7 +4,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
 import { normalizeBdPhone } from '@/modules/customers'
-import { freeShipping, type FreeShippingRule } from '@/modules/orders/client'
+import {
+  bdDistricts,
+  detectZone,
+  freeShipping,
+  type AddressRule,
+  type FreeShippingRule,
+} from '@/modules/orders/client'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart } from '../cart-store'
 import { placeOrder, quoteOrder, saveDraft, type Quote } from './actions'
@@ -70,6 +76,7 @@ export const CheckoutForm = ({
   fields,
   coupons,
   freeRule,
+  address,
 }: {
   zones: Zone[]
   labels: Record<string, string>
@@ -79,6 +86,8 @@ export const CheckoutForm = ({
   /** C2: show the "Have a code?" box (the coupons module is on). */
   coupons: boolean
   freeRule: FreeShippingRule
+  /** C4/C17: district suggestions and the zone each district means. */
+  address: AddressRule
 }) => {
   const items = useCart()
   const router = useRouter()
@@ -88,9 +97,21 @@ export const CheckoutForm = ({
   const [pending, start] = useTransition()
   // C18: removing a line asks once more (the button turns into "Tap again to remove").
   const [removing, setRemoving] = useState('')
+  // C17: the zone the typed address points to (shown as a chip; the shopper can still change it).
+  const [detected, setDetected] = useState<string | null>(null)
   const onType = (e: FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget
     const data = new FormData(form)
+    // Only address typing re-guesses, so a zone the shopper picked stays picked.
+    if (['district', 'area', 'address'].includes((e.target as HTMLInputElement).name)) {
+      const z = detectZone(
+        ['district', 'area', 'address'].map((k) => data.get(k)).join(' '),
+        address,
+        zones.map((z) => z.id),
+      )
+      setDetected(z)
+      if (z) setZoneId(z)
+    }
     const now = Object.fromEntries(
       [...form.querySelectorAll<HTMLInputElement>('[data-kept]')].map((el) => [el.name, el.value]),
     )
@@ -205,9 +226,26 @@ export const CheckoutForm = ({
         </Section>
         <Section title={L.address}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input id="district" data-kept label={L.district} required minLength={2} />
+            <Input
+              id="district"
+              data-kept
+              label={L.district}
+              required
+              minLength={2}
+              list={address.mode === 'picker' ? 'bd-districts' : undefined}
+            />
             <Input id="area" data-kept label={L.area} required minLength={2} />
           </div>
+          <p className="text-xs text-muted">{L.thanaHint}</p>
+          {address.mode === 'picker' && (
+            <datalist id="bd-districts">
+              {bdDistricts
+                .flatMap((d) => [d.en, d.bn])
+                .map((n) => (
+                  <option key={n} value={n} />
+                ))}
+            </datalist>
+          )}
           <Input
             id="address"
             data-kept
@@ -243,6 +281,14 @@ export const CheckoutForm = ({
           )}
         </Section>
         <Section title={L.zone}>
+          {detected && (
+            <p
+              data-testid="zone-detected"
+              className="w-fit rounded-full bg-soft px-3 py-1 text-sm font-semibold"
+            >
+              {L.zoneDetected!.replace('{{zone}}', zones.find((z) => z.id === detected)!.label)}
+            </p>
+          )}
           {zones.map((z) => (
             <label
               key={z.id}

@@ -95,6 +95,11 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   await expect(page.getByTestId('checkout-total')).toHaveText('৳1,360')
   await a11y()
   await fillCheckout(page)
+  // C17: the typed district picks the zone; a zone the shopper picks stays picked.
+  await expect(page.getByTestId('zone-detected')).toHaveText('Delivery area found: Inside Dhaka')
+  await page.getByLabel('District').fill('')
+  await expect(page.getByTestId('zone-detected')).toHaveCount(0)
+  await page.getByLabel('District').fill('Dhaka')
   await page.getByLabel('Outside Dhaka').check()
   await expect(page.getByTestId('checkout-total')).toHaveText('৳1,430')
   await page.getByLabel('Email (optional)').fill('rahim@example.com')

@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { test, expect } from './fixtures'
 import { e2eEnv } from '../../scripts/e2e-env.mjs'
 import { signedIn } from './admin'
-import { createProduct, editProduct, fillCheckout, photo, uid, uploadPhoto } from './shop'
+import { createProduct, editProduct, fillCheckout, photo, slug, uid, uploadPhoto } from './shop'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -1512,6 +1512,37 @@ test('free delivery rule with the cart hint; per-product quantity and order limi
   await page.getByRole('dialog', { name: 'Cart' }).getByRole('button', { name: '+' }).click()
   await expect(page.getByTestId('free-hint')).toHaveText('🎉 Your delivery is free')
   await rules('', '')
+})
+
+test('district list at checkout and zones by district (C4, C17)', async ({ page, a11y }) => {
+  const name = `Zoned ${uid()}`
+  await signedIn(page)
+  const setup = async (mode: string, khulna: string) => {
+    await page.goto('/admin/store')
+    await page.getByLabel('How shoppers type the district').selectOption({ label: mode })
+    await page.getByText('Zone by district').click()
+    await page.getByLabel('Khulna · খুলনা').selectOption({ label: khulna })
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  await setup('Text with a list of all 64 districts', 'Inside Dhaka')
+  await page.goto('/admin/store')
+  await expect(page.getByLabel('Khulna · খুলনা')).toHaveValue('inside-dhaka')
+  await expect(page.getByLabel('Zone for every other district')).toHaveValue('outside-dhaka')
+  await a11y()
+
+  await createProduct(page, { name, price: '200', stock: '5' })
+  await page.goto(`/p/${slug(name)}`)
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.goto('/checkout')
+  await expect(page.locator('#bd-districts option[value="খুলনা"]')).toHaveCount(1)
+  await page.getByLabel('District').fill('খুলনা')
+  await expect(page.getByTestId('zone-detected')).toHaveText('Delivery area found: Inside Dhaka')
+  await expect(page.getByLabel('Inside Dhaka')).toBeChecked()
+  await page.getByLabel('District').fill('Rajshahi')
+  await expect(page.getByLabel('Outside Dhaka')).toBeChecked()
+  await a11y()
+  await setup('Free text', 'Same as every other district')
 })
 
 // Last in the file: "start fresh" deletes the owner's products.

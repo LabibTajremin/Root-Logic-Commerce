@@ -57,6 +57,16 @@ export const businessSchema = z.object({
       maxOrder: z.number().int().positive().nullable().default(null),
     })
     .prefault({}),
+  // C4/C17: how the address is typed, and which delivery zone each district means.
+  address: z
+    .object({
+      mode: z.enum(['text', 'picker']).default('text'),
+      districtZones: z
+        .record(z.string().max(40), z.string().max(60))
+        .default({ Dhaka: 'inside-dhaka' }),
+      otherZone: z.string().max(60).default('outside-dhaka'),
+    })
+    .prefault({}),
   // C6: which extra fields checkout asks for.
   checkout: z
     .object({
