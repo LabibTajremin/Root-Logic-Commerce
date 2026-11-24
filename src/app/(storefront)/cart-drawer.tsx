@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { freeShipping, type FreeShippingRule } from '@/modules/orders'
+import { freeShipping, type FreeShippingRule } from '@/modules/orders/client'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { Icon } from '@/ui/icon'
 import { cart, DRAWER, openCart, useCart } from './cart-store'

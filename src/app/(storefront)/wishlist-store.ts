@@ -1,6 +1,7 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
+import { storedList } from '@/ui/stored-list'
 import type { Item } from './cart-store'
 
 /** A10: saved products, on this device only (no account needed). */
@@ -10,19 +11,11 @@ const listeners = new Set<() => void>()
 let raw = ''
 let items = EMPTY
 
-// Anything that isn't a JSON array (tampered, outdated) is dropped.
-const parse = (r: string) => {
-  try {
-    return (JSON.parse(r) as Item[]).slice()
-  } catch {
-    return EMPTY
-  }
-}
 const snapshot = () => {
   const r = localStorage.getItem(KEY) ?? '[]'
   if (r !== raw) {
     raw = r
-    items = parse(r)
+    items = storedList(r, EMPTY)
   }
   return items
 }
