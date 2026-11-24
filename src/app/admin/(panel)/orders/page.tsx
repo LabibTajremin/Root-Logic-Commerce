@@ -39,6 +39,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
             {tab.label}
           </Link>
         ))}
+        <Link
+          href="/admin/orders/incomplete"
+          className="min-h-11 shrink-0 border-b-2 border-transparent px-3 py-2.5 text-sm font-semibold text-muted"
+        >
+          {t('drafts.title')}
+        </Link>
       </nav>
       <form className="flex gap-2" role="search">
         {active && <input type="hidden" name="status" value={active} />}

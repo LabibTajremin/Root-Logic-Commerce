@@ -3,10 +3,31 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
-import { freeShipping, type FreeShippingRule } from '@/modules/orders'
+import { normalizeBdPhone } from '@/modules/customers'
+import { freeShipping, type FreeShippingRule } from '@/modules/orders/client'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart } from '../cart-store'
-import { placeOrder, quoteOrder, type Quote } from './actions'
+import { placeOrder, quoteOrder, saveDraft, type Quote } from './actions'
+
+// C1: this browser's own copy of what was typed (the shop's copy is the server draft).
+const KEPT = 'rlc-checkout'
+let typed: ReturnType<typeof setTimeout> | undefined
+/** Ref callback: the form mounts once the cart is known, then gets the kept fields back. */
+const restore = (form: HTMLFormElement) => {
+  const raw = localStorage.getItem(KEPT)
+  if (raw) {
+    const fields = [...form.querySelectorAll<HTMLInputElement>('[data-kept]')]
+    // A field the shop switched on since keeps its own (empty) value.
+    const kept = {
+      ...Object.fromEntries(fields.map((el) => [el.name, el.value])),
+      ...JSON.parse(raw),
+    }
+    for (const el of fields) el.value = kept[el.name]
+    form.querySelector<HTMLElement>('[data-restored]')!.hidden = false
+  }
+  // Leaving checkout drops a draft save still waiting to go.
+  return () => clearTimeout(typed)
+}
 
 type Zone = { id: string; label: string; charge: number }
 
@@ -67,6 +88,18 @@ export const CheckoutForm = ({
   const [pending, start] = useTransition()
   // C18: removing a line asks once more (the button turns into "Tap again to remove").
   const [removing, setRemoving] = useState('')
+  const onType = (e: FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget
+    const data = new FormData(form)
+    const now = Object.fromEntries(
+      [...form.querySelectorAll<HTMLInputElement>('[data-kept]')].map((el) => [el.name, el.value]),
+    )
+    localStorage.setItem(KEPT, JSON.stringify(now))
+    clearTimeout(typed)
+    // The shop only gets a draft once the phone is a real BD number.
+    if (!normalizeBdPhone(now.phone!)) return
+    typed = setTimeout(() => void saveDraft(data), 800)
+  }
   const money = (m: number) => formatMoney(m, moneyFormat)
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
   // C3: same rule the server applies when placing.
@@ -100,21 +133,39 @@ export const CheckoutForm = ({
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
+    // A pending draft save must not land after the order (it would leave a stale draft).
+    clearTimeout(typed)
     start(async () => {
       const r = await placeOrder(form)
       if ('error' in r) return setError(r.error)
       if ('otp' in r) return (setError(''), setOtpTo(r.otp))
+      localStorage.removeItem(KEPT)
       router.push(`/order/${r.orderNo}`)
       cart.clear()
     })
   }
 
   return (
-    <form onSubmit={submit} aria-busy={pending} className="grid gap-6 md:grid-cols-[1fr_360px]">
+    <form
+      ref={restore}
+      onSubmit={submit}
+      onInput={onType}
+      aria-busy={pending}
+      className="grid gap-6 md:grid-cols-[1fr_360px]"
+    >
       <div className="flex flex-col gap-6">
+        <p
+          role="status"
+          data-restored
+          hidden
+          className="rounded-control bg-soft p-3 text-sm font-semibold"
+        >
+          {L.draftRestored}
+        </p>
         <Section title={L.details}>
           <Input
             id="name"
+            data-kept
             label={L.name}
             required
             minLength={2}
@@ -123,6 +174,7 @@ export const CheckoutForm = ({
           />
           <Input
             id="phone"
+            data-kept
             label={L.phone}
             required
             type="tel"
@@ -133,6 +185,7 @@ export const CheckoutForm = ({
           {fields.email !== 'off' && (
             <Input
               id="email"
+              data-kept
               label={fields.email === 'required' ? L.emailRequired : L.email}
               type="email"
               autoComplete="email"
@@ -142,6 +195,7 @@ export const CheckoutForm = ({
           {fields.altPhone && (
             <Input
               id="altPhone"
+              data-kept
               label={L.altPhone}
               type="tel"
               inputMode="tel"
@@ -151,17 +205,18 @@ export const CheckoutForm = ({
         </Section>
         <Section title={L.address}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input id="district" label={L.district} required minLength={2} />
-            <Input id="area" label={L.area} required minLength={2} />
+            <Input id="district" data-kept label={L.district} required minLength={2} />
+            <Input id="area" data-kept label={L.area} required minLength={2} />
           </div>
           <Input
             id="address"
+            data-kept
             label={L.addressLine}
             required
             minLength={5}
             autoComplete="street-address"
           />
-          <Input id="note" label={L.note} maxLength={500} />
+          <Input id="note" data-kept label={L.note} maxLength={500} />
           {fields.preferredTime && (
             <div className="flex flex-col gap-1.5">
               <label htmlFor="preferredTime" className="text-sm font-semibold">
@@ -333,6 +388,7 @@ export const CheckoutForm = ({
           ))}
         </ul>
         <p className="text-xs text-muted">{L.guest}</p>
+        <p className="text-xs text-muted">{L.draftConsent}</p>
       </aside>
     </form>
   )

@@ -70,6 +70,13 @@
   "orders.search": "ফোন বা অর্ডার নম্বর দিয়ে খুঁজুন",
   "orders.empty": "এখানে এখনো কোনো অর্ডার নেই।",
   "orders.all": "সব",
+  "drafts.title": "অসম্পূর্ণ",
+  "drafts.hint": "যাঁরা চেকআউটে ফোন নম্বর লিখেছেন কিন্তু অর্ডার করেননি। কল করুন, বা খসড়াটিকে অর্ডার বানান। খসড়া ৩০ দিন পরে মুছে যায় এবং অর্ডার বা বিক্রিতে গোনা হয় না।",
+  "drafts.empty": "কোনো অসম্পূর্ণ চেকআউট নেই।",
+  "drafts.items": "{{n}}টি পণ্য",
+  "drafts.call": "কল করুন",
+  "drafts.convert": "অর্ডার বানান",
+  "drafts.discard": "বাদ দিন",
   "status.PENDING": "অপেক্ষমাণ",
   "status.CONFIRMED": "কনফার্মড",
   "status.PROCESSING": "প্রসেসিং",
@@ -265,6 +272,8 @@
   "shop.delivery": "সারা বাংলাদেশে ডেলিভারি",
   "checkout.title": "চেকআউট",
   "checkout.guest": "গেস্ট চেকআউট — অ্যাকাউন্ট লাগবে না।",
+  "checkout.draftConsent": "আপনি যা লিখছেন তা আমরা রেখে দিই, যাতে অর্ডার শেষ না হলে সাহায্য করতে পারি।",
+  "checkout.draftRestored": "আপনি যা লিখেছিলেন তা এখনও আছে।",
   "checkout.details": "আপনার তথ্য",
   "checkout.address": "ডেলিভারি ঠিকানা",
   "checkout.payment": "পেমেন্ট",
@@ -914,5 +923,6 @@
   "badge.success": "সবুজ",
   "badge.danger": "লাল",
   "badge.neutral": "সাধারণ",
-  "stock.showLeft": "স্টক কম হলে ক্রেতাদের “মাত্র Nটি বাকি” দেখান"
+  "stock.showLeft": "স্টক কম হলে ক্রেতাদের “মাত্র Nটি বাকি” দেখান",
+  "error.draft.not_found": "খসড়াটি আর নেই (অর্ডার হয়েছে বা বাদ দেওয়া হয়েছে)।"
 }

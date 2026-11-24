@@ -8,14 +8,19 @@ type Options = { limit: number; windowMs: number; now?: () => number }
  */
 export const createRateLimiter = ({ limit, windowMs, now = Date.now }: Options) => {
   const windows = new Map<string, { start: number; count: number }>()
+  /** Counts one hit; false once the key is over its limit for the window. */
+  const allow = (key: string) => {
+    const t = now()
+    for (const [k, w] of windows) if (t - w.start >= windowMs) windows.delete(k)
+    const w = windows.get(key) ?? { start: t, count: 0 }
+    w.count += 1
+    windows.set(key, w)
+    return w.count <= limit
+  }
   return {
+    allow,
     assert(key: string) {
-      const t = now()
-      for (const [k, w] of windows) if (t - w.start >= windowMs) windows.delete(k)
-      const w = windows.get(key) ?? { start: t, count: 0 }
-      w.count += 1
-      windows.set(key, w)
-      if (w.count > limit) throw new DomainError('rate.limited')
+      if (!allow(key)) throw new DomainError('rate.limited')
     },
     size: () => windows.size,
   }

@@ -44,6 +44,8 @@ const KEYS = [
   'discount',
   'haveCode',
   'applyCode',
+  'draftConsent',
+  'draftRestored',
 ]
 
 export default async function CheckoutPage() {

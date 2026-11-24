@@ -10,13 +10,15 @@ export type PlaceResult = { error: string } | { otp: string } | { orderNo: numbe
 export type Quote = { error: string } | { discount: number; couponCode: string | null }
 
 const optional = (v: string) => v.trim() || null
+// Fields a shop switched off are simply missing from the form.
+const field = (form: FormData, k: string) => String(form.get(k) ?? '')
 
 export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
-  const [{ orders, otp, store, business, limits, t }, ip] = await Promise.all([
+  const [{ orders, drafts, otp, store, business, limits, t }, ip] = await Promise.all([
     storefront(),
     currentIp(),
   ])
-  const f = (k: string) => String(form.get(k) ?? '')
+  const f = (k: string) => field(form, k)
   try {
     limits.checkout.assert(`${store.id}:${ip}`)
     const email = optional(f('email'))
@@ -49,6 +51,7 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
       },
       shopRulesOf(business),
     )
+    await drafts.ordered(store.id, f('phone'))
     return { orderNo: order.orderNo }
   } catch (e) {
     return actionError(t, e, 'checkout')
@@ -80,4 +83,21 @@ export const quoteOrder = async (form: FormData): Promise<Quote> => {
   } catch (e) {
     return actionError(t, e, 'quote')
   }
+}
+
+/** C1: what the shopper has typed so far (only once the phone is valid; skipped quietly otherwise). */
+export const saveDraft = async (form: FormData): Promise<void> => {
+  const [{ drafts, store }, ip] = await Promise.all([storefront(), currentIp()])
+  const f = (k: string) => field(form, k)
+  await drafts.save(store.id, ip, {
+    phone: f('phone'),
+    name: f('name'),
+    email: f('email'),
+    district: f('district'),
+    area: f('area'),
+    address: f('address'),
+    note: f('note'),
+    zoneId: f('zoneId'),
+    items: JSON.parse(f('items')),
+  })
 }

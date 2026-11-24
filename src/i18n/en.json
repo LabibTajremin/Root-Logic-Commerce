@@ -70,6 +70,13 @@
   "orders.search": "Search by phone or order no.",
   "orders.empty": "No orders here yet.",
   "orders.all": "All",
+  "drafts.title": "Incomplete",
+  "drafts.hint": "Shoppers who typed their phone at checkout but did not order. Call them, or turn the draft into an order. Drafts go after 30 days and never count as orders or sales.",
+  "drafts.empty": "No incomplete checkouts.",
+  "drafts.items": "{{n}} items",
+  "drafts.call": "Call",
+  "drafts.convert": "Make it an order",
+  "drafts.discard": "Discard",
   "status.PENDING": "Pending",
   "status.CONFIRMED": "Confirmed",
   "status.PROCESSING": "Processing",
@@ -265,6 +272,8 @@
   "shop.delivery": "Delivery all over Bangladesh",
   "checkout.title": "Checkout",
   "checkout.guest": "Guest checkout — no account needed.",
+  "checkout.draftConsent": "We keep what you type here so we can help if you don't finish.",
+  "checkout.draftRestored": "What you typed is still here.",
   "checkout.details": "Your details",
   "checkout.address": "Delivery address",
   "checkout.payment": "Payment",
@@ -914,5 +923,6 @@
   "badge.success": "Green",
   "badge.danger": "Red",
   "badge.neutral": "Plain",
-  "stock.showLeft": "Show “Only N left” to shoppers when stock is low"
+  "stock.showLeft": "Show “Only N left” to shoppers when stock is low",
+  "error.draft.not_found": "That draft is gone (ordered or discarded)."
 }

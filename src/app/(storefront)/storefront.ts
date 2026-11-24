@@ -80,6 +80,7 @@ export const storefront = cache(async () => {
     catalog: container.catalog,
     pages: container.pages,
     orders: container.orders,
+    drafts: container.drafts,
     reviews: container.reviews,
     otp: container.otp,
     promotions: container.promotions,

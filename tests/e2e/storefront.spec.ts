@@ -954,3 +954,78 @@ test('mini-cart: a count and total pill appears with items and reopens the cart'
   await drawer(page).getByRole('button', { name: 'Remove' }).click()
   await expect(pill).toHaveCount(0)
 })
+
+test('incomplete checkout: the draft comes back for the shopper and waits for the owner (C1)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const name = `Draft ${id}`
+  const phone = `019${Date.now().toString().slice(-8)}`
+  const other = `018${Date.now().toString().slice(-8)}`
+  const saved = () =>
+    page.waitForResponse(
+      (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/checkout',
+    )
+  await signedIn(page)
+  await createProduct(page, { name, price: '150', stock: '5' })
+  await page.goto(`/p/${slug(name)}`)
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.goto('/checkout')
+  await expect(page.getByText('We keep what you type here')).toBeVisible()
+  await page.getByLabel('Full name').fill('Karim Draft')
+  let save = saved()
+  await page.getByLabel('Phone number').fill(phone)
+  await save
+  // Coming back: the browser's copy fills the form again.
+  await page.goto('/checkout')
+  await expect(
+    page.getByRole('status').filter({ hasText: 'What you typed is still here.' }),
+  ).toBeVisible()
+  await expect(page.getByLabel('Full name')).toHaveValue('Karim Draft')
+  await expect(page.getByLabel('Phone number')).toHaveValue(phone)
+  await a11y()
+
+  await page.goto('/admin/orders')
+  await page.goto(
+    (await page.getByRole('link', { name: 'Incomplete', exact: true }).getAttribute('href'))!,
+  )
+  const card = page.locator('li').filter({ hasText: phone })
+  await expect(card).toContainText('Karim Draft')
+  await expect(card).toContainText('1 items')
+  await expect(card.getByRole('link', { name: 'Call' })).toHaveAttribute('href', `tel:${phone}`)
+  await expect(card.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute(
+    'href',
+    `https://wa.me/88${phone}`,
+  )
+  await a11y()
+  // No address yet: converting says what is missing and keeps the draft.
+  await card.getByRole('button', { name: 'Make it an order' }).click()
+  await alert(page, 'Please check the highlighted fields.')
+
+  // The shopper adds the address (the draft follows), then starts again with another phone.
+  await page.goto('/checkout')
+  await page.getByLabel('District').fill('Dhaka')
+  await page.getByLabel('Area / Thana').fill('Mirpur')
+  save = saved()
+  await page.getByLabel('Full address').fill('House 9, Road 2')
+  await save
+  save = saved()
+  await page.getByLabel('Phone number').fill(other)
+  await save
+
+  await page.goto('/admin/orders/incomplete')
+  await page
+    .locator('li')
+    .filter({ hasText: other })
+    .getByRole('button', { name: 'Discard' })
+    .click()
+  await expect(page.locator('li').filter({ hasText: other })).toHaveCount(0)
+  await card.getByRole('button', { name: 'Make it an order' }).click()
+  await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+  await expect(page.getByText('House 9, Road 2')).toBeVisible()
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByText('Cancelled').first()).toBeVisible()
+  await page.goto('/admin/orders/incomplete')
+  await expect(page.getByText(phone)).toHaveCount(0)
+})

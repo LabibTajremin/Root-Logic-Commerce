@@ -6,7 +6,7 @@ import { createInsights } from '@/modules/insights'
 import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
-import { createOrders, type OrderEvents } from '@/modules/orders'
+import { createDrafts, createOrders, type OrderEvents } from '@/modules/orders'
 import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
 import { auditActor } from './audit-context'
@@ -36,6 +36,7 @@ import { createReviewsRepo } from '@/infrastructure/db/repositories/reviews-repo
 import { createActivityRepo } from '@/infrastructure/db/repositories/activity-repo'
 import { createNotificationsRepo } from '@/infrastructure/db/repositories/notifications-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
+import { createDraftsRepo } from '@/infrastructure/db/repositories/drafts-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
 import { createStoreDirectory } from '@/infrastructure/db/repositories/store-directory'
@@ -155,6 +156,10 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
       audit,
     }),
     orders,
+    drafts: createDrafts({
+      repo: createDraftsRepo(db),
+      allow: createRateLimiter({ limit: 60, windowMs: 10 * 60_000 }).allow,
+    }),
     coupons,
     stock: createStock({ repo: createStockRepo(db) }),
     plans,

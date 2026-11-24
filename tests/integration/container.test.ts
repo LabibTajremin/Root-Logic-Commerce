@@ -34,6 +34,7 @@ describe('container', () => {
       'bus',
       'catalog',
       'coupons',
+      'drafts',
       'features',
       'insights',
       'limits',

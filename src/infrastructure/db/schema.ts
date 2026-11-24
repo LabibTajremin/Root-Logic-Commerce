@@ -454,6 +454,28 @@ export const couponRedemptions = pgTable(
   (t) => [index('coupon_redemptions_coupon_phone_idx').on(t.couponId, t.phone)],
 )
 
+/** C1: one per store + phone; replaced on every save, deleted when that phone orders. */
+export const checkoutDrafts = pgTable(
+  'checkout_drafts',
+  {
+    id: id(),
+    storeId: storeId(),
+    phone: text().notNull(),
+    name: text().notNull(),
+    email: text().notNull(),
+    district: text().notNull(),
+    area: text().notNull(),
+    address: text().notNull(),
+    note: text().notNull(),
+    zoneId: text().notNull(),
+    items: jsonb()
+      .$type<{ productId: string; variantId: string | null; quantity: number }[]>()
+      .notNull(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex('checkout_drafts_store_phone_uq').on(t.storeId, t.phone)],
+)
+
 export const orderItems = pgTable(
   'order_items',
   {
