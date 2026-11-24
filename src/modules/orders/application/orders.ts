@@ -1,5 +1,6 @@
 import { variantLabel } from '@/modules/catalog'
 import { applyCoupon, type Coupon, type Coupons } from '@/modules/coupons'
+import type { Client, Fraud, FraudRules } from '@/modules/fraud'
 import { normalizeBdPhone } from '@/modules/customers'
 import { z } from 'zod'
 import { DomainError, validate, type EventBus } from '@/modules/shared'
@@ -31,9 +32,10 @@ type Deps = {
   repo: OrdersRepo
   bus: EventBus<OrderEvents>
   coupons: Pick<Coupons, 'find' | 'auto' | 'usedByPhone'>
+  fraud: Pick<Fraud, 'check'>
 }
 
-export const createOrders = ({ repo, bus, coupons }: Deps) => {
+export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
   /** Lines, delivery and the coupon (typed, else the best automatic one) for a cart. */
   /** `manual`: a discount the shop types in (C12) instead of any coupon. */
   const price = async (
@@ -146,14 +148,29 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
       return { ...totals, couponCode: coupon?.code ?? null }
     },
 
-    /** C12/C15: the shop places manual orders with a `source` and its own `discount`. */
+    /**
+     * C12/C15: the shop places manual orders with a `source` and its own `discount`.
+     * D1/D3/D4: web checkout passes `guard` (who is ordering + the shop's rules).
+     */
     async placeOrder(
       storeId: string,
       input: CheckoutInput,
       shop: ShopRules<DeliveryZone>,
-      by: { source?: OrderSource; discount?: number } = {},
+      by: {
+        source?: OrderSource
+        discount?: number
+        guard?: { client: Omit<Client, 'phone'>; rules: FraudRules }
+      } = {},
     ) {
       const { d, zone, lines, coupon, totals } = await price(storeId, input, shop, by.discount)
+      const client = by.guard ? { ...by.guard.client, phone: d.phone } : null
+      if (client)
+        await fraud.check(
+          storeId,
+          client,
+          lines.map((l) => l.productId),
+          by.guard!.rules,
+        )
       const created = await repo.create(storeId, {
         customer: { phone: d.phone, name: d.name, email: d.email },
         ship: {
@@ -171,6 +188,7 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         deliveryZone: zone.label,
         paymentMethod: d.paymentMethod,
         source: validate(z.enum(orderSources).default('web'), by.source),
+        client: client && { ip: client.ip, deviceId: client.deviceId },
         totals,
         coupon: coupon && { id: coupon.id, code: coupon.code, totalLimit: coupon.totalLimit },
         items: lines,

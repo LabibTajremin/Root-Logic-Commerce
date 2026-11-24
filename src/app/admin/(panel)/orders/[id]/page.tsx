@@ -8,6 +8,7 @@ import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../../context'
 import { changeStatus, recordReturn, restoreOrder, trashOrder } from '../actions'
+import { addBlock } from '../../fraud/actions'
 import { TONE } from '../tone'
 
 export const metadata: Metadata = { title: 'Order' }
@@ -303,6 +304,29 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 {t('order.location', { m: o.shipLocation.accuracy })}
               </a>
             )}
+            {/* D3: block who placed it; web orders also carry the IP and device. */}
+            <div className="flex flex-wrap gap-2" data-testid="order-block">
+              {(
+                [
+                  ['phone', o.shipPhone],
+                  ['ip', o.clientIp],
+                  ['device', o.deviceId],
+                ] as const
+              )
+                .filter((b): b is ['phone' | 'ip' | 'device', string] => b[1] !== null)
+                .map(([kind, value]) => (
+                  <ActionForm key={kind} action={addBlock}>
+                    <input type="hidden" name="kind" value={kind} />
+                    <input type="hidden" name="value" value={value} />
+                    <button
+                      className="min-h-11 rounded-control border border-line px-3 text-xs font-semibold text-danger"
+                      title={value}
+                    >
+                      {t(`fraud.block_${kind}`)}
+                    </button>
+                  </ActionForm>
+                ))}
+            </div>
             <div className="flex gap-2">
               <a
                 href={`tel:${o.shipPhone}`}

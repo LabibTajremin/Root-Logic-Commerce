@@ -82,6 +82,15 @@ export const businessSchema = z.object({
       whatsapp: z.boolean().default(true),
     })
     .prefault({}),
+  // D1/D4: order guard (0 = no per-window limit; duplicates are flagged, blocked only if asked).
+  fraud: z
+    .object({
+      perWindow: z.number().int().min(0).max(100).default(0),
+      windowHours: z.number().int().min(1).max(720).default(24),
+      duplicateHours: z.number().int().min(1).max(720).default(24),
+      blockDuplicates: z.boolean().default(false),
+    })
+    .prefault({}),
   // C6: which extra fields checkout asks for.
   checkout: z
     .object({

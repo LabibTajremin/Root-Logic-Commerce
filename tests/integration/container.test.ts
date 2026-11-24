@@ -39,6 +39,7 @@ describe('container', () => {
       'coupons',
       'drafts',
       'features',
+      'fraud',
       'insights',
       'limits',
       'media',

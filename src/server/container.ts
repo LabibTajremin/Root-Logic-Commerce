@@ -6,6 +6,7 @@ import { createInsights } from '@/modules/insights'
 import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
+import { createFraud } from '@/modules/fraud'
 import { createDrafts, createOrders, type OrderEvents } from '@/modules/orders'
 import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
@@ -37,6 +38,7 @@ import { createActivityRepo } from '@/infrastructure/db/repositories/activity-re
 import { createNotificationsRepo } from '@/infrastructure/db/repositories/notifications-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createDraftsRepo } from '@/infrastructure/db/repositories/drafts-repo'
+import { createFraudRepo } from '@/infrastructure/db/repositories/fraud-repo'
 import { createSettingsRepo } from '@/infrastructure/db/repositories/settings-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
 import { createStoreDirectory } from '@/infrastructure/db/repositories/store-directory'
@@ -77,7 +79,8 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
   }
   const settings = createSiteSettings({ repo: createSettingsRepo(db), audit })
   const coupons = createCoupons({ repo: createCouponsRepo(db) })
-  const orders = createOrders({ repo: createOrdersRepo(db), bus, coupons })
+  const fraud = createFraud({ repo: createFraudRepo(db) })
+  const orders = createOrders({ repo: createOrdersRepo(db), bus, coupons, fraud })
   const secrets = createSecretBox(config.settingsKey)
   const plans = createPlans({ repo: createEntitlementsRepo(db), configured: config.entitlements })
   const storeSettings = (storeId: string) => settings.get(storeId, { storeName: config.store.name })
@@ -158,6 +161,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
       audit,
     }),
     orders,
+    fraud,
     drafts: createDrafts({
       repo: createDraftsRepo(db),
       allow: createRateLimiter({ limit: 60, windowMs: 10 * 60_000 }).allow,

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { orderSources, orderStatuses, type OrderSource, type OrderStatus } from '@/modules/orders'
+import { currentSettings } from '@/server/request'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../context'
@@ -13,12 +14,14 @@ type Search = Promise<{ status?: string; q?: string; source?: string; trash?: st
 export default async function OrdersPage({ searchParams }: { searchParams: Search }) {
   const { status, q, source, trash } = await searchParams
   const { orders, store, t, money } = await adminContext('orders.manage')
+  const { business } = await currentSettings()
   const active = orderStatuses.find((s) => s === status) as OrderStatus | undefined
   const from = orderSources.find((s) => s === source) as OrderSource | undefined
   const { rows, total } = await orders.listOrders(store.id, {
     status: active,
     source: from,
     trash: trash === '1',
+    duplicateHours: business.fraud.duplicateHours,
     search: q || undefined,
   })
   const tabs: { key?: OrderStatus; label: string }[] = [
@@ -136,6 +139,23 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                     {t(`source.${o.source}`)}
                   </span>
                   <span className="font-semibold">{money(o.total)}</span>
+                  {o.duplicateOf && (
+                    <span
+                      className="basis-full text-xs font-semibold text-danger"
+                      data-testid="order-duplicate"
+                    >
+                      {t('orders.duplicateOf', {
+                        no: o.duplicateOf.orderNo,
+                        status: t(`status.${o.duplicateOf.status}`),
+                        hours: Math.max(
+                          1,
+                          Math.round(
+                            (o.createdAt.getTime() - o.duplicateOf.createdAt.getTime()) / 3_600_000,
+                          ),
+                        ),
+                      })}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

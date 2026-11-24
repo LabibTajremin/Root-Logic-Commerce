@@ -1,5 +1,7 @@
 import { createCoupons, type Coupons } from '@/modules/coupons'
 import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
+import { createFraud, type Fraud } from '@/modules/fraud'
+import { createFraudRepo } from '@/infrastructure/db/repositories/fraud-repo'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createCatalog } from '@/modules/catalog'
@@ -9,11 +11,12 @@ import { createStock, type Stock } from '@/modules/stock'
 import { createEventBus } from '@/modules/shared'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { createStockRepo } from '@/infrastructure/db/repositories/stock-repo'
-import { products, productVariants } from '@/infrastructure/db/schema'
+import { orders as ordersTable, products, productVariants } from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
 type TestDb = Awaited<ReturnType<typeof createTestDb>>
+let fraud: Fraud
 let db: TestDb, orders: Orders, coupons: Coupons, stock: Stock, store: string, other: string
 let events: string[]
 // The shop's checkout rules: two zones, no free-shipping rule, no order limits.
@@ -102,7 +105,8 @@ beforeEach(async () => {
   ] as const)
     bus.on(e, (p) => void events.push(`${e}#${p.orderNo}`))
   coupons = createCoupons({ repo: createCouponsRepo(db) })
-  orders = createOrders({ repo: createOrdersRepo(db), bus, coupons })
+  fraud = createFraud({ repo: createFraudRepo(db) })
+  orders = createOrders({ repo: createOrdersRepo(db), bus, coupons, fraud })
   stock = createStock({ repo: createStockRepo(db) })
   store = await seedStore(db)
   other = await seedStore(db, 'other')
@@ -830,5 +834,107 @@ describe('returns and exchanges (C14)', () => {
       { kind: 'exchange', note: 'Cracked lid', exchangeOrderId: swap.id, exchangeOrderNo: swapNo },
       { kind: 'return', restocked: false, refund: 0 },
     ])
+  })
+})
+
+describe('order guard: blocklist, limits, duplicates, report (D1, D3, D4, D5)', () => {
+  const rules = { perWindow: 2, windowHours: 24, duplicateHours: 24, blockDuplicates: false }
+  const web = (ip = '10.0.0.1', deviceId = 'dev-1') => ({
+    guard: { client: { ip, deviceId }, rules },
+  })
+
+  it('records who ordered and refuses blocked phones, IPs and devices', async () => {
+    const p = await product(store, { stock: 50 })
+    const { id } = await orders.placeOrder(store, checkout(p.id), zones, web())
+    expect(
+      await db
+        .select({ ip: ordersTable.clientIp, d: ordersTable.deviceId })
+        .from(ordersTable)
+        .where(eq(ordersTable.id, id)),
+    ).toEqual([{ ip: '10.0.0.1', d: 'dev-1' }])
+    await fraud.block(store, { kind: 'device', value: 'dev-9' })
+    await fraud.block(store, { kind: 'ip', value: '10.0.0.9' })
+    await fraud.block(store, { kind: 'phone', value: '01899999999' })
+    await fraud.block(store, { kind: 'ip', value: '10.0.0.9' })
+    await expect(
+      orders.placeOrder(store, checkout(p.id), zones, web('10.0.0.2', 'dev-9')),
+    ).rejects.toThrow('order.blocked')
+    await expect(orders.placeOrder(store, checkout(p.id), zones, web('10.0.0.9'))).rejects.toThrow(
+      'order.blocked',
+    )
+    await expect(
+      orders.placeOrder(store, checkout(p.id, 1, '01899999999'), zones, web('10.0.0.3', 'dev-3')),
+    ).rejects.toThrow('order.blocked')
+    // Another store's blocklist doesn't apply; the shop's own manual orders are never guarded.
+    await orders.placeOrder(other, checkout((await product(other)).id), zones, web('10.0.0.9'))
+    await orders.placeOrder(store, checkout(p.id, 1, '01899999999'), zones)
+    const blocks = await fraud.listBlocks(store)
+    expect(blocks.map((b) => `${b.kind}:${b.value}`).sort()).toEqual([
+      'device:dev-9',
+      'ip:10.0.0.9',
+      'phone:01899999999',
+    ])
+    await fraud.unblock(store, blocks.find((b) => b.kind === 'device')!.id)
+    await orders.placeOrder(
+      store,
+      checkout(p.id, 1, '01822222222'),
+      zones,
+      web('10.0.0.4', 'dev-9'),
+    )
+    expect((await fraud.report(store)).attempts.map((a) => a.reason)).toEqual([
+      'blocked',
+      'blocked',
+      'blocked',
+    ])
+  })
+
+  it('limits orders per phone, IP or device in the window', async () => {
+    const p = await product(store, { stock: 50 })
+    await orders.placeOrder(store, checkout(p.id), zones, web('10.1.0.1', 'a'))
+    await orders.placeOrder(store, checkout(p.id, 1, '01811111111'), zones, web('10.1.0.1', 'b'))
+    // Same IP twice already.
+    await expect(
+      orders.placeOrder(store, checkout(p.id, 1, '01922222222'), zones, web('10.1.0.1', 'c')),
+    ).rejects.toThrow('order.too_many')
+    await orders.placeOrder(store, checkout(p.id, 1, '01922222222'), zones, web('10.1.0.2', 'c'))
+  })
+
+  it('blocks a same-phone, same-product repeat when the shop asks, and flags it otherwise', async () => {
+    const p = await product(store, { stock: 50 })
+    const q = await product(store, { stock: 50 })
+    const first = await orders.placeOrder(store, checkout(p.id), zones, web('10.2.0.1', 'x'))
+    const strict = {
+      guard: {
+        client: { ip: '10.2.0.2', deviceId: 'y' },
+        rules: { ...rules, perWindow: 0, blockDuplicates: true },
+      },
+    }
+    await expect(orders.placeOrder(store, checkout(p.id), zones, strict)).rejects.toThrow(
+      'order.duplicate',
+    )
+    await orders.placeOrder(store, checkout(q.id), zones, strict)
+    const repeat = await orders.placeOrder(store, checkout(p.id), zones)
+    const third = await orders.placeOrder(store, checkout(p.id), zones)
+    const { rows } = await orders.listOrders(store, { duplicateHours: 24 })
+    const firstNo = (await orders.getOrder(store, first.id))!.orderNo
+    expect(rows.find((r) => r.id === repeat.id)!.duplicateOf).toMatchObject({
+      orderNo: firstNo,
+      status: 'PENDING',
+    })
+    expect(rows.find((r) => r.id === first.id)!.duplicateOf).toBeNull()
+    // Several earlier matches: the nearest one is named.
+    const repeatNo = (await orders.getOrder(store, repeat.id))!.orderNo
+    expect(rows.find((r) => r.id === third.id)!.duplicateOf).toMatchObject({ orderNo: repeatNo })
+  })
+
+  it('reports the phones with the most lost orders', async () => {
+    const p = await product(store, { stock: 50 })
+    for (let i = 0; i < 2; i++) {
+      const { id } = await orders.placeOrder(store, checkout(p.id, 1, '01733333333'), zones)
+      await orders.changeStatus(store, id, 'CANCELLED', null)
+    }
+    await orders.placeOrder(store, checkout(p.id, 1, '01733333333'), zones)
+    await orders.placeOrder(store, checkout(p.id, 1, '01744444444'), zones)
+    expect((await fraud.report(store)).risky).toEqual([{ phone: '01733333333', lost: 2, total: 3 }])
   })
 })

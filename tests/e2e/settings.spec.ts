@@ -1689,6 +1689,100 @@ test('manual order: customer lookup, products and variants, discount, source tag
   await expect(page.getByLabel('Full address')).toHaveValue('House 4, Road 7')
 })
 
+test('order guard: block from an order, limits, duplicates, the report (D1, D3, D4, D5)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Guarded ${uid()}`
+  const stamp = Date.now().toString().slice(-8)
+  const [p1, p2] = [`016${stamp}`, `013${stamp}`]
+  await signedIn(page)
+  await createProduct(page, { name, price: '120', stock: '50' })
+  const toOrder = async (no: string) => {
+    await page.goto(`/admin/orders?q=${no}`)
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+  }
+  const checkoutAs = async (phone: string) => {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page, phone)
+    await page.getByRole('button', { name: 'Place order' }).click()
+  }
+  const placed = async () => {
+    await page.waitForURL(/\/order\/\d+$/)
+    return (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  }
+  const rules = async (perWindow: string, duplicates: boolean) => {
+    await page.goto('/admin/fraud')
+    await page.getByLabel('Orders per phone, IP or device (0 = no limit)').fill(perWindow)
+    await page.getByLabel('Refuse possible duplicates at checkout').setChecked(duplicates)
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await saved(page)
+  }
+  const nos: string[] = []
+
+  await checkoutAs(p1)
+  nos.push(await placed())
+  await toOrder(nos[0]!)
+  await expect(page.getByTestId('order-block').getByRole('button')).toHaveText([
+    'Block phone',
+    'Block IP',
+    'Block device',
+  ])
+  await page.getByRole('button', { name: 'Block phone' }).click()
+  await checkoutAs(p1)
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Sorry, we can’t take this order online.' }),
+  ).toBeVisible()
+
+  await page.goto('/admin/fraud')
+  await expect(page.getByTestId('blocklist')).toContainText(p1)
+  await expect(page.getByTestId('attempts')).toContainText(`Blocked · ${p1}`)
+  await page.getByLabel('Block a').selectOption('ip')
+  await page.getByLabel('Value').fill('203.0.113.7')
+  await page.getByLabel('Note (optional)').fill('spam bot')
+  await page.getByRole('button', { name: 'Block', exact: true }).click()
+  await expect(page.getByTestId('blocklist')).toContainText('IP 203.0.113.7 spam bot')
+  await a11y()
+  for (const v of ['203.0.113.7', p1]) {
+    await page.getByRole('button', { name: `Unblock ${v}` }).click()
+    await expect(page.getByRole('button', { name: `Unblock ${v}` })).toHaveCount(0)
+  }
+
+  // This browser (and IP) already ordered: a limit of 1 refuses the next one.
+  await rules('1', false)
+  await checkoutAs(p2)
+  await expect(page.getByRole('alert').filter({ hasText: 'several orders just now' })).toBeVisible()
+  await rules('0', true)
+  await page.goto('/checkout')
+  await page.getByRole('button', { name: 'Place order' }).click()
+  nos.push(await placed())
+  await checkoutAs(p2)
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'looks like an order you already placed' }),
+  ).toBeVisible()
+  await rules('0', false)
+  await page.goto('/checkout')
+  await page.getByRole('button', { name: 'Place order' }).click()
+  nos.push(await placed())
+  await page.goto(`/admin/orders?q=${p2}`)
+  await expect(page.getByTestId('order-duplicate')).toHaveText(
+    new RegExp(`Possible duplicate of #${nos[1]} \\(Pending, \\d+ h earlier\\)`),
+  )
+  for (const no of nos) {
+    await toOrder(no)
+    await page.getByRole('button', { name: 'Cancel order' }).click()
+    await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+  }
+  await page.goto('/admin/fraud')
+  await expect(page.getByTestId('risky')).toContainText(
+    `${p2}: 2 of 2 orders cancelled or returned`,
+  )
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

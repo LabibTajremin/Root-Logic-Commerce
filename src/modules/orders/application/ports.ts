@@ -48,6 +48,7 @@ export type NewOrder = {
   deliveryZone: string
   paymentMethod: string
   source: OrderSource
+  client: { ip: string; deviceId: string } | null
   totals: { subtotal: number; deliveryCharge: number; discount: number; total: number }
   /** C2: redeemed in the same transaction (the total limit is re-checked there). */
   coupon: { id: string; code: string; totalLimit: number | null } | null
@@ -63,6 +64,8 @@ export type OrderSummary = {
   source: OrderSource
   createdAt: Date
 }
+/** D1: an earlier order from the same phone with a product in common, within the window. */
+export type DuplicateOf = { orderNo: number; status: OrderStatus; createdAt: Date }
 export type OrderEvent = {
   fromStatus: OrderStatus | null
   toStatus: OrderStatus
@@ -89,6 +92,8 @@ export type OrderDetail = OrderSummary & {
   stockDeducted: boolean
   scheduledFor: Date | null
   deletedAt: Date | null
+  clientIp: string | null
+  deviceId: string | null
   customerEmail: string | null
   items: (Omit<OrderLine, 'productId'> & { id: string; productId: string | null })[]
   events: OrderEvent[]
@@ -114,6 +119,8 @@ export type OrderFilter = {
   source?: OrderSource
   /** C13: the Trash instead of live orders. */
   trash?: boolean
+  /** D1: how far back an earlier order counts as a possible duplicate (default 24). */
+  duplicateHours?: number
   from?: Date
   to?: Date
   search?: string
@@ -140,7 +147,10 @@ export type OrdersRepo = {
   findForTracking(storeId: string, orderNo: number, phone: string): Promise<OrderDetail | null>
   /** The newest order placed with this phone (C12 customer lookup). */
   latestForPhone(storeId: string, phone: string): Promise<OrderDetail | null>
-  list(storeId: string, filter: OrderFilter): Promise<{ rows: OrderSummary[]; total: number }>
+  list(
+    storeId: string,
+    filter: OrderFilter,
+  ): Promise<{ rows: (OrderSummary & { duplicateOf: DuplicateOf | null })[]; total: number }>
   /** C13: hide a cancelled order (false when it isn't cancelled or is already trashed). */
   trash(storeId: string, id: string): Promise<boolean>
   restore(storeId: string, id: string): Promise<void>

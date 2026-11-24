@@ -99,6 +99,14 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           giftWrap: form.get('checkout.giftWrap') === 'on',
         },
       }),
+      ...(has('fraud.perWindow') && {
+        fraud: {
+          perWindow: Number(form.get('fraud.perWindow')),
+          windowHours: Number(form.get('fraud.windowHours')),
+          duplicateHours: Number(form.get('fraud.duplicateHours')),
+          blockDuplicates: form.get('fraud.blockDuplicates') === 'on',
+        },
+      }),
       ...(has('otp') && {
         otp: { sms: form.get('otp.sms') === 'on', email: form.get('otp.email') === 'on' },
       }),

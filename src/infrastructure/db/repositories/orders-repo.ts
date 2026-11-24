@@ -63,6 +63,8 @@ const detail = {
   stockDeducted: orders.stockDeducted,
   scheduledFor: orders.scheduledFor,
   deletedAt: orders.deletedAt,
+  clientIp: orders.clientIp,
+  deviceId: orders.deviceId,
 }
 
 export const createOrdersRepo = (db: Db): OrdersRepo => {
@@ -131,6 +133,8 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           giftWrap: o.giftWrap,
           shipLocation: o.location,
           source: o.source,
+          clientIp: o.client?.ip,
+          deviceId: o.client?.deviceId,
           note: o.note,
           deliveryZone: o.deliveryZone,
           paymentMethod: o.paymentMethod,
@@ -230,7 +234,50 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
         .limit(f.limit ?? 50)
         .offset(f.offset ?? 0)
       const [{ n }] = (await db.select({ n: count() }).from(orders).where(cond)) as [{ n: number }]
-      return { rows, total: n }
+      // D1: the nearest earlier order with the same phone and a shared product.
+      const earlier = alias(orders, 'earlier')
+      const hours = f.duplicateHours ?? 24
+      const dups = await db
+        .select({
+          id: orders.id,
+          orderNo: earlier.orderNo,
+          status: earlier.status,
+          createdAt: earlier.createdAt,
+        })
+        .from(orders)
+        .innerJoin(
+          earlier,
+          and(
+            eq(earlier.storeId, orders.storeId),
+            eq(earlier.shipPhone, orders.shipPhone),
+            lt(earlier.createdAt, orders.createdAt),
+            gte(earlier.createdAt, sql`${orders.createdAt} - make_interval(hours => ${hours})`),
+          ),
+        )
+        .where(
+          and(
+            inArray(
+              orders.id,
+              rows.map((r) => r.id),
+            ),
+            sql`exists (select 1 from order_items a join order_items b on b.product_id = a.product_id where a.order_id = ${orders.id} and b.order_id = ${earlier.id})`,
+          ),
+        )
+        .orderBy(desc(earlier.createdAt))
+      const dupOf = new Map<string, (typeof dups)[number]>()
+      for (const d of dups) if (!dupOf.has(d.id)) dupOf.set(d.id, d)
+      return {
+        rows: rows.map((r) => {
+          const d = dupOf.get(r.id)
+          return {
+            ...r,
+            duplicateOf: d
+              ? { orderNo: d.orderNo, status: d.status, createdAt: d.createdAt }
+              : null,
+          }
+        }),
+        total: n,
+      }
     },
 
     listReturns: async (storeId, orderId) => {

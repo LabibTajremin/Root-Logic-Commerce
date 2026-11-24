@@ -1,3 +1,5 @@
+import { createFraud } from '@/modules/fraud'
+import { createFraudRepo } from '@/infrastructure/db/repositories/fraud-repo'
 import { createCoupons } from '@/modules/coupons'
 import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -24,6 +26,7 @@ beforeEach(async () => {
     repo: createOrdersRepo(db),
     bus: createEventBus<OrderEvents>(vi.fn()),
     coupons: createCoupons({ repo: createCouponsRepo(db) }),
+    fraud: createFraud({ repo: createFraudRepo(db) }),
   })
   reviews = createReviews({
     repo: createReviewsRepo(db),

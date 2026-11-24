@@ -397,6 +397,9 @@ export const orders = pgTable(
     paymentMethod: text().notNull().default('COD'),
     // C15: web, landing, chat, voice, pos, manual, import.
     source: text().$type<OrderSource>().notNull().default('web'),
+    // D3/D4: who placed a web order (IP and the first-party device cookie).
+    clientIp: text(),
+    deviceId: text(),
     paymentStatus: paymentStatusEnum().notNull().default('unpaid'),
     stockDeducted: boolean().notNull().default(false),
     createdAt: createdAt(),
@@ -468,6 +471,35 @@ export const couponRedemptions = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('coupon_redemptions_coupon_phone_idx').on(t.couponId, t.phone)],
+)
+
+/** D3: phones, IPs and devices that may not order. */
+export const blocks = pgTable(
+  'blocks',
+  {
+    id: id(),
+    storeId: storeId(),
+    kind: text().$type<'phone' | 'ip' | 'device'>().notNull(),
+    value: text().notNull(),
+    note: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('blocks_store_kind_value_uq').on(t.storeId, t.kind, t.value)],
+)
+
+/** D5: refused order attempts (blocked, too many, duplicate). */
+export const fraudAttempts = pgTable(
+  'fraud_attempts',
+  {
+    id: id(),
+    storeId: storeId(),
+    reason: text().$type<'blocked' | 'too_many' | 'duplicate'>().notNull(),
+    phone: text().notNull(),
+    ip: text().notNull(),
+    deviceId: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('fraud_attempts_store_idx').on(t.storeId, t.createdAt)],
 )
 
 /** C14: a return or exchange recorded against a delivered order. */

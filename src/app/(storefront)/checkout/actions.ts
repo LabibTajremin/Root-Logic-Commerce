@@ -1,5 +1,6 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { cookies } from 'next/headers'
 import { otpTarget } from '@/modules/messages'
 import { PLACED_COOKIE, previewValue } from '@/server/preview'
@@ -12,6 +13,7 @@ import { storefront } from '../storefront'
 export type PlaceResult = { error: string } | { otp: string } | { orderNo: number }
 export type Quote = { error: string } | { discount: number; couponCode: string | null }
 
+const DEVICE_COOKIE = 'rlc-dev'
 const optional = (v: string) => v.trim() || null
 // Fields a shop switched off are simply missing from the form.
 const field = (form: FormData, k: string) => String(form.get(k) ?? '')
@@ -35,6 +37,15 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         return { otp: await otp.request(store.id, check.channel, check.target, store.name) }
       await otp.verify(store.id, check.target, code)
     }
+    // D3/D4: a first-party device id (random, no fingerprinting), kept for a year.
+    const jar = await cookies()
+    const deviceId = jar.get(DEVICE_COOKIE)?.value ?? randomUUID()
+    jar.set(DEVICE_COOKIE, deviceId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 31536000,
+    })
     const order = await orders.placeOrder(
       store.id,
       {
@@ -55,10 +66,11 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         items: JSON.parse(f('items')),
       },
       shopRulesOf(business),
+      { guard: { client: { ip, deviceId }, rules: business.fraud } },
     )
     await drafts.ordered(store.id, f('phone'))
     // C10: this browser may see the order it just placed on the thank-you page, for an hour.
-    const [{ config }, jar] = await Promise.all([runtime(), cookies()])
+    const { config } = await runtime()
     jar.set(
       PLACED_COOKIE,
       previewValue(config.authSecret, store.id, `${order.orderNo}:${order.phone}`),
