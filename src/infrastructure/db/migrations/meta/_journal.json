@@ -120,6 +120,13 @@
       "when": 1795475042933,
       "tag": "0016_coupons",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795478396242,
+      "tag": "0017_rules",
+      "breakpoints": true
     }
   ]
 }

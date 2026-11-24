@@ -1455,6 +1455,65 @@ test('coupons: percent, fixed and automatic free delivery; checkout code box, or
   await toggle('Turn on')
 })
 
+test('free delivery rule with the cart hint; per-product quantity and order limits (C3, C7)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Limited ${uid()}`
+  const url = `/p/${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+  await signedIn(page)
+  const rules = async (free: string, max: string) => {
+    await page.goto('/admin/store')
+    await page.getByLabel('Free above (৳, optional)').fill(free)
+    await page.getByLabel('Maximum order (৳, optional)').fill(max)
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  await rules('1000', '3000')
+  await page.goto('/admin/store')
+  await expect(page.getByLabel('Free above (৳, optional)')).toHaveValue('1000')
+  await a11y()
+  await createProduct(page, { name, price: '400', stock: '9' })
+  await editProduct(page, name)
+  await page.getByLabel('Minimum per order (optional)').fill('2')
+  await page.getByLabel('Maximum per order (optional)').fill('5')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await editProduct(page, name)
+  await expect(page.getByLabel('Minimum per order (optional)')).toHaveValue('2')
+
+  await page.goto(url)
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await expect(page.getByTestId('free-hint')).toHaveText('Add ৳600 more for free delivery')
+  await a11y()
+  await page.getByRole('link', { name: 'Checkout' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'needs a bigger quantity' })).toBeVisible()
+  const line = page.getByRole('group', { name: `Quantity: ${name}` })
+  for (let i = 0; i < 2; i++) await line.getByRole('button', { name: '+' }).click()
+  // ৳1,200 is over ৳1,000: delivery is free, the total is the goods alone.
+  await expect(page.getByTestId('checkout-total')).toHaveText('৳1,200')
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  await expect(page.getByTestId('order-total')).toHaveText('৳1,200')
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  await page.goto(url)
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.getByRole('dialog', { name: 'Cart' }).getByRole('button', { name: '+' }).click()
+  await page.getByRole('dialog', { name: 'Cart' }).getByRole('button', { name: '+' }).click()
+  await expect(page.getByTestId('free-hint')).toHaveText('🎉 Your delivery is free')
+  await rules('', '')
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

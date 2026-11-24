@@ -13,9 +13,24 @@ const FIELDS = ['phone', 'whatsapp', 'messenger', 'address', 'mapUrl'] as const
 
 /** Contact details shoppers see (help bubble, contact page, invoices). */
 export default async function StorePage() {
-  const { allowed, locale, t } = await adminContext('settings.manage')
+  const { allowed, locale, t, catalog, store } = await adminContext('settings.manage')
   if (!allowed) return <p className="text-muted">{t('error.access.denied')}</p>
   const { business, version } = await currentSettings()
+  const products = await catalog.listProducts(store.id)
+  const taka = (m: number | null) => (m === null ? '' : m / 100)
+  const num = (id: string, label: string, value: number | '') => (
+    <div className="flex flex-col gap-1.5 text-sm font-semibold">
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        name={id}
+        type="number"
+        min={1}
+        defaultValue={value}
+        className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+      />
+    </div>
+  )
   return (
     <>
       <h1 className="font-heading text-3xl">{t('store.title')}</h1>
@@ -43,6 +58,44 @@ export default async function StorePage() {
               className="size-6 accent-[var(--color-accent)]"
             />
           </label>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('store.freeShipping')}</legend>
+            {num('free.min', t('store.freeMin'), taka(business.freeShipping.minSubtotal))}
+            <p className="text-sm font-semibold">{t('store.freeZones')}</p>
+            {business.deliveryZones.map((z) => (
+              <label key={z.id} className="flex min-h-11 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  name="free.zones"
+                  value={z.id}
+                  defaultChecked={business.freeShipping.zoneIds.includes(z.id)}
+                  className="size-5"
+                />
+                {z.label}
+              </label>
+            ))}
+            <div className="flex flex-col gap-1.5 text-sm font-semibold">
+              <label htmlFor="free.products">{t('store.freeProducts')}</label>
+              <select
+                id="free.products"
+                name="free.products"
+                multiple
+                defaultValue={business.freeShipping.productIds}
+                className="min-h-24 rounded-control border border-line bg-surface p-2 font-normal"
+              >
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </fieldset>
+          <fieldset className="grid grid-cols-2 gap-3">
+            <legend className="mb-1 font-semibold">{t('store.limits')}</legend>
+            {num('limits.min', t('store.minOrder'), taka(business.orderLimits.minOrder))}
+            {num('limits.max', t('store.maxOrder'), taka(business.orderLimits.maxOrder))}
+          </fieldset>
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.checkoutFields')}</legend>
             <div className="flex flex-col gap-1.5">

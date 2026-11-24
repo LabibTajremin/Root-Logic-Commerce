@@ -147,6 +147,21 @@ export const ProductForm = ({
             defaultValue: taka(product?.costPrice),
           })}
           {f('stock', 'field.stock', { type: 'number', min: 0, defaultValue: product?.stock ?? 0 })}
+          <div className="grid grid-cols-2 gap-3">
+            {(['minQty', 'maxQty'] as const).map((k) => (
+              <div key={k} className="flex flex-col gap-1.5 text-sm font-semibold">
+                <label htmlFor={k}>{t(`field.${k}`)}</label>
+                <input
+                  id={k}
+                  name={k}
+                  type="number"
+                  min={1}
+                  defaultValue={product?.[k] ?? ''}
+                  className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+                />
+              </div>
+            ))}
+          </div>
           {f('lowStockThreshold', 'field.lowStock', {
             type: 'number',
             min: 0,

@@ -1,3 +1,4 @@
+import { shopRules } from '@/modules/orders'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -119,7 +120,7 @@ describe('container', () => {
         zoneId: zones[0]!.id,
         items: [{ productId: p.id, quantity: 1 }],
       },
-      zones,
+      { ...shopRules, zones },
     )
     // Events for an order that no longer exists are ignored by every subscriber.
     for (const ev of ['order.confirmed', 'order.delivered'] as const)
@@ -163,7 +164,7 @@ describe('container', () => {
         zoneId: 'z',
         items: [{ productId: p.id, quantity: 2 }],
       },
-      zones,
+      { ...shopRules, zones },
     )
     for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] as const)
       await c.orders.changeStatus(store, o.id, s, null)

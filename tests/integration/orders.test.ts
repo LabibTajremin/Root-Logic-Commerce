@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { createCatalog } from '@/modules/catalog'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
-import { createOrders, type OrderEvents, type Orders } from '@/modules/orders'
+import { createOrders, shopRules, type OrderEvents, type Orders } from '@/modules/orders'
 import { createStock, type Stock } from '@/modules/stock'
 import { createEventBus } from '@/modules/shared'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
@@ -16,10 +16,14 @@ import { seedStore } from '../fixtures/store'
 type TestDb = Awaited<ReturnType<typeof createTestDb>>
 let db: TestDb, orders: Orders, coupons: Coupons, stock: Stock, store: string, other: string
 let events: string[]
-const zones = [
-  { id: 'dhaka', label: 'Inside Dhaka', charge: 6000 },
-  { id: 'out', label: 'Outside Dhaka', charge: 13000 },
-]
+// The shop's checkout rules: two zones, no free-shipping rule, no order limits.
+const zones = {
+  ...shopRules,
+  zones: [
+    { id: 'dhaka', label: 'Inside Dhaka', charge: 6000 },
+    { id: 'out', label: 'Outside Dhaka', charge: 13000 },
+  ],
+}
 
 const product = async (s: string, o: Partial<typeof products.$inferInsert> = {}) =>
   (
@@ -532,7 +536,10 @@ describe('coupons at checkout (C2)', () => {
     const q = await orders.quote(store, checkout(p.id), zones)
     expect(q).toMatchObject({ discount: 6000, total: 30000, couponCode: 'SHIPFREE' })
     expect(
-      await orders.quote(store, checkout(p.id), [{ id: 'dhaka', label: 'Free', charge: 0 }]),
+      await orders.quote(store, checkout(p.id), {
+        ...shopRules,
+        zones: [{ id: 'dhaka', label: 'Free', charge: 0 }],
+      }),
     ).toMatchObject({
       discount: 100,
       couponCode: 'SMALL',
@@ -573,5 +580,33 @@ describe('coupons at checkout (C2)', () => {
       ['TWO', 'fixed'],
     ])
     expect(await coupons.find(store, ' two ')).toMatchObject({ code: 'TWO' })
+  })
+})
+
+describe('free shipping and limits at checkout (C3, C7)', () => {
+  it('waives delivery by the rule and refuses carts outside the limits', async () => {
+    const p = await product(store, { price: 40000, stock: 20, minQty: 2, maxQty: 4 })
+    const rules = (o: Partial<typeof zones>) => ({ ...zones, ...o })
+    const free = rules({ freeShipping: { minSubtotal: 100000, zoneIds: [], productIds: [] } })
+    expect(await orders.quote(store, checkout(p.id, 2), free)).toMatchObject({
+      deliveryCharge: 6000,
+    })
+    expect(await orders.quote(store, checkout(p.id, 3), free)).toMatchObject({
+      deliveryCharge: 0,
+      total: 120000,
+    })
+    await expect(orders.placeOrder(store, checkout(p.id, 1), zones)).rejects.toThrow(
+      'order.min_qty',
+    )
+    await expect(orders.placeOrder(store, checkout(p.id, 5), zones)).rejects.toThrow(
+      'order.max_qty',
+    )
+    await expect(
+      orders.placeOrder(
+        store,
+        checkout(p.id, 2),
+        rules({ limits: { minOrder: 100000, maxOrder: null } }),
+      ),
+    ).rejects.toThrow('order.min_value')
   })
 })

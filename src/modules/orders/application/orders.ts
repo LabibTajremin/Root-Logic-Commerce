@@ -9,6 +9,7 @@ import {
   type CheckoutInput,
   type DeliveryZone,
 } from '../domain/checkout'
+import { checkLimits, freeShipping, type ShopRules } from '../domain/rules'
 import { canTransition, stockEffect, type OrderStatus } from '../domain/status'
 import type { OrderFilter, OrdersRepo } from './ports'
 
@@ -24,9 +25,9 @@ type Deps = {
 
 export const createOrders = ({ repo, bus, coupons }: Deps) => {
   /** Lines, delivery and the coupon (typed, else the best automatic one) for a cart. */
-  const price = async (storeId: string, input: CheckoutInput, zones: DeliveryZone[]) => {
+  const price = async (storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) => {
     const d = validate(checkoutInput, input)
-    const zone = zones.find((z) => z.id === d.zoneId)
+    const zone = shop.zones.find((z) => z.id === d.zoneId)
     if (!zone) throw new DomainError('checkout.zone_invalid')
     const items = mergeItems(d.items)
     const products = new Map(
@@ -69,6 +70,25 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         quantity,
       }
     })
+    const subtotal = lines.reduce((n, l) => n + l.unitPrice * l.quantity, 0)
+    const breach = checkLimits(
+      lines.map((l) => ({
+        ...l,
+        min: products.get(l.productId)!.minQty,
+        max: products.get(l.productId)!.maxQty,
+      })),
+      subtotal,
+      shop.limits,
+    )
+    if (breach) throw new DomainError(breach.code, breach)
+    // C3: free delivery by subtotal, zone or product.
+    const charge = freeShipping(shop.freeShipping, {
+      subtotal,
+      zoneId: zone.id,
+      productIds: lines.map((l) => l.productId),
+    }).free
+      ? 0
+      : zone.charge
     const amounts = lines.map((l) => ({
       productId: l.productId,
       categoryId: products.get(l.productId)!.categoryId,
@@ -77,7 +97,7 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
     const tryCoupon = async (c: Coupon) =>
       applyCoupon(c, {
         lines: amounts,
-        delivery: zone.charge,
+        delivery: charge,
         now: new Date(),
         usedByPhone: await coupons.usedByPhone(c.id, d.phone),
       })
@@ -96,18 +116,18 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         if (r.ok && r.discount > discount) [coupon, discount] = [c, r.discount]
       }
     }
-    return { d, zone, lines, coupon, totals: computeTotals(lines, zone.charge, discount) }
+    return { d, zone, lines, coupon, totals: computeTotals(lines, charge, discount) }
   }
 
   return {
     /** C2: what checkout shows before placing (same rules as placing). */
-    async quote(storeId: string, input: CheckoutInput, zones: DeliveryZone[]) {
-      const { coupon, totals } = await price(storeId, input, zones)
+    async quote(storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) {
+      const { coupon, totals } = await price(storeId, input, shop)
       return { ...totals, couponCode: coupon?.code ?? null }
     },
 
-    async placeOrder(storeId: string, input: CheckoutInput, zones: DeliveryZone[]) {
-      const { d, zone, lines, coupon, totals } = await price(storeId, input, zones)
+    async placeOrder(storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) {
+      const { d, zone, lines, coupon, totals } = await price(storeId, input, shop)
       const created = await repo.create(storeId, {
         customer: { phone: d.phone, name: d.name, email: d.email },
         ship: {

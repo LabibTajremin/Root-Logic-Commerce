@@ -6,6 +6,10 @@ import { cookies } from 'next/headers'
 import { currentLocale, currentSettings } from '@/server/request'
 import { bandsFromText } from '@/modules/site-settings'
 
+// An empty taka box means "no limit".
+const optionalMinor = (v: FormDataEntryValue | null) =>
+  String(v) === '' ? null : Math.round(Number(v) * 100)
+
 /** Merges a partial business-settings patch from a form into the saved settings (version-locked). */
 export async function saveBusiness(_: ActionState, form: FormData) {
   return act('settings.manage', async ({ settings, store }) => {
@@ -58,6 +62,15 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           warranty: String(form.get('trust.warranty')),
         },
         budgetBands: bandsFromText(String(form.get('budgetBands'))),
+        freeShipping: {
+          minSubtotal: optionalMinor(form.get('free.min')),
+          zoneIds: form.getAll('free.zones').map(String),
+          productIds: form.getAll('free.products').map(String),
+        },
+        orderLimits: {
+          minOrder: optionalMinor(form.get('limits.min')),
+          maxOrder: optionalMinor(form.get('limits.max')),
+        },
         checkout: {
           email: String(form.get('checkout.email')) as 'optional',
           altPhone: form.get('checkout.altPhone') === 'on',

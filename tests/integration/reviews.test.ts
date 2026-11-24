@@ -1,7 +1,7 @@
 import { createCoupons } from '@/modules/coupons'
 import { createCouponsRepo } from '@/infrastructure/db/repositories/coupons-repo'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createOrders, type OrderEvents, type Orders } from '@/modules/orders'
+import { createOrders, shopRules, type OrderEvents, type Orders } from '@/modules/orders'
 import { createReviews, type Reviews } from '@/modules/reviews'
 import { createEventBus } from '@/modules/shared'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
@@ -56,7 +56,7 @@ beforeEach(async () => {
       zoneId: 'd',
       items: [{ productId, quantity: 1 }],
     },
-    [{ id: 'd', label: 'Dhaka', charge: 0 }],
+    { ...shopRules, zones: [{ id: 'd', label: 'Dhaka', charge: 0 }] },
   )
   orderNo = o.orderNo
   for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] as const)

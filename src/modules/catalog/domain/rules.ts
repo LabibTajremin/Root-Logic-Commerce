@@ -39,6 +39,9 @@ export const productInput = z
     costPrice: money.default(0),
     stock: z.number().int().nonnegative().default(0),
     lowStockThreshold: z.number().int().nonnegative().default(5),
+    // C7: quantity bounds per order line (null = none).
+    minQty: z.number().int().positive().nullable().default(null),
+    maxQty: z.number().int().positive().nullable().default(null),
     sku: z.string().trim().max(64).nullable().default(null),
     status: z.enum(['draft', 'active', 'archived']).default('draft'),
     categoryId: z.uuid().nullable().default(null),

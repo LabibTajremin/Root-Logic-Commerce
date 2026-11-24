@@ -42,6 +42,21 @@ export const businessSchema = z.object({
       warranty: z.string().trim().max(200).default(''),
     })
     .prefault({}),
+  // C3: delivery is free above a subtotal, in some zones, or with some products.
+  freeShipping: z
+    .object({
+      minSubtotal: z.number().int().positive().nullable().default(null),
+      zoneIds: z.array(z.string()).max(20).default([]),
+      productIds: z.array(z.uuid()).max(50).default([]),
+    })
+    .prefault({}),
+  // C7: order value bounds (minor units, null = none).
+  orderLimits: z
+    .object({
+      minOrder: z.number().int().positive().nullable().default(null),
+      maxOrder: z.number().int().positive().nullable().default(null),
+    })
+    .prefault({}),
   // C6: which extra fields checkout asks for.
   checkout: z
     .object({

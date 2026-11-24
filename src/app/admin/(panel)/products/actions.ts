@@ -5,6 +5,7 @@ import { act, type ActionState } from '../act'
 
 // Every key below is an input of the product form, so `get` never returns null here.
 const field = (f: FormData, k: string) => f.get(k) as string
+const whole = (s: string) => (s === '' ? null : Number(s))
 const minor = (s: string) => (s === '' ? null : Math.round(Number(s) * 100))
 
 const readProduct = (f: FormData) => ({
@@ -17,6 +18,8 @@ const readProduct = (f: FormData) => ({
   costPrice: minor(field(f, 'costPrice')) ?? 0,
   stock: Number(field(f, 'stock')),
   lowStockThreshold: Number(field(f, 'lowStockThreshold')),
+  minQty: whole(field(f, 'minQty')),
+  maxQty: whole(field(f, 'maxQty')),
   sku: field(f, 'sku') || null,
   status: field(f, 'status') as 'draft' | 'active' | 'archived',
   categoryId: field(f, 'categoryId') || null,

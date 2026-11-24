@@ -10,6 +10,8 @@ export type OrderProduct = {
   status: string
   options: ProductOptions
   categoryId: string | null
+  minQty: number | null
+  maxQty: number | null
 }
 export type OrderVariant = {
   id: string

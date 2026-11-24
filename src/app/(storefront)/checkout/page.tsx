@@ -64,6 +64,7 @@ export default async function CheckoutPage() {
         moneyFormat={moneyFormat}
         fields={business.checkout}
         coupons={on('coupons')}
+        freeRule={business.freeShipping}
       />
     </section>
   )

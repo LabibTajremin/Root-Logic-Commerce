@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { freeShipping, type FreeShippingRule } from '@/modules/orders'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { Icon } from '@/ui/icon'
 import { cart, DRAWER, openCart, useCart } from './cart-store'
@@ -29,11 +30,20 @@ export const CartButton = ({ label }: { label: string }) => {
 export const CartDrawer = ({
   labels: L,
   moneyFormat,
+  freeRule,
 }: {
   labels: Record<string, string>
   moneyFormat: MoneyFormat
+  /** C3: the shop's free-delivery rule, for the "add ৳X more" hint. */
+  freeRule: FreeShippingRule
 }) => {
   const items = useCart()
+  const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
+  const hint = freeShipping(freeRule, {
+    subtotal,
+    zoneId: '',
+    productIds: items.map((l) => l.productId),
+  })
   const money = (m: number) => formatMoney(m, moneyFormat)
   const close = () => drawer().close()
   return (
@@ -105,10 +115,17 @@ export const CartDrawer = ({
         <div className="mt-auto flex flex-col gap-3 border-t border-line p-4">
           <p className="flex justify-between font-semibold">
             <span>{L.subtotal}</span>
-            <span data-testid="cart-subtotal">
-              {money(items.reduce((s, l) => s + l.price * l.qty, 0))}
-            </span>
+            <span data-testid="cart-subtotal">{money(subtotal)}</span>
           </p>
+          {hint.remaining !== null && items.length > 0 && (
+            <p
+              role="status"
+              className="rounded-control bg-soft p-2 text-sm"
+              data-testid="free-hint"
+            >
+              {hint.free ? L.freeDelivery : L.freeMore!.replace('{{n}}', money(hint.remaining))}
+            </p>
+          )}
           {items.length > 0 && (
             <Link
               href="/checkout"

@@ -2,6 +2,7 @@
 
 import { otpTarget } from '@/modules/messages'
 import { actionError } from '../action-error'
+import { shopRulesOf } from '../shop-rules'
 import { currentIp } from '@/server/request'
 import { storefront } from '../storefront'
 
@@ -46,7 +47,7 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         couponCode: f('couponCode'),
         items: JSON.parse(f('items')),
       },
-      business.deliveryZones,
+      shopRulesOf(business),
     )
     return { orderNo: order.orderNo }
   } catch (e) {
@@ -73,7 +74,7 @@ export const quoteOrder = async (form: FormData): Promise<Quote> => {
         couponCode: f('couponCode'),
         items: JSON.parse(f('items')),
       },
-      business.deliveryZones,
+      shopRulesOf(business),
     )
     return { discount: q.discount, couponCode: q.couponCode }
   } catch (e) {

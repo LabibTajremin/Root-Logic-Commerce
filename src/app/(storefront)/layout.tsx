@@ -105,8 +105,11 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
         labels={{
           ...k(['cart', 'cartEmpty', 'checkout', 'continue', 'subtotal', 'remove', 'qty']),
           close: t('common.cancel'),
+          freeDelivery: t('shop.freeDelivery'),
+          freeMore: t('shop.freeMore'),
         }}
         moneyFormat={moneyFormat}
+        freeRule={business.freeShipping}
       />
       {on('helpBubble') && (
         <HelpBubble

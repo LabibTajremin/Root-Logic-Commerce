@@ -1,3 +1,4 @@
+import { shopRules } from '@/modules/orders'
 import { sql } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { createInsightsRepo } from '@/infrastructure/db/repositories/insights-repo'
@@ -54,7 +55,7 @@ describe('insights repo', () => {
           zoneId: 'z',
           items: [{ productId, quantity }],
         },
-        zones,
+        { ...shopRules, zones },
       )
     await order(tea.id, 2)
     await order(rice.id, 1)

@@ -163,6 +163,8 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           status: products.status,
           options: products.options,
           categoryId: products.categoryId,
+          minQty: products.minQty,
+          maxQty: products.maxQty,
         })
         .from(products)
         .where(and(eq(products.storeId, storeId), inArray(products.id, ids))),

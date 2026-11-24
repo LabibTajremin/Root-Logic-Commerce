@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ComponentProps, type FormEvent, type ReactNode } from 'react'
+import { freeShipping, type FreeShippingRule } from '@/modules/orders'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart } from '../cart-store'
 import { placeOrder, quoteOrder, type Quote } from './actions'
@@ -47,6 +48,7 @@ export const CheckoutForm = ({
   moneyFormat,
   fields,
   coupons,
+  freeRule,
 }: {
   zones: Zone[]
   labels: Record<string, string>
@@ -55,6 +57,7 @@ export const CheckoutForm = ({
   fields: Fields
   /** C2: show the "Have a code?" box (the coupons module is on). */
   coupons: boolean
+  freeRule: FreeShippingRule
 }) => {
   const items = useCart()
   const router = useRouter()
@@ -66,7 +69,14 @@ export const CheckoutForm = ({
   const [removing, setRemoving] = useState('')
   const money = (m: number) => formatMoney(m, moneyFormat)
   const subtotal = items.reduce((s, l) => s + l.price * l.qty, 0)
-  const charge = zones.find((z) => z.id === zoneId)!.charge
+  // C3: same rule the server applies when placing.
+  const charge = freeShipping(freeRule, {
+    subtotal,
+    zoneId,
+    productIds: items.map((l) => l.productId),
+  }).free
+    ? 0
+    : zones.find((z) => z.id === zoneId)!.charge
   const payload = JSON.stringify(
     items.map((l) => ({ productId: l.productId, variantId: l.variantId, quantity: l.qty })),
   )

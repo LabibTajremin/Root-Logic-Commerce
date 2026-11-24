@@ -31,6 +31,8 @@ describe('media repo', () => {
           costPrice: 0,
           stock: 1,
           lowStockThreshold: 1,
+          minQty: null,
+          maxQty: null,
           sku: null,
           status: 'active',
           categoryId: null,
