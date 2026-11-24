@@ -1615,6 +1615,75 @@ test('thank-you page: owner texts, colour and buttons; the placing browser sees 
   await expect(page.getByTestId('order-events')).toContainText('Cancelled')
 })
 
+test('manual order: customer lookup, products and variants, discount, source tag and filter (C12, C15)', async ({
+  page,
+  a11y,
+}) => {
+  const id = uid()
+  const [name, sized] = [`Manual ${id}`, `Sized ${id}`]
+  const phone = `015${Date.now().toString().slice(-8)}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '300', stock: '9' })
+  await createProduct(page, { name: sized, price: '500', stock: '0' })
+  await editProduct(page, sized)
+  await page.getByLabel('Options', { exact: true }).fill('Size: M')
+  await page.getByRole('button', { name: 'Apply options' }).click()
+  await page.getByLabel('Stock quantity — M', { exact: true }).fill('4')
+  await page.getByRole('button', { name: 'Update prices and stock' }).click()
+  await page.reload()
+  await expect(page.getByLabel('Stock quantity', { exact: true })).toHaveValue('4')
+
+  await page.goto('/admin/orders')
+  const newOrder = (await page.getByRole('link', { name: 'New order' }).getAttribute('href'))!
+  await page.goto(newOrder)
+  const found = page.getByRole('status').filter({ hasText: /customer|last order/ })
+  await page.getByLabel('Customer phone').fill(phone)
+  await page.getByRole('button', { name: 'Find customer' }).click()
+  await expect(found).toHaveText('New customer — type the details.')
+  await page.getByLabel('Name').fill('Salma Begum')
+  await page.getByLabel('District').fill('Khulna')
+  await page.getByLabel('Area / Thana').fill('Sonadanga')
+  await page.getByLabel('Full address').fill('House 4, Road 7')
+  await page.getByLabel('Product 1').selectOption({ label: `${name} — ৳300` })
+  await page.getByLabel('Qty 1').fill('2')
+  await page.getByRole('button', { name: 'Add another product' }).click()
+  await page.getByLabel('Product 2').selectOption({ label: `${sized} (M) — ৳500` })
+  await page.getByRole('button', { name: 'Add another product' }).click()
+  await page.getByRole('button', { name: 'Remove' }).last().click()
+  await expect(page.getByLabel('Product 3')).toHaveCount(0)
+  await page.getByLabel('Delivery zone').selectOption({ index: 1 })
+  await page.getByLabel('Order came from').selectOption({ label: 'Phone call' })
+  await a11y()
+  await page.getByLabel('Discount (৳)').fill('99999')
+  await page.getByRole('button', { name: 'Create order' }).click()
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'The discount can’t be more than the order total.' }),
+  ).toBeVisible()
+  await page.getByLabel('Discount (৳)').fill('50')
+  await page.getByRole('button', { name: 'Create order' }).click()
+  await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+  const orderUrl = page.url()
+  await expect(page.getByTestId('order-discount')).toHaveText('−৳50')
+  await expect(page.getByText(`${sized} (M)`)).toBeVisible()
+  await expect(page.getByText('House 4, Road 7, Sonadanga, Khulna')).toBeVisible()
+
+  await page.goto('/admin/orders?source=voice')
+  const row = page.getByRole('link').filter({ hasText: phone })
+  await expect(row.getByTestId('order-source')).toHaveText('Phone call')
+  await expect(page.getByLabel('Source')).toHaveValue('voice')
+  await page.goto(orderUrl)
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+
+  // The same phone again: the form fills from that order.
+  await page.goto(newOrder)
+  await page.getByLabel('Customer phone').fill(phone)
+  await page.getByRole('button', { name: 'Find customer' }).click()
+  await expect(found).toHaveText('Filled in from their last order.')
+  await expect(page.getByLabel('Name')).toHaveValue('Salma Begum')
+  await expect(page.getByLabel('Full address')).toHaveValue('House 4, Road 7')
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

@@ -617,3 +617,43 @@ describe('free shipping and limits at checkout (C3, C7)', () => {
     ).rejects.toThrow('order.min_value')
   })
 })
+
+describe('manual orders and sources (C12, C15)', () => {
+  it('places with a typed discount and a source; filters by source', async () => {
+    const p = await product(store)
+    const web = await orders.placeOrder(store, checkout(p.id), zones)
+    const { id } = await orders.placeOrder(store, checkout(p.id, 2), zones, {
+      source: 'chat',
+      discount: 10000,
+    })
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      source: 'chat',
+      subtotal: 69800,
+      discount: 10000,
+      total: 69800 + 6000 - 10000,
+      couponCode: null,
+    })
+    expect((await orders.getOrder(store, web.id))!.source).toBe('web')
+    const chat = await orders.listOrders(store, { source: 'chat' })
+    expect(chat.rows.map((r) => [r.id, r.source])).toEqual([[id, 'chat']])
+  })
+
+  it('refuses a discount above the order or below zero', async () => {
+    const p = await product(store)
+    for (const discount of [-1, 34900 + 6000 + 1, 1.5])
+      await expect(
+        orders.placeOrder(store, checkout(p.id), zones, { source: 'manual', discount }),
+      ).rejects.toThrow('order.discount_invalid')
+  })
+
+  it('finds the last order for a phone, in this store only', async () => {
+    const p = await product(store)
+    await orders.placeOrder(store, checkout(p.id), zones)
+    await orders.placeOrder(store, { ...checkout(p.id), address: 'House 99, Road 1' }, zones)
+    expect(await orders.lastForPhone(store, '+8801712345678')).toMatchObject({
+      shipAddress: 'House 99, Road 1',
+    })
+    expect(await orders.lastForPhone(other, '01712345678')).toBeNull()
+    expect(await orders.lastForPhone(store, '123')).toBeNull()
+  })
+})

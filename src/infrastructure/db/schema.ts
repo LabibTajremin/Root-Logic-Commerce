@@ -1,3 +1,4 @@
+import type { OrderSource } from '@/modules/orders'
 import {
   type AnyPgColumn,
   bigint,
@@ -383,6 +384,8 @@ export const orders = pgTable(
     shipLocation: jsonb().$type<{ lat: number; lng: number; accuracy: number }>(),
     note: text(),
     paymentMethod: text().notNull().default('COD'),
+    // C15: web, landing, chat, voice, pos, manual, import.
+    source: text().$type<OrderSource>().notNull().default('web'),
     paymentStatus: paymentStatusEnum().notNull().default('unpaid'),
     stockDeducted: boolean().notNull().default(false),
     createdAt: createdAt(),

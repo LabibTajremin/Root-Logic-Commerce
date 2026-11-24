@@ -81,7 +81,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               {o.discount > 0 && (
                 <>
                   <dt className="text-muted">
-                    {t('order.discount')} · {o.couponCode}
+                    {[t('order.discount'), o.couponCode].filter(Boolean).join(' · ')}
                   </dt>
                   <dd className="text-right" data-testid="order-discount">
                     −{money(o.discount)}

@@ -1,5 +1,5 @@
 import type { ProductOptions, VariantOptions } from '@/modules/catalog'
-import type { OrderStatus, StockEffect } from '../domain/status'
+import type { OrderSource, OrderStatus, StockEffect } from '../domain/status'
 
 export type OrderProduct = {
   id: string
@@ -47,6 +47,7 @@ export type NewOrder = {
   note: string | null
   deliveryZone: string
   paymentMethod: string
+  source: OrderSource
   totals: { subtotal: number; deliveryCharge: number; discount: number; total: number }
   /** C2: redeemed in the same transaction (the total limit is re-checked there). */
   coupon: { id: string; code: string; totalLimit: number | null } | null
@@ -59,6 +60,7 @@ export type OrderSummary = {
   total: number
   shipName: string
   shipPhone: string
+  source: OrderSource
   createdAt: Date
 }
 export type OrderEvent = {
@@ -91,6 +93,7 @@ export type OrderDetail = OrderSummary & {
 }
 export type OrderFilter = {
   status?: OrderStatus
+  source?: OrderSource
   from?: Date
   to?: Date
   search?: string
@@ -111,6 +114,8 @@ export type OrdersRepo = {
   create(storeId: string, order: NewOrder): Promise<{ id: string; orderNo: number }>
   get(storeId: string, id: string): Promise<OrderDetail | null>
   findForTracking(storeId: string, orderNo: number, phone: string): Promise<OrderDetail | null>
+  /** The newest order placed with this phone (C12 customer lookup). */
+  latestForPhone(storeId: string, phone: string): Promise<OrderDetail | null>
   list(storeId: string, filter: OrderFilter): Promise<{ rows: OrderSummary[]; total: number }>
   /** Atomic: status guard + stock effect + order_events row, or nothing. */
   transition(storeId: string, id: string, change: StatusChange): Promise<void>

@@ -1,6 +1,7 @@
 import { variantLabel } from '@/modules/catalog'
 import { applyCoupon, type Coupon, type Coupons } from '@/modules/coupons'
 import { normalizeBdPhone } from '@/modules/customers'
+import { z } from 'zod'
 import { DomainError, validate, type EventBus } from '@/modules/shared'
 import {
   checkoutInput,
@@ -10,7 +11,13 @@ import {
   type DeliveryZone,
 } from '../domain/checkout'
 import { checkLimits, freeShipping, type ShopRules } from '../domain/rules'
-import { canTransition, stockEffect, type OrderStatus } from '../domain/status'
+import {
+  canTransition,
+  orderSources,
+  stockEffect,
+  type OrderSource,
+  type OrderStatus,
+} from '../domain/status'
 import type { OrderFilter, OrdersRepo } from './ports'
 
 type EventPayload = { storeId: string; orderId: string; orderNo: number }
@@ -25,7 +32,13 @@ type Deps = {
 
 export const createOrders = ({ repo, bus, coupons }: Deps) => {
   /** Lines, delivery and the coupon (typed, else the best automatic one) for a cart. */
-  const price = async (storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) => {
+  /** `manual`: a discount the shop types in (C12) instead of any coupon. */
+  const price = async (
+    storeId: string,
+    input: CheckoutInput,
+    shop: ShopRules<DeliveryZone>,
+    manual?: number,
+  ) => {
     const d = validate(checkoutInput, input)
     const zone = shop.zones.find((z) => z.id === d.zoneId)
     if (!zone) throw new DomainError('checkout.zone_invalid')
@@ -103,7 +116,11 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
       })
     let coupon: Coupon | null = null
     let discount = 0
-    if (d.couponCode) {
+    if (manual !== undefined) {
+      if (!Number.isSafeInteger(manual) || manual < 0 || manual > subtotal + charge)
+        throw new DomainError('order.discount_invalid')
+      discount = manual
+    } else if (d.couponCode) {
       coupon = await coupons.find(storeId, d.couponCode)
       if (!coupon) throw new DomainError('coupon.invalid')
       const r = await tryCoupon(coupon)
@@ -126,8 +143,14 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
       return { ...totals, couponCode: coupon?.code ?? null }
     },
 
-    async placeOrder(storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) {
-      const { d, zone, lines, coupon, totals } = await price(storeId, input, shop)
+    /** C12/C15: the shop places manual orders with a `source` and its own `discount`. */
+    async placeOrder(
+      storeId: string,
+      input: CheckoutInput,
+      shop: ShopRules<DeliveryZone>,
+      by: { source?: OrderSource; discount?: number } = {},
+    ) {
+      const { d, zone, lines, coupon, totals } = await price(storeId, input, shop, by.discount)
       const created = await repo.create(storeId, {
         customer: { phone: d.phone, name: d.name, email: d.email },
         ship: {
@@ -144,6 +167,7 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         location: d.location,
         deliveryZone: zone.label,
         paymentMethod: d.paymentMethod,
+        source: validate(z.enum(orderSources).default('web'), by.source),
         totals,
         coupon: coupon && { id: coupon.id, code: coupon.code, totalLimit: coupon.totalLimit },
         items: lines,
@@ -175,6 +199,11 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
     },
 
     getOrder: (storeId: string, id: string) => repo.get(storeId, id),
+    /** C12: the last name and address used with this phone, to prefill a manual order. */
+    lastForPhone(storeId: string, phone: string) {
+      const p = normalizeBdPhone(phone)
+      return p ? repo.latestForPhone(storeId, p) : Promise.resolve(null)
+    },
     listOrders: (storeId: string, filter: OrderFilter = {}) => repo.list(storeId, filter),
 
     // Public tracking needs order number + the phone it was placed with.

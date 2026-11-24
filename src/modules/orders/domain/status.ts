@@ -1,3 +1,7 @@
+/** C15: where an order came from (tag + filter in admin). */
+export const orderSources = ['web', 'landing', 'chat', 'voice', 'pos', 'manual', 'import'] as const
+export type OrderSource = (typeof orderSources)[number]
+
 export const orderStatuses = [
   'PENDING',
   'CONFIRMED',

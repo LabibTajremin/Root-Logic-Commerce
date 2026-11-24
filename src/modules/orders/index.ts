@@ -11,7 +11,14 @@ export type {
 } from './application/ports'
 export type { CheckoutInput, DeliveryZone } from './domain/checkout'
 export { lineName } from './domain/checkout'
-export { canTransition, nextStatuses, orderStatuses, type OrderStatus } from './domain/status'
+export {
+  canTransition,
+  nextStatuses,
+  orderSources,
+  orderStatuses,
+  type OrderSource,
+  type OrderStatus,
+} from './domain/status'
 export {
   freeShipping,
   shopRules,

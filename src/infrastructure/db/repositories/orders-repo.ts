@@ -36,6 +36,7 @@ const summary = {
   total: orders.total,
   shipName: orders.shipName,
   shipPhone: orders.shipPhone,
+  source: orders.source,
   createdAt: orders.createdAt,
 }
 const detail = {
@@ -122,6 +123,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           preferredTime: o.preferredTime,
           giftWrap: o.giftWrap,
           shipLocation: o.location,
+          source: o.source,
           note: o.note,
           deliveryZone: o.deliveryZone,
           paymentMethod: o.paymentMethod,
@@ -191,9 +193,20 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
         and(eq(orders.storeId, storeId), eq(orders.orderNo, orderNo), eq(orders.shipPhone, phone))!,
       ),
 
+    async latestForPhone(storeId, phone) {
+      const [row] = await db
+        .select({ id: orders.id })
+        .from(orders)
+        .where(and(eq(orders.storeId, storeId), eq(orders.shipPhone, phone)))
+        .orderBy(desc(orders.createdAt), desc(orders.orderNo))
+        .limit(1)
+      return row ? load(eq(orders.id, row.id)) : null
+    },
+
     async list(storeId, f) {
       const where: SQL[] = [eq(orders.storeId, storeId)]
       if (f.status) where.push(eq(orders.status, f.status))
+      if (f.source) where.push(eq(orders.source, f.source))
       if (f.from) where.push(gte(orders.createdAt, f.from))
       if (f.to) where.push(lte(orders.createdAt, f.to))
       if (f.search) {
