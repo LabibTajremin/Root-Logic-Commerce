@@ -1545,6 +1545,76 @@ test('district list at checkout and zones by district (C4, C17)', async ({ page,
   await setup('Free text', 'Same as every other district')
 })
 
+test('thank-you page: owner texts, colour and buttons; the placing browser sees its order (C10)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Thanks ${uid()}`
+  await signedIn(page)
+  await page.goto('/admin/store')
+  const original = await page.getByLabel('WhatsApp number').inputValue()
+  type Thanks = { heading: string; message: string; accent: string; home: boolean; wa: string }
+  const thanks = async (v: Thanks) => {
+    await page.goto('/admin/store')
+    await page.getByLabel('WhatsApp number').fill(v.wa)
+    await page.getByLabel('Heading', { exact: true }).fill(v.heading)
+    await page.getByLabel('Message (optional)').fill(v.message)
+    await page.getByLabel('Accent colour (optional, e.g. #1f7a4d)').fill(v.accent)
+    await page.getByLabel('Show “Back to the shop”').setChecked(v.home)
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  const plain = { heading: '', message: '', accent: '', home: true }
+  // Defaults, no WhatsApp; without the placing cookie only the number shows.
+  await thanks({ ...plain, wa: '' })
+  await page.goto('/order/999999')
+  await expect(page.getByRole('heading', { name: 'Thank you! Order placed.' })).toBeVisible()
+  await expect(page.getByTestId('placed-order')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Back to the shop' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Confirm on WhatsApp' })).toBeHidden()
+
+  await thanks({
+    heading: 'Shukria!',
+    message: 'We pack every order by hand.',
+    accent: '#1f7a4d',
+    home: false,
+    wa: '01711000000',
+  })
+  await page.goto('/admin/store')
+  await expect(page.getByLabel('Heading', { exact: true })).toHaveValue('Shukria!')
+  await a11y()
+
+  await createProduct(page, { name, price: '250', stock: '5' })
+  await page.goto(`/p/${slug(name)}`)
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.goto('/checkout')
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+  const no = (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  await expect(page.getByRole('heading', { name: 'Shukria!' })).toBeVisible()
+  await expect(page.getByTestId('thanks-message')).toHaveText('We pack every order by hand.')
+  await expect(page.getByTestId('placed-order')).toContainText(`${name} × 1`)
+  await expect(page.getByTestId('placed-order')).toContainText('Rahim Uddin')
+  await expect(page.getByRole('link', { name: 'Back to the shop' })).toBeHidden()
+  await expect(page.getByRole('link', { name: 'Confirm on WhatsApp' })).toHaveAttribute(
+    'href',
+    `https://wa.me/01711000000?text=${encodeURIComponent(`Hello, I just placed order #${no}.`)}`,
+  )
+  await a11y()
+  await page.evaluate(() => {
+    window.print = () => document.body.setAttribute('data-printed', '1')
+  })
+  await page.getByRole('button', { name: 'Print invoice' }).click()
+  await expect(page.locator('body')).toHaveAttribute('data-printed', '1')
+
+  await thanks({ ...plain, wa: original })
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

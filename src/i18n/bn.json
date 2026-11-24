@@ -939,5 +939,19 @@
   "checkout.shareLocation": "আমার লোকেশন দিন (ঐচ্ছিক)",
   "checkout.locationAdded": "লোকেশন যোগ হয়েছে ({{m}} মিটারের মধ্যে)।",
   "checkout.locationFailed": "লোকেশন পাওয়া যায়নি — ঠিকানাই যথেষ্ট।",
-  "order.location": "দেওয়া লোকেশন ম্যাপে খুলুন (±{{m}} মিটার)"
+  "order.location": "দেওয়া লোকেশন ম্যাপে খুলুন (±{{m}} মিটার)",
+  "success.total": "মোট",
+  "success.print": "ইনভয়েস প্রিন্ট করুন",
+  "success.home": "দোকানে ফিরে যান",
+  "success.whatsapp": "হোয়াটসঅ্যাপে নিশ্চিত করুন",
+  "success.waText": "হ্যালো, আমি এইমাত্র #{{no}} অর্ডার করেছি।",
+  "store.thanksTitle": "ধন্যবাদ পেজ",
+  "store.thanksHint": "খালি রাখলে ডিফল্ট লেখা দেখাবে।",
+  "store.thanks_heading": "শিরোনাম",
+  "store.thanks_sub": "শিরোনামের নিচের লাইন",
+  "store.thanks_message": "বার্তা (ঐচ্ছিক)",
+  "store.thanks_accent": "রং (ঐচ্ছিক, যেমন #1f7a4d)",
+  "store.thanks_home": "“দোকানে ফিরে যান” দেখান",
+  "store.thanks_invoice": "“ইনভয়েস প্রিন্ট করুন” দেখান",
+  "store.thanks_whatsapp": "“হোয়াটসঅ্যাপে নিশ্চিত করুন” দেখান (হোয়াটসঅ্যাপ নম্বর লাগবে)"
 }

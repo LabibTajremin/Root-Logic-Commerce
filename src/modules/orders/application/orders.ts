@@ -149,7 +149,7 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         items: lines,
       })
       await bus.emit('order.placed', { storeId, orderId: created.id, orderNo: created.orderNo })
-      return created
+      return { ...created, phone: d.phone }
     },
 
     async changeStatus(

@@ -5,7 +5,13 @@ export {
   type SiteSettings,
   type StoredSettings,
 } from './application/settings'
-export { bandsFromText, bandsToText, businessSchema, type Business } from './domain/business'
+export {
+  bandsFromText,
+  bandsToText,
+  businessSchema,
+  textOr,
+  type Business,
+} from './domain/business'
 export { layoutSchema, sectionRefSchema, type Layout, type SectionRef } from './domain/layout'
 export { contrastRatio, passesAA, readableOn } from './domain/contrast'
 export {

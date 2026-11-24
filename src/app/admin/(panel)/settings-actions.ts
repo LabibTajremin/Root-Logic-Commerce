@@ -83,6 +83,15 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           ),
           otherZone: String(form.get('zone.other')),
         },
+        thankYou: {
+          heading: String(form.get('ty.heading')),
+          sub: String(form.get('ty.sub')),
+          message: String(form.get('ty.message')),
+          accent: String(form.get('ty.accent')),
+          home: form.get('ty.home') === 'on',
+          invoice: form.get('ty.invoice') === 'on',
+          whatsapp: form.get('ty.whatsapp') === 'on',
+        },
         checkout: {
           email: String(form.get('checkout.email')) as 'optional',
           altPhone: form.get('checkout.altPhone') === 'on',

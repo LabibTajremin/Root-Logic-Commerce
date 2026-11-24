@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
 export const PREVIEW_COOKIE = 'rlc-preview'
+/** C10: `<orderNo>:<phone>` of the order this browser just placed (same signing). */
+export const PLACED_COOKIE = 'rlc-placed'
 
 const sign = (secret: string, storeId: string, preset: string) =>
   createHmac('sha256', secret).update(`${storeId}:${preset}`).digest('base64url')

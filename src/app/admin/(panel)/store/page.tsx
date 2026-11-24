@@ -158,6 +158,56 @@ export default async function StorePage() {
             </details>
           </fieldset>
           <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('store.thanksTitle')}</legend>
+            <p className="text-sm text-muted">{t('store.thanksHint')}</p>
+            {(['heading', 'sub'] as const).map((k) => (
+              <Field
+                key={k}
+                id={`ty.${k}`}
+                name={`ty.${k}`}
+                defaultValue={business.thankYou[k]}
+                label={t(`store.thanks_${k}`)}
+                help={helpText(locale, `store.thanks_${k}`)}
+                helpLabel={t('common.help')}
+              />
+            ))}
+            <div className="flex flex-col gap-1.5 text-sm font-semibold">
+              <label htmlFor="ty.message">{t('store.thanks_message')}</label>
+              <textarea
+                id="ty.message"
+                name="ty.message"
+                rows={3}
+                maxLength={1000}
+                defaultValue={business.thankYou.message}
+                className="rounded-control border border-line bg-surface p-3 font-normal"
+              />
+            </div>
+            <Field
+              id="ty.accent"
+              name="ty.accent"
+              defaultValue={business.thankYou.accent}
+              label={t('store.thanks_accent')}
+              help={helpText(locale, 'store.thanks_accent')}
+              helpLabel={t('common.help')}
+              placeholder="#1f7a4d"
+              pattern="#[0-9a-fA-F]{6}"
+            />
+            {(['home', 'invoice', 'whatsapp'] as const).map((k) => (
+              <label
+                key={k}
+                className="flex min-h-11 items-center justify-between gap-3 text-sm font-semibold"
+              >
+                {t(`store.thanks_${k}`)}
+                <input
+                  type="checkbox"
+                  name={`ty.${k}`}
+                  defaultChecked={business.thankYou[k]}
+                  className="size-6 accent-[var(--color-accent)]"
+                />
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.checkoutFields')}</legend>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="checkout.email" className="text-sm font-semibold">

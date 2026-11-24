@@ -171,4 +171,12 @@ describe('checkout fields (C6)', () => {
       giftWrap: false,
     })
   })
+
+  it('uses owner text, else the default wording (C10)', async () => {
+    const { textOr, businessSchema } = await import('./business')
+    expect(textOr('Shukria!', 'Thanks')).toBe('Shukria!')
+    expect(textOr('', 'Thanks')).toBe('Thanks')
+    expect(businessSchema.parse({}).thankYou).toMatchObject({ accent: '', home: true })
+    expect(businessSchema.safeParse({ thankYou: { accent: 'red' } }).success).toBe(false)
+  })
 })

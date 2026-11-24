@@ -1,6 +1,9 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { otpTarget } from '@/modules/messages'
+import { PLACED_COOKIE, previewValue } from '@/server/preview'
+import { runtime } from '@/server/runtime'
 import { actionError } from '../action-error'
 import { shopRulesOf } from '../shop-rules'
 import { currentIp } from '@/server/request'
@@ -54,6 +57,13 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
       shopRulesOf(business),
     )
     await drafts.ordered(store.id, f('phone'))
+    // C10: this browser may see the order it just placed on the thank-you page, for an hour.
+    const [{ config }, jar] = await Promise.all([runtime(), cookies()])
+    jar.set(
+      PLACED_COOKIE,
+      previewValue(config.authSecret, store.id, `${order.orderNo}:${order.phone}`),
+      { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 3600 },
+    )
     return { orderNo: order.orderNo }
   } catch (e) {
     return actionError(t, e, 'checkout')

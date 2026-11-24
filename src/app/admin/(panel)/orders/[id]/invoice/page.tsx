@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { isUuid } from '@/modules/shared'
 import { adminContext } from '../../../context'
-import { PrintButton } from './print-button'
+import { PrintButton } from '@/ui/print-button'
 import { currentSettings } from '@/server/request'
 import { lineName } from '@/modules/orders'
 

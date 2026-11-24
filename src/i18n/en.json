@@ -939,5 +939,19 @@
   "checkout.shareLocation": "Share my location (optional)",
   "checkout.locationAdded": "Location added (within {{m}} m).",
   "checkout.locationFailed": "Couldn’t get your location — the address is enough.",
-  "order.location": "Open the shared location in Maps (±{{m}} m)"
+  "order.location": "Open the shared location in Maps (±{{m}} m)",
+  "success.total": "Total",
+  "success.print": "Print invoice",
+  "success.home": "Back to the shop",
+  "success.whatsapp": "Confirm on WhatsApp",
+  "success.waText": "Hello, I just placed order #{{no}}.",
+  "store.thanksTitle": "Thank-you page",
+  "store.thanksHint": "Leave a text empty to use the default wording.",
+  "store.thanks_heading": "Heading",
+  "store.thanks_sub": "Line under the heading",
+  "store.thanks_message": "Message (optional)",
+  "store.thanks_accent": "Accent colour (optional, e.g. #1f7a4d)",
+  "store.thanks_home": "Show “Back to the shop”",
+  "store.thanks_invoice": "Show “Print invoice”",
+  "store.thanks_whatsapp": "Show “Confirm on WhatsApp” (when the shop has WhatsApp)"
 }

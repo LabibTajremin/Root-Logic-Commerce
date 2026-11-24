@@ -67,6 +67,21 @@ export const businessSchema = z.object({
       otherZone: z.string().max(60).default('outside-dhaka'),
     })
     .prefault({}),
+  // C10: thank-you page; empty texts use the default wording.
+  thankYou: z
+    .object({
+      heading: z.string().trim().max(120).default(''),
+      sub: z.string().trim().max(300).default(''),
+      message: z.string().trim().max(1000).default(''),
+      accent: z
+        .string()
+        .regex(/^(#[0-9a-fA-F]{6})?$/)
+        .default(''),
+      home: z.boolean().default(true),
+      invoice: z.boolean().default(true),
+      whatsapp: z.boolean().default(true),
+    })
+    .prefault({}),
   // C6: which extra fields checkout asks for.
   checkout: z
     .object({
@@ -153,6 +168,9 @@ export const businessSchema = z.object({
 export type Business = z.infer<typeof businessSchema>
 
 /** B12: "Under ৳500: 500" per line → bands; lines without a valid price are skipped. */
+/** An owner text, or the default wording when it is left empty. */
+export const textOr = (custom: string, fallback: string) => custom || fallback
+
 export const bandsFromText = (text: string) =>
   text
     .split('\n')
