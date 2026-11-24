@@ -36,7 +36,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         )}
         {o.deletedAt && <Badge tone="neutral">{t('order.inTrash')}</Badge>}
         <Link
-          href={`/admin/orders/${o.id}/invoice`}
+          href={`/admin/orders/print?ids=${o.id}`}
           className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-control border border-line px-4 text-sm font-semibold"
         >
           <Icon name="receipt" size={18} />

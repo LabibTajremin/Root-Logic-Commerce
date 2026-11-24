@@ -105,26 +105,42 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
           <p className="text-muted">{t('orders.empty')}</p>
         </Card>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {rows.map((o) => (
-            <li key={o.id}>
-              <Link
-                href={`/admin/orders/${o.id}`}
-                className="flex min-h-14 flex-wrap items-center gap-x-4 gap-y-1 rounded-card border border-line bg-surface p-4"
-              >
-                <span className="font-semibold">#{o.orderNo}</span>
-                <Badge tone={TONE[o.status]}>{t(`status.${o.status}`)}</Badge>
-                <span className="min-w-0 flex-1 truncate text-sm text-muted">
-                  {o.shipName} · {o.shipPhone}
-                </span>
-                <span className="text-xs text-muted" data-testid="order-source">
-                  {t(`source.${o.source}`)}
-                </span>
-                <span className="font-semibold">{money(o.total)}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* C16: tick orders, then print their invoices or packing slips together. */}
+          <form id="bulk-print" action="/admin/orders/print" className="flex justify-end">
+            <button className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold">
+              {t('orders.printSelected')}
+            </button>
+          </form>
+          <ul className="flex flex-col gap-3">
+            {rows.map((o) => (
+              <li key={o.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="ids"
+                  value={o.id}
+                  form="bulk-print"
+                  aria-label={t('orders.select', { no: o.orderNo })}
+                  className="size-6 shrink-0"
+                />
+                <Link
+                  href={`/admin/orders/${o.id}`}
+                  className="flex min-h-14 flex-1 flex-wrap items-center gap-x-4 gap-y-1 rounded-card border border-line bg-surface p-4"
+                >
+                  <span className="font-semibold">#{o.orderNo}</span>
+                  <Badge tone={TONE[o.status]}>{t(`status.${o.status}`)}</Badge>
+                  <span className="min-w-0 flex-1 truncate text-sm text-muted">
+                    {o.shipName} · {o.shipPhone}
+                  </span>
+                  <span className="text-xs text-muted" data-testid="order-source">
+                    {t(`source.${o.source}`)}
+                  </span>
+                  <span className="font-semibold">{money(o.total)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </>
   )

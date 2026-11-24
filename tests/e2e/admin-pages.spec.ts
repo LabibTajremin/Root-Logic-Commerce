@@ -144,10 +144,8 @@ test('unknown ids show not found', async ({ page }) => {
   for (const path of [
     '/admin/products/nope',
     '/admin/orders/nope',
-    '/admin/orders/nope/invoice',
     '/admin/products/00000000-0000-4000-8000-000000000000',
     '/admin/orders/00000000-0000-4000-8000-000000000000',
-    '/admin/orders/00000000-0000-4000-8000-000000000000/invoice',
   ]) {
     await page.goto(path)
     await expect(page.getByText('This page could not be found.')).toBeVisible()

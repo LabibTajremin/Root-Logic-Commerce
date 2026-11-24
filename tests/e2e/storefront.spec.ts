@@ -154,7 +154,7 @@ test('shopper browses, carts, checks out and tracks; owner confirms then cancels
   await page.evaluate(() => {
     window.print = () => document.body.setAttribute('data-printed', '1')
   })
-  await page.getByRole('button', { name: 'Print invoice' }).click()
+  await page.getByRole('button', { name: 'Print (1)' }).click()
   await expect(page.locator('body')).toHaveAttribute('data-printed', '1')
   await page.goto(orderUrl)
   await page.getByRole('button', { name: 'Cancel order' }).click()
@@ -1192,4 +1192,52 @@ test('returns and exchanges on a delivered order: refund, restock, replacement l
   await page.getByRole('button', { name: 'Mark returned' }).click()
   await expect(page.getByRole('button', { name: 'Save return' })).toHaveCount(0)
   await expect(returns.locator('li')).toHaveCount(2)
+})
+
+test('invoices and packing slips: bulk print, designs, 80 mm, Bangla, barcode (C16)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Printed ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '150', stock: '10' })
+  const nos: string[] = []
+  for (let n = 0; n < 2; n++) {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page)
+    nos.push(await placeOrder(page))
+  }
+  await page.goto(`/admin/orders?q=${encodeURIComponent('01712345678')}`)
+  for (const no of nos) await page.getByLabel(`Select order #${no}`).check()
+  await page.getByRole('button', { name: 'Print selected' }).click()
+  await page.waitForURL(/\/admin\/orders\/print\?/)
+  await expect(page.getByTestId('invoice')).toHaveCount(2)
+  for (const no of nos) await expect(page.getByText(`Invoice #${no}`)).toBeVisible()
+  await a11y()
+
+  await page.getByLabel('Document').selectOption('slip')
+  await page.getByLabel('Design').selectOption('bold')
+  await page.getByLabel('Paper').selectOption('80mm')
+  await page.getByLabel('Print language').selectOption('bn')
+  await page.getByRole('button', { name: 'Show' }).click()
+  await page.waitForURL(/doc=slip/)
+  await expect(page.getByTestId('packing-slip')).toHaveCount(2)
+  await expect(page.getByText(`প্যাকিং স্লিপ #${nos[0]}`)).toBeVisible()
+  await expect(page.getByRole('img', { name: `#${nos[1]}` })).toBeVisible()
+  await a11y()
+
+  // Unknown ids are skipped.
+  const ids = new URL(page.url()).searchParams.getAll('ids')
+  await page.goto(
+    `/admin/orders/print?ids=00000000-0000-4000-8000-000000000000&ids=${ids[0]}&design=compact`,
+  )
+  await expect(page.getByTestId('invoice')).toHaveCount(1)
+  for (const id of ids) {
+    await page.goto(`/admin/orders/${id}`)
+    await page.getByRole('button', { name: 'Cancel order' }).click()
+    await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+  }
 })

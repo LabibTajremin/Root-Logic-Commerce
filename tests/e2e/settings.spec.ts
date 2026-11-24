@@ -1428,9 +1428,10 @@ test('coupons: percent, fixed and automatic free delivery; checkout code box, or
   await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
   await expect(page.getByTestId('order-discount')).toHaveText('−৳100')
   await expect(page.getByTestId('order-total')).toHaveText('৳960')
+  const orderUrl = page.url()
   await page.getByRole('link', { name: 'Print invoice' }).click()
-  await expect(page.getByText(`Discount (SAVE10-${id})`)).toBeVisible()
-  await page.goBack()
+  await expect(page.getByText(`Discount · SAVE10-${id}`)).toBeVisible()
+  await page.goto(orderUrl)
   await page.getByRole('button', { name: 'Cancel order' }).click()
   await expect(page.getByTestId('order-events')).toContainText('Cancelled')
 
