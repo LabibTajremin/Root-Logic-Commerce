@@ -1,9 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { orderSources, orderStatuses, type OrderSource, type OrderStatus } from '@/modules/orders'
+import {
+  lineName,
+  orderSources,
+  orderStatuses,
+  type OrderSource,
+  type OrderStatus,
+} from '@/modules/orders'
 import { currentSettings } from '@/server/request'
 import { Icon } from '@/ui/icon'
+import { ActionForm } from '@/ui/action-form'
 import { Badge, Card } from '@/ui/primitives'
+import { bulkOrders } from './actions'
 import { adminContext } from '../context'
 import { TONE } from './tone'
 
@@ -110,19 +118,56 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
       ) : (
         <>
           {/* C16: tick orders, then print their invoices or packing slips together. */}
-          <form id="bulk-print" action="/admin/orders/print" className="flex justify-end">
-            <button className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold">
+          {/* F4: tick orders below, then act on all of them. */}
+          <ActionForm
+            id="bulk"
+            action={bulkOrders}
+            className="flex flex-wrap items-center justify-end gap-2"
+          >
+            <button
+              name="intent"
+              value="print"
+              className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold"
+            >
               {t('orders.printSelected')}
             </button>
-          </form>
+            <label className="sr-only" htmlFor="bulk-to">
+              {t('orders.bulkStatus')}
+            </label>
+            <select
+              id="bulk-to"
+              name="to"
+              className="min-h-11 rounded-control border border-line bg-surface px-2 text-sm"
+            >
+              {orderStatuses.map((s) => (
+                <option key={s} value={s}>
+                  {t(`status.${s}`)}
+                </option>
+              ))}
+            </select>
+            <button
+              name="intent"
+              value="status"
+              className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold"
+            >
+              {t('orders.bulkApply')}
+            </button>
+            <button
+              name="intent"
+              value="trash"
+              className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold text-danger"
+            >
+              {t('order.trash')}
+            </button>
+          </ActionForm>
           <ul className="flex flex-col gap-3">
             {rows.map((o) => (
-              <li key={o.id} className="flex items-center gap-2">
+              <li key={o.id} className="flex flex-wrap items-center gap-2">
                 <input
                   type="checkbox"
                   name="ids"
                   value={o.id}
-                  form="bulk-print"
+                  form="bulk"
                   aria-label={t('orders.select', { no: o.orderNo })}
                   className="size-6 shrink-0"
                 />
@@ -157,6 +202,34 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                     </span>
                   )}
                 </Link>
+                {/* F12: the rest of the row — when, where, what, and quick contact. */}
+                <div className="flex basis-full flex-wrap items-center gap-x-3 gap-y-1 ps-8 text-xs text-muted">
+                  <span>{o.createdAt.toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' })}</span>
+                  <span>
+                    {o.shipAddress}, {o.shipArea}, {o.shipDistrict}
+                  </span>
+                  <span data-testid="order-lines">
+                    {o.lines
+                      .map((l) =>
+                        [`${lineName(l)} × ${l.quantity}`, l.sku].filter(Boolean).join(' · '),
+                      )
+                      .join(', ')}
+                  </span>
+                  <span>
+                    {t('order.delivery')} {money(o.deliveryCharge)}
+                  </span>
+                  <Badge tone="neutral">{t(`payment.${o.paymentStatus}`)}</Badge>
+                  <span className="italic empty:hidden">{o.note}</span>
+                  <a href={`tel:${o.shipPhone}`} className="underline">
+                    {t('order.call')}
+                  </a>
+                  <a href={`https://wa.me/88${o.shipPhone}`} className="underline">
+                    {t('order.whatsapp')}
+                  </a>
+                  <a href={`/admin/orders/print?ids=${o.id}`} className="underline">
+                    {t('print.doc_invoice')}
+                  </a>
+                </div>
               </li>
             ))}
           </ul>

@@ -1,6 +1,7 @@
 'use server'
 
 import { orderStatuses, type OrderStatus } from '@/modules/orders'
+import { DomainError } from '@/modules/shared'
 import { act, type ActionState } from '../act'
 
 export async function changeStatus(_: ActionState, form: FormData) {
@@ -57,5 +58,42 @@ export async function recordReturn(_: ActionState, form: FormData) {
       },
       actor!.id,
     )
+  })
+}
+
+/** F4: the ticked orders (ids join the form from each row) — print, change status or trash. */
+export async function bulkOrders(_: ActionState, form: FormData) {
+  const ids = form.getAll('ids').map(String)
+  const intent = String(form.get('intent'))
+  const to = String(form.get('to')) as OrderStatus
+  return act('orders.manage', async ({ orders, store, actor }) => {
+    if (intent === 'print')
+      return `/admin/orders/print?${new URLSearchParams(ids.map((id) => ['ids', id]))}`
+    let failed = 0
+    for (const id of ids) {
+      try {
+        await (intent === 'trash'
+          ? orders.trash(store.id, id)
+          : orders.changeStatus(store.id, id, to, actor!.id))
+      } catch {
+        failed++
+      }
+    }
+    // The rest went through; say how the others stand.
+    if (failed > 0) throw new DomainError('order.bulk_partial')
+  })
+}
+
+// Every key read is an input of the address form.
+export async function editShipping(_: ActionState, form: FormData) {
+  return act('orders.manage', ({ orders, store }) => {
+    const f = (k: string) => String(form.get(k))
+    return orders.editShipping(store.id, f('id'), {
+      name: f('name'),
+      altPhone: f('altPhone'),
+      address: f('address'),
+      area: f('area'),
+      district: f('district'),
+    })
   })
 }

@@ -22,11 +22,14 @@ export const ActionForm = ({
   children,
   className,
   saved,
+  id,
 }: {
   action: Action
   children: ReactNode
   className?: string
   saved?: string
+  /** Lets controls elsewhere on the page join with `form={id}` (bulk selection). */
+  id?: string
 }) => {
   const [state, run, pending] = useActionState(action, {})
   const ref = useRef<HTMLFormElement>(null)
@@ -39,7 +42,7 @@ export const ActionForm = ({
     startTransition(() => run(data))
   }
   return (
-    <form ref={ref} onSubmit={submit} className={className} aria-busy={pending}>
+    <form ref={ref} id={id} onSubmit={submit} className={className} aria-busy={pending}>
       {children}
       {state.error && (
         <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">

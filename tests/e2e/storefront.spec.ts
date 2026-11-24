@@ -1241,3 +1241,81 @@ test('invoices and packing slips: bulk print, designs, 80 mm, Bangla, barcode (C
     await expect(page.getByTestId('order-events')).toContainText('Cancelled')
   }
 })
+
+test('bulk actions on ticked orders: status, a refusal, trash (F4)', async ({ page, a11y }) => {
+  const name = `Bulk ${uid()}`
+  const phone = `014${Date.now().toString().slice(-8)}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '90', stock: '10' })
+  const nos: string[] = []
+  for (let n = 0; n < 2; n++) {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page, phone)
+    nos.push(await placeOrder(page))
+  }
+  const list = `/admin/orders?q=${phone}`
+  const rows = page.getByRole('link').filter({ hasText: phone })
+  const bulk = async (status: string | null) => {
+    await page.goto(list)
+    for (const no of nos) await page.getByLabel(`Select order #${no}`).check()
+    if (status === null) return page.getByRole('button', { name: 'Move to Trash' }).click()
+    await page.getByLabel('Status for the ticked orders').selectOption({ label: status })
+    await page.getByRole('button', { name: 'Set status' }).click()
+  }
+  await bulk('Confirmed')
+  await expect(rows.filter({ hasText: 'Confirmed' })).toHaveCount(2)
+  await a11y()
+  await bulk('Pending')
+  await alert(page, 'Some ticked orders couldn’t be changed')
+  await bulk('Cancelled')
+  await expect(rows.filter({ hasText: 'Cancelled' })).toHaveCount(2)
+  await bulk(null)
+  await expect(page.getByRole('link').filter({ hasText: phone })).toHaveCount(0)
+  await page.goto(`/admin/orders?trash=1&q=${phone}`)
+  await expect(page.getByRole('link').filter({ hasText: phone })).toHaveCount(2)
+})
+
+test('order rows and the order page: details, customer history, address edit (F12)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Row ${uid()}`
+  const phone = `017${Date.now().toString().slice(-8)}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '80', stock: '10', sku: `SKU-${Date.now()}` })
+  const urls: string[] = []
+  for (let n = 0; n < 2; n++) {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page, phone)
+    const no = await placeOrder(page)
+    await page.goto(`/admin/orders?q=${no}`)
+    await expect(page.getByTestId('order-lines')).toContainText(`${name} × 1 · SKU-`)
+    await expect(page.getByText('House 12, Road 3, Mirpur, Dhaka')).toBeVisible()
+    await expect(page.getByText('Unpaid')).toBeVisible()
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}$/)
+    urls.push(page.url())
+  }
+  await a11y()
+  await expect(page.getByTestId('order-client')).toHaveText(/^IP .+ · \d+ orders from this device$/)
+  await expect(page.getByTestId('order-history').getByRole('link')).toHaveCount(1)
+  await page.getByLabel('Full address').fill('Flat 7A, Road 11')
+  await page.getByLabel('Area / Thana').fill('Banani')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Saved')).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('Flat 7A, Road 11, Banani, Dhaka')).toBeVisible()
+  await page.goto(urls[0]!)
+  await expect(page.getByTestId('order-history').getByRole('link')).toHaveCount(1)
+  for (const url of urls) {
+    await page.goto(url)
+    await page.getByRole('button', { name: 'Cancel order' }).click()
+    await expect(page.getByLabel('Full address')).toHaveCount(0)
+  }
+})

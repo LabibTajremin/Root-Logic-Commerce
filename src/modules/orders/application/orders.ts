@@ -13,6 +13,7 @@ import {
 } from '../domain/checkout'
 import { checkLimits, freeShipping, type ShopRules } from '../domain/rules'
 import { checkReturn, returnInput, type ReturnInput } from '../domain/returns'
+import { editableStatuses, shippingInput, type ShippingInput } from '../domain/checkout'
 import {
   canTransition,
   orderSources,
@@ -246,6 +247,18 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
       await repo.recordReturn(storeId, orderId, { ...rest, exchangeOrderId: swap }, actorId)
     },
     listReturns: (storeId: string, orderId: string) => repo.listReturns(storeId, orderId),
+
+    /** F12: the customer's earlier orders and this device's order count. */
+    history: (storeId: string, o: { id: string; shipPhone: string; deviceId: string | null }) =>
+      repo.history(storeId, { id: o.id, phone: o.shipPhone, deviceId: o.deviceId }),
+
+    /** F12: fix the name / address until the parcel leaves. */
+    async editShipping(storeId: string, id: string, input: ShippingInput) {
+      const order = await repo.get(storeId, id)
+      if (!order) throw new DomainError('order.not_found')
+      if (!editableStatuses.includes(order.status)) throw new DomainError('order.locked')
+      await repo.updateShipping(storeId, id, validate(shippingInput, input))
+    },
 
     async trash(storeId: string, id: string) {
       if (!(await repo.trash(storeId, id))) throw new DomainError('order.trash_invalid')

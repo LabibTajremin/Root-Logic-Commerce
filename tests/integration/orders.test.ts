@@ -938,3 +938,64 @@ describe('order guard: blocklist, limits, duplicates, report (D1, D3, D4, D5)', 
     expect((await fraud.report(store)).risky).toEqual([{ phone: '01733333333', lost: 2, total: 3 }])
   })
 })
+
+describe('order rows and the order page (F12)', () => {
+  it('rows carry the address, lines with SKU, delivery and payment', async () => {
+    const p = await product(store, { sku: 'DB-1' })
+    const { id } = await orders.placeOrder(store, checkout(p.id, 2), zones)
+    const row = (await orders.listOrders(store)).rows.find((r) => r.id === id)!
+    expect(row).toMatchObject({
+      shipAddress: 'House 12, Road 4, Mirpur',
+      deliveryCharge: 6000,
+      paymentStatus: 'unpaid',
+      lines: [{ name: 'Door Bell', variantLabel: null, quantity: 2, sku: 'DB-1' }],
+    })
+  })
+
+  it('shows earlier orders from the phone and the device count', async () => {
+    const p = await product(store, { stock: 20 })
+    const web = {
+      guard: {
+        client: { ip: '10.9.0.1', deviceId: 'dev-h' },
+        rules: { perWindow: 0, windowHours: 24, duplicateHours: 24, blockDuplicates: false },
+      },
+    }
+    const a = await orders.placeOrder(store, checkout(p.id), zones, web)
+    const b = await orders.placeOrder(store, checkout(p.id), zones, web)
+    const ob = (await orders.getOrder(store, b.id))!
+    const h = await orders.history(store, ob)
+    expect(h.previous.map((o) => o.id)).toContain(a.id)
+    expect(h.previous.map((o) => o.id)).not.toContain(b.id)
+    expect(h.deviceOrders).toBe(2)
+    const manual = (await orders.getOrder(
+      store,
+      (await orders.placeOrder(store, checkout(p.id), zones)).id,
+    ))!
+    expect((await orders.history(store, manual)).deviceOrders).toBe(0)
+  })
+
+  it('edits the name and address until the parcel ships', async () => {
+    const p = await product(store)
+    const { id } = await orders.placeOrder(store, checkout(p.id), zones)
+    const ship = {
+      name: 'Rahima K.',
+      altPhone: '01812345678',
+      address: 'Flat 3B, Road 9',
+      area: 'Uttara',
+      district: 'Dhaka',
+    }
+    await orders.editShipping(store, id, ship)
+    expect(await orders.getOrder(store, id)).toMatchObject({
+      shipName: 'Rahima K.',
+      shipAltPhone: '01812345678',
+      shipArea: 'Uttara',
+    })
+    await expect(orders.editShipping(store, id, { ...ship, address: 'x' })).rejects.toThrow(
+      'validation',
+    )
+    await expect(orders.editShipping(other, id, ship)).rejects.toThrow('order.not_found')
+    for (const s of ['CONFIRMED', 'PROCESSING', 'SHIPPED'] as const)
+      await orders.changeStatus(store, id, s, null)
+    await expect(orders.editShipping(store, id, ship)).rejects.toThrow('order.locked')
+  })
+})

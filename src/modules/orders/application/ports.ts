@@ -64,6 +64,24 @@ export type OrderSummary = {
   source: OrderSource
   createdAt: Date
 }
+/** F12: what an order row shows besides the summary. */
+export type OrderRow = OrderSummary & {
+  duplicateOf: DuplicateOf | null
+  shipAddress: string
+  shipArea: string
+  shipDistrict: string
+  deliveryCharge: number
+  paymentStatus: string
+  note: string | null
+  lines: { name: string; variantLabel: string | null; quantity: number; sku: string | null }[]
+}
+export type ShippingEdit = {
+  name: string
+  altPhone: string | null
+  address: string
+  area: string
+  district: string
+}
 /** D1: an earlier order from the same phone with a product in common, within the window. */
 export type DuplicateOf = { orderNo: number; status: OrderStatus; createdAt: Date }
 export type OrderEvent = {
@@ -147,10 +165,13 @@ export type OrdersRepo = {
   findForTracking(storeId: string, orderNo: number, phone: string): Promise<OrderDetail | null>
   /** The newest order placed with this phone (C12 customer lookup). */
   latestForPhone(storeId: string, phone: string): Promise<OrderDetail | null>
-  list(
+  list(storeId: string, filter: OrderFilter): Promise<{ rows: OrderRow[]; total: number }>
+  /** F12: earlier orders from this phone, and how many orders this device placed. */
+  history(
     storeId: string,
-    filter: OrderFilter,
-  ): Promise<{ rows: (OrderSummary & { duplicateOf: DuplicateOf | null })[]; total: number }>
+    o: { id: string; phone: string; deviceId: string | null },
+  ): Promise<{ previous: OrderSummary[]; deviceOrders: number }>
+  updateShipping(storeId: string, id: string, ship: ShippingEdit): Promise<void>
   /** C13: hide a cancelled order (false when it isn't cancelled or is already trashed). */
   trash(storeId: string, id: string): Promise<boolean>
   restore(storeId: string, id: string): Promise<void>

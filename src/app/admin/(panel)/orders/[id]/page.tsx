@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { lineName, nextStatuses, returnReasons } from '@/modules/orders'
+import { editableStatuses, lineName, nextStatuses, returnReasons } from '@/modules/orders'
 import { isUuid } from '@/modules/shared'
 import { ActionForm } from '@/ui/action-form'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../../context'
-import { changeStatus, recordReturn, restoreOrder, trashOrder } from '../actions'
+import { changeStatus, editShipping, recordReturn, restoreOrder, trashOrder } from '../actions'
 import { addBlock } from '../../fraud/actions'
 import { TONE } from '../tone'
 
@@ -20,7 +20,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const o = await orders.getOrder(store.id, id)
   if (!o) notFound()
   const wa = `https://wa.me/88${o.shipPhone}`
-  const returns = await orders.listReturns(store.id, o.id)
+  const [returns, history] = await Promise.all([
+    orders.listReturns(store.id, o.id),
+    orders.history(store.id, o),
+  ])
   const itemName = new Map(o.items.map((i) => [i.id, lineName(i)]))
   const field = 'min-h-11 rounded-control border border-line bg-surface px-3 font-normal'
   return (
@@ -97,6 +100,57 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               </ActionForm>
             </Card>
           )}
+          {/* F12: fix the name or address until the parcel ships. */}
+          {editableStatuses.includes(o.status) && (
+            <Card>
+              <ActionForm
+                action={editShipping}
+                className="flex flex-col gap-3 text-sm"
+                saved={t('common.saved')}
+              >
+                <h2 className="font-semibold">{t('order.editShipping')}</h2>
+                <input type="hidden" name="id" value={o.id} />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {(
+                    [
+                      ['name', o.shipName],
+                      ['altPhone', o.shipAltPhone ?? ''],
+                      ['district', o.shipDistrict],
+                      ['area', o.shipArea],
+                      ['address', o.shipAddress],
+                    ] as const
+                  ).map(([k, v]) => (
+                    <div key={k} className="flex flex-col gap-1.5 font-semibold">
+                      <label htmlFor={`ship-${k}`}>{t(`order.ship_${k}`)}</label>
+                      <input id={`ship-${k}`} name={k} defaultValue={v} className={field} />
+                    </div>
+                  ))}
+                </div>
+                <button className="min-h-11 w-fit rounded-control border border-line px-4 font-semibold">
+                  {t('common.save')}
+                </button>
+              </ActionForm>
+            </Card>
+          )}
+          {/* F12: who this customer is to the shop. */}
+          <Card className="flex flex-col gap-2 text-sm">
+            <h2 className="font-semibold">{t('order.history')}</h2>
+            <p data-testid="order-client">
+              {t('order.client', { ip: o.clientIp ?? '—', n: history.deviceOrders })}
+            </p>
+            <ul className="peer flex flex-col gap-1" data-testid="order-history">
+              {history.previous.map((p) => (
+                <li key={p.id}>
+                  <Link href={`/admin/orders/${p.id}`} className="underline">
+                    #{p.orderNo}
+                  </Link>{' '}
+                  · {t(`status.${p.status}`)} · {money(p.total)} ·{' '}
+                  {p.createdAt.toLocaleDateString('en-GB', { timeZone: 'Asia/Dhaka' })}
+                </li>
+              ))}
+            </ul>
+            <p className="hidden text-muted peer-empty:block">{t('order.firstOrder')}</p>
+          </Card>
           {/* C14: returns and exchanges recorded so far, and a form while the order is delivered. */}
           <Card className="flex flex-col gap-3 has-[ul:empty]:not-has-[form]:hidden">
             <h2 className="font-semibold">{t('return.title')}</h2>

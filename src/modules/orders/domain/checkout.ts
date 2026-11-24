@@ -62,6 +62,23 @@ export const checkoutInput = z.object({
 })
 export type CheckoutInput = z.input<typeof checkoutInput>
 
+/** F12: what the shop may correct on an order before it ships. */
+export const shippingInput = checkoutInput.pick({
+  name: true,
+  altPhone: true,
+  address: true,
+  area: true,
+  district: true,
+})
+export type ShippingInput = z.input<typeof shippingInput>
+export const editableStatuses: string[] = [
+  'PENDING',
+  'ON_HOLD',
+  'SCHEDULED',
+  'CONFIRMED',
+  'PROCESSING',
+]
+
 export const lineTotal = (l: { unitPrice: number; quantity: number }) => l.unitPrice * l.quantity
 
 export const computeTotals = (

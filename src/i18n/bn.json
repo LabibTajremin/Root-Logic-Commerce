@@ -1083,5 +1083,21 @@
   "orders.duplicateOf": "সম্ভবত #{{no}} এর ডুপ্লিকেট ({{status}}, {{hours}} ঘণ্টা আগে)",
   "error.order.blocked": "দুঃখিত, এই অর্ডার অনলাইনে নেওয়া যাচ্ছে না। অর্ডার করতে আমাদের ফোন করুন।",
   "error.order.too_many": "আপনি এইমাত্র কয়েকটি অর্ডার করেছেন। আরেকটি লাগলে আমাদের ফোন করুন।",
-  "error.order.duplicate": "মনে হচ্ছে এই অর্ডার আগেই করেছেন। আমরা শিগগির ফোন করব।"
+  "error.order.duplicate": "মনে হচ্ছে এই অর্ডার আগেই করেছেন। আমরা শিগগির ফোন করব।",
+  "orders.bulkStatus": "বাছাই করা অর্ডারের স্ট্যাটাস",
+  "orders.bulkApply": "স্ট্যাটাস দিন",
+  "error.order.bulk_partial": "কিছু বাছাই করা অর্ডার বদলানো যায়নি — তাদের স্ট্যাটাসে তা চলে না। বাকিগুলো হয়েছে।",
+  "payment.unpaid": "অপরিশোধিত",
+  "payment.paid": "পরিশোধিত",
+  "payment.refunded": "ফেরত",
+  "order.editShipping": "নাম ও ঠিকানা",
+  "order.ship_name": "নাম",
+  "order.ship_altPhone": "দ্বিতীয় ফোন",
+  "order.ship_district": "জেলা",
+  "order.ship_area": "এলাকা / থানা",
+  "order.ship_address": "পূর্ণ ঠিকানা",
+  "order.history": "ক্রেতা",
+  "order.client": "আইপি {{ip}} · এই ডিভাইস থেকে {{n}}টি অর্ডার",
+  "order.firstOrder": "এই ফোন থেকে প্রথম অর্ডার।",
+  "error.order.locked": "পার্সেল চলে গেছে — এখন ঠিকানা বদলানো যাবে না।"
 }

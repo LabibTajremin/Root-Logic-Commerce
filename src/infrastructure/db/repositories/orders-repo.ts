@@ -11,6 +11,7 @@ import {
   isNull,
   lt,
   lte,
+  ne,
   or,
   sql,
   type SQL,
@@ -227,7 +228,15 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
       }
       const cond = and(...where)
       const rows = await db
-        .select(summary)
+        .select({
+          ...summary,
+          shipAddress: orders.shipAddress,
+          shipArea: orders.shipArea,
+          shipDistrict: orders.shipDistrict,
+          deliveryCharge: orders.deliveryCharge,
+          paymentStatus: orders.paymentStatus,
+          note: orders.note,
+        })
         .from(orders)
         .where(cond)
         .orderBy(desc(orders.createdAt), desc(orders.orderNo))
@@ -264,6 +273,24 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           ),
         )
         .orderBy(desc(earlier.createdAt))
+      // F12: each row's products with their current SKU.
+      const lines = await db
+        .select({
+          orderId: orderItems.orderId,
+          name: orderItems.name,
+          variantLabel: orderItems.variantLabel,
+          quantity: orderItems.quantity,
+          sku: products.sku,
+        })
+        .from(orderItems)
+        .leftJoin(products, eq(products.id, orderItems.productId))
+        .where(
+          inArray(
+            orderItems.orderId,
+            rows.map((r) => r.id),
+          ),
+        )
+        .orderBy(asc(orderItems.name))
       const dupOf = new Map<string, (typeof dups)[number]>()
       for (const d of dups) if (!dupOf.has(d.id)) dupOf.set(d.id, d)
       return {
@@ -274,6 +301,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
             duplicateOf: d
               ? { orderNo: d.orderNo, status: d.status, createdAt: d.createdAt }
               : null,
+            lines: lines.filter((l) => l.orderId === r.id).map(({ orderId: _o, ...l }) => l),
           }
         }),
         total: n,
@@ -335,6 +363,37 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
         })
         await applyStock(tx, storeId, moves, 1, { reason: 'order_restocked', orderId, actorId })
       }),
+
+    async history(storeId, o) {
+      const [previous, [device]] = await Promise.all([
+        db
+          .select(summary)
+          .from(orders)
+          .where(
+            and(eq(orders.storeId, storeId), eq(orders.shipPhone, o.phone), ne(orders.id, o.id)),
+          )
+          .orderBy(desc(orders.createdAt))
+          .limit(10),
+        db
+          .select({ n: count() })
+          .from(orders)
+          .where(and(eq(orders.storeId, storeId), eq(orders.deviceId, String(o.deviceId)))),
+      ])
+      return { previous, deviceOrders: device!.n }
+    },
+    async updateShipping(storeId, id, s) {
+      await db
+        .update(orders)
+        .set({
+          shipName: s.name,
+          shipAltPhone: s.altPhone,
+          shipAddress: s.address,
+          shipArea: s.area,
+          shipDistrict: s.district,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(orders.storeId, storeId), eq(orders.id, id)))
+    },
 
     async trash(storeId, id) {
       const rows = await db

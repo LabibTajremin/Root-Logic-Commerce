@@ -1083,5 +1083,21 @@
   "orders.duplicateOf": "Possible duplicate of #{{no}} ({{status}}, {{hours}} h earlier)",
   "error.order.blocked": "Sorry, we can’t take this order online. Please call us to order.",
   "error.order.too_many": "You’ve placed several orders just now. Please call us if you need another one.",
-  "error.order.duplicate": "This looks like an order you already placed. We’ll call you about it soon."
+  "error.order.duplicate": "This looks like an order you already placed. We’ll call you about it soon.",
+  "orders.bulkStatus": "Status for the ticked orders",
+  "orders.bulkApply": "Set status",
+  "error.order.bulk_partial": "Some ticked orders couldn’t be changed — their status doesn’t allow it. The rest were done.",
+  "payment.unpaid": "Unpaid",
+  "payment.paid": "Paid",
+  "payment.refunded": "Refunded",
+  "order.editShipping": "Name and address",
+  "order.ship_name": "Name",
+  "order.ship_altPhone": "Second phone",
+  "order.ship_district": "District",
+  "order.ship_area": "Area / Thana",
+  "order.ship_address": "Full address",
+  "order.history": "Customer",
+  "order.client": "IP {{ip}} · {{n}} orders from this device",
+  "order.firstOrder": "First order from this phone.",
+  "error.order.locked": "The parcel has left — the address can’t change now."
 }
