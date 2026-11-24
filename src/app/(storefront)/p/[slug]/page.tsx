@@ -4,7 +4,8 @@ import { ProductBadges, StockLeft } from '@/ui/product-badges'
 import { GaEvent } from '../../ga'
 import { Breadcrumbs } from '../../breadcrumbs'
 import { faqLd, JsonLd } from '../../json-ld'
-import { QtyBuy } from '../../cart-buttons'
+import { orderButtons, stickyBuyBar } from '@/modules/site-settings'
+import { QtyBuy, StickyBuy } from './buy-buttons'
 import { origin } from '../../origin'
 import { storefront } from '../../storefront'
 import { ProductGrid } from '../../product-grid'
@@ -61,6 +62,21 @@ export default async function ProductPage({ params }: Props) {
     name: p.name,
     price: p.price,
   }
+  // B2: the owner's ways to order (WhatsApp / Call only with the shop's numbers).
+  const paths = {
+    ids: orderButtons(business),
+    whatsapp: business.contact.whatsapp.replace(/\D/g, ''),
+    phone: business.contact.phone,
+    url: `${base}/p/${p.slug}`,
+    labels: {
+      addToCart: t('shop.addToCart'),
+      orderNow: t('shop.orderNow'),
+      whatsapp: t('shop.waOrder'),
+      call: t('shop.callOrder'),
+      waText: t('shop.waOrderText'),
+    },
+  }
+
   const chart = await catalog.sizeChartFor(store.id, p)
   const { reviews: said, summary } = await reviews.forProduct(store.id, p.id)
   const shots = await reviews.screenshots(store.id)
@@ -157,6 +173,7 @@ export default async function ProductPage({ params }: Props) {
         )}
         {variants.length > 0 ? (
           <VariantPicker
+            paths={paths}
             options={p.options}
             variants={variants}
             labels={{
@@ -183,15 +200,7 @@ export default async function ProductPage({ params }: Props) {
             </p>
             <StockLeft n={v.left} label={t('shop.left')} />
             {v.inStock && (
-              <QtyBuy
-                item={item}
-                max={p.stock}
-                labels={{
-                  qty: t('shop.qty'),
-                  addToCart: t('shop.addToCart'),
-                  orderNow: t('shop.orderNow'),
-                }}
-              />
+              <QtyBuy item={item} max={p.stock} qtyLabel={t('shop.qty')} paths={paths} />
             )}
           </>
         )}
@@ -203,6 +212,13 @@ export default async function ProductPage({ params }: Props) {
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
         <TrustStrip trust={business.trust} t={t} />
+        {stickyBuyBar(business, { variants: variants.length, inStock: v.inStock }) && (
+          <StickyBuy
+            item={item}
+            price={v.price}
+            labels={{ cart: t('shop.cart'), orderNow: t('shop.orderNow') }}
+          />
+        )}
         {on('wishlist') && (
           <WishButton item={item} labels={{ add: t('wishlist.add'), saved: t('wishlist.saved') }} />
         )}

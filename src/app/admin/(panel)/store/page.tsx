@@ -6,7 +6,8 @@ import { Button, Card, Field } from '@/ui/primitives'
 import { adminContext } from '../context'
 import { bdDistricts } from '@/modules/orders'
 import { bandsToText } from '@/modules/site-settings'
-import { saveBusiness } from '../settings-actions'
+import { reorderOrderPaths, saveBusiness } from '../settings-actions'
+import { SortableList } from '@/ui/sortable-list'
 
 export const metadata: Metadata = { title: 'Shop info' }
 
@@ -156,6 +157,38 @@ export default async function StorePage() {
                 )}
               </div>
             </details>
+          </fieldset>
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 font-semibold">{t('store.pathsTitle')}</legend>
+            <p className="text-sm text-muted">{t('store.pathsHint')}</p>
+            <SortableList
+              handleLabel={t('common.reorder')}
+              onReorder={reorderOrderPaths}
+              items={business.orderPaths.buttons.map((b) => ({
+                id: b.id,
+                content: (
+                  <label className="flex min-h-11 flex-1 items-center justify-between gap-3 text-sm font-semibold">
+                    {t(`store.path_${b.id}`)}
+                    <input
+                      type="checkbox"
+                      name="paths.on"
+                      value={b.id}
+                      defaultChecked={b.on}
+                      className="size-6 accent-[var(--color-accent)]"
+                    />
+                  </label>
+                ),
+              }))}
+            />
+            <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-semibold">
+              {t('store.stickyBar')}
+              <input
+                type="checkbox"
+                name="paths.sticky"
+                defaultChecked={business.orderPaths.stickyBar}
+                className="size-6 accent-[var(--color-accent)]"
+              />
+            </label>
           </fieldset>
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.thanksTitle')}</legend>

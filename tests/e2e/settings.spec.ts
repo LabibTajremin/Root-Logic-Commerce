@@ -1783,6 +1783,76 @@ test('order guard: block from an order, limits, duplicates, the report (D1, D3, 
   )
 })
 
+test('order buttons: owner picks and orders them; WhatsApp message, call link, phone buy bar (B2)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Paths ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '250', stock: '9' })
+  await page.goto('/admin/store')
+  const [wa, phone] = [
+    await page.getByLabel('WhatsApp number').inputValue(),
+    await page.getByLabel('Phone', { exact: true }).inputValue(),
+  ]
+  const paths = async (v: { wa: string; phone: string; on: boolean }) => {
+    await page.goto('/admin/store')
+    await page.getByLabel('WhatsApp number').fill(v.wa)
+    await page.getByLabel('Phone', { exact: true }).fill(v.phone)
+    for (const l of ['Order on WhatsApp', 'Call to order', 'Buy bar at the bottom on phones'])
+      await page.getByLabel(l).setChecked(v.on)
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await saved(page)
+  }
+  await paths({ wa: '01711000000', phone: '01811000000', on: true })
+  // Drag "Order on WhatsApp" above "Order now".
+  const item = page.getByRole('listitem').filter({ hasText: 'Order on WhatsApp' })
+  await item.scrollIntoViewIfNeeded()
+  const from = (await item.getByRole('button', { name: 'Drag to reorder' }).boundingBox())!
+  const to = (await item.locator('xpath=preceding-sibling::li[1]').boundingBox())!
+  // The reorder action posts the new id order (the bell's poll posts too).
+  const posted = page.waitForResponse((r) => !!r.request().postData()?.includes('"whatsapp","now"'))
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(from.x + from.width / 2, to.y + to.height / 2, { steps: 12 })
+  await page.mouse.up()
+  const res = await posted
+  expect(res.ok()).toBe(true)
+  await a11y()
+
+  await page.goto(`/p/${slug(name)}`)
+  await page.waitForLoadState('networkidle')
+  const buttons = page.getByTestId('buy-buttons').locator('a, button')
+  await expect(buttons).toHaveText([
+    'Add to cart',
+    'Order on WhatsApp',
+    'Order now',
+    'Call to order',
+  ])
+  await page.getByRole('group', { name: 'Quantity' }).getByRole('button', { name: '+' }).click()
+  await expect(page.getByRole('link', { name: 'Order on WhatsApp' })).toHaveAttribute(
+    'href',
+    new RegExp(
+      `^https://wa\\.me/01711000000\\?text=${encodeURIComponent(`Hi, I want to order: ${name} × 2.`).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+    ),
+  )
+  await expect(page.getByRole('link', { name: 'Call to order' })).toHaveAttribute(
+    'href',
+    'tel:01811000000',
+  )
+  await expect(page.getByTestId('sticky-buy')).toBeHidden()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.reload()
+  await expect(page.getByTestId('sticky-buy')).toBeVisible()
+  await a11y()
+  await page.getByTestId('sticky-buy').getByRole('button', { name: 'Cart' }).click()
+  await page.getByRole('dialog', { name: 'Cart' }).getByRole('button', { name: 'Cancel' }).click()
+  await page.getByTestId('sticky-buy').getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await paths({ wa, phone, on: false })
+})
+
 // Last in the file: "start fresh" deletes the owner's products.
 test('layout switch: keep both, show demo and bring mine back, remove demo, start fresh (J3)', async ({
   page,

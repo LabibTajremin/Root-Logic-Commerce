@@ -72,6 +72,14 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           minOrder: optionalMinor(form.get('limits.min')),
           maxOrder: optionalMinor(form.get('limits.max')),
         },
+        // B2: on/off here; the order is saved by dragging (reorderOrderPaths).
+        orderPaths: {
+          buttons: current.business.orderPaths.buttons.map((b) => ({
+            ...b,
+            on: form.getAll('paths.on').includes(b.id),
+          })),
+          stickyBar: form.get('paths.sticky') === 'on',
+        },
         address: {
           mode: String(form.get('address.mode')) as 'text',
           // Districts left on "Any other" are simply not listed.
@@ -118,5 +126,19 @@ export async function saveBusiness(_: ActionState, form: FormData) {
         jar.set('lang', await currentLocale(), { path: '/', maxAge: 31536000, sameSite: 'lax' })
     }
     await settings.saveBusiness(store.id, next, Number(form.get('version')))
+  })
+}
+
+/** B2: the dragged order of the product page's order buttons. */
+export async function reorderOrderPaths(ids: string[]) {
+  return act('settings.manage', async ({ settings, store }) => {
+    const { business, version } = await currentSettings()
+    const by = new Map(business.orderPaths.buttons.map((b) => [b.id as string, b]))
+    const buttons = ids.map((id) => by.get(id)).filter((b): b is NonNullable<typeof b> => !!b)
+    await settings.saveBusiness(
+      store.id,
+      { ...business, orderPaths: { ...business.orderPaths, buttons } },
+      version,
+    )
   })
 }

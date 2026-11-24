@@ -1099,5 +1099,15 @@
   "order.history": "Customer",
   "order.client": "IP {{ip}} · {{n}} orders from this device",
   "order.firstOrder": "First order from this phone.",
-  "error.order.locked": "The parcel has left — the address can’t change now."
+  "error.order.locked": "The parcel has left — the address can’t change now.",
+  "shop.waOrder": "Order on WhatsApp",
+  "shop.callOrder": "Call to order",
+  "shop.waOrderText": "Hi, I want to order: {{product}} × {{qty}}. {{url}}",
+  "store.pathsTitle": "Order buttons on the product page",
+  "store.pathsHint": "Tick the ones to show and drag them into order. WhatsApp and Call need the numbers above.",
+  "store.path_cart": "Add to cart",
+  "store.path_now": "Order now (straight to checkout)",
+  "store.path_whatsapp": "Order on WhatsApp",
+  "store.path_call": "Call to order",
+  "store.stickyBar": "Buy bar at the bottom on phones"
 }

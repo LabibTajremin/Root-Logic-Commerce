@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
 
+/** B2: Add to cart, Order now (straight to checkout), WhatsApp order, Call to order. */
+export const orderPathIds = ['cart', 'now', 'whatsapp', 'call'] as const
+export type OrderPathId = (typeof orderPathIds)[number]
+
 export const businessSchema = z.object({
   contact: z
     .object({
@@ -65,6 +69,16 @@ export const businessSchema = z.object({
         .record(z.string().max(40), z.string().max(60))
         .default({ Dhaka: 'inside-dhaka' }),
       otherZone: z.string().max(60).default('outside-dhaka'),
+    })
+    .prefault({}),
+  // B2: the product page's ways to order, in the owner's order, and the mobile buy bar.
+  orderPaths: z
+    .object({
+      buttons: z
+        .array(z.object({ id: z.enum(orderPathIds), on: z.boolean() }))
+        .max(orderPathIds.length)
+        .default(orderPathIds.map((id) => ({ id, on: id === 'cart' || id === 'now' }))),
+      stickyBar: z.boolean().default(false),
     })
     .prefault({}),
   // C10: thank-you page; empty texts use the default wording.
@@ -177,6 +191,15 @@ export const businessSchema = z.object({
 export type Business = z.infer<typeof businessSchema>
 
 /** B12: "Under ৳500: 500" per line → bands; lines without a valid price are skipped. */
+/** B2: the buttons a product shows, in order; WhatsApp / Call only with the shop's number. */
+export const orderButtons = (b: Business) => {
+  const has = { cart: true, now: true, whatsapp: !!b.contact.whatsapp, call: !!b.contact.phone }
+  return b.orderPaths.buttons.filter((x) => x.on && has[x.id]).map((x) => x.id)
+}
+/** B2: the mobile buy bar shows on plain, in-stock products when the owner turns it on. */
+export const stickyBuyBar = (b: Business, p: { variants: number; inStock: boolean }) =>
+  b.orderPaths.stickyBar && p.variants === 0 && p.inStock
+
 /** An owner text, or the default wording when it is left empty. */
 export const textOr = (custom: string, fallback: string) => custom || fallback
 

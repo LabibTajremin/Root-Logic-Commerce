@@ -1099,5 +1099,15 @@
   "order.history": "ক্রেতা",
   "order.client": "আইপি {{ip}} · এই ডিভাইস থেকে {{n}}টি অর্ডার",
   "order.firstOrder": "এই ফোন থেকে প্রথম অর্ডার।",
-  "error.order.locked": "পার্সেল চলে গেছে — এখন ঠিকানা বদলানো যাবে না।"
+  "error.order.locked": "পার্সেল চলে গেছে — এখন ঠিকানা বদলানো যাবে না।",
+  "shop.waOrder": "হোয়াটসঅ্যাপে অর্ডার",
+  "shop.callOrder": "কল করে অর্ডার",
+  "shop.waOrderText": "হ্যালো, আমি অর্ডার করতে চাই: {{product}} × {{qty}}। {{url}}",
+  "store.pathsTitle": "পণ্যের পেজে অর্ডার বাটন",
+  "store.pathsHint": "যেগুলো দেখাবেন টিক দিন, টেনে ক্রম ঠিক করুন। হোয়াটসঅ্যাপ ও কলের জন্য উপরের নম্বর লাগবে।",
+  "store.path_cart": "কার্টে যোগ",
+  "store.path_now": "এখনই অর্ডার (সরাসরি চেকআউট)",
+  "store.path_whatsapp": "হোয়াটসঅ্যাপে অর্ডার",
+  "store.path_call": "কল করে অর্ডার",
+  "store.stickyBar": "ফোনে নিচে কেনার বার"
 }

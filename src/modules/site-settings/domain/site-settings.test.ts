@@ -179,4 +179,33 @@ describe('checkout fields (C6)', () => {
     expect(businessSchema.parse({}).thankYou).toMatchObject({ accent: '', home: true })
     expect(businessSchema.safeParse({ thankYou: { accent: 'red' } }).success).toBe(false)
   })
+
+  it('picks the order buttons and the mobile buy bar (B2)', async () => {
+    const { businessSchema, orderButtons, stickyBuyBar } = await import('./business')
+    const plain = businessSchema.parse({})
+    expect(orderButtons(plain)).toEqual(['cart', 'now'])
+    const all = businessSchema.parse({
+      contact: { whatsapp: '8801711111111' },
+      orderPaths: {
+        buttons: [
+          { id: 'whatsapp', on: true },
+          { id: 'call', on: true },
+          { id: 'now', on: true },
+          { id: 'cart', on: false },
+        ],
+        stickyBar: true,
+      },
+    })
+    // No shop phone yet: Call to order stays hidden.
+    expect(orderButtons(all)).toEqual(['whatsapp', 'now'])
+    expect(orderButtons({ ...all, contact: { ...all.contact, phone: '01711111111' } })).toEqual([
+      'whatsapp',
+      'call',
+      'now',
+    ])
+    expect(stickyBuyBar(all, { variants: 0, inStock: true })).toBe(true)
+    expect(stickyBuyBar(all, { variants: 2, inStock: true })).toBe(false)
+    expect(stickyBuyBar(all, { variants: 0, inStock: false })).toBe(false)
+    expect(stickyBuyBar(plain, { variants: 0, inStock: true })).toBe(false)
+  })
 })

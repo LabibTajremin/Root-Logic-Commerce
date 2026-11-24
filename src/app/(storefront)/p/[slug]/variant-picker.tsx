@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import type { ProductOptions, VariantOptions } from '@/modules/catalog'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
-import { added, AddToCart, OrderNow } from '../../cart-buttons'
+import { added } from '../../cart-buttons'
+import { BuyButtons, type Paths } from './buy-buttons'
 import { openCart, type Item } from '../../cart-store'
 
 export type PickerVariant = {
@@ -33,11 +34,14 @@ export const VariantPicker = ({
   variants,
   labels,
   moneyFormat,
+  paths,
 }: {
   options: ProductOptions
   variants: PickerVariant[]
   labels: Labels
   moneyFormat: MoneyFormat
+  /** B2 */
+  paths: Paths
 }) => {
   const first = variants.find((v) => v.stock > 0) ?? variants[0]!
   const [sel, setSel] = useState(first.options)
@@ -93,8 +97,7 @@ export const VariantPicker = ({
       {chosen.stock > 0 ? (
         <div className="flex flex-col gap-2 sm:max-w-sm">
           <p className="text-sm font-semibold">{labels.inStock}</p>
-          <AddToCart item={chosen.item} qty={1} label={labels.addToCart} />
-          <OrderNow item={chosen.item} qty={1} label={labels.orderNow} />
+          <BuyButtons item={chosen.item} qty={1} paths={paths} />
           <button type="button" onClick={pick} className="min-h-11 text-sm font-semibold underline">
             {labels.addToList}
           </button>

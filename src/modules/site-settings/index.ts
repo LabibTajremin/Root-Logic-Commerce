@@ -9,8 +9,12 @@ export {
   bandsFromText,
   bandsToText,
   businessSchema,
+  orderButtons,
+  orderPathIds,
+  stickyBuyBar,
   textOr,
   type Business,
+  type OrderPathId,
 } from './domain/business'
 export { layoutSchema, sectionRefSchema, type Layout, type SectionRef } from './domain/layout'
 export { contrastRatio, passesAA, readableOn } from './domain/contrast'
