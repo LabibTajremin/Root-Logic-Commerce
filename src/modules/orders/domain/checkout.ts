@@ -24,6 +24,15 @@ export const checkoutInput = z.object({
     .default(null),
   preferredTime: z.enum(preferredTimes).default('any'),
   giftWrap: z.boolean().default(false),
+  // C5: optional GPS point from the shopper's device.
+  location: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+      accuracy: z.number().nonnegative().max(100_000),
+    })
+    .nullable()
+    .default(null),
   email: z.email().nullable().default(null),
   address: z.string().trim().min(5).max(300),
   area: z.string().trim().min(2).max(80),

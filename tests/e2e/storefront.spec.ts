@@ -1034,3 +1034,39 @@ test('incomplete checkout: the draft comes back for the shopper and waits for th
   await page.goto('/admin/orders/incomplete')
   await expect(page.getByText(phone)).toHaveCount(0)
 })
+
+test('share location: asked only on tap; a refusal is fine; the owner opens it in Maps (C5)', async ({
+  page,
+  context,
+  a11y,
+}) => {
+  const name = `Located ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '110', stock: '5' })
+  await page.goto(`/p/${slug(name)}`)
+  await page.getByRole('button', { name: 'Add to cart' }).click()
+  await page.goto('/checkout')
+  await fillCheckout(page)
+  const share = page.getByRole('button', { name: 'Share my location (optional)' })
+  await share.click()
+  await expect(page.getByTestId('location')).toHaveText(
+    'Couldn’t get your location — the address is enough.',
+  )
+  await context.grantPermissions(['geolocation'])
+  await context.setGeolocation({ latitude: 23.8103, longitude: 90.4125, accuracy: 30 })
+  await share.click()
+  await expect(page.getByTestId('location')).toHaveText('Location added (within 30 m).')
+  await a11y()
+  const no = await placeOrder(page)
+  await page.goto(`/admin/orders?q=${no}`)
+  await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+  await expect(page.getByTestId('order-location')).toHaveAttribute(
+    'href',
+    'https://www.google.com/maps?q=23.8103,90.4125',
+  )
+  await expect(page.getByTestId('order-location')).toHaveText(
+    'Open the shared location in Maps (±30 m)',
+  )
+  await page.getByRole('button', { name: 'Cancel order' }).click()
+  await expect(page.getByTestId('order-events')).toContainText('Cancelled')
+})

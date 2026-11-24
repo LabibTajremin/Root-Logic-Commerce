@@ -13,6 +13,7 @@ export type OrderProduct = {
   minQty: number | null
   maxQty: number | null
 }
+export type GeoPoint = { lat: number; lng: number; accuracy: number }
 export type OrderVariant = {
   id: string
   productId: string
@@ -42,6 +43,7 @@ export type NewOrder = {
   }
   preferredTime: string
   giftWrap: boolean
+  location: GeoPoint | null
   note: string | null
   deliveryZone: string
   paymentMethod: string
@@ -78,6 +80,7 @@ export type OrderDetail = OrderSummary & {
   shipAltPhone: string | null
   preferredTime: string
   giftWrap: boolean
+  shipLocation: GeoPoint | null
   note: string | null
   paymentMethod: string
   paymentStatus: string

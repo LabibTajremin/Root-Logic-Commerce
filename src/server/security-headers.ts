@@ -24,7 +24,11 @@ export const securityHeaders = (production: boolean) => {
     { key: 'X-Content-Type-Options', value: 'nosniff' },
     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-    { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
+    // C5: checkout may ask for the shopper's location (own pages only, never embeds).
+    {
+      key: 'Permissions-Policy',
+      value: 'camera=(), microphone=(), geolocation=(self), payment=()',
+    },
     ...(production
       ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]
       : []),

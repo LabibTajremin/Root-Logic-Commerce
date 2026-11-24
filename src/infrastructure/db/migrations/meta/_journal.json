@@ -134,6 +134,13 @@
       "when": 1795479583629,
       "tag": "0018_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795483112438,
+      "tag": "0019_location",
+      "breakpoints": true
     }
   ]
 }

@@ -141,6 +141,7 @@ export const createOrders = ({ repo, bus, coupons }: Deps) => {
         note: d.note,
         preferredTime: d.preferredTime,
         giftWrap: d.giftWrap,
+        location: d.location,
         deliveryZone: zone.label,
         paymentMethod: d.paymentMethod,
         totals,

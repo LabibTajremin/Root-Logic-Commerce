@@ -379,6 +379,8 @@ export const orders = pgTable(
     shipAltPhone: text(),
     preferredTime: text().notNull().default('any'),
     giftWrap: boolean().notNull().default(false),
+    // C5: shared from the shopper's device on tap (accuracy in metres).
+    shipLocation: jsonb().$type<{ lat: number; lng: number; accuracy: number }>(),
     note: text(),
     paymentMethod: text().notNull().default('COD'),
     paymentStatus: paymentStatusEnum().notNull().default('unpaid'),

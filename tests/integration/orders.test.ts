@@ -242,17 +242,24 @@ describe('status flow with stock', () => {
     expect(await order(p.id, l.id, 4)).toMatchObject({ orderNo: expect.any(Number) })
   })
 
-  it('keeps the extra checkout fields: second phone, preferred time, gift wrap (C6)', async () => {
+  it('keeps the extra checkout fields: second phone, preferred time, gift wrap (C6), location (C5)', async () => {
     const p = await product(store)
     const { id } = await orders.placeOrder(
       store,
-      { ...checkout(p.id), altPhone: '01812345678', preferredTime: 'evening', giftWrap: true },
+      {
+        ...checkout(p.id),
+        altPhone: '01812345678',
+        preferredTime: 'evening',
+        giftWrap: true,
+        location: { lat: 23.81, lng: 90.41, accuracy: 25 },
+      },
       zones,
     )
     expect(await orders.getOrder(store, id)).toMatchObject({
       shipAltPhone: '01812345678',
       preferredTime: 'evening',
       giftWrap: true,
+      shipLocation: { lat: 23.81, lng: 90.41, accuracy: 25 },
     })
   })
 

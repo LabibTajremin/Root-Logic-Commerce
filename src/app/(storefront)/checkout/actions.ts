@@ -40,6 +40,8 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         altPhone: f('altPhone'),
         preferredTime: (f('preferredTime') || 'any') as 'any',
         giftWrap: form.get('giftWrap') === 'on',
+        // Always sent: 'null' until the shopper shares a location.
+        location: JSON.parse(f('location')),
         email,
         district: f('district'),
         area: f('area'),

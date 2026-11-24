@@ -97,6 +97,22 @@ export const CheckoutForm = ({
   const [pending, start] = useTransition()
   // C18: removing a line asks once more (the button turns into "Tap again to remove").
   const [removing, setRemoving] = useState('')
+  // C5: the device's position, asked for only when the shopper taps the button.
+  const [loc, setLoc] = useState<{ lat: number; lng: number; accuracy: number } | null>(null)
+  const [locFailed, setLocFailed] = useState(false)
+  const locate = () =>
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => (
+        setLocFailed(false),
+        setLoc({
+          lat: coords.latitude,
+          lng: coords.longitude,
+          accuracy: Math.round(coords.accuracy),
+        })
+      ),
+      () => setLocFailed(true),
+      { enableHighAccuracy: true, timeout: 15_000 },
+    )
   // C17: the zone the typed address points to (shown as a chip; the shopper can still change it).
   const [detected, setDetected] = useState<string | null>(null)
   const onType = (e: FormEvent<HTMLFormElement>) => {
@@ -237,6 +253,21 @@ export const CheckoutForm = ({
             <Input id="area" data-kept label={L.area} required minLength={2} />
           </div>
           <p className="text-xs text-muted">{L.thanaHint}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={locate}
+              className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold"
+            >
+              {L.shareLocation}
+            </button>
+            <input type="hidden" name="location" value={JSON.stringify(loc)} />
+            <p role="status" className="text-sm" data-testid="location">
+              {loc
+                ? L.locationAdded!.replace('{{m}}', String(loc.accuracy))
+                : locFailed && L.locationFailed}
+            </p>
+          </div>
           {address.mode === 'picker' && (
             <datalist id="bd-districts">
               {bdDistricts

@@ -144,6 +144,15 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                   </div>
                 ))}
             </dl>
+            {o.shipLocation && (
+              <a
+                href={`https://www.google.com/maps?q=${o.shipLocation.lat},${o.shipLocation.lng}`}
+                className="text-sm font-semibold underline"
+                data-testid="order-location"
+              >
+                {t('order.location', { m: o.shipLocation.accuracy })}
+              </a>
+            )}
             <div className="flex gap-2">
               <a
                 href={`tel:${o.shipPhone}`}

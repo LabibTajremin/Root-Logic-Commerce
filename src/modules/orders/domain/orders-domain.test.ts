@@ -43,7 +43,12 @@ describe('checkout', () => {
       altPhone: null,
       preferredTime: 'any',
       giftWrap: false,
+      location: null,
     })
+    // C5: a GPS point must be a real coordinate.
+    expect(
+      checkoutInput.safeParse({ ...valid, location: { lat: 99, lng: 0, accuracy: 5 } }).success,
+    ).toBe(false)
     // C6: a second phone is normalized like the first; a bad one is refused.
     expect(checkoutInput.parse({ ...valid, altPhone: '+880 1812-345678' }).altPhone).toBe(
       '01812345678',

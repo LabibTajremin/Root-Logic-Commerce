@@ -935,5 +935,9 @@
   "store.otherZone": "বাকি সব জেলার এলাকা",
   "store.noGuess": "অনুমান করবেন না",
   "store.zoneByDistrict": "জেলা অনুযায়ী এলাকা",
-  "store.anyOther": "বাকি জেলাগুলোর মতো"
+  "store.anyOther": "বাকি জেলাগুলোর মতো",
+  "checkout.shareLocation": "আমার লোকেশন দিন (ঐচ্ছিক)",
+  "checkout.locationAdded": "লোকেশন যোগ হয়েছে ({{m}} মিটারের মধ্যে)।",
+  "checkout.locationFailed": "লোকেশন পাওয়া যায়নি — ঠিকানাই যথেষ্ট।",
+  "order.location": "দেওয়া লোকেশন ম্যাপে খুলুন (±{{m}} মিটার)"
 }

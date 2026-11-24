@@ -48,6 +48,9 @@ const KEYS = [
   'draftRestored',
   'zoneDetected',
   'thanaHint',
+  'shareLocation',
+  'locationAdded',
+  'locationFailed',
 ]
 
 export default async function CheckoutPage() {
