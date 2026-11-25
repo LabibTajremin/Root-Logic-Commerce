@@ -79,3 +79,12 @@ Sections: Core web public `81:4742`, web admin `81:4743`, mobile public `81:4744
 ## Owner-notes pass (2026-11-22)
 - New Core web admin screens (after `Admin/Design`): `Admin/Design/Header & logo` (logo, dark-mode logo, favicon uploads with size hints; logo text on/off; name/site font; header opacity; sticky), `Admin/Design/Background` (accent; Light bg cream→white slider, warm↔cool slider, Dark bg midnight→black slider; 24 patterns; pattern opacity; visitor light/dark switch), `Admin/Design/Footer` (3 presets, footer logo, colour, column/payment/social/call toggles, footer text, Pro "remove Powered by Root Logic Lab"), `Admin/Design/Home sections` (section on/off + drag order). Live preview = scaled clone of `Public/Home` (top or footer).
 - "Do it with AI" button: fill now bound to accent-tint variable `2:15` at full opacity (opacity on bound paints is dropped on clone — never rely on it).
+
+## Reels redesign (2026-11-25, owner request: clean, gorgeous, simple, eye-catching)
+References: Swiper 3D coverflow, visionOS player, Instagram carousel strip. Main components on Foundation › Reels (B4) — every page updates from them (52 desktop + 42 mobile carousel instances across Core and the 5 theme pages).
+- `Reel/Card` `84:117` — 9:16, radius 28, 1px white/18% inner stroke, soft drop shadow; top + bottom scrim; frosted duration chip (top-left); bottom `info`: category eyebrow (11px, 14% tracking), title (heading font var, 22px), price + frosted "Shop →" pill. Text props: Title, Category, Price, Duration.
+- `Reel/Coverflow carousel · desktop` `86:641` — `stage` frame with 3D perspective 1500; 7 cards 250×444; offsets 0/205/370/505 px, rotateY 0/±40/±50/±56° (inward), depth 0/−130/−250/−350, opacity 1/1/.92/.62. Only the centre card shows `info`; side cards show photo + duration. Glass `dock` (surface fill, line stroke, blur): prev · pill dots (active = accent 24px) · pause (accent) · next.
+- `Reel/Coverflow carousel · mobile` `86:642` — 3 cards 196×348, perspective 900, sides at ±132 px, ±42°, depth −140; dots pill below.
+- `Reel/Overlay player` `84:290` — full-bleed video, story progress bars, shop header + glass close, glass action rail (like/share/mute), caption, glass product sheet with accent "Order now".
+- Bangla demo frames: card props in Bangla (digits too), Shop label "কিনুন".
+- Code (Phase 15 B4): CSS `perspective` on the track + `rotateY/translateZ` per slot, scroll-snap; reduced-motion → flat row, no tilt.
