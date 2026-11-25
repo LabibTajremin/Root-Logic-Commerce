@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 14 (Courier) — spec docs/BUILD_SPEC.md
-Now: Phase 14 Courier — E1/E2 (CI green 4a7e7d4) and E3 courier report + E5 payouts/courier cost (CI green 5c20e21) done. NEXT: E4 parcel scan (hand-over session: courier, rider, scan box barcodes → printable hand-over receipt; returns scan → RETURN_RECEIVED; what came back / what did not report) → D2 courier score (FraudCheckPort: success % per phone on rows + drawer, optional hold/OTP threshold) → close Phase 14.
+Now: Phase 14 Courier — E1/E2, E3/E5 and E4 parcel scan (hand-over + returns sessions, scanner gun / camera, signed receipt; CI green dd23e7c) done. NEXT: D2 courier score (own delivery history per phone: success % on rows + order page; optional rule min % / min orders → hold or OTP) → close Phase 14.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
