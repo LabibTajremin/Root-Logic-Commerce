@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { noSubscribe } from '@/ui/static-store'
 
 type Detector = { detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]> }
 type DetectorClass = new (options: { formats: string[] }) => Detector
-const noChange = () => () => {}
 
 /**
  * E4: read box barcodes with the camera where the browser has a BarcodeDetector; each new
@@ -21,7 +21,7 @@ export const CameraScan = ({
 }) => {
   // Fixed per browser: nothing to subscribe to; the server renders no camera button.
   const supported = useSyncExternalStore(
-    noChange,
+    noSubscribe,
     () => 'BarcodeDetector' in window,
     () => false,
   )
