@@ -6,7 +6,12 @@ import { Button, Card, Field } from '@/ui/primitives'
 import { adminContext } from '../context'
 import { bdDistricts } from '@/modules/orders'
 import { bandsToText } from '@/modules/site-settings'
-import { reorderOrderPaths, saveBusiness } from '../settings-actions'
+import {
+  addCertificate,
+  removeCertificate,
+  reorderOrderPaths,
+  saveBusiness,
+} from '../settings-actions'
 import { SortableList } from '@/ui/sortable-list'
 
 export const metadata: Metadata = { title: 'Shop info' }
@@ -158,7 +163,7 @@ export default async function StorePage() {
               </div>
             </details>
           </fieldset>
-          <fieldset className="flex flex-col gap-3">
+          <fieldset id="order-buttons" className="flex scroll-mt-20 flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.pathsTitle')}</legend>
             <p className="text-sm text-muted">{t('store.pathsHint')}</p>
             <SortableList
@@ -190,7 +195,7 @@ export default async function StorePage() {
               />
             </label>
           </fieldset>
-          <fieldset className="flex flex-col gap-3">
+          <fieldset id="thank-you" className="flex scroll-mt-20 flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.thanksTitle')}</legend>
             <p className="text-sm text-muted">{t('store.thanksHint')}</p>
             {(['heading', 'sub'] as const).map((k) => (
@@ -240,7 +245,7 @@ export default async function StorePage() {
               </label>
             ))}
           </fieldset>
-          <fieldset className="flex flex-col gap-3">
+          <fieldset id="checkout-fields" className="flex scroll-mt-20 flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('store.checkoutFields')}</legend>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="checkout.email" className="text-sm font-semibold">
@@ -277,6 +282,15 @@ export default async function StorePage() {
           <fieldset className="flex flex-col gap-3">
             <legend className="mb-1 font-semibold">{t('trust.title')}</legend>
             <p className="text-sm text-muted">{t('trust.hint')}</p>
+            <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-semibold">
+              {t('trust.footer')}
+              <input
+                type="checkbox"
+                name="trust.footer"
+                defaultChecked={business.trust.footer}
+                className="size-6 accent-[var(--color-accent)]"
+              />
+            </label>
             {(['tradeLicence', 'tin', 'bin', 'dbid', 'warranty'] as const).map((k) => (
               <Field
                 key={k}
@@ -309,6 +323,50 @@ export default async function StorePage() {
           <Button type="submit" icon="check" className="self-start">
             {t('common.save')}
           </Button>
+        </ActionForm>
+      </Card>
+      {/* B6: certificate photos for the trust strip (their own forms: files can't ride the big one). */}
+      <Card className="flex flex-col gap-3">
+        <h2 className="font-semibold">{t('trust.certificates')}</h2>
+        <ul className="flex flex-col gap-2 text-sm" data-testid="admin-certificates">
+          {business.trust.certificates.map((c) => (
+            <li key={c.id} className="flex items-center justify-between gap-3">
+              <a href={`/api/media/${c.id}/320`} className="underline">
+                {c.caption}
+              </a>
+              <ActionForm action={removeCertificate}>
+                <input type="hidden" name="id" value={c.id} />
+                <button className="min-h-11 px-2 text-sm text-danger underline">
+                  {t('common.remove')} {c.caption}
+                </button>
+              </ActionForm>
+            </li>
+          ))}
+        </ul>
+        <ActionForm action={addCertificate} className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-1.5 text-sm font-semibold">
+            <label htmlFor="cert-file">{t('trust.certificateFile')}</label>
+            <input
+              id="cert-file"
+              name="file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              required
+            />
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5 text-sm font-semibold">
+            <label htmlFor="cert-caption">{t('trust.certificateCaption')}</label>
+            <input
+              id="cert-caption"
+              name="caption"
+              required
+              maxLength={80}
+              className="min-h-11 rounded-control border border-line bg-surface px-3 font-normal"
+            />
+          </div>
+          <button className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold">
+            {t('trust.addCertificate')}
+          </button>
         </ActionForm>
       </Card>
     </>

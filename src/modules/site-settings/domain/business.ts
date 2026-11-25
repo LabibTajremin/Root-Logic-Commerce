@@ -44,6 +44,13 @@ export const businessSchema = z.object({
       bin: z.string().trim().max(60).default(''),
       dbid: z.string().trim().max(60).default(''),
       warranty: z.string().trim().max(200).default(''),
+      // Certificate photos (media ids) with a caption, opened in a viewer.
+      certificates: z
+        .array(z.object({ id: z.uuid(), caption: z.string().trim().max(80) }))
+        .max(6)
+        .default([]),
+      // Also show the strip above the footer on every page.
+      footer: z.boolean().default(false),
     })
     .prefault({}),
   // C3: delivery is free above a subtotal, in some zones, or with some products.

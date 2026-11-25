@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { Business } from '@/modules/site-settings'
 import { Icon } from '@/ui/icon'
 
@@ -13,8 +14,8 @@ export const TrustStrip = ({
 }) => (
   <section
     aria-label={t('trust.title')}
-    // Hidden by CSS until the owner fills in a number.
-    className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4 text-sm has-[dl:empty]:hidden"
+    // Hidden by CSS until the owner fills in a number or adds a certificate.
+    className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4 text-sm has-[dl:empty]:has-[ul:empty]:hidden"
   >
     <p className="flex items-center gap-2 font-semibold">
       <Icon name="check" size={18} className="text-success" />
@@ -31,5 +32,51 @@ export const TrustStrip = ({
         ))}
     </dl>
     <p className="text-muted empty:hidden">{trust.warranty}</p>
+    {/* B6: certificate photos; each opens in a native popover viewer. */}
+    <ul className="flex flex-wrap gap-2 empty:hidden" data-testid="certificates">
+      {trust.certificates.map((c) => (
+        <li key={c.id}>
+          <button
+            type="button"
+            popoverTarget={`cert-${c.id}`}
+            className="block overflow-hidden rounded-control border border-line"
+          >
+            <Image
+              src={`/api/media/${c.id}/320`}
+              alt={c.caption}
+              width={96}
+              height={72}
+              className="h-18 w-24 object-cover"
+            />
+          </button>
+          <div
+            id={`cert-${c.id}`}
+            popover="auto"
+            role="dialog"
+            aria-label={c.caption}
+            className="m-auto max-w-[min(92vw,48rem)] rounded-card border border-line bg-surface p-4 text-text shadow-xl backdrop:bg-black/60"
+          >
+            <Image
+              src={`/api/media/${c.id}/1024`}
+              alt={c.caption}
+              width={1024}
+              height={768}
+              className="h-auto max-h-[80vh] w-full object-contain"
+            />
+            <p className="mt-2 flex items-center justify-between gap-3">
+              {c.caption}
+              <button
+                type="button"
+                popoverTarget={`cert-${c.id}`}
+                popoverTargetAction="hide"
+                className="min-h-11 px-3 font-semibold underline"
+              >
+                {t('common.close')}
+              </button>
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
   </section>
 )

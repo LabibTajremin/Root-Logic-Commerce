@@ -9,6 +9,8 @@ export const UPLOAD_LIMITS = {
   favicon: 1 * MB,
   // A7: WhatsApp/Messenger screenshots shoppers sent the owner.
   screenshot: 4 * MB,
+  // B6: trade licence, BSTI and similar certificates.
+  certificate: 4 * MB,
 } as const
 export type UploadPurpose = keyof typeof UPLOAD_LIMITS
 

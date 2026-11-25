@@ -1,3 +1,4 @@
+import { TrustStrip } from './trust-strip'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -92,6 +93,11 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       <main id="main" className="flex-1">
         {children}
       </main>
+      {business.trust.footer && (
+        <div className="mx-auto w-full max-w-6xl px-4 pb-6">
+          <TrustStrip trust={business.trust} t={t} />
+        </div>
+      )}
       <Footer
         store={store}
         categories={categories}

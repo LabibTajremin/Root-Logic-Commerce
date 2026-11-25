@@ -83,6 +83,29 @@ export default async function DesignPage() {
       <h1 className="font-heading text-3xl">{t('design.title')}</h1>
       <BrandImages brand={design.brand} t={t} />
       <AnnouncementForm a={design.announcement} t={t} help={helpText(locale, 'announce')} />
+      {/* J1: the checkout, order buttons and thank-you page are set where their rules live. */}
+      <Card className="flex flex-col gap-2">
+        <h2 className="font-semibold">{t('design.ordering')}</h2>
+        <p className="text-sm text-muted">{t('design.orderingHint')}</p>
+        <ul className="flex flex-wrap gap-2">
+          {(
+            [
+              ['order-buttons', 'store.pathsTitle'],
+              ['checkout-fields', 'store.checkoutFields'],
+              ['thank-you', 'store.thanksTitle'],
+            ] as const
+          ).map(([id, key]) => (
+            <li key={id}>
+              <a
+                href={`/admin/store#${id}`}
+                className="inline-flex min-h-11 items-center rounded-control border border-line px-4 text-sm font-semibold"
+              >
+                {t(key)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Card>
       <DesignEditor
         initial={design}
         version={version}

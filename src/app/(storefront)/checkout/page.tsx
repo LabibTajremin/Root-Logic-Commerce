@@ -1,3 +1,4 @@
+import { TrustStrip } from '../trust-strip'
 import type { Metadata } from 'next'
 import { storefront } from '../storefront'
 import { GaEvent } from '../ga'
@@ -74,6 +75,7 @@ export default async function CheckoutPage() {
         freeRule={business.freeShipping}
         address={business.address}
       />
+      <TrustStrip trust={business.trust} t={t} />
     </section>
   )
 }

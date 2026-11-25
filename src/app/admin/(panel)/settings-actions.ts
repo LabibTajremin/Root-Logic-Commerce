@@ -56,6 +56,8 @@ export async function saveBusiness(_: ActionState, form: FormData) {
         },
         showStockLeft: form.get('showStockLeft') === 'on',
         trust: {
+          ...current.business.trust,
+          footer: form.get('trust.footer') === 'on',
           tradeLicence: String(form.get('trust.tradeLicence')),
           tin: String(form.get('trust.tin')),
           bin: String(form.get('trust.bin')),
@@ -138,6 +140,36 @@ export async function reorderOrderPaths(ids: string[]) {
     await settings.saveBusiness(
       store.id,
       { ...business, orderPaths: { ...business.orderPaths, buttons } },
+      version,
+    )
+  })
+}
+
+/** B6: a certificate photo added to the trust strip. `file`/`caption` are inputs of its form. */
+export async function addCertificate(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ media, settings, store }) => {
+    const bytes = new Uint8Array(await (form.get('file') as File).arrayBuffer())
+    const m = await media.upload(store.id, 'certificate', bytes)
+    const { business, version } = await currentSettings()
+    const certificates = [
+      ...business.trust.certificates,
+      { id: m.id, caption: String(form.get('caption')) },
+    ]
+    await settings.saveBusiness(
+      store.id,
+      { ...business, trust: { ...business.trust, certificates } },
+      version,
+    )
+  })
+}
+
+export async function removeCertificate(_: ActionState, form: FormData) {
+  return act('settings.manage', async ({ settings, store }) => {
+    const { business, version } = await currentSettings()
+    const certificates = business.trust.certificates.filter((c) => c.id !== form.get('id'))
+    await settings.saveBusiness(
+      store.id,
+      { ...business, trust: { ...business.trust, certificates } },
       version,
     )
   })

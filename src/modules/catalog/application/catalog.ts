@@ -27,7 +27,14 @@ import type { CatalogRepo, Product, ProductFilter } from './ports'
 /** F3: product changes go to the activity log (before → after). */
 export type CatalogAudit = (
   storeId: string,
-  action: 'product.create' | 'product.update',
+  action:
+    | 'product.create'
+    | 'product.update'
+    | 'product.variants'
+    | 'catalog.hide_mine'
+    | 'catalog.restore_mine'
+    | 'catalog.remove_demo'
+    | 'catalog.start_fresh',
   before: unknown,
   after: unknown,
 ) => Promise<void>
@@ -178,7 +185,8 @@ export const createCatalog = ({ repo, shortId, audit }: Deps) => {
     async setOptions(storeId: string, productId: string, input: ProductOptions) {
       const options = validate(productOptions, input)
       const p = await mustProduct(storeId, productId)
-      const rows = mergeMatrix(options, await repo.listVariants(storeId, [productId]), {
+      const before = await repo.listVariants(storeId, [productId])
+      const rows = mergeMatrix(options, before, {
         productId,
         price: p.price,
         compareAtPrice: p.compareAtPrice,
@@ -187,6 +195,12 @@ export const createCatalog = ({ repo, shortId, audit }: Deps) => {
         sku: null,
       })
       await repo.saveVariants(storeId, productId, options, rows)
+      await audit(
+        storeId,
+        'product.variants',
+        { id: productId, options: p.options },
+        { id: productId, options },
+      )
     },
 
     /** Prices/stock per variant; ids that are not this product's variants are ignored. */
@@ -197,11 +211,19 @@ export const createCatalog = ({ repo, shortId, audit }: Deps) => {
     ) {
       const p = await mustProduct(storeId, productId)
       const byId = new Map(patches.map((x) => [x.id, x]))
-      const rows = (await repo.listVariants(storeId, [productId])).map((v) => ({
+      const before = await repo.listVariants(storeId, [productId])
+      const rows = before.map((v) => ({
         id: v.id,
         ...validate(variantInput, { ...v, ...byId.get(v.id), options: v.options }),
       }))
       await repo.saveVariants(storeId, productId, p.options, rows)
+      // F3: CSV variant rows land here too, so imports are logged line by line.
+      await audit(
+        storeId,
+        'product.variants',
+        { id: productId, variants: before },
+        { id: productId, variants: rows },
+      )
     },
 
     /** A8: "You may also like" and "Frequently bought together" for a product page. */
@@ -235,11 +257,24 @@ export const createCatalog = ({ repo, shortId, audit }: Deps) => {
       await repo.markDemo(storeId, ids)
     },
     /** Hide mine, show demo: the owner's products turn draft; nothing is deleted. */
-    hideMine: (storeId: string) => repo.parkMine(storeId),
-    restoreMine: (storeId: string) => repo.unparkMine(storeId),
-    removeDemo: (storeId: string) => repo.deleteProducts(storeId, true),
+    // F3: each bulk move of a layout switch is logged as one entry.
+    async hideMine(storeId: string) {
+      await repo.parkMine(storeId)
+      await audit(storeId, 'catalog.hide_mine', null, null)
+    },
+    async restoreMine(storeId: string) {
+      await repo.unparkMine(storeId)
+      await audit(storeId, 'catalog.restore_mine', null, null)
+    },
+    async removeDemo(storeId: string) {
+      await repo.deleteProducts(storeId, true)
+      await audit(storeId, 'catalog.remove_demo', null, null)
+    },
     /** Start fresh: the owner's own products are deleted (the page asks twice). */
-    startFresh: (storeId: string) => repo.deleteProducts(storeId, false),
+    async startFresh(storeId: string) {
+      await repo.deleteProducts(storeId, false)
+      await audit(storeId, 'catalog.start_fresh', null, null)
+    },
 
     /**
      * A15 import: every row is checked first (dry run); `apply` writes only a sheet with

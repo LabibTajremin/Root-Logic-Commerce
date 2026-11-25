@@ -1109,5 +1109,18 @@
   "store.path_now": "এখনই অর্ডার (সরাসরি চেকআউট)",
   "store.path_whatsapp": "হোয়াটসঅ্যাপে অর্ডার",
   "store.path_call": "কল করে অর্ডার",
-  "store.stickyBar": "ফোনে নিচে কেনার বার"
+  "store.stickyBar": "ফোনে নিচে কেনার বার",
+  "trust.certificates": "সার্টিফিকেট",
+  "trust.certificateFile": "সার্টিফিকেটের ছবি",
+  "trust.certificateCaption": "কী এটি (যেমন ট্রেড লাইসেন্স ২০২৬)",
+  "trust.addCertificate": "সার্টিফিকেট যোগ করুন",
+  "trust.footer": "প্রতিটি পেজে ফুটারের উপরে “যাচাই করা ব্যবসা” দেখান",
+  "common.remove": "সরান",
+  "design.ordering": "চেকআউট, অর্ডার বাটন ও ধন্যবাদ পেজ",
+  "design.orderingHint": "এগুলো শপ ইনফোতে, ডেলিভারি ও চেকআউটের নিয়মের পাশে।",
+  "activity.action.product.variants": "ভ্যারিয়েন্ট বদলানো হয়েছে",
+  "activity.action.catalog.hide_mine": "নিজের পণ্য লুকানো (লেআউট বদল)",
+  "activity.action.catalog.restore_mine": "নিজের পণ্য ফেরানো",
+  "activity.action.catalog.remove_demo": "ডেমো পণ্য মুছে ফেলা",
+  "activity.action.catalog.start_fresh": "নিজের পণ্য মুছে নতুন শুরু"
 }

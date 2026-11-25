@@ -1109,5 +1109,18 @@
   "store.path_now": "Order now (straight to checkout)",
   "store.path_whatsapp": "Order on WhatsApp",
   "store.path_call": "Call to order",
-  "store.stickyBar": "Buy bar at the bottom on phones"
+  "store.stickyBar": "Buy bar at the bottom on phones",
+  "trust.certificates": "Certificates",
+  "trust.certificateFile": "Certificate photo",
+  "trust.certificateCaption": "What it is (e.g. Trade licence 2026)",
+  "trust.addCertificate": "Add certificate",
+  "trust.footer": "Show “Verified business” above the footer on every page",
+  "common.remove": "Remove",
+  "design.ordering": "Checkout, order buttons and thank-you page",
+  "design.orderingHint": "These live in Shop info, next to the delivery and checkout rules.",
+  "activity.action.product.variants": "Variants changed",
+  "activity.action.catalog.hide_mine": "Own products hidden (layout switch)",
+  "activity.action.catalog.restore_mine": "Own products brought back",
+  "activity.action.catalog.remove_demo": "Demo products removed",
+  "activity.action.catalog.start_fresh": "Own products deleted (start fresh)"
 }
