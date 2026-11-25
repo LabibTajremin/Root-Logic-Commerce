@@ -58,7 +58,7 @@ export default async function CourierPayoutsPage() {
                     {(
                       [
                         ['collected', r.collected],
-                        ['charge', r.charge ?? 0],
+                        ['charge', r.charge],
                       ] as const
                     ).map(([k, v]) => (
                       <div key={k} className="flex flex-col gap-1 font-semibold">

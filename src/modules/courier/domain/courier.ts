@@ -188,6 +188,10 @@ export const courierReport = (rows: ParcelFact[]) =>
   })
 export type CourierReportRow = ReturnType<typeof courierReport>[number]
 
+/** E3 cells: a dash where there is nothing to measure yet. */
+export const showPct = (n: number | null) => (n === null ? '—' : `${n}%`)
+export const showDays = (n: number | null) => (n === null ? '—' : String(n))
+
 /** E5: cash the courier holds for a parcel — what the owner entered, else the COD of a delivered one. */
 export const collectedOf = (s: { state: ParcelState; cod: number; codCollected: number | null }) =>
   s.codCollected ?? (s.state === 'delivered' ? s.cod : 0)

@@ -227,9 +227,13 @@ export const createCourier = ({ repo, api, box, orders, token, now }: Deps) => {
 
     /** E5: delivered parcels not paid out yet, and what the couriers owe in total. */
     async unsettled(storeId: string) {
-      const rows = (await repo.unsettled(storeId)).map((s) => ({ ...s, collected: collectedOf(s) }))
+      const rows = (await repo.unsettled(storeId)).map((s) => ({
+        ...s,
+        charge: s.charge ?? 0,
+        collected: collectedOf(s),
+      }))
       const collected = rows.reduce((a, r) => a + r.collected, 0)
-      const charges = rows.reduce((a, r) => a + (r.charge ?? 0), 0)
+      const charges = rows.reduce((a, r) => a + r.charge, 0)
       return { rows, collected, charges, due: collected - charges }
     },
     setAmounts: async (storeId: string, id: string, a: { collected: number; charge: number }) =>

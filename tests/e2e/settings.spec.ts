@@ -2057,6 +2057,7 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
       .first(),
   ).toHaveText('2')
   await page.getByLabel('Product', { exact: true }).selectOption({ label: name })
+  await page.getByLabel('To', { exact: true }).fill('2099-12-31')
   await page.getByRole('button', { name: 'Show' }).click()
   await expect(page).toHaveURL(/product=/)
   await expect(report.getByRole('row', { name: /Steadfast/ })).toBeVisible()

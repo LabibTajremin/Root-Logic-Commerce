@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { showDays, showPct } from '@/modules/courier'
 import { adminContext } from '../../context'
 import { Card } from '@/ui/primitives'
 
@@ -83,10 +84,8 @@ export default async function CourierReportPage({ searchParams }: { searchParams
                       {r[c]}
                     </td>
                   ))}
-                  <td className="py-2 text-end">
-                    {r.successPct === null ? '—' : `${r.successPct}%`}
-                  </td>
-                  <td className="py-2 text-end">{r.avgDays ?? '—'}</td>
+                  <td className="py-2 text-end">{showPct(r.successPct)}</td>
+                  <td className="py-2 text-end">{showDays(r.avgDays)}</td>
                 </tr>
               ))}
             </tbody>

@@ -9,6 +9,8 @@ import {
   orderStatusFor,
   parcelState,
   readWebhook,
+  showDays,
+  showPct,
 } from './courier'
 
 describe('courier statuses (E2)', () => {
@@ -114,6 +116,12 @@ describe('courier report and payouts (E3, E5)', () => {
       },
     ])
     expect(courierReport([])).toEqual([])
+    expect([showPct(75), showPct(null), showDays(2.5), showDays(null)]).toEqual([
+      '75%',
+      '—',
+      '2.5',
+      '—',
+    ])
   })
 
   it('a delivered parcel collected its COD unless the owner says otherwise', () => {
