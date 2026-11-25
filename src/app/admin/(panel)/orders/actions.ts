@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { orderStatuses, type OrderStatus } from '@/modules/orders'
 import { DomainError } from '@/modules/shared'
 import { act, type ActionState } from '../act'
@@ -82,8 +83,11 @@ export async function bulkOrders(_: ActionState, form: FormData) {
         failed++
       }
     }
-    // The rest went through; say how the others stand.
-    if (failed > 0) throw new DomainError('order.bulk_partial')
+    // The rest went through: show them, then say how the others stand.
+    if (failed > 0) {
+      revalidatePath('/admin/orders')
+      throw new DomainError('order.bulk_partial')
+    }
   })
 }
 
