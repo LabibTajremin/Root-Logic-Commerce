@@ -75,7 +75,7 @@ export default async function CheckoutPage() {
         freeRule={business.freeShipping}
         address={business.address}
       />
-      <TrustStrip trust={business.trust} t={t} />
+      <TrustStrip trust={business.trust} t={t} place="checkout" />
     </section>
   )
 }

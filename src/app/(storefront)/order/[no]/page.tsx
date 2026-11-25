@@ -96,7 +96,7 @@ export default async function OrderPlaced({ params }: { params: Promise<{ no: st
           {t('success.whatsapp')}
         </a>
       </div>
-      <TrustStrip trust={business.trust} t={t} />
+      <TrustStrip trust={business.trust} t={t} place="thanks" />
     </section>
   )
 }

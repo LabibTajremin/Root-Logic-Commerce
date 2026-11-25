@@ -211,7 +211,7 @@ export default async function ProductPage({ params }: Props) {
           />
         )}
         <p className="rounded-card bg-soft p-4 text-sm">{t('shop.cod')}</p>
-        <TrustStrip trust={business.trust} t={t} />
+        <TrustStrip trust={business.trust} t={t} place="product" />
         {stickyBuyBar(business, { variants: variants.length, inStock: v.inStock }) && (
           <StickyBuy
             item={item}

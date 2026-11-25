@@ -95,7 +95,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       </main>
       {business.trust.footer && (
         <div className="mx-auto w-full max-w-6xl px-4 pb-6">
-          <TrustStrip trust={business.trust} t={t} />
+          <TrustStrip trust={business.trust} t={t} place="footer" />
         </div>
       )}
       <Footer

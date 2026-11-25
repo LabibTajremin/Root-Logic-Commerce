@@ -8,9 +8,12 @@ const keys = ['tradeLicence', 'tin', 'bin', 'dbid'] as const
 export const TrustStrip = ({
   trust,
   t,
+  place,
 }: {
   trust: Business['trust']
   t: (k: string) => string
+  /** A page can show the strip twice (e.g. checkout + footer): keeps the viewer ids apart. */
+  place: 'home' | 'product' | 'checkout' | 'thanks' | 'footer'
 }) => (
   <section
     aria-label={t('trust.title')}
@@ -38,11 +41,11 @@ export const TrustStrip = ({
         <li key={c.id}>
           <button
             type="button"
-            popoverTarget={`cert-${c.id}`}
+            popoverTarget={`cert-${place}-${c.id}`}
             className="block overflow-hidden rounded-control border border-line"
           >
             <Image
-              src={`/api/media/${c.id}/320`}
+              src={`/api/media/${c.id}`}
               alt={c.caption}
               width={96}
               height={72}
@@ -50,14 +53,14 @@ export const TrustStrip = ({
             />
           </button>
           <div
-            id={`cert-${c.id}`}
+            id={`cert-${place}-${c.id}`}
             popover="auto"
             role="dialog"
             aria-label={c.caption}
             className="m-auto max-w-[min(92vw,48rem)] rounded-card border border-line bg-surface p-4 text-text shadow-xl backdrop:bg-black/60"
           >
             <Image
-              src={`/api/media/${c.id}/1024`}
+              src={`/api/media/${c.id}`}
               alt={c.caption}
               width={1024}
               height={768}
@@ -67,7 +70,7 @@ export const TrustStrip = ({
               {c.caption}
               <button
                 type="button"
-                popoverTarget={`cert-${c.id}`}
+                popoverTarget={`cert-${place}-${c.id}`}
                 popoverTargetAction="hide"
                 className="min-h-11 px-3 font-semibold underline"
               >

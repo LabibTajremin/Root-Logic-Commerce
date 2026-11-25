@@ -156,7 +156,7 @@ const renderers: Record<SectionId, Render> = {
   ),
   'trust-strip': ({ ctx: { business, t } }) => (
     <div className={wrap}>
-      <TrustStrip trust={business.trust} t={t} />
+      <TrustStrip trust={business.trust} t={t} place="home" />
     </div>
   ),
   'screenshot-reviews': async ({ ctx: { reviews, store, t } }) => {
