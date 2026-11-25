@@ -4,6 +4,7 @@ import type { CourierRepo } from '@/modules/courier'
 import { createCourierApis } from '@/infrastructure/courier/couriers'
 import { createCourierRepo } from '@/infrastructure/db/repositories/courier-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
+import { createFraudRepo } from '@/infrastructure/db/repositories/fraud-repo'
 import {
   courierEvents,
   courierShipments,
@@ -286,6 +287,31 @@ describe('parcel scan sessions (E4)', () => {
       ].sort(),
     )
     expect(await repo.listSessions(other, 10)).toEqual([])
+  })
+})
+
+describe('courier score history (D2)', () => {
+  it('counts each phone’s delivered and courier-returned orders, ignoring the rest', async () => {
+    const statuses = [
+      'DELIVERED',
+      'PARTIAL_DELIVERED',
+      'RETURNED',
+      'RETURNING',
+      'RETURN_RECEIVED',
+      'RETURN_MISSING',
+      'CANCELLED',
+      'PENDING',
+    ] as const
+    for (const [i, status] of statuses.entries()) {
+      const id = await order(store, 100 + i)
+      await db.update(orders).set({ status }).where(eq(orders.id, id))
+    }
+    const fraud = createFraudRepo(db)
+    expect(await fraud.courierHistory(store, ['01712345678', '01999999999'])).toEqual({
+      '01712345678': { delivered: 3, returned: 3, total: 6 },
+    })
+    expect(await fraud.courierHistory(other, ['01712345678'])).toEqual({})
+    expect(await fraud.courierHistory(store, [])).toEqual({})
   })
 })
 

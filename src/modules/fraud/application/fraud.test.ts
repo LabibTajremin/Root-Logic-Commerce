@@ -16,6 +16,10 @@ const setup = (state: { blocked?: boolean; recent?: number; dup?: boolean } = {}
     logAttempt: async (...a) => void calls.push(['log', ...a]),
     attempts: async (_s, n) => (calls.push(['attempts', n]), []),
     riskyPhones: async (_s, n) => (calls.push(['risky', n]), []),
+    courierHistory: async (_s, phones) => (
+      calls.push(['history', phones]),
+      { '01711111111': { total: 4, delivered: 1, returned: 3 } }
+    ),
   }
   const fraud = createFraud({ repo, now: () => new Date('2026-05-02T12:00:00Z') })
   return { fraud, calls }
@@ -74,5 +78,19 @@ describe('fraud', () => {
     } as unknown as FraudRepo
     await createFraud({ repo }).check('s', client, [], { ...rules, blockDuplicates: false })
     expect(Date.now() - since.getTime()).toBeGreaterThanOrEqual(24 * 3_600_000)
+  })
+
+  it('scores phones by their finished courier deliveries and applies the shop rule (D2)', async () => {
+    const { fraud, calls } = setup()
+    expect(await fraud.scores('s', ['01711111111', '01822222222', '01711111111'])).toEqual({
+      '01711111111': { total: 4, delivered: 1, returned: 3, pct: 25 },
+      '01822222222': { total: 0, delivered: 0, returned: 0, pct: null },
+    })
+    expect(calls).toEqual([['history', ['01711111111', '01822222222']]])
+    const rule = { minPct: 50, minOrders: 3, action: 'otp' as const }
+    expect(await fraud.scoreCheck('s', '+8801711111111', rule)).toBe('otp')
+    expect(await fraud.scoreCheck('s', '01822222222', rule)).toBeNull()
+    expect(await fraud.scoreCheck('s', 'not a phone', rule)).toBeNull()
+    expect(await fraud.scoreCheck('s', '01711111111', { ...rule, minPct: 0 })).toBeNull()
   })
 })

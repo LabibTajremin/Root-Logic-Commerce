@@ -19,7 +19,7 @@ const optional = (v: string) => v.trim() || null
 const field = (form: FormData, k: string) => String(form.get(k) ?? '')
 
 export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
-  const [{ orders, drafts, otp, store, business, limits, t }, ip] = await Promise.all([
+  const [{ orders, drafts, otp, fraud, on, store, business, limits, t }, ip] = await Promise.all([
     storefront(),
     currentIp(),
   ])
@@ -29,8 +29,15 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
     const email = optional(f('email'))
     if (business.checkout.email === 'required' && !email)
       return { error: t('error.checkout.email') }
-    // With a verification channel on, the first submit only sends the code.
-    const check = otpTarget(business.otp, { phone: f('phone'), email })
+    // D2: a phone with a poor courier record may be held or asked for an SMS code.
+    const risk = on('fraudCheck')
+      ? await fraud.scoreCheck(store.id, f('phone'), business.fraud.score)
+      : null
+    // With a verification channel on (or the score rule asking), the first submit only sends the code.
+    const check = otpTarget(risk === 'otp' ? { sms: true, email: false } : business.otp, {
+      phone: f('phone'),
+      email,
+    })
     if (check) {
       const code = optional(f('code'))
       if (!code)
@@ -68,6 +75,8 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
       shopRulesOf(business),
       { guard: { client: { ip, deviceId }, rules: business.fraud } },
     )
+    if (risk === 'hold')
+      await orders.changeStatus(store.id, order.id, 'ON_HOLD', null, 'system: low courier score')
     await drafts.ordered(store.id, f('phone'))
     // C10: this browser may see the order it just placed on the thank-you page, for an hour.
     const { config } = await runtime()

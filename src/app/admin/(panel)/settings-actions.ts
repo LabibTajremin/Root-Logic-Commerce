@@ -115,6 +115,14 @@ export async function saveBusiness(_: ActionState, form: FormData) {
           windowHours: Number(form.get('fraud.windowHours')),
           duplicateHours: Number(form.get('fraud.duplicateHours')),
           blockDuplicates: form.get('fraud.blockDuplicates') === 'on',
+          // D2 fields show only with the courier score module; keep the saved rule otherwise.
+          score: has('fraud.score.minPct')
+            ? {
+                minPct: Number(form.get('fraud.score.minPct')),
+                minOrders: Number(form.get('fraud.score.minOrders')),
+                action: String(form.get('fraud.score.action')) as 'hold',
+              }
+            : current.business.fraud.score,
         },
       }),
       ...(has('otp') && {

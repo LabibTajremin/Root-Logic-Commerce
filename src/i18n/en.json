@@ -1210,5 +1210,14 @@
   "error.scan.wrong_courier": "This parcel is with another courier.",
   "error.scan.not_outgoing": "This parcel is already delivered or back — it can't go out again.",
   "error.scan.not_returning": "This parcel isn't on its way back. Only returning parcels can be received.",
-  "error.scan.duplicate": "Already scanned in this session."
+  "error.scan.duplicate": "Already scanned in this session.",
+  "fraud.score": "Courier score rule",
+  "fraud.score_minPct": "Act below this success % (0 = off)",
+  "fraud.score_minOrders": "Only after this many finished deliveries",
+  "fraud.score_action": "Then",
+  "fraud.score_hold": "Put the order on hold",
+  "fraud.score_otp": "Ask for an SMS code",
+  "fraud.scoreLocked": "Courier score: see each customer's delivered vs returned record and act on it. A premium feature.",
+  "fraud.scoreNone": "Courier score: no deliveries yet",
+  "fraud.scoreLine": "Courier score {{pct}}% · {{delivered}} of {{total}} delivered"
 }

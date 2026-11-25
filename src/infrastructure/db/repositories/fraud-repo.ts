@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, inArray, ne, or, sql } from 'drizzle-orm'
 import type { FraudRepo } from '@/modules/fraud'
-import { lostStatuses } from '@/modules/orders'
+import { lostStatuses, type OrderStatus } from '@/modules/orders'
 import type { Db } from '../client'
 import { blocks, fraudAttempts, orderItems, orders } from '../schema'
 
@@ -91,6 +91,25 @@ export const createFraudRepo = (db: Db): FraudRepo => ({
       .where(eq(fraudAttempts.storeId, storeId))
       .orderBy(desc(fraudAttempts.createdAt))
       .limit(limit),
+  async courierHistory(storeId, phones) {
+    if (phones.length === 0) return {}
+    const n = (s: readonly string[]) =>
+      sql<number>`count(*) filter (where ${inArray(orders.status, [...s] as OrderStatus[])})`.mapWith(
+        Number,
+      )
+    const rows = await db
+      .select({
+        phone: orders.shipPhone,
+        delivered: n(['DELIVERED', 'PARTIAL_DELIVERED', 'RETURNED']),
+        returned: n(['RETURNING', 'RETURN_RECEIVED', 'RETURN_MISSING']),
+      })
+      .from(orders)
+      .where(and(eq(orders.storeId, storeId), inArray(orders.shipPhone, phones)))
+      .groupBy(orders.shipPhone)
+    return Object.fromEntries(
+      rows.map(({ phone, ...h }) => [phone, { ...h, total: h.delivered + h.returned }]),
+    )
+  },
   riskyPhones: (storeId, limit) => {
     const lost =
       sql<number>`count(*) filter (where ${inArray(orders.status, [...lostStatuses])})`.mapWith(

@@ -2158,3 +2158,94 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
   await page.getByRole('button', { name: 'Remove Outside Dhaka' }).click()
   await expect(accounts.getByRole('listitem')).toHaveCount(1)
 })
+
+test('courier score: delivered vs returned per phone, then hold or ask for a code (D2)', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Score ${uid()}`
+  const phone = `016${Date.now().toString().slice(-8)}`
+  await signedIn(page)
+  await page.goto('/admin/fraud')
+  await expect(page.getByText(/Courier score: see each customer/)).toBeVisible()
+  // Saving the guard without the module keeps the (off) score rule.
+  await page.getByRole('button', { name: 'Save' }).first().click()
+  await saved(page)
+
+  await createProduct(page, { name, price: '300', stock: '20' })
+  const place = async () => {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page, phone)
+    await page.getByRole('button', { name: 'Place order' }).click()
+  }
+  const placed = async () => {
+    await page.waitForURL(/\/order\/\d+$/)
+    return (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  }
+  const open = async (no: string) => {
+    await page.goto(`/admin/orders?q=${no}`)
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/)
+  }
+  const steps = async (no: string, last: string) => {
+    await open(no)
+    for (const s of ['Confirm order', 'Start processing', 'Mark shipped', last]) {
+      await page.getByRole('button', { name: s }).click()
+      await expect(page.getByRole('button', { name: s })).toHaveCount(0)
+    }
+  }
+  // One delivered, one the courier brought back: 50%.
+  await place()
+  await steps(await placed(), 'Mark delivered')
+  await place()
+  await steps(await placed(), 'Courier is returning it')
+
+  await page.context().clearCookies()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-fraudCheck').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-fraudCheck')).toContainText('Included')
+  await page.goto('/admin/features')
+  await page.getByTestId('module-fraudCheck').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('module-fraudCheck')).toContainText('On')
+
+  await page.goto(`/admin/orders?q=${phone}`)
+  const score = page.getByTestId('courier-score').first()
+  await expect(score).toHaveText('Courier score 50% · 1 of 2 delivered')
+  await expect(score).toHaveAttribute('data-risky', 'true')
+  await page.goto('/admin/orders')
+  await expect(page.getByText('Courier score: no deliveries yet').first()).toBeVisible()
+
+  // Rule: under 60% after 2 finished deliveries → hold.
+  await page.goto('/admin/fraud')
+  await page.getByLabel(/^Act below this success %/).fill('60')
+  await page.getByLabel('Only after this many finished deliveries').fill('2')
+  await page.getByLabel('Then', { exact: true }).selectOption({ label: 'Put the order on hold' })
+  await page.getByRole('button', { name: 'Save' }).first().click()
+  await saved(page)
+  await a11y()
+  await place()
+  const held = await placed()
+  await open(held)
+  await expect(page.getByText('On hold', { exact: true }).first()).toBeVisible()
+  await expect(page.getByTestId('courier-score')).toHaveText('Courier score 50% · 1 of 2 delivered')
+
+  // …or ask this phone for an SMS code first.
+  await page.goto('/admin/fraud')
+  await page.getByLabel('Then', { exact: true }).selectOption({ label: 'Ask for an SMS code' })
+  await page.getByRole('button', { name: 'Save' }).first().click()
+  await saved(page)
+  await place()
+  await expect(page.getByText(`We sent a 6-digit code to •••••••${phone.slice(-3)}`)).toBeVisible()
+  await page.getByLabel('Verification code').fill(lastCode(phone))
+  await page.getByRole('button', { name: 'Verify & place order' }).click()
+  await placed()
+
+  await page.goto('/admin/fraud')
+  await page.getByLabel(/^Act below this success %/).fill('0')
+  await page.getByRole('button', { name: 'Save' }).first().click()
+  await saved(page)
+})

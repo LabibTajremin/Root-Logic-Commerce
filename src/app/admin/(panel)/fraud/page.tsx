@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { blockKinds } from '@/modules/fraud'
 import { currentSettings } from '@/server/request'
 import { ActionForm } from '@/ui/action-form'
-import { Card } from '@/ui/primitives'
+import { Card, LockBadge } from '@/ui/primitives'
 import { adminContext } from '../context'
 import { saveBusiness } from '../settings-actions'
 import { addBlock, removeBlock } from './actions'
@@ -14,9 +14,13 @@ const when = (d: Date) => d.toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' })
 
 /** D1/D3/D4/D5: order limits, the blocklist, refused attempts and risky numbers. */
 export default async function FraudPage() {
-  const { fraud, store, t } = await adminContext('orders.manage')
+  const { fraud, features, store, t } = await adminContext('orders.manage')
   const { business, version } = await currentSettings()
-  const [blocks, report] = await Promise.all([fraud.listBlocks(store.id), fraud.report(store.id)])
+  const [blocks, report, scoring] = await Promise.all([
+    fraud.listBlocks(store.id),
+    fraud.report(store.id),
+    features.isOn(store.id, 'fraudCheck'),
+  ])
   const rules = business.fraud
   return (
     <>
@@ -49,6 +53,45 @@ export default async function FraudPage() {
             />
             {t('fraud.blockDuplicates')}
           </label>
+          {/* D2: the courier score rule — a premium module. */}
+          {scoring ? (
+            <fieldset className="grid gap-3 sm:grid-cols-3">
+              <legend className="mb-1 text-sm font-semibold">{t('fraud.score')}</legend>
+              {(['minPct', 'minOrders'] as const).map((k) => (
+                <div key={k} className="flex flex-col gap-1.5 text-sm font-semibold">
+                  <label htmlFor={`fraud.score.${k}`}>{t(`fraud.score_${k}`)}</label>
+                  <input
+                    id={`fraud.score.${k}`}
+                    name={`fraud.score.${k}`}
+                    type="number"
+                    min={k === 'minPct' ? 0 : 1}
+                    max={k === 'minPct' ? 100 : 50}
+                    defaultValue={rules.score[k]}
+                    className={field}
+                  />
+                </div>
+              ))}
+              <div className="flex flex-col gap-1.5 text-sm font-semibold">
+                <label htmlFor="fraud.score.action">{t('fraud.score_action')}</label>
+                <select
+                  id="fraud.score.action"
+                  name="fraud.score.action"
+                  defaultValue={rules.score.action}
+                  className={field}
+                >
+                  {(['hold', 'otp'] as const).map((a) => (
+                    <option key={a} value={a}>
+                      {t(`fraud.score_${a}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </fieldset>
+          ) : (
+            <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+              <LockBadge label={t('common.premium')} /> {t('fraud.scoreLocked')}
+            </p>
+          )}
           <button className="min-h-11 w-fit rounded-control bg-button px-4 font-semibold text-button-text">
             {t('common.save')}
           </button>

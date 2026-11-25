@@ -110,6 +110,14 @@ export const businessSchema = z.object({
       windowHours: z.number().int().min(1).max(720).default(24),
       duplicateHours: z.number().int().min(1).max(720).default(24),
       blockDuplicates: z.boolean().default(false),
+      // D2: below `minPct` (0 = off) after `minOrders` finished deliveries → hold or ask for a code.
+      score: z
+        .object({
+          minPct: z.number().int().min(0).max(100).default(0),
+          minOrders: z.number().int().min(1).max(50).default(3),
+          action: z.enum(['hold', 'otp']).default('hold'),
+        })
+        .prefault({}),
     })
     .prefault({}),
   // C6: which extra fields checkout asks for.

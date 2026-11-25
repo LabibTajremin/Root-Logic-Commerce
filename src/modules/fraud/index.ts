@@ -14,4 +14,10 @@ export {
   type BlockInput,
   type BlockKind,
   type FraudRules,
+  noHistory,
+  riskyScore,
+  scoreAction,
+  successPct,
+  type CourierHistory,
+  type ScoreRule,
 } from './domain/fraud'

@@ -8,6 +8,7 @@ import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../../context'
 import { CourierCard } from './courier-card'
+import { CourierScore } from '../courier-score'
 import { changeStatus, editShipping, recordReturn, restoreOrder, trashOrder } from '../actions'
 import { addBlock } from '../../fraud/actions'
 import { TONE } from '../tone'
@@ -17,13 +18,17 @@ export const metadata: Metadata = { title: 'Order' }
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (!isUuid(id)) notFound()
-  const { orders, store, t, money } = await adminContext('orders.manage')
+  const { orders, features, fraud, store, t, money } = await adminContext('orders.manage')
   const o = await orders.getOrder(store.id, id)
   if (!o) notFound()
   const wa = `https://wa.me/88${o.shipPhone}`
-  const [returns, history] = await Promise.all([
+  const [returns, history, scores] = await Promise.all([
     orders.listReturns(store.id, o.id),
     orders.history(store.id, o),
+    // D2: the phone's courier record, with the premium module on.
+    features
+      .isOn(store.id, 'fraudCheck')
+      .then((on) => (on ? fraud.scores(store.id, [o.shipPhone]) : null)),
   ])
   const itemName = new Map(o.items.map((i) => [i.id, lineName(i)]))
   const field = 'min-h-11 rounded-control border border-line bg-surface px-3 font-normal'
@@ -325,6 +330,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <h2 className="font-semibold">{t('order.customer')}</h2>
             <p className="font-semibold">{o.shipName}</p>
             <p className="text-sm">{o.shipPhone}</p>
+            {scores && (
+              <p className="text-sm">
+                <CourierScore score={scores[o.shipPhone]!} t={t} />
+              </p>
+            )}
             <p className="text-sm text-muted">
               {o.shipAddress}, {o.shipArea}, {o.shipDistrict}
             </p>

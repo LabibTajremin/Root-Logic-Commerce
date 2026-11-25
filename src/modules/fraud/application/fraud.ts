@@ -1,3 +1,4 @@
+import { normalizeBdPhone } from '@/modules/customers'
 import { DomainError, validate } from '@/modules/shared'
 import {
   blockInput,
@@ -5,6 +6,11 @@ import {
   type BlockInput,
   type BlockKind,
   type FraudRules,
+  noHistory,
+  scoreAction,
+  successPct,
+  type CourierHistory,
+  type ScoreRule,
 } from '../domain/fraud'
 
 export type Client = { phone: string; ip: string; deviceId: string }
@@ -22,6 +28,8 @@ export type FraudRepo = {
   hasDuplicate(storeId: string, phone: string, productIds: string[], since: Date): Promise<boolean>
   logAttempt(storeId: string, a: Client & { reason: AttemptReason }): Promise<void>
   attempts(storeId: string, limit: number): Promise<Attempt[]>
+  /** D2 (FraudCheckPort, own-history provider): finished courier deliveries per phone. */
+  courierHistory(storeId: string, phones: string[]): Promise<Record<string, CourierHistory>>
   /** D5: phones with the most cancelled / returned orders. */
   riskyPhones(
     storeId: string,
@@ -43,6 +51,22 @@ export const createFraud = ({
     throw new DomainError(`order.${reason}`)
   }
   return {
+    /** D2: each phone's courier record and success % (for order rows and the order page). */
+    async scores(storeId: string, phones: string[]) {
+      const h = await repo.courierHistory(storeId, [...new Set(phones)])
+      return Object.fromEntries(
+        phones.map((p) => {
+          const x = h[p] ?? noHistory
+          return [p, { ...x, pct: successPct(x) }]
+        }),
+      )
+    },
+    /** D2 at checkout: what the shop's score rule says for this phone (null = nothing). */
+    async scoreCheck(storeId: string, phone: string, rule: ScoreRule) {
+      const p = normalizeBdPhone(phone)
+      if (rule.minPct === 0 || !p) return null
+      return scoreAction((await repo.courierHistory(storeId, [p]))[p] ?? noHistory, rule)
+    },
     block: async (storeId: string, input: BlockInput) =>
       repo.addBlock(storeId, validate(blockInput, input)),
     unblock: (storeId: string, id: string) => repo.removeBlock(storeId, id),

@@ -1210,5 +1210,14 @@
   "error.scan.wrong_courier": "এই পার্সেলটি অন্য কুরিয়ারের।",
   "error.scan.not_outgoing": "এই পার্সেল ডেলিভারি হয়েছে বা ফেরত এসেছে — আবার পাঠানো যাবে না।",
   "error.scan.not_returning": "এই পার্সেল ফেরত আসছে না। শুধু ফেরত আসা পার্সেল গ্রহণ করা যায়।",
-  "error.scan.duplicate": "এই সেশনে আগেই স্ক্যান হয়েছে।"
+  "error.scan.duplicate": "এই সেশনে আগেই স্ক্যান হয়েছে।",
+  "fraud.score": "কুরিয়ার স্কোর নিয়ম",
+  "fraud.score_minPct": "এই সফলতা %-এর নিচে হলে (০ = বন্ধ)",
+  "fraud.score_minOrders": "অন্তত এতগুলো ডেলিভারি শেষ হলে",
+  "fraud.score_action": "তখন",
+  "fraud.score_hold": "অর্ডার হোল্ডে রাখুন",
+  "fraud.score_otp": "SMS কোড চান",
+  "fraud.scoreLocked": "কুরিয়ার স্কোর: প্রতিটি কাস্টমারের ডেলিভারি বনাম ফেরতের হিসাব দেখুন ও ব্যবস্থা নিন। প্রিমিয়াম ফিচার।",
+  "fraud.scoreNone": "কুরিয়ার স্কোর: এখনো কোনো ডেলিভারি নেই",
+  "fraud.scoreLine": "কুরিয়ার স্কোর {{pct}}% · {{total}}টির মধ্যে {{delivered}}টি ডেলিভারি"
 }

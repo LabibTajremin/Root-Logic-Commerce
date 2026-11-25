@@ -31,3 +31,19 @@ export type FraudRules = {
 
 export const attemptReasons = ['blocked', 'too_many', 'duplicate'] as const
 export type AttemptReason = (typeof attemptReasons)[number]
+
+/** D2: a phone's finished courier deliveries (cancellations before shipping don't count). */
+export type CourierHistory = { total: number; delivered: number; returned: number }
+export const noHistory: CourierHistory = { total: 0, delivered: 0, returned: 0 }
+
+export const successPct = (h: CourierHistory) =>
+  h.total === 0 ? null : Math.round((h.delivered / h.total) * 100)
+
+/** D2: below `minPct` (0 = off) with at least `minOrders` finished, hold the order or ask for a code. */
+export type ScoreRule = { minPct: number; minOrders: number; action: 'hold' | 'otp' }
+
+export const scoreAction = (h: CourierHistory, r: ScoreRule) =>
+  r.minPct > 0 && h.total >= r.minOrders && (successPct(h) ?? 100) < r.minPct ? r.action : null
+
+/** D2: under this success % a phone's record is shown as a warning. */
+export const riskyScore = (pct: number | null) => pct !== null && pct < 60
