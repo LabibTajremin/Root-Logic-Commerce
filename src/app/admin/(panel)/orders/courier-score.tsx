@@ -12,7 +12,8 @@ export const CourierScore = ({
 }) => (
   <span
     data-testid="courier-score"
-    className={score.pct !== null && score.pct < 60 ? 'font-semibold text-danger' : ''}
+    data-risky={riskyScore(score.pct)}
+    className="data-[risky=true]:font-semibold data-[risky=true]:text-danger"
   >
     {score.pct === null
       ? t('fraud.scoreNone')
