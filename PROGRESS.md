@@ -1,5 +1,5 @@
 IN_PROGRESS: Phase 14 (Courier) — spec docs/BUILD_SPEC.md
-Now: Phase 14 Courier — E1 courier accounts + send (Steadfast/Pathao/RedX, keys sealed, default account, single + bulk send, COD = due) and E2 status sync (per-account webhook link + cron poll → order status; parcel + raw status on order rows) done, CI green 4a7e7d4 (https://github.com/LabibTajremin/Root-Logic-Commerce/actions/runs/45672014960). NEXT: E3 courier report (per courier sent/on the way/delivered/returned/success %/avg days; date + product filters) and E5 reconciliation (charge + COD collected per parcel, payout tracking, courier cost on dashboard) → E4 parcel scan (hand-over + returns sessions, receipt, report) → D2 courier score (FraudCheckPort) → close Phase 14.
+Now: Phase 14 Courier — E1/E2 (CI green 4a7e7d4) and E3 courier report + E5 payouts/courier cost (CI green 5c20e21) done. NEXT: E4 parcel scan (hand-over session: courier, rider, scan box barcodes → printable hand-over receipt; returns scan → RETURN_RECEIVED; what came back / what did not report) → D2 courier score (FraudCheckPort: success % per phone on rows + drawer, optional hold/OTP threshold) → close Phase 14.
 
 ## Owner requests queued for J1 (design editor) — 2026-11-21
 - DONE: background sliders (cream→white, warm↔cool, midnight→black).
