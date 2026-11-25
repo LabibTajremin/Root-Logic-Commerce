@@ -250,10 +250,15 @@ test('cart and checkout edge cases', async ({ page, a11y }) => {
   await fillCheckout(page)
   await page.getByRole('button', { name: 'Place order' }).click()
   await alert(page, /Not enough stock/)
-  // A tampered payload gets a friendly retry hint, never a 500.
-  await page.locator('input[name="items"]').evaluate((e: HTMLInputElement) => (e.value = 'nope'))
-  await page.getByRole('button', { name: 'Place order' }).click()
-  await alert(page, 'Something went wrong. Please try again.')
+  // A tampered payload gets a friendly retry hint, never a 500. React may re-render the hidden
+  // field from its state before the click, so tamper again until the tampered value is sent.
+  await expect(async () => {
+    await page.locator('input[name="items"]').evaluate((e: HTMLInputElement) => (e.value = 'nope'))
+    await page.getByRole('button', { name: 'Place order' }).click()
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Something went wrong. Please try again.' }),
+    ).toBeVisible({ timeout: 2000 })
+  }).toPass()
   await page.evaluate(() => {
     const lines = JSON.parse(localStorage.getItem('rlc-cart')!) as { productId: string }[]
     lines[0]!.productId = '00000000-0000-4000-8000-000000000000'

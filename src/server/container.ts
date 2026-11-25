@@ -153,6 +153,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     box: secrets,
     orders,
     token: () => randomBytes(24).toString('base64url'),
+    now: () => new Date(),
   })
   return {
     bus,

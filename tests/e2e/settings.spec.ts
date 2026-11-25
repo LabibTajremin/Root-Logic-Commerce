@@ -2013,6 +2013,11 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
     404,
   )
   const post = (data: unknown) => request.post(hook, { data })
+  expect(
+    await (
+      await request.post(hook, { data: 'not json', headers: { 'content-type': 'text/plain' } })
+    ).json(),
+  ).toEqual({ applied: false })
   expect(await (await post({ consignment_id: 'LOG-0', status: 'delivered' })).json()).toEqual({
     applied: false,
   })

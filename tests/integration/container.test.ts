@@ -23,6 +23,14 @@ describe('container', () => {
     expect(cat.slug).toMatch(/^p-[0-9a-f]{6}$/)
     expect(await c.plans.has(store, 'seoPro')).toBe(true)
     expect(await c.stores.findBySlug('shop')).toMatchObject({ id: store })
+    // E1/E2: courier keys are sealed with the settings key; the webhook link gets a random token.
+    await c.courier.addAccount(store, {
+      provider: 'redx',
+      label: 'Main',
+      credentials: { token: 'redx-token' },
+    })
+    expect((await c.courier.listAccounts(store))[0]!.webhookToken).toMatch(/^[\w-]{32}$/)
+    expect(await c.courier.sync()).toEqual({ checked: 0, failed: 0 })
     c.bus.on('order.placed', () => {
       throw new Error('mail down')
     })

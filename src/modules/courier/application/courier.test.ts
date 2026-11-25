@@ -180,7 +180,7 @@ describe('courier (E1, E2)', () => {
     })
     await t.courier.send('s1', 'o1', null, null)
     t.changes.length = 0
-    await expect(t.courier.webhook('nope', {})).rejects.toThrow('courier.unknown_hook')
+    expect(await t.courier.webhook('nope', {})).toBeNull()
     expect(await t.courier.webhook('tok', { notification_type: 'x' })).toBe(false)
     expect(await t.courier.webhook('tok', { consignment_id: 'zz', status: 'hold' })).toBe(false)
     // Hold, then delivered with the charge the courier billed.

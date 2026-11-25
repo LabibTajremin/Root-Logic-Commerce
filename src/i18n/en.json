@@ -1158,6 +1158,5 @@
   "error.courier.no_account": "Add a courier account first.",
   "error.courier.account_not_found": "That courier account was removed.",
   "error.courier.refused": "The courier refused the parcel. Check the account keys and the address, then try again.",
-  "error.courier.unknown_hook": "Unknown courier link.",
   "courier.sendSelected": "Send to courier"
 }

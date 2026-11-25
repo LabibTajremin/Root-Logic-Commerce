@@ -97,7 +97,7 @@ type Deps = {
     ): Promise<void>
   }
   token: () => string
-  now?: () => Date
+  now: () => Date
 }
 
 const names: Record<CourierProvider, string> = {
@@ -106,7 +106,7 @@ const names: Record<CourierProvider, string> = {
   redx: 'RedX',
 }
 
-export const createCourier = ({ repo, api, box, orders, token, now = () => new Date() }: Deps) => {
+export const createCourier = ({ repo, api, box, orders, token, now }: Deps) => {
   const apiFor = async (storeId: string, accountId: string) => {
     const a = await repo.sealed(storeId, accountId)
     if (!a) throw new DomainError('courier.account_not_found')
@@ -190,10 +190,10 @@ export const createCourier = ({ repo, api, box, orders, token, now = () => new D
       return s
     },
 
-    /** E2: a courier's webhook, addressed by the account's secret token. */
+    /** E2: a courier's webhook, addressed by the account's secret token (null = no such link). */
     async webhook(token: string, body: unknown) {
       const a = await repo.accountByToken(token)
-      if (!a) throw new DomainError('courier.unknown_hook')
+      if (!a) return null
       const u = readWebhook(a.provider, body)
       const s = u && (await repo.shipmentByRef(a.id, u.ref))
       if (!u || !s) return false

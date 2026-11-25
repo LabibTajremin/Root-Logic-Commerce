@@ -1158,6 +1158,5 @@
   "error.courier.no_account": "আগে একটি কুরিয়ার অ্যাকাউন্ট যোগ করুন।",
   "error.courier.account_not_found": "এই কুরিয়ার অ্যাকাউন্টটি সরানো হয়েছে।",
   "error.courier.refused": "কুরিয়ার পার্সেলটি নেয়নি। অ্যাকাউন্টের কী আর ঠিকানা দেখে আবার চেষ্টা করুন।",
-  "error.courier.unknown_hook": "অচেনা কুরিয়ার লিংক।",
   "courier.sendSelected": "কুরিয়ারে পাঠান"
 }

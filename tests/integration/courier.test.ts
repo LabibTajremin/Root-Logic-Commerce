@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CourierRepo } from '@/modules/courier'
 import { createCourierApis } from '@/infrastructure/courier/couriers'
 import { createCourierRepo } from '@/infrastructure/db/repositories/courier-repo'
+import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
 import { courierEvents, courierShipments, customers, orders } from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
@@ -100,6 +101,12 @@ describe('courier repository (E1, E2)', () => {
     await expect(repo.addShipment(store, { ...base, orderId: o1, ref: '78' })).rejects.toThrow()
     await repo.addShipment(store, { ...base, orderId: o2, ref: '79', state: 'delivered' })
     expect((await repo.shipmentForOrder(store, o1))!.ref).toBe('77')
+    // E2: order rows carry the parcel and the courier's own status word.
+    const { rows } = await createOrdersRepo(db).list(store, {})
+    expect(rows.map((r) => r.parcel)).toEqual([
+      { provider: 'steadfast', tracking: 'SF77', rawStatus: 'pending' },
+      { provider: 'steadfast', tracking: 'SF77', rawStatus: 'pending' },
+    ])
     expect(await repo.shipmentForOrder(other, o1)).toBeNull()
     expect((await repo.shipmentByRef(acc, '77'))!.id).toBe(s.id)
     expect(await repo.shipmentByRef(acc, 'zz')).toBeNull()
