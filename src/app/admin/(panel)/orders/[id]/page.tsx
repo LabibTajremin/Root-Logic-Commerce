@@ -7,6 +7,7 @@ import { ActionForm } from '@/ui/action-form'
 import { Icon } from '@/ui/icon'
 import { Badge, Card } from '@/ui/primitives'
 import { adminContext } from '../../context'
+import { CourierCard } from './courier-card'
 import { changeStatus, editShipping, recordReturn, restoreOrder, trashOrder } from '../actions'
 import { addBlock } from '../../fraud/actions'
 import { TONE } from '../tone'
@@ -49,6 +50,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       </div>
       <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
         <div className="flex flex-col gap-5">
+          <CourierCard order={o} />
           {nextStatuses(o.status).length > 0 && (
             <Card className="flex flex-col gap-3">
               {o.status === 'PENDING' && (

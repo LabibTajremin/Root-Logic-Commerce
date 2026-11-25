@@ -169,6 +169,13 @@
       "when": 1795495370610,
       "tag": "0023_fraud",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795609993441,
+      "tag": "0024_courier",
+      "breakpoints": true
     }
   ]
 }

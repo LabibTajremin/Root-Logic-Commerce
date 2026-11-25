@@ -61,12 +61,12 @@ export async function recordReturn(_: ActionState, form: FormData) {
   })
 }
 
-/** F4: the ticked orders (ids join the form from each row) — print, change status or trash. */
+/** F4: the ticked orders (ids join the form from each row) — print, status, courier or trash. */
 export async function bulkOrders(_: ActionState, form: FormData) {
   const ids = form.getAll('ids').map(String)
   const intent = String(form.get('intent'))
   const to = String(form.get('to')) as OrderStatus
-  return act('orders.manage', async ({ orders, store, actor }) => {
+  return act('orders.manage', async ({ orders, courier, store, actor }) => {
     if (intent === 'print')
       return `/admin/orders/print?${new URLSearchParams(ids.map((id) => ['ids', id]))}`
     let failed = 0
@@ -74,7 +74,10 @@ export async function bulkOrders(_: ActionState, form: FormData) {
       try {
         await (intent === 'trash'
           ? orders.trash(store.id, id)
-          : orders.changeStatus(store.id, id, to, actor!.id))
+          : intent === 'courier'
+            ? // E1: each ticked order goes to the default courier account.
+              courier.send(store.id, id, null, actor!.id)
+            : orders.changeStatus(store.id, id, to, actor!.id))
       } catch {
         failed++
       }

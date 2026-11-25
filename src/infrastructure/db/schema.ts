@@ -1,4 +1,5 @@
 import type { OrderSource } from '@/modules/orders'
+import type { CourierProvider, ParcelState } from '@/modules/courier'
 import {
   type AnyPgColumn,
   bigint,
@@ -728,4 +729,65 @@ export const dailyStats = pgTable(
     cost: bigint({ mode: 'number' }).notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.storeId, t.date] })],
+)
+
+/** E1: a shop's merchant account with a courier; keys are sealed (AES-GCM) with SETTINGS_KEY. */
+export const courierAccounts = pgTable(
+  'courier_accounts',
+  {
+    id: id(),
+    storeId: storeId(),
+    provider: text().$type<CourierProvider>().notNull(),
+    label: text().notNull(),
+    credentials: text().notNull(),
+    // E2: the courier calls /api/courier/hook/<token>; the token is the webhook's secret.
+    webhookToken: text().notNull().unique(),
+    isDefault: boolean().notNull().default(false),
+    createdAt: createdAt(),
+  },
+  (t) => [index('courier_accounts_store_idx').on(t.storeId)],
+)
+
+/** E1/E2: one parcel per order, with the courier's reference and latest status. */
+export const courierShipments = pgTable(
+  'courier_shipments',
+  {
+    id: id(),
+    storeId: storeId(),
+    orderId: uuid()
+      .notNull()
+      .unique()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    accountId: uuid().references(() => courierAccounts.id, { onDelete: 'set null' }),
+    provider: text().$type<CourierProvider>().notNull(),
+    ref: text().notNull(),
+    tracking: text().notNull(),
+    cod: bigint({ mode: 'number' }).notNull(),
+    charge: bigint({ mode: 'number' }),
+    rawStatus: text().notNull(),
+    state: text().$type<ParcelState>().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index('courier_shipments_account_ref_idx').on(t.accountId, t.ref),
+    index('courier_shipments_state_updated_idx').on(t.state, t.updatedAt),
+  ],
+)
+
+/** E2: every status a courier reported, raw payload kept for support questions. */
+export const courierEvents = pgTable(
+  'courier_events',
+  {
+    id: id(),
+    storeId: storeId(),
+    shipmentId: uuid()
+      .notNull()
+      .references(() => courierShipments.id, { onDelete: 'cascade' }),
+    rawStatus: text().notNull(),
+    state: text().$type<ParcelState>().notNull(),
+    payload: jsonb().$type<unknown>(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('courier_events_shipment_idx').on(t.shipmentId)],
 )

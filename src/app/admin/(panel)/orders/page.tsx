@@ -21,8 +21,11 @@ type Search = Promise<{ status?: string; q?: string; source?: string; trash?: st
 
 export default async function OrdersPage({ searchParams }: { searchParams: Search }) {
   const { status, q, source, trash } = await searchParams
-  const { orders, store, t, money } = await adminContext('orders.manage')
-  const { business } = await currentSettings()
+  const { orders, features, store, t, money } = await adminContext('orders.manage')
+  const [{ business }, courierOn] = await Promise.all([
+    currentSettings(),
+    features.isOn(store.id, 'courier'),
+  ])
   const active = orderStatuses.find((s) => s === status) as OrderStatus | undefined
   const from = orderSources.find((s) => s === source) as OrderSource | undefined
   const { rows, total } = await orders.listOrders(store.id, {
@@ -152,6 +155,15 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
             >
               {t('orders.bulkApply')}
             </button>
+            {courierOn && (
+              <button
+                name="intent"
+                value="courier"
+                className="min-h-11 rounded-control border border-line px-4 text-sm font-semibold"
+              >
+                {t('courier.sendSelected')}
+              </button>
+            )}
             <button
               name="intent"
               value="trash"
@@ -219,6 +231,11 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
                     {t('order.delivery')} {money(o.deliveryCharge)}
                   </span>
                   <Badge tone="neutral">{t(`payment.${o.paymentStatus}`)}</Badge>
+                  {o.parcel && (
+                    <span data-testid="order-parcel">
+                      {t(`courier.${o.parcel.provider}`)} {o.parcel.tracking} · {o.parcel.rawStatus}
+                    </span>
+                  )}
                   <span className="italic empty:hidden">{o.note}</span>
                   <a href={`tel:${o.shipPhone}`} className="underline">
                     {t('order.call')}

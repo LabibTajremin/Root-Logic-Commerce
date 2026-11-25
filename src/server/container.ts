@@ -7,6 +7,9 @@ import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createFraud } from '@/modules/fraud'
+import { createCourier } from '@/modules/courier'
+import { createCourierApis } from '@/infrastructure/courier/couriers'
+import { createCourierRepo } from '@/infrastructure/db/repositories/courier-repo'
 import { createDrafts, createOrders, type OrderEvents } from '@/modules/orders'
 import { createNotifications } from '@/modules/notifications'
 import { createActivity } from '@/modules/activity'
@@ -58,6 +61,7 @@ type Deps = {
     | 'store'
     | 'settingsKey'
     | 'messagesTransport'
+    | 'courierTransport'
     | 'authSecret'
   > & { notifyLogFile?: string }
   db: Db
@@ -143,8 +147,16 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
   })
   for (const s of ['placed', 'confirmed', 'delivered', 'cancelled', 'returned'] as const)
     bus.on(`order.${s}`, (e) => insights.onOrderEvent(s, e))
+  const courier = createCourier({
+    repo: createCourierRepo(db),
+    api: createCourierApis({ mode: config.courierTransport }),
+    box: secrets,
+    orders,
+    token: () => randomBytes(24).toString('base64url'),
+  })
   return {
     bus,
+    courier,
     messaging,
     insights,
     promotions: createPromotions({ repo: createBannersRepo(db) }),

@@ -74,6 +74,8 @@ export type OrderRow = OrderSummary & {
   paymentStatus: string
   note: string | null
   lines: { name: string; variantLabel: string | null; quantity: number; sku: string | null }[]
+  /** E2: the parcel once sent; the status is the courier's own word. */
+  parcel: { provider: string; tracking: string; rawStatus: string } | null
 }
 export type ShippingEdit = {
   name: string

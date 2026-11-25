@@ -1922,3 +1922,125 @@ test('layout switch: keep both, show demo and bring mine back, remove demo, star
   await expect(page.getByRole('link', { name: 'Mustard Oil 1 L' }).first()).toBeVisible()
   await useLayout(page, 'general', 'Switch, keep mine')
 })
+
+test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', async ({
+  page,
+  request,
+  a11y,
+}) => {
+  const name = `Parcel ${uid()}`
+  const phone = `013${Date.now().toString().slice(-8)}`
+  await signedIn(page)
+  await page.goto('/admin/couriers')
+  await expect(page.getByText(/A premium feature/)).toBeVisible()
+
+  // Root Logic Lab unlocks couriers; the module then starts switched off.
+  await page.context().clearCookies()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-courier').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-courier')).toContainText('Included')
+  await page.goto('/admin/features')
+  await page.getByTestId('module-courier').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('module-courier')).toContainText('On')
+
+  await createProduct(page, { name, price: '500', stock: '9' })
+  const nos: string[] = []
+  for (let n = 0; n < 3; n++) {
+    await page.goto(`/p/${slug(name)}`)
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Add to cart' }).click()
+    await page.goto('/checkout')
+    await fillCheckout(page, phone)
+    await page.getByRole('button', { name: 'Place order' }).click()
+    await page.waitForURL(/\/order\/\d+$/)
+    nos.push((await page.getByTestId('order-no').textContent())!.replace('#', ''))
+  }
+  const open = async (no: string) => {
+    await page.goto(`/admin/orders?q=${no}`)
+    await page.getByRole('link', { name: new RegExp(`#${no}`) }).click()
+    await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/)
+  }
+  // A pending order can't go yet; once confirmed, the page asks for a courier account.
+  await open(nos[0]!)
+  await expect(page.getByRole('button', { name: 'Send to courier' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Confirm order' }).click()
+  await expect(page.getByText('No courier account yet.')).toBeVisible()
+  const order = page.url()
+  await page.getByRole('link', { name: 'Add one in Couriers' }).click()
+
+  await page.locator('#steadfast-label').fill('Main')
+  await page.locator('#steadfast-apiKey').fill('sf-key')
+  await page.locator('#steadfast-secretKey').fill('sf-secret')
+  await page.getByRole('button', { name: 'Save account' }).first().click()
+  const accounts = page.getByTestId('courier-accounts')
+  await expect(accounts.getByRole('listitem').filter({ hasText: 'Main' })).toContainText('Default')
+  await page.locator('#pathao-label').fill('Outside Dhaka')
+  for (const f of ['clientId', 'clientSecret', 'username', 'password'])
+    await page.locator(`#pathao-${f}`).fill(`p-${f}`)
+  await page.locator('#pathao-storeId').fill('store-one')
+  await page.getByRole('button', { name: 'Save account' }).nth(1).click()
+  await alert(page, 'Please check the highlighted fields.')
+  await page.locator('#pathao-storeId').fill('1234')
+  await page.getByRole('button', { name: 'Save account' }).nth(1).click()
+  await expect(accounts.getByRole('listitem')).toHaveCount(2)
+  await page.getByRole('button', { name: 'Make default: Outside Dhaka' }).click()
+  await expect(accounts.getByRole('listitem').filter({ hasText: 'Outside Dhaka' })).toContainText(
+    'Default',
+  )
+  await page.getByRole('button', { name: 'Make default: Main' }).click()
+  await expect(accounts.getByRole('listitem').filter({ hasText: 'Main' })).toContainText('Default')
+  await a11y()
+  const hook = await accounts
+    .getByRole('listitem')
+    .filter({ hasText: 'Main' })
+    .getByRole('textbox')
+    .inputValue()
+  expect(hook).toMatch(/^http:\/\/127\.0\.0\.1:3100\/api\/courier\/hook\/[\w-]{32}$/)
+
+  // Sent with the default account: the order ships and shows the parcel.
+  await page.goto(order)
+  await expect(page.getByLabel('Send with')).toHaveValue(/.+/)
+  await page.getByRole('button', { name: 'Send to courier' }).click()
+  const parcel = page.getByTestId('shipment')
+  await expect(parcel).toContainText(`Tracking: LOG-${nos[0]}`)
+  await expect(parcel).toContainText('pending')
+  await expect(page.getByText('Shipped', { exact: true }).first()).toBeVisible()
+  await a11y()
+
+  // The courier's webhook moves it on; unknown links and other parcels change nothing.
+  expect((await request.post(hook.replace(/[\w-]+$/, 'not-a-token'), { data: {} })).status()).toBe(
+    404,
+  )
+  const post = (data: unknown) => request.post(hook, { data })
+  expect(await (await post({ consignment_id: 'LOG-0', status: 'delivered' })).json()).toEqual({
+    applied: false,
+  })
+  expect(await (await post({ consignment_id: `LOG-${nos[0]}`, status: 'hold' })).json()).toEqual({
+    applied: true,
+  })
+  await post({ consignment_id: `LOG-${nos[0]}`, status: 'delivered', delivery_charge: 60 })
+  await page.reload()
+  await expect(parcel).toContainText('delivered')
+  await expect(parcel).toContainText('Courier charge: ৳60')
+  await expect(page.getByText('Delivered', { exact: true }).first()).toBeVisible()
+  const cron = await request.get('/api/cron/outbox', {
+    headers: { authorization: `Bearer ${e2eEnv.CRON_SECRET}` },
+  })
+  expect(cron.ok()).toBe(true)
+
+  // Bulk: the confirmed one goes, the pending one is refused.
+  await open(nos[1]!)
+  await page.getByRole('button', { name: 'Confirm order' }).click()
+  await expect(page.getByRole('button', { name: 'Send to courier' })).toBeVisible()
+  await page.goto(`/admin/orders?q=${phone}`)
+  for (const no of nos.slice(1)) await page.getByLabel(`Select order #${no}`).check()
+  await page.getByRole('button', { name: 'Send to courier' }).click()
+  await alert(page, 'Some ticked orders couldn’t be changed')
+  await expect(page.getByTestId('order-parcel')).toHaveCount(2)
+  await expect(page.getByTestId('order-parcel').first()).toContainText('Steadfast LOG-')
+
+  await page.goto('/admin/couriers')
+  await page.getByRole('button', { name: 'Remove Outside Dhaka' }).click()
+  await expect(accounts.getByRole('listitem')).toHaveCount(1)
+})

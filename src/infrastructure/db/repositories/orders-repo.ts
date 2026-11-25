@@ -23,13 +23,14 @@ import type { Db } from '../client'
 import {
   couponRedemptions,
   coupons,
+  courierShipments,
   customers,
   orderEvents,
   orderItems,
   orderReturns,
   orders,
-  products,
   productVariants,
+  products,
   stores,
 } from '../schema'
 import { applyStock } from './stock-repo'
@@ -236,8 +237,13 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           deliveryCharge: orders.deliveryCharge,
           paymentStatus: orders.paymentStatus,
           note: orders.note,
+          // E2: the parcel and the courier's own status word, when the order has been sent.
+          parcelProvider: courierShipments.provider,
+          parcelTracking: courierShipments.tracking,
+          parcelStatus: courierShipments.rawStatus,
         })
         .from(orders)
+        .leftJoin(courierShipments, eq(courierShipments.orderId, orders.id))
         .where(cond)
         .orderBy(desc(orders.createdAt), desc(orders.orderNo))
         .limit(f.limit ?? 50)
@@ -294,10 +300,15 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
       const dupOf = new Map<string, (typeof dups)[number]>()
       for (const d of dups) if (!dupOf.has(d.id)) dupOf.set(d.id, d)
       return {
-        rows: rows.map((r) => {
+        rows: rows.map(({ parcelProvider, parcelTracking, parcelStatus, ...r }) => {
           const d = dupOf.get(r.id)
           return {
             ...r,
+            parcel: parcelProvider && {
+              provider: parcelProvider,
+              tracking: parcelTracking!,
+              rawStatus: parcelStatus!,
+            },
             duplicateOf: d
               ? { orderNo: d.orderNo, status: d.status, createdAt: d.createdAt }
               : null,

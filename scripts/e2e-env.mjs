@@ -12,6 +12,7 @@ export const e2eEnv = {
   NOTIFY_LOG_FILE: '.e2e/notify.log',
   MEDIA_DIR: '.e2e/media',
   MESSAGES_TRANSPORT: 'log',
+  COURIER_TRANSPORT: 'log',
   SETTINGS_KEY: 'e2e-settings-key-e2e-settings-key-00',
   CRON_SECRET: 'e2e-cron-secret-0123456789',
 }

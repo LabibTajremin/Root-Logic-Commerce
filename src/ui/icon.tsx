@@ -32,6 +32,7 @@ const PATHS = {
   upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
   alert: 'M12 3l10 18H2zM12 10v5M12 18v.5',
   logout: 'M10 4H5v16h5M15 8l4 4-4 4M19 12H9',
+  truck: 'M3 6h11v10H3zM14 9h4l3 3v4h-7M7 18a2 2 0 1 0 0-.01M17 18a2 2 0 1 0 0-.01',
 } as const
 
 export type IconName = keyof typeof PATHS

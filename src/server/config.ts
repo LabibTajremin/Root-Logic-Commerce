@@ -65,6 +65,8 @@ const envSchema = z.object({
   MEDIA_DIR: z.string().min(1).default('.media'),
   // 'log' writes messages to NOTIFY_LOG_FILE (or stdout) instead of sending them (dev/e2e).
   MESSAGES_TRANSPORT: z.enum(['live', 'log']).default('live'),
+  // 'log' gives parcels made-up references instead of calling the courier (dev/e2e).
+  COURIER_TRANSPORT: z.enum(['live', 'log']).default('live'),
   // Bearer token Vercel Cron (or any scheduler) sends to /api/cron/outbox.
   CRON_SECRET: z.string().min(16).optional(),
   // S3-compatible media storage (AWS S3, Cloudflare R2, MinIO) when STORAGE_DRIVER=s3.
@@ -126,6 +128,7 @@ export const loadConfig = (env: Record<string, string | undefined>, file: unknow
     // Complete whenever the driver is s3 (checked above).
     s3: s3 as S3Config,
     messagesTransport: e.data.MESSAGES_TRANSPORT,
+    courierTransport: e.data.COURIER_TRANSPORT,
     cronSecret: e.data.CRON_SECRET,
     hostingProfile: e.data.HOSTING_PROFILE,
     storeMode: e.data.STORE_MODE,
