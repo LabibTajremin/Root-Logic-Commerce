@@ -32,26 +32,28 @@ export const CameraScan = ({
     const Barcode = (window as unknown as { BarcodeDetector: DetectorClass }).BarcodeDetector
     const detector = new Barcode({ formats: ['code_128', 'qr_code', 'ean_13'] })
     let last = ''
-    let end = () => {}
-    void navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((s) => {
-      const v = video.current!
-      v.srcObject = s
-      void v.play()
-      const timer = setInterval(async () => {
-        const [code] = await detector.detect(v)
-        // The same box stays in view for a while: submit each code once.
-        if (!code || code.rawValue === last) return
-        last = code.rawValue
-        const field = document.getElementById(input) as HTMLInputElement
-        field.value = code.rawValue
-        field.form!.requestSubmit()
-      }, 400)
-      end = () => {
-        clearInterval(timer)
-        s.getTracks().forEach((t) => t.stop())
-      }
-    })
-    return () => end()
+    // Stopping waits for the camera to have started, then releases it.
+    const started = navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: 'environment' } })
+      .then((s) => {
+        const v = video.current!
+        v.srcObject = s
+        void v.play()
+        const timer = setInterval(async () => {
+          const [code] = await detector.detect(v)
+          // The same box stays in view for a while: submit each code once.
+          if (!code || code.rawValue === last) return
+          last = code.rawValue
+          const field = document.getElementById(input) as HTMLInputElement
+          field.value = code.rawValue
+          field.form!.requestSubmit()
+        }, 400)
+        return () => {
+          clearInterval(timer)
+          s.getTracks().forEach((t) => t.stop())
+        }
+      })
+    return () => void started.then((end) => end())
   }, [on, input])
   if (!supported) return null
   return (

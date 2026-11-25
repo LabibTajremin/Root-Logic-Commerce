@@ -2138,10 +2138,15 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
   await page.getByRole('button', { name: 'Start scanning' }).click()
   await page.waitForURL(/\/admin\/couriers\/scan\/[0-9a-f-]+$/)
   await expect(page.getByTestId('scan-outstanding')).toContainText('Still not back: 1')
+  // A full load hydrates the camera button from the server render (no camera there).
+  await page.reload()
   await page.getByRole('button', { name: 'Scan with camera' }).click()
   await expect(page.getByTestId('scan-items')).toContainText(`#${nos[1]}`)
   await expect(page.getByTestId('scan-outstanding')).toContainText('Still not back: 0')
   await page.getByRole('button', { name: 'Stop camera' }).click()
+  // Leaving within the app unmounts the scanner.
+  await page.getByRole('link', { name: 'Parcel scan' }).click()
+  await page.waitForURL(/\/admin\/couriers\/scan$/)
   test.info().annotations.push({ type: 'allow-status', description: '404' })
   for (const bad of ['not-a-session', '00000000-0000-4000-8000-000000000000'])
     expect((await page.goto(`/admin/couriers/scan/${bad}`))!.status()).toBe(404)
