@@ -200,3 +200,22 @@ export const amountsInput = z.object({
   collected: z.number().int().min(0),
   charge: z.number().int().min(0),
 })
+
+/** E4: a hand-over (parcels leave with the rider) or a returns session (parcels come back). */
+export const sessionKinds = ['handover', 'return'] as const
+export type SessionKind = (typeof sessionKinds)[number]
+
+export const sessionInput = z.object({
+  kind: z.enum(sessionKinds),
+  provider: z.enum(courierProviders),
+  riderName: z.string().trim().max(80).default(''),
+  riderPhone: z.string().trim().max(20).default(''),
+})
+export type SessionInput = z.input<typeof sessionInput>
+
+/** E4: what a scanned box says — the invoice barcode is `#<order no>`, else a courier tracking code. */
+export const scanCode = (code: string): { orderNo: number } | { tracking: string } | null => {
+  const c = code.trim()
+  if (/^#?\d{1,9}$/.test(c)) return { orderNo: Number(c.replace('#', '')) }
+  return c ? { tracking: c } : null
+}

@@ -9,6 +9,8 @@ import {
   orderStatusFor,
   parcelState,
   readWebhook,
+  scanCode,
+  sessionInput,
   showDays,
   showPct,
 } from './courier'
@@ -129,5 +131,21 @@ describe('courier report and payouts (E3, E5)', () => {
     expect(collectedOf({ state: 'partial', cod: 5000, codCollected: null })).toBe(0)
     expect(collectedOf({ state: 'partial', cod: 5000, codCollected: 3000 })).toBe(3000)
     expect(amountsInput.safeParse({ collected: -1, charge: 0 }).success).toBe(false)
+  })
+})
+
+describe('parcel scan (E4)', () => {
+  it('reads the invoice barcode, a bare order number or a tracking code', () => {
+    expect(scanCode('#1042')).toEqual({ orderNo: 1042 })
+    expect(scanCode(' 1042 ')).toEqual({ orderNo: 1042 })
+    expect(scanCode('SF77AB')).toEqual({ tracking: 'SF77AB' })
+    expect(scanCode('   ')).toBeNull()
+    expect(sessionInput.parse({ kind: 'return', provider: 'redx' })).toEqual({
+      kind: 'return',
+      provider: 'redx',
+      riderName: '',
+      riderPhone: '',
+    })
+    expect(sessionInput.safeParse({ kind: 'lost', provider: 'redx' }).success).toBe(false)
   })
 })

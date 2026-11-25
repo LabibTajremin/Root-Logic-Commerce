@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { CourierRepo } from '@/modules/courier'
 import { createCourierApis } from '@/infrastructure/courier/couriers'
@@ -211,6 +212,80 @@ describe('courier report and payouts (E3, E5)', () => {
     expect(await repo.markPaid(store, [a.id], now)).toBe(0)
     expect(await repo.markPaid(other, [b.id], now)).toBe(0)
     expect((await repo.unsettled(store)).map((r) => r.orderNo)).toEqual([2])
+  })
+})
+
+describe('parcel scan sessions (E4)', () => {
+  it('finds parcels by order number or tracking, scans each once, lists returns still out', async () => {
+    const acc = await repo.addAccount(store, {
+      provider: 'pathao',
+      label: 'Main',
+      sealed: 'enc:a',
+      webhookToken: 't1',
+    })
+    const o1 = await order(store, 7)
+    const o2 = await order(store, 8)
+    const s1 = await repo.addShipment(store, {
+      orderId: o1,
+      accountId: acc,
+      provider: 'pathao',
+      ref: 'DL7',
+      tracking: 'DL7',
+      cod: 106000,
+      charge: null,
+      rawStatus: 'Returned',
+      state: 'returning',
+    })
+    await repo.addShipment(store, {
+      orderId: o2,
+      accountId: acc,
+      provider: 'pathao',
+      ref: 'DL8',
+      tracking: 'DL8',
+      cod: 50000,
+      charge: null,
+      rawStatus: 'Delivered',
+      state: 'delivered',
+    })
+    await db.update(orders).set({ status: 'RETURNING' }).where(eq(orders.id, o1))
+    expect(await repo.findParcel(store, { orderNo: 7 })).toMatchObject({
+      id: s1.id,
+      orderNo: 7,
+      orderStatus: 'RETURNING',
+    })
+    expect(await repo.findParcel(store, { tracking: 'DL8' })).toMatchObject({ orderNo: 8 })
+    expect(await repo.findParcel(other, { orderNo: 7 })).toBeNull()
+    expect(await repo.findParcel(store, { tracking: 'nope' })).toBeNull()
+
+    const sid = await repo.createSession(store, {
+      kind: 'return',
+      provider: 'pathao',
+      riderName: 'Karim',
+      riderPhone: '01711111111',
+    })
+    expect(await repo.getSession(store, sid)).toMatchObject({ kind: 'return', riderName: 'Karim' })
+    expect(await repo.getSession(other, sid)).toBeNull()
+    expect((await repo.outstandingReturns(store, 'pathao')).map((r) => r.orderNo)).toEqual([7])
+    expect(await repo.outstandingReturns(store, 'redx')).toEqual([])
+    expect(await repo.addScan(store, sid, s1.id)).toBe(true)
+    expect(await repo.addScan(store, sid, s1.id)).toBe(false)
+    expect(await repo.sessionItems(store, sid)).toMatchObject([
+      { orderNo: 7, shipName: 'Rumana', tracking: 'DL7', cod: 106000 },
+    ])
+    expect(await repo.sessionItems(other, sid)).toEqual([])
+    const empty = await repo.createSession(store, {
+      kind: 'handover',
+      provider: 'pathao',
+      riderName: '',
+      riderPhone: '',
+    })
+    expect((await repo.listSessions(store, 10)).map((x) => [x.id, x.parcels]).sort()).toEqual(
+      [
+        [empty, 0],
+        [sid, 1],
+      ].sort(),
+    )
+    expect(await repo.listSessions(other, 10)).toEqual([])
   })
 })
 

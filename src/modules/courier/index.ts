@@ -8,7 +8,10 @@ export {
   type Created,
   type NewShipment,
   type Parcel,
+  type FoundParcel,
   type ReportFilter,
+  type ScannedParcel,
+  type ScanSession,
   type Unsettled,
   type Shipment,
 } from './application/courier'
@@ -25,6 +28,9 @@ export {
   parcelState,
   parcelStates,
   readWebhook,
+  scanCode,
+  sessionInput,
+  sessionKinds,
   showDays,
   showPct,
   type AccountInput,
@@ -33,4 +39,6 @@ export {
   type Credentials,
   type ParcelFact,
   type ParcelState,
+  type SessionInput,
+  type SessionKind,
 } from './domain/courier'

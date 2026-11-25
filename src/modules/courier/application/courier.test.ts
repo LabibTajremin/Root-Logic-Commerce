@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { OrderDetail, OrderStatus } from '@/modules/orders'
-import { createCourier, type CourierRepo, type Shipment } from './courier'
+import { createCourier, type CourierRepo, type ScanSession, type Shipment } from './courier'
 
 const order = (o: Partial<OrderDetail> = {}) =>
   ({
@@ -20,6 +20,8 @@ const order = (o: Partial<OrderDetail> = {}) =>
 
 const setup = (o: OrderDetail | null = order()) => {
   const shipments: Shipment[] = []
+  const sessions: ScanSession[] = []
+  const scans = new Set<string>()
   const accounts: { id: string; provider: 'steadfast'; sealed: string; isDefault: boolean }[] = []
   let current = o
   const repo: CourierRepo = {
@@ -66,6 +68,26 @@ const setup = (o: OrderDetail | null = order()) => {
     setAmounts: vi.fn(async () => {}),
     markPaid: vi.fn(async (_s, ids) => ids.length),
     chargesSince: async () => 6000,
+    createSession: async (_s, x) => {
+      sessions.push({ ...x, id: `ses${sessions.length + 1}`, createdAt: new Date() })
+      return `ses${sessions.length}`
+    },
+    getSession: async (_s, id) => sessions.find((x) => x.id === id) ?? null,
+    listSessions: async () => sessions.map((x) => ({ ...x, parcels: scans.size })),
+    sessionItems: async () => [],
+    outstandingReturns: vi.fn(async () => []),
+    findParcel: async (_s, by) => {
+      const s = shipments.find((x) =>
+        'orderNo' in by ? by.orderNo === current?.orderNo : x.tracking === by.tracking,
+      )
+      return s && current ? { ...s, orderNo: current.orderNo, orderStatus: current.status } : null
+    },
+    addScan: async (_s, session, shipment) => {
+      const k = `${session}/${shipment}`
+      if (scans.has(k)) return false
+      scans.add(k)
+      return true
+    },
   }
   const api = {
     create: vi.fn(async () => ({ ref: '77', tracking: 'SF77', charge: 6000 })),
@@ -242,6 +264,58 @@ describe('courier (E1, E2)', () => {
     expect(await t.courier.markPaid('s1', ['sh1'])).toBe(1)
     expect(t.repo.markPaid).toHaveBeenCalledWith('s1', ['sh1'], new Date('2026-11-25T10:00:00Z'))
     expect(await t.courier.chargesSince('s1', new Date(0))).toBe(6000)
+  })
+
+  it('scans parcels out to the rider and back in from returns (E4)', async () => {
+    await t.courier.addAccount('s1', {
+      provider: 'steadfast',
+      label: 'Main',
+      credentials: { apiKey: 'k', secretKey: 's' },
+    })
+    await t.courier.send('s1', 'o1', null, null)
+    t.changes.length = 0
+    const out = await t.courier.startSession('s1', {
+      kind: 'handover',
+      provider: 'steadfast',
+      riderName: 'Karim',
+    })
+    const other = await t.courier.startSession('s1', { kind: 'handover', provider: 'redx' })
+    await expect(
+      t.courier.startSession('s1', { kind: 'x' as 'return', provider: 'redx' }),
+    ).rejects.toThrow('validation')
+    await expect(t.courier.scan('s1', 'nope', '#1042', null)).rejects.toThrow(
+      'scan.session_not_found',
+    )
+    await expect(t.courier.scan('s1', out, '  ', null)).rejects.toThrow('scan.unknown')
+    await expect(t.courier.scan('s1', out, 'ZZ9', null)).rejects.toThrow('scan.unknown')
+    await expect(t.courier.scan('s1', other, '#1042', null)).rejects.toThrow('scan.wrong_courier')
+    expect(await t.courier.scan('s1', out, 'SF77', 'u1')).toBe(1042)
+    await expect(t.courier.scan('s1', out, '#1042', 'u1')).rejects.toThrow('scan.duplicate')
+    expect(t.changes).toEqual([])
+    expect(await t.courier.session('s1', out)).toMatchObject({
+      kind: 'handover',
+      items: [],
+      outstanding: [],
+    })
+    expect(t.repo.outstandingReturns).not.toHaveBeenCalled()
+    expect(await t.courier.session('s1', 'nope')).toBeNull()
+    expect((await t.courier.listSessions('s1')).length).toBe(2)
+
+    // Returns: only parcels the courier is bringing back; scanning one receives it.
+    const back = await t.courier.startSession('s1', { kind: 'return', provider: 'steadfast' })
+    await expect(t.courier.scan('s1', back, '#1042', 'u1')).rejects.toThrow('scan.not_returning')
+    await t.courier.webhook('tok', { consignment_id: 77, status: 'cancelled' })
+    expect(await t.courier.scan('s1', back, '#1042', 'u1')).toBe(1042)
+    expect(t.changes.at(-1)).toEqual(['RETURN_RECEIVED', 'scan: back with the shop'])
+    await t.courier.session('s1', back)
+    expect(t.repo.outstandingReturns).toHaveBeenCalledWith('s1', 'steadfast')
+    // A parcel already back (final) can't go out again.
+    await expect(t.courier.scan('s1', out, '#1042', null)).rejects.toThrow()
+    const late = await t.courier.startSession('s1', { kind: 'handover', provider: 'steadfast' })
+    await expect(t.courier.scan('s1', late, '#1042', null)).rejects.toThrow('scan.not_outgoing')
+    t.set(order({ status: 'RETURN_MISSING' }))
+    const again = await t.courier.startSession('s1', { kind: 'return', provider: 'steadfast' })
+    expect(await t.courier.scan('s1', again, '#1042', null)).toBe(1042)
   })
 
   it('polls quiet parcels and counts the ones the courier could not answer', async () => {

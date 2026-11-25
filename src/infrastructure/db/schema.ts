@@ -1,5 +1,5 @@
 import type { OrderSource } from '@/modules/orders'
-import type { CourierProvider, ParcelState } from '@/modules/courier'
+import type { CourierProvider, ParcelState, SessionKind } from '@/modules/courier'
 import {
   type AnyPgColumn,
   bigint,
@@ -793,4 +793,36 @@ export const courierEvents = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('courier_events_shipment_idx').on(t.shipmentId)],
+)
+
+/** E4: a hand-over to a courier's rider, or a session receiving returned parcels. */
+export const parcelHandovers = pgTable(
+  'parcel_handovers',
+  {
+    id: id(),
+    storeId: storeId(),
+    kind: text().$type<SessionKind>().notNull(),
+    provider: text().$type<CourierProvider>().notNull(),
+    riderName: text().notNull().default(''),
+    riderPhone: text().notNull().default(''),
+    createdAt: createdAt(),
+  },
+  (t) => [index('parcel_handovers_store_idx').on(t.storeId, t.createdAt)],
+)
+
+/** E4: each parcel scanned in a session, once. */
+export const parcelHandoverItems = pgTable(
+  'parcel_handover_items',
+  {
+    id: id(),
+    storeId: storeId(),
+    handoverId: uuid()
+      .notNull()
+      .references(() => parcelHandovers.id, { onDelete: 'cascade' }),
+    shipmentId: uuid()
+      .notNull()
+      .references(() => courierShipments.id, { onDelete: 'cascade' }),
+    scannedAt: createdAt(),
+  },
+  (t) => [uniqueIndex('parcel_handover_items_uq').on(t.handoverId, t.shipmentId)],
 )

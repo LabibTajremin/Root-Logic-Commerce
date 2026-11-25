@@ -1,9 +1,12 @@
 import {
+  type SQL,
   and,
   asc,
-  getTableColumns,
+  count,
+  desc,
   eq,
   exists,
+  getTableColumns,
   gte,
   inArray,
   isNotNull,
@@ -12,11 +15,25 @@ import {
   lte,
   notInArray,
   sql,
-  type SQL,
 } from 'drizzle-orm'
-import { finalStates, type CourierRepo, type Shipment, type Unsettled } from '@/modules/courier'
+import {
+  finalStates,
+  type CourierRepo,
+  type FoundParcel,
+  type ScanSession,
+  type Shipment,
+  type Unsettled,
+} from '@/modules/courier'
 import type { Db } from '../client'
-import { courierAccounts, courierEvents, courierShipments, orderItems, orders } from '../schema'
+import {
+  courierAccounts,
+  courierEvents,
+  courierShipments,
+  orderItems,
+  orders,
+  parcelHandoverItems,
+  parcelHandovers,
+} from '../schema'
 
 const account = {
   id: courierAccounts.id,
@@ -25,6 +42,22 @@ const account = {
   isDefault: courierAccounts.isDefault,
   webhookToken: courierAccounts.webhookToken,
   createdAt: courierAccounts.createdAt,
+}
+
+const session = {
+  id: parcelHandovers.id,
+  kind: parcelHandovers.kind,
+  provider: parcelHandovers.provider,
+  riderName: parcelHandovers.riderName,
+  riderPhone: parcelHandovers.riderPhone,
+  createdAt: parcelHandovers.createdAt,
+}
+const scanned = {
+  orderId: orders.id,
+  orderNo: orders.orderNo,
+  shipName: orders.shipName,
+  tracking: courierShipments.tracking,
+  cod: courierShipments.cod,
 }
 
 const one = async <T>(rows: Promise<T[]>) => (await rows)[0] ?? null
@@ -207,5 +240,78 @@ export const createCourierRepo = (db: Db): CourierRepo => {
         .where(and(eq(courierShipments.storeId, storeId), gte(courierShipments.createdAt, since)))
       return r!.n
     },
+    async createSession(storeId, x) {
+      const [row] = await db
+        .insert(parcelHandovers)
+        .values({ ...x, storeId })
+        .returning({ id: parcelHandovers.id })
+      return row!.id
+    },
+    getSession: (storeId, id) =>
+      one(
+        db
+          .select(session)
+          .from(parcelHandovers)
+          .where(and(eq(parcelHandovers.storeId, storeId), eq(parcelHandovers.id, id))),
+      ) as Promise<ScanSession | null>,
+    listSessions: (storeId, limit) =>
+      db
+        .select({ ...session, parcels: count(parcelHandoverItems.id) })
+        .from(parcelHandovers)
+        .leftJoin(parcelHandoverItems, eq(parcelHandoverItems.handoverId, parcelHandovers.id))
+        .where(eq(parcelHandovers.storeId, storeId))
+        .groupBy(parcelHandovers.id)
+        .orderBy(desc(parcelHandovers.createdAt))
+        .limit(limit),
+    sessionItems: (storeId, id) =>
+      db
+        .select({ ...scanned, scannedAt: parcelHandoverItems.scannedAt })
+        .from(parcelHandoverItems)
+        .innerJoin(courierShipments, eq(courierShipments.id, parcelHandoverItems.shipmentId))
+        .innerJoin(orders, eq(orders.id, courierShipments.orderId))
+        .where(
+          and(eq(parcelHandoverItems.storeId, storeId), eq(parcelHandoverItems.handoverId, id)),
+        )
+        .orderBy(asc(parcelHandoverItems.scannedAt)),
+    findParcel: (storeId, by) =>
+      one(
+        db
+          .select({
+            ...getTableColumns(courierShipments),
+            orderNo: orders.orderNo,
+            orderStatus: orders.status,
+          })
+          .from(courierShipments)
+          .innerJoin(orders, eq(orders.id, courierShipments.orderId))
+          .where(
+            and(
+              eq(courierShipments.storeId, storeId),
+              'orderNo' in by
+                ? eq(orders.orderNo, by.orderNo)
+                : eq(courierShipments.tracking, by.tracking),
+            ),
+          ),
+      ) as Promise<FoundParcel | null>,
+    async addScan(storeId, sessionId, shipmentId) {
+      const added = await db
+        .insert(parcelHandoverItems)
+        .values({ storeId, handoverId: sessionId, shipmentId })
+        .onConflictDoNothing()
+        .returning({ id: parcelHandoverItems.id })
+      return added.length > 0
+    },
+    outstandingReturns: (storeId, provider) =>
+      db
+        .select({ ...scanned, scannedAt: courierShipments.updatedAt })
+        .from(courierShipments)
+        .innerJoin(orders, eq(orders.id, courierShipments.orderId))
+        .where(
+          and(
+            eq(courierShipments.storeId, storeId),
+            eq(courierShipments.provider, provider),
+            inArray(orders.status, ['RETURNING', 'RETURN_MISSING']),
+          ),
+        )
+        .orderBy(asc(orders.orderNo)),
   }
 }

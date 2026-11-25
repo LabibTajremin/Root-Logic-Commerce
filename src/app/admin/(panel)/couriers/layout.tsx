@@ -17,6 +17,7 @@ export default async function CouriersLayout({ children }: { children: ReactNode
               ['/admin/couriers', 'courier.accounts'],
               ['/admin/couriers/report', 'courier.report'],
               ['/admin/couriers/payouts', 'courier.payouts'],
+              ['/admin/couriers/scan', 'courier.scan'],
             ].map(([href, key]) => (
               <Link
                 key={href}

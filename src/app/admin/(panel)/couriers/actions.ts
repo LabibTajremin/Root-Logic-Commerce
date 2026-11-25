@@ -54,3 +54,23 @@ export async function markParcelsPaid(_: ActionState, form: FormData) {
     await courier.markPaid(store.id, form.getAll('ids').map(String))
   })
 }
+
+// `kind`, `provider`, `riderName` and `riderPhone` are inputs of the new-session form.
+export async function startScanSession(_: ActionState, form: FormData) {
+  return act('orders.manage', async ({ courier, store }) => {
+    const id = await courier.startSession(store.id, {
+      kind: String(form.get('kind')) as 'handover',
+      provider: String(form.get('provider')) as CourierProvider,
+      riderName: String(form.get('riderName')),
+      riderPhone: String(form.get('riderPhone')),
+    })
+    return `/admin/couriers/scan/${id}`
+  })
+}
+
+// `session` and `code` are inputs of the scan form (a scanner gun types the code and Enter).
+export async function scanParcel(_: ActionState, form: FormData) {
+  return act('orders.manage', async ({ courier, store, actor }) => {
+    await courier.scan(store.id, String(form.get('session')), String(form.get('code')), actor!.id)
+  })
+}

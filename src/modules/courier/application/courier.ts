@@ -2,6 +2,9 @@ import { canTransition, type OrderDetail, type OrderStatus } from '@/modules/ord
 import { DomainError, validate } from '@/modules/shared'
 import {
   accountInput,
+  finalStates,
+  scanCode,
+  sessionInput,
   amountsInput,
   collectedOf,
   courierReport,
@@ -14,6 +17,8 @@ import {
   type Credentials,
   type ParcelFact,
   type ParcelState,
+  type SessionInput,
+  type SessionKind,
 } from '../domain/courier'
 
 export type Parcel = {
@@ -69,6 +74,25 @@ export type NewShipment = Omit<
   'id' | 'storeId' | 'codCollected' | 'paidOutAt' | 'createdAt' | 'updatedAt'
 >
 export type ReportFilter = { from?: Date; to?: Date; productId?: string }
+/** E4: a scan session and the parcels scanned in it. */
+export type ScanSession = {
+  id: string
+  kind: SessionKind
+  provider: CourierProvider
+  riderName: string
+  riderPhone: string
+  createdAt: Date
+}
+export type ScannedParcel = {
+  orderId: string
+  orderNo: number
+  shipName: string
+  tracking: string
+  cod: number
+  scannedAt: Date
+}
+/** A parcel found by a scanned code, with its order's status. */
+export type FoundParcel = Shipment & { orderNo: number; orderStatus: OrderStatus }
 /** E5: a delivered parcel the courier still owes money for. */
 export type Unsettled = Shipment & { orderNo: number }
 
@@ -100,6 +124,18 @@ export type CourierRepo = {
   markPaid(storeId: string, ids: string[], at: Date): Promise<number>
   /** E5: what the couriers charged for parcels sent since `since`. */
   chargesSince(storeId: string, since: Date): Promise<number>
+  createSession(storeId: string, s: Omit<ScanSession, 'id' | 'createdAt'>): Promise<string>
+  getSession(storeId: string, id: string): Promise<ScanSession | null>
+  listSessions(storeId: string, limit: number): Promise<(ScanSession & { parcels: number })[]>
+  sessionItems(storeId: string, id: string): Promise<ScannedParcel[]>
+  findParcel(
+    storeId: string,
+    by: { orderNo: number } | { tracking: string },
+  ): Promise<FoundParcel | null>
+  /** false when the parcel was already scanned in this session. */
+  addScan(storeId: string, sessionId: string, shipmentId: string): Promise<boolean>
+  /** E4: this courier's parcels on their way back (or missing) that nobody has scanned in. */
+  outstandingReturns(storeId: string, provider: CourierProvider): Promise<ScannedParcel[]>
 }
 
 type Deps = {
@@ -240,6 +276,47 @@ export const createCourier = ({ repo, api, box, orders, token, now }: Deps) => {
       repo.setAmounts(storeId, id, validate(amountsInput, a)),
     markPaid: (storeId: string, ids: string[]) => repo.markPaid(storeId, ids, now()),
     chargesSince: (storeId: string, since: Date) => repo.chargesSince(storeId, since),
+
+    /** E4: open a hand-over or returns session for one courier. */
+    startSession: async (storeId: string, input: SessionInput) =>
+      repo.createSession(storeId, validate(sessionInput, input)),
+    listSessions: (storeId: string) => repo.listSessions(storeId, 20),
+    async session(storeId: string, id: string) {
+      const s = await repo.getSession(storeId, id)
+      if (!s) return null
+      const [items, outstanding] = await Promise.all([
+        repo.sessionItems(storeId, id),
+        s.kind === 'return' ? repo.outstandingReturns(storeId, s.provider) : [],
+      ])
+      return { ...s, items, outstanding }
+    },
+
+    /** E4: one scanned box — it must be this courier's parcel, going out or coming back. */
+    async scan(storeId: string, sessionId: string, code: string, actorId: string | null) {
+      const s = await repo.getSession(storeId, sessionId)
+      if (!s) throw new DomainError('scan.session_not_found')
+      const by = scanCode(code)
+      const p = by && (await repo.findParcel(storeId, by))
+      if (!p) throw new DomainError('scan.unknown', { code })
+      if (p.provider !== s.provider) throw new DomainError('scan.wrong_courier', { no: p.orderNo })
+      const back = p.orderStatus === 'RETURNING' || p.orderStatus === 'RETURN_MISSING'
+      if (s.kind === 'handover' && finalStates.includes(p.state))
+        throw new DomainError('scan.not_outgoing', { no: p.orderNo })
+      if (s.kind === 'return' && !back)
+        throw new DomainError('scan.not_returning', { no: p.orderNo })
+      if (!(await repo.addScan(storeId, sessionId, p.id)))
+        throw new DomainError('scan.duplicate', { no: p.orderNo })
+      // A returned box on the shelf again: received, and its stock comes back.
+      if (s.kind === 'return')
+        await orders.changeStatus(
+          storeId,
+          p.orderId,
+          'RETURN_RECEIVED',
+          actorId,
+          'scan: back with the shop',
+        )
+      return p.orderNo
+    },
 
     /** E2 (cron): ask the courier about parcels with no news for 30 minutes. */
     async sync(limit = 50) {

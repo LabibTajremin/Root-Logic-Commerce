@@ -2082,6 +2082,73 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
   await page.goto('/admin')
   await expect(page.getByTestId('kpi-courier-cost')).toContainText('৳70')
 
+  // E4: a hand-over session — the bulk-sent parcel goes with the rider, once.
+  await page.goto('/admin/couriers')
+  await page.getByRole('link', { name: 'Parcel scan' }).click()
+  await expect(page.getByText('No scan sessions yet.')).toBeVisible()
+  await page.getByLabel('Session').selectOption({ label: 'Hand-over to rider' })
+  await page.getByLabel('Courier', { exact: true }).selectOption({ label: 'Steadfast' })
+  await page.getByLabel('Rider name').fill('Karim')
+  await page.getByLabel('Rider phone').fill('01711111111')
+  await page.getByRole('button', { name: 'Start scanning' }).click()
+  await page.waitForURL(/\/admin\/couriers\/scan\/[0-9a-f-]+$/)
+  await expect(page.getByText('Rider name: Karim 01711111111')).toBeVisible()
+  const code = page.getByLabel('Scan or type the box code')
+  // Camera scanning is offered only where the browser can read barcodes.
+  await expect(page.getByRole('button', { name: 'Scan with camera' })).toHaveCount(0)
+  await code.fill(`#${nos[1]}`)
+  await code.press('Enter')
+  await expect(page.getByRole('status').filter({ hasText: 'Added.' })).toBeVisible()
+  await expect(page.getByTestId('scan-items')).toContainText(`#${nos[1]}`)
+  await code.fill(`#${nos[1]}`)
+  await code.press('Enter')
+  await alert(page, 'Already scanned in this session.')
+  await code.fill('NO-SUCH-BOX')
+  await code.press('Enter')
+  await alert(page, 'No parcel has this code.')
+  await code.fill(`#${nos[0]}`)
+  await code.press('Enter')
+  await alert(page, 'already delivered or back')
+  await expect(page.getByRole('button', { name: 'Print receipt' })).toBeVisible()
+  await a11y()
+
+  // E4 returns: the courier brings it back; the camera reads the box and receives it.
+  await post({ consignment_id: `LOG-${nos[1]}`, status: 'cancelled' })
+  await page.addInitScript((box) => {
+    let seen = 0
+    Object.assign(window, {
+      BarcodeDetector: class {
+        async detect() {
+          seen++
+          return seen < 2 ? [] : [{ rawValue: box }]
+        }
+      },
+    })
+    navigator.mediaDevices.getUserMedia = async () => {
+      const c = document.createElement('canvas')
+      c.width = 8
+      c.height = 8
+      c.getContext('2d')!.fillRect(0, 0, 8, 8)
+      return c.captureStream()
+    }
+  }, `#${nos[1]}`)
+  await page.goto('/admin/couriers/scan')
+  await page.getByLabel('Session').selectOption({ label: 'Returns received' })
+  await page.getByLabel('Courier', { exact: true }).selectOption({ label: 'Steadfast' })
+  await page.getByRole('button', { name: 'Start scanning' }).click()
+  await page.waitForURL(/\/admin\/couriers\/scan\/[0-9a-f-]+$/)
+  await expect(page.getByTestId('scan-outstanding')).toContainText('Still not back: 1')
+  await page.getByRole('button', { name: 'Scan with camera' }).click()
+  await expect(page.getByTestId('scan-items')).toContainText(`#${nos[1]}`)
+  await expect(page.getByTestId('scan-outstanding')).toContainText('Still not back: 0')
+  await page.getByRole('button', { name: 'Stop camera' }).click()
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  for (const bad of ['not-a-session', '00000000-0000-4000-8000-000000000000'])
+    expect((await page.goto(`/admin/couriers/scan/${bad}`))!.status()).toBe(404)
+  await page.goto('/admin/couriers/scan')
+  await expect(page.getByTestId('scan-sessions').getByRole('listitem')).toHaveCount(2)
+  await expect(page.getByTestId('scan-sessions')).toContainText('1 parcels')
+
   await page.goto('/admin/couriers')
   await page.getByRole('button', { name: 'Remove Outside Dhaka' }).click()
   await expect(accounts.getByRole('listitem')).toHaveCount(1)
