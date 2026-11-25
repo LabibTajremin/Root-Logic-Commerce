@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { courierProviders, credentialFields } from '@/modules/courier'
 import { ActionForm } from '@/ui/action-form'
-import { Badge, Card, LockBadge } from '@/ui/primitives'
+import { Badge, Card } from '@/ui/primitives'
 import { origin } from '../../../(storefront)/origin'
 import { adminContext } from '../context'
 import { addCourierAccount, makeDefaultCourier, removeCourierAccount } from './actions'
@@ -13,24 +12,10 @@ const field = 'min-h-11 rounded-control border border-line bg-surface px-3 font-
 
 /** E1: the shop's courier accounts (keys sealed), the default one, and each webhook URL. */
 export default async function CouriersPage() {
-  const { courier, features, store, t } = await adminContext('settings.manage')
-  if (!(await features.isOn(store.id, 'courier')))
-    return (
-      <>
-        <h1 className="font-heading text-3xl">{t('courier.title')}</h1>
-        <Card className="flex flex-col items-start gap-3">
-          <LockBadge label={t('common.premium')} />
-          <p className="text-sm text-muted">{t('courier.locked')}</p>
-          <Link href="/admin/plan" className="font-semibold underline">
-            {t('nav.plan')}
-          </Link>
-        </Card>
-      </>
-    )
+  const { courier, store, t } = await adminContext('settings.manage')
   const [accounts, base] = await Promise.all([courier.listAccounts(store.id), origin()])
   return (
     <>
-      <h1 className="font-heading text-3xl">{t('courier.title')}</h1>
       <p className="text-sm text-muted">{t('courier.intro')}</p>
       <Card className="flex flex-col gap-3">
         <h2 className="font-semibold">{t('courier.accounts')}</h2>

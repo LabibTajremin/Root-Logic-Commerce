@@ -2,6 +2,9 @@ import { canTransition, type OrderDetail, type OrderStatus } from '@/modules/ord
 import { DomainError, validate } from '@/modules/shared'
 import {
   accountInput,
+  amountsInput,
+  collectedOf,
+  courierReport,
   credentialSchemas,
   orderStatusFor,
   parcelState,
@@ -9,6 +12,7 @@ import {
   type AccountInput,
   type CourierProvider,
   type Credentials,
+  type ParcelFact,
   type ParcelState,
 } from '../domain/courier'
 
@@ -53,10 +57,20 @@ export type Shipment = {
   charge: number | null
   rawStatus: string
   state: ParcelState
+  /** E5: cash the courier says it collected (null = not entered). */
+  codCollected: number | null
+  /** E5: when the courier paid this parcel's money to the shop. */
+  paidOutAt: Date | null
   createdAt: Date
   updatedAt: Date
 }
-export type NewShipment = Omit<Shipment, 'id' | 'storeId' | 'createdAt' | 'updatedAt'>
+export type NewShipment = Omit<
+  Shipment,
+  'id' | 'storeId' | 'codCollected' | 'paidOutAt' | 'createdAt' | 'updatedAt'
+>
+export type ReportFilter = { from?: Date; to?: Date; productId?: string }
+/** E5: a delivered parcel the courier still owes money for. */
+export type Unsettled = Shipment & { orderNo: number }
 
 export type CourierRepo = {
   addAccount(
@@ -80,6 +94,12 @@ export type CourierRepo = {
   ): Promise<void>
   /** Parcels still moving that nobody has heard about since `before`. */
   staleShipments(before: Date, limit: number): Promise<Shipment[]>
+  parcelFacts(storeId: string, f: ReportFilter): Promise<ParcelFact[]>
+  unsettled(storeId: string): Promise<Unsettled[]>
+  setAmounts(storeId: string, id: string, a: { collected: number; charge: number }): Promise<void>
+  markPaid(storeId: string, ids: string[], at: Date): Promise<number>
+  /** E5: what the couriers charged for parcels sent since `since`. */
+  chargesSince(storeId: string, since: Date): Promise<number>
 }
 
 type Deps = {
@@ -200,6 +220,22 @@ export const createCourier = ({ repo, api, box, orders, token, now }: Deps) => {
       await apply(s, u.raw, u.charge, body)
       return true
     },
+
+    /** E3: how each courier does, for parcels sent in the range (and with the product). */
+    report: async (storeId: string, f: ReportFilter = {}) =>
+      courierReport(await repo.parcelFacts(storeId, f)),
+
+    /** E5: delivered parcels not paid out yet, and what the couriers owe in total. */
+    async unsettled(storeId: string) {
+      const rows = (await repo.unsettled(storeId)).map((s) => ({ ...s, collected: collectedOf(s) }))
+      const collected = rows.reduce((a, r) => a + r.collected, 0)
+      const charges = rows.reduce((a, r) => a + (r.charge ?? 0), 0)
+      return { rows, collected, charges, due: collected - charges }
+    },
+    setAmounts: async (storeId: string, id: string, a: { collected: number; charge: number }) =>
+      repo.setAmounts(storeId, id, validate(amountsInput, a)),
+    markPaid: (storeId: string, ids: string[]) => repo.markPaid(storeId, ids, now()),
+    chargesSince: (storeId: string, since: Date) => repo.chargesSince(storeId, since),
 
     /** E2 (cron): ask the courier about parcels with no news for 30 minutes. */
     async sync(limit = 50) {

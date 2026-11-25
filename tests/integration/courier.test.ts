@@ -3,7 +3,14 @@ import type { CourierRepo } from '@/modules/courier'
 import { createCourierApis } from '@/infrastructure/courier/couriers'
 import { createCourierRepo } from '@/infrastructure/db/repositories/courier-repo'
 import { createOrdersRepo } from '@/infrastructure/db/repositories/orders-repo'
-import { courierEvents, courierShipments, customers, orders } from '@/infrastructure/db/schema'
+import {
+  courierEvents,
+  courierShipments,
+  customers,
+  orderItems,
+  orders,
+  products,
+} from '@/infrastructure/db/schema'
 import { createTestDb } from '../fixtures/db'
 import { seedStore } from '../fixtures/store'
 
@@ -134,6 +141,76 @@ describe('courier repository (E1, E2)', () => {
     await repo.removeAccount(store, acc)
     expect((await db.select().from(courierShipments)).map((x) => x.accountId)).toEqual([null, null])
     expect(await repo.staleShipments(later, 10)).toEqual([])
+  })
+})
+
+describe('courier report and payouts (E3, E5)', () => {
+  it('filters the report by date and product; lists, edits and pays out delivered parcels', async () => {
+    const acc = await repo.addAccount(store, {
+      provider: 'redx',
+      label: 'Main',
+      sealed: 'enc:a',
+      webhookToken: 't1',
+    })
+    const [p] = await db
+      .insert(products)
+      .values({ storeId: store, name: 'Kurta', slug: 'kurta', price: 100000 })
+      .returning({ id: products.id })
+    const ship = async (
+      no: number,
+      state: 'delivered' | 'partial' | 'pending',
+      charge: number | null,
+    ) => {
+      const o = await order(store, no)
+      if (no === 1)
+        await db.insert(orderItems).values({
+          orderId: o,
+          productId: p!.id,
+          name: 'Kurta',
+          unitPrice: 100000,
+          unitCost: 60000,
+          quantity: 1,
+        })
+      return repo.addShipment(store, {
+        orderId: o,
+        accountId: acc,
+        provider: 'redx',
+        ref: `R${no}`,
+        tracking: `R${no}`,
+        cod: 106000,
+        charge,
+        rawStatus: state,
+        state,
+      })
+    }
+    const a = await ship(1, 'delivered', 6000)
+    const b = await ship(2, 'partial', null)
+    await ship(3, 'pending', 9000)
+    const all = await repo.parcelFacts(store, {})
+    expect(all.map((r) => r.state).sort()).toEqual(['delivered', 'partial', 'pending'])
+    expect(await repo.parcelFacts(store, { productId: p!.id })).toMatchObject([
+      { state: 'delivered' },
+    ])
+    expect(await repo.parcelFacts(store, { from: new Date(Date.now() + 60_000) })).toEqual([])
+    expect(await repo.parcelFacts(store, { to: new Date(0) })).toEqual([])
+    expect(await repo.parcelFacts(other, {})).toEqual([])
+
+    expect((await repo.unsettled(store)).map((r) => [r.orderNo, r.state])).toEqual([
+      [1, 'delivered'],
+      [2, 'partial'],
+    ])
+    await repo.setAmounts(store, b.id, { collected: 50000, charge: 7000 })
+    await repo.setAmounts(other, b.id, { collected: 1, charge: 1 })
+    expect((await repo.unsettled(store))[1]).toMatchObject({ codCollected: 50000, charge: 7000 })
+    expect(await repo.chargesSince(store, new Date(0))).toBe(6000 + 7000 + 9000)
+    expect(await repo.chargesSince(other, new Date(0))).toBe(0)
+    const now = new Date()
+    expect(await repo.markPaid(store, [], now)).toBe(0)
+    expect(await repo.markPaid(store, [a.id], now)).toBe(1)
+    // Paid once only; another shop's ids do nothing.
+    expect(await repo.markPaid(store, [a.id], now)).toBe(0)
+    expect(await repo.markPaid(other, [b.id], now)).toBe(0)
+    expect((await repo.unsettled(store)).map((r) => r.orderNo)).toEqual([2])
   })
 })
 

@@ -21,16 +21,20 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
   ])
   const money = (minor: number) => formatMoney(minor, { currency: business.currency })
   const t = (k: string, v?: Record<string, string | number>) => translate(locale, k, v)
-  const [pending, month, recent, low, cats, prods, ga4InAdmin, search] = await Promise.all([
-    container.orders.listOrders(store.id, { status: 'PENDING', limit: 1 }),
-    container.orders.listOrders(store.id, { from: daysAgo(30), limit: 1 }),
-    container.orders.listOrders(store.id, { limit: 5 }),
-    container.stock.lowStock(store.id),
-    container.catalog.listCategories(store.id),
-    container.catalog.listProducts(store.id),
-    container.plans.has(store.id, 'ga4InAdmin'),
-    searchParams,
-  ])
+  const [pending, month, recent, low, cats, prods, ga4InAdmin, search, courierOn] =
+    await Promise.all([
+      container.orders.listOrders(store.id, { status: 'PENDING', limit: 1 }),
+      container.orders.listOrders(store.id, { from: daysAgo(30), limit: 1 }),
+      container.orders.listOrders(store.id, { limit: 5 }),
+      container.stock.lowStock(store.id),
+      container.catalog.listCategories(store.id),
+      container.catalog.listProducts(store.id),
+      container.plans.has(store.id, 'ga4InAdmin'),
+      searchParams,
+      container.features.isOn(store.id, 'courier'),
+    ])
+  // E5: what couriers charged for parcels sent in the last 30 days.
+  const courierCost = courierOn ? await container.courier.chargesSince(store.id, daysAgo(30)) : null
   const steps = [
     { label: t('dash.step.category'), done: cats.length > 0, href: '/admin/categories' },
     { label: t('dash.step.product'), done: prods.length > 0, href: '/admin/products/new' },
@@ -53,6 +57,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
             {month.total}
           </p>
         </Card>
+        {courierCost !== null && (
+          <Card>
+            <p className="text-sm text-muted">{t('dash.courierCost')}</p>
+            <p className="font-heading text-3xl" data-testid="kpi-courier-cost">
+              {money(courierCost)}
+            </p>
+          </Card>
+        )}
       </div>
       <InsightsPanel
         insights={container.insights}

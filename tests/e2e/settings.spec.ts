@@ -2045,6 +2045,42 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
   await expect(page.getByTestId('order-parcel')).toHaveCount(2)
   await expect(page.getByTestId('order-parcel').first()).toContainText('Steadfast LOG-')
 
+  // E3: one courier, two parcels — one delivered, one on the way; filters narrow the range.
+  await page.goto('/admin/couriers')
+  await page.getByRole('link', { name: 'Report' }).click()
+  const report = page.getByTestId('courier-report')
+  await expect(report.getByRole('row', { name: /Steadfast/ })).toContainText('100%')
+  await expect(
+    report
+      .getByRole('row', { name: /Steadfast/ })
+      .getByRole('cell')
+      .first(),
+  ).toHaveText('2')
+  await page.getByLabel('Product').selectOption({ label: name })
+  await page.getByRole('button', { name: 'Show' }).click()
+  await expect(page).toHaveURL(/product=/)
+  await expect(report.getByRole('row', { name: /Steadfast/ })).toBeVisible()
+  await page.getByLabel('From').fill('2099-01-01')
+  await page.getByRole('button', { name: 'Show' }).click()
+  await expect(page.getByText('No parcels in this range.')).toBeVisible()
+  await a11y()
+
+  // E5: the delivered parcel's cash and charge, corrected, then paid out.
+  await page.getByRole('link', { name: 'Payouts' }).click()
+  const totals = page.getByTestId('payout-totals')
+  await expect(totals).toContainText('৳60')
+  await page.getByLabel(`Collected (#${nos[0]})`).fill('400')
+  await page.getByLabel(`Charge (#${nos[0]})`).fill('70')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(totals).toContainText('৳400')
+  await expect(totals).toContainText('৳330')
+  await a11y()
+  await page.getByLabel(`Select parcel of order #${nos[0]}`).check()
+  await page.getByRole('button', { name: 'Mark paid out' }).click()
+  await expect(page.getByText('Every delivered parcel has been paid out.')).toBeVisible()
+  await page.goto('/admin')
+  await expect(page.getByTestId('kpi-courier-cost')).toContainText('৳70')
+
   await page.goto('/admin/couriers')
   await page.getByRole('button', { name: 'Remove Outside Dhaka' }).click()
   await expect(accounts.getByRole('listitem')).toHaveCount(1)

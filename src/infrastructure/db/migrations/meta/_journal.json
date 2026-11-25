@@ -176,6 +176,13 @@
       "when": 1795609993441,
       "tag": "0024_courier",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795631068889,
+      "tag": "0025_courier_payouts",
+      "breakpoints": true
     }
   ]
 }

@@ -145,3 +145,54 @@ export const readWebhook = (
   }[provider]()
   return pick.ref && pick.raw ? pick : null
 }
+
+/** What the E3 report needs of each parcel. */
+export type ParcelFact = {
+  provider: CourierProvider
+  state: ParcelState
+  createdAt: Date
+  updatedAt: Date
+}
+
+const DAY = 86_400_000
+
+/** E3: per courier — sent, still moving, delivered, partly delivered, returned, success %, average days. */
+export const courierReport = (rows: ParcelFact[]) =>
+  courierProviders.flatMap((provider) => {
+    const mine = rows.filter((r) => r.provider === provider)
+    if (mine.length === 0) return []
+    const n = (...s: ParcelState[]) => mine.filter((r) => s.includes(r.state)).length
+    const delivered = n('delivered')
+    const partial = n('partial')
+    const returned = n('returning', 'cancelled')
+    const done = delivered + partial + returned
+    // The parcel's last update is its delivery for a delivered one.
+    const took = mine
+      .filter((r) => r.state === 'delivered')
+      .map((r) => (r.updatedAt.getTime() - r.createdAt.getTime()) / DAY)
+    return [
+      {
+        provider,
+        sent: mine.length,
+        moving: n('pending', 'in_transit', 'hold'),
+        delivered,
+        partial,
+        returned,
+        successPct: done === 0 ? null : Math.round(((delivered + partial) / done) * 100),
+        avgDays:
+          took.length === 0
+            ? null
+            : Math.round((took.reduce((a, b) => a + b, 0) / took.length) * 10) / 10,
+      },
+    ]
+  })
+export type CourierReportRow = ReturnType<typeof courierReport>[number]
+
+/** E5: cash the courier holds for a parcel — what the owner entered, else the COD of a delivered one. */
+export const collectedOf = (s: { state: ParcelState; cod: number; codCollected: number | null }) =>
+  s.codCollected ?? (s.state === 'delivered' ? s.cod : 0)
+
+export const amountsInput = z.object({
+  collected: z.number().int().min(0),
+  charge: z.number().int().min(0),
+})

@@ -36,3 +36,21 @@ export async function sendToCourier(_: ActionState, form: FormData) {
     await courier.send(store.id, String(form.get('id')), String(form.get('account')), actor!.id)
   })
 }
+
+// `id`, `collected` and `charge` (taka) are inputs of a parcel's amounts form.
+export async function setParcelAmounts(_: ActionState, form: FormData) {
+  const paisa = (k: string) => Math.round(Number(form.get(k)) * 100)
+  return act('orders.manage', ({ courier, store }) =>
+    courier.setAmounts(store.id, String(form.get('id')), {
+      collected: paisa('collected'),
+      charge: paisa('charge'),
+    }),
+  )
+}
+
+/** E5: the ticked parcels (ids join the form from each row) were paid out by the courier. */
+export async function markParcelsPaid(_: ActionState, form: FormData) {
+  return act('orders.manage', async ({ courier, store }) => {
+    await courier.markPaid(store.id, form.getAll('ids').map(String))
+  })
+}

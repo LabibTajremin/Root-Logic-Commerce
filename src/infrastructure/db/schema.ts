@@ -766,6 +766,9 @@ export const courierShipments = pgTable(
     charge: bigint({ mode: 'number' }),
     rawStatus: text().notNull(),
     state: text().$type<ParcelState>().notNull(),
+    // E5: the courier's collected cash (owner-entered) and when it was paid to the shop.
+    codCollected: bigint({ mode: 'number' }),
+    paidOutAt: timestamp({ withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

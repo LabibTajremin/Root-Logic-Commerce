@@ -44,6 +44,8 @@ const setup = (o: OrderDetail | null = order()) => {
         ...s,
         id: `sh${shipments.length + 1}`,
         storeId,
+        codCollected: null,
+        paidOutAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -59,6 +61,11 @@ const setup = (o: OrderDetail | null = order()) => {
       )
     }),
     staleShipments: async () => shipments,
+    parcelFacts: vi.fn(async () => shipments),
+    unsettled: async () => shipments.map((s) => ({ ...s, orderNo: 1042 })),
+    setAmounts: vi.fn(async () => {}),
+    markPaid: vi.fn(async (_s, ids) => ids.length),
+    chargesSince: async () => 6000,
   }
   const api = {
     create: vi.fn(async () => ({ ref: '77', tracking: 'SF77', charge: 6000 })),
@@ -205,6 +212,36 @@ describe('courier (E1, E2)', () => {
     await t.courier.webhook('tok', { consignment_id: 77, status: 'hold' })
     expect(t.changes).toHaveLength(2)
     expect(t.shipments[0]!.charge).toBe(6500)
+  })
+
+  it('reports per courier, totals what couriers owe, records amounts and payouts (E3, E5)', async () => {
+    await t.courier.addAccount('s1', {
+      provider: 'steadfast',
+      label: 'Main',
+      credentials: { apiKey: 'k', secretKey: 's' },
+    })
+    await t.courier.send('s1', 'o1', null, null)
+    await t.courier.webhook('tok', { consignment_id: 77, status: 'delivered' })
+    expect(await t.courier.report('s1')).toMatchObject([
+      { provider: 'steadfast', sent: 1, delivered: 1, successPct: 100 },
+    ])
+    expect(t.repo.parcelFacts).toHaveBeenCalledWith('s1', {})
+    expect(await t.courier.unsettled('s1')).toMatchObject({
+      rows: [{ orderNo: 1042, collected: 125000 }],
+      collected: 125000,
+      charges: 6000,
+      due: 119000,
+    })
+    t.shipments[0]!.charge = null
+    expect((await t.courier.unsettled('s1')).charges).toBe(0)
+    await expect(t.courier.setAmounts('s1', 'sh1', { collected: -5, charge: 0 })).rejects.toThrow(
+      'validation',
+    )
+    await t.courier.setAmounts('s1', 'sh1', { collected: 100000, charge: 7000 })
+    expect(t.repo.setAmounts).toHaveBeenCalledWith('s1', 'sh1', { collected: 100000, charge: 7000 })
+    expect(await t.courier.markPaid('s1', ['sh1'])).toBe(1)
+    expect(t.repo.markPaid).toHaveBeenCalledWith('s1', ['sh1'], new Date('2026-11-25T10:00:00Z'))
+    expect(await t.courier.chargesSince('s1', new Date(0))).toBe(6000)
   })
 
   it('polls quiet parcels and counts the ones the courier could not answer', async () => {
