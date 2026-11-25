@@ -2056,11 +2056,11 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
       .getByRole('cell')
       .first(),
   ).toHaveText('2')
-  await page.getByLabel('Product').selectOption({ label: name })
+  await page.getByLabel('Product', { exact: true }).selectOption({ label: name })
   await page.getByRole('button', { name: 'Show' }).click()
   await expect(page).toHaveURL(/product=/)
   await expect(report.getByRole('row', { name: /Steadfast/ })).toBeVisible()
-  await page.getByLabel('From').fill('2099-01-01')
+  await page.getByLabel('From', { exact: true }).fill('2099-01-01')
   await page.getByRole('button', { name: 'Show' }).click()
   await expect(page.getByText('No parcels in this range.')).toBeVisible()
   await a11y()
