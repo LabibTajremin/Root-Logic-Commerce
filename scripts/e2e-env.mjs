@@ -13,6 +13,7 @@ export const e2eEnv = {
   MEDIA_DIR: '.e2e/media',
   MESSAGES_TRANSPORT: 'log',
   COURIER_TRANSPORT: 'log',
+  TRACKING_TRANSPORT: 'log',
   SETTINGS_KEY: 'e2e-settings-key-e2e-settings-key-00',
   CRON_SECRET: 'e2e-cron-secret-0123456789',
 }

@@ -1,4 +1,5 @@
 import { Icon } from '@/ui/icon'
+import { TrackedLink } from './ga'
 
 export type HelpLink = { href: string; label: string }
 
@@ -32,12 +33,12 @@ export const HelpBubble = ({
       <ul className="absolute bottom-16 right-0 flex group-data-[side=left]/b:left-0 group-data-[side=left]/b:right-auto w-56 flex-col gap-1 rounded-card border border-line bg-surface p-2 shadow-xl">
         {links.map((l) => (
           <li key={l.href}>
-            <a
+            <TrackedLink
               href={l.href}
               className="flex min-h-11 items-center rounded-control px-3 text-sm font-semibold hover:bg-soft"
             >
               {l.label}
-            </a>
+            </TrackedLink>
           </li>
         ))}
         {top !== null && (

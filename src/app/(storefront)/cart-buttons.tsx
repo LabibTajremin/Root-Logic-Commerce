@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/ui/icon'
-import { gaEvent } from './ga'
+import { track } from './ga'
 import { cart, openCart, type Item } from './cart-store'
 
 export const added = (item: Item, qty: number) => {
   cart.add(item, qty)
-  gaEvent('add_to_cart', {
+  track('add_to_cart', {
     currency: 'BDT',
     value: (item.price * qty) / 100,
     items: [{ item_id: item.id, item_name: item.name, price: item.price / 100, quantity: qty }],

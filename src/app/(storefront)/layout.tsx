@@ -5,6 +5,8 @@ import type { ReactNode } from 'react'
 import { brandImages, toCssVars } from '@/modules/site-settings'
 import { themeCss } from '@/themes'
 import { LangToggle } from '@/ui/lang-toggle'
+import { trackingPlan } from '@/modules/tracking'
+import type { Business } from '@/modules/site-settings'
 import { Analytics } from './analytics'
 import { AnnouncementBar } from './announcement-bar'
 import { BottomNav } from './bottom-nav'
@@ -16,9 +18,29 @@ import { MiniCart } from './mini-cart'
 import { exitPreview } from './preview-actions'
 import { storefront } from './storefront'
 
+/** H1/H2/H3: what the browser loads — no pixel script when GTM (or nobody) sends for Meta. */
+const tagsOf = (b: Business) => {
+  const plan = trackingPlan(b.tracking)
+  return {
+    ga4: [b.ga4MeasurementId, ...b.tracking.ga4Extra].filter((x): x is string => !!x),
+    gtm: b.tracking.gtm,
+    metaPixels: plan.metaPixels,
+    tiktok: plan.tiktokPixel,
+    clarity: b.tracking.clarity,
+  }
+}
+
 export const generateMetadata = async (): Promise<Metadata> => {
   const { store, business, design, t } = await storefront()
+  const tr = business.tracking
   return {
+    // H1/H3: domain verification for Meta Business and Search Console.
+    verification: {
+      ...(tr.searchConsole && { google: tr.searchConsole }),
+      ...(tr.meta.domainVerification && {
+        other: { 'facebook-domain-verification': tr.meta.domainVerification },
+      }),
+    },
     icons: { icon: brandImages(design).favicon },
     title: { default: store.name, template: business.seo.titleTemplate },
     description:
@@ -147,7 +169,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           items={d.mobileNav}
         />
       )}
-      <Analytics ga4={business.ga4MeasurementId} />
+      <Analytics tags={tagsOf(business)} />
     </div>
   )
 }

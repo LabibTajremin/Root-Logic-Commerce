@@ -6,12 +6,13 @@
 export const securityHeaders = (production: boolean) => {
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+    // The ad and analytics tools a shop can switch on (H1/H2/H3); a static header can't vary per shop.
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com https://www.clarity.ms https://scripts.clarity.ms",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://i.ytimg.com https://www.google-analytics.com https://www.googletagmanager.com",
+    "img-src 'self' data: blob: https://i.ytimg.com https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://*.clarity.ms",
     "font-src 'self'",
     "media-src 'self'",
-    "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+    "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.clarity.ms",
     // 'self': the design editor previews the storefront in an iframe.
     "frame-src 'self' https://www.youtube-nocookie.com https://www.facebook.com https://www.instagram.com",
     "frame-ancestors 'self'",
@@ -27,7 +28,8 @@ export const securityHeaders = (production: boolean) => {
     // C5: checkout may ask for the shopper's location (own pages only, never embeds).
     {
       key: 'Permissions-Policy',
-      value: 'camera=(), microphone=(), geolocation=(self), payment=()',
+      // E4: the parcel scanner reads barcodes with the camera on our own pages.
+      value: 'camera=(self), microphone=(), geolocation=(self), payment=()',
     },
     ...(production
       ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]

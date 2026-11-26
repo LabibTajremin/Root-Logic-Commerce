@@ -33,10 +33,13 @@ export const test = base.extend<Fixtures>({
     await page.setExtraHTTPHeaders({
       'x-forwarded-for': `10.${testInfo.workerIndex % 250}.${testInfo.repeatEachIndex}.${n + 1}`,
     })
-    // Never call third parties from tests: gtag.js and video embeds get empty answers.
-    await page.route('https://www.googletagmanager.com/**', (r) =>
-      r.fulfill({ contentType: 'text/javascript', body: '' }),
-    )
+    // Never call third parties from tests: tag scripts and video embeds get empty answers.
+    const stubTags = () =>
+      page.route(
+        /^https:\/\/(www\.googletagmanager\.com|connect\.facebook\.net|analytics\.tiktok\.com|www\.clarity\.ms)\//,
+        (r) => r.fulfill({ contentType: 'text/javascript', body: '' }),
+      )
+    await stubTags()
     await page.route(
       /^https:\/\/(www\.youtube-nocookie\.com|i\.ytimg\.com|www\.facebook\.com|www\.instagram\.com)\//,
       (r) => r.fulfill({ contentType: 'text/html', body: '<!doctype html><title>embed</title>' }),
@@ -46,10 +49,7 @@ export const test = base.extend<Fixtures>({
     // Tests follow plain (non-Next) links with goto(href) for the same reason.
     const flush = async () => {
       await addBrowserCoverage(await page.coverage.stopJSCoverage())
-      // Never call Google from tests: gtag.js is answered with an empty script.
-      await page.route('https://www.googletagmanager.com/**', (r) =>
-        r.fulfill({ contentType: 'text/javascript', body: '' }),
-      )
+      await stubTags()
       await page.coverage.startJSCoverage({ resetOnNavigation: false })
     }
     const goto = page.goto.bind(page)

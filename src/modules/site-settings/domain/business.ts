@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { trackingSchema } from '@/modules/tracking'
 import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
 
 /** B2: Add to cart, Order now (straight to checkout), WhatsApp order, Call to order. */
@@ -202,6 +203,8 @@ export const businessSchema = z.object({
     .regex(/^G-[A-Z0-9]{4,}$/)
     .nullable()
     .default(null),
+  // H1/H2/H3: ad pixels and tags; server tokens are sealed before they are saved.
+  tracking: trackingSchema.prefault({}),
 })
 export type Business = z.infer<typeof businessSchema>
 

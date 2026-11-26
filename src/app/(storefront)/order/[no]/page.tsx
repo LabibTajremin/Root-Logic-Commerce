@@ -7,7 +7,8 @@ import { textOr } from '@/modules/site-settings'
 import { PLACED_COOKIE, readPreview } from '@/server/preview'
 import { runtime } from '@/server/runtime'
 import { PrintButton } from '@/ui/print-button'
-import { GaEvent } from '../../ga'
+import { purchaseEventId, trackingPlan } from '@/modules/tracking'
+import { TrackOnView } from '../../ga'
 import { storefront } from '../../storefront'
 import { TrustStrip } from '../../trust-strip'
 
@@ -34,12 +35,26 @@ export default async function OrderPlaced({ params }: { params: Promise<{ no: st
   ).split(':')
   const order = placedNo === no ? await orders.trackOrder(store.id, Number(no), phone!) : null
   const wa = business.contact.whatsapp.replace(/\D/g, '')
+  const plan = trackingPlan(business.tracking)
   return (
     <section
       className="mx-auto flex max-w-xl flex-col items-center gap-4 border-t-4 px-4 py-16 text-center"
       style={{ borderColor: textOr(ty.accent, 'var(--color-accent)') }}
     >
-      <GaEvent name="purchase" params={{ transaction_id: no, currency: 'BDT' }} />
+      {/* H1/H2: the pixels send Purchase here only when their server doesn't (same event id). */}
+      <TrackOnView
+        name="purchase"
+        params={{
+          transaction_id: no,
+          currency: business.currency,
+          ...(order && { value: order.total / 100 }),
+        }}
+        options={{
+          eventId: purchaseEventId(Number(no)),
+          meta: plan.metaBrowserPurchase,
+          tiktok: plan.tiktokBrowserPurchase,
+        }}
+      />
       <h1 className="font-heading text-3xl">{textOr(ty.heading, t('success.title'))}</h1>
       <p className="text-muted">{textOr(ty.sub, t('success.body'))}</p>
       <p className="whitespace-pre-line empty:hidden" data-testid="thanks-message">

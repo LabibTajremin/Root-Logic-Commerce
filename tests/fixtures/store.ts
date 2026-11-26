@@ -29,6 +29,7 @@ export const testConfig = (
   settingsKey: 'test-settings-key-test-settings-key',
   messagesTransport: 'log' as const,
   courierTransport: 'log' as const,
+  trackingTransport: 'log' as const,
   s3: {
     endpoint: 'https://s3.example',
     bucket: 'b',

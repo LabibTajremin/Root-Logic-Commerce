@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductBadges, StockLeft } from '@/ui/product-badges'
-import { GaEvent } from '../../ga'
+import { TrackOnView } from '../../ga'
 import { Breadcrumbs } from '../../breadcrumbs'
 import { faqLd, JsonLd } from '../../json-ld'
 import { orderButtons, stickyBuyBar } from '@/modules/site-settings'
@@ -137,7 +137,7 @@ export default async function ProductPage({ params }: Props) {
         />
       </div>
       {p.content.faq.length > 0 && <JsonLd data={faqLd(p.content.faq)} />}
-      <GaEvent
+      <TrackOnView
         name="view_item"
         params={{
           currency: 'BDT',

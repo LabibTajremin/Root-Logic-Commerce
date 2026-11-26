@@ -8,6 +8,8 @@ import { createMedia } from '@/modules/media'
 import { createMessaging, createOtp } from '@/modules/messages'
 import { createFraud } from '@/modules/fraud'
 import { createCourier } from '@/modules/courier'
+import { createTracking } from '@/modules/tracking'
+import { createTrackingSender } from '@/infrastructure/tracking/sender'
 import { createCourierApis } from '@/infrastructure/courier/couriers'
 import { createCourierRepo } from '@/infrastructure/db/repositories/courier-repo'
 import { createDrafts, createOrders, type OrderEvents } from '@/modules/orders'
@@ -62,6 +64,7 @@ type Deps = {
     | 'settingsKey'
     | 'messagesTransport'
     | 'courierTransport'
+    | 'trackingTransport'
     | 'authSecret'
   > & { notifyLogFile?: string }
   db: Db
@@ -147,6 +150,37 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
   })
   for (const s of ['placed', 'confirmed', 'delivered', 'cancelled', 'returned'] as const)
     bus.on(`order.${s}`, (e) => insights.onOrderEvent(s, e))
+  const tracking = createTracking({
+    settings: async (id) => {
+      const { business } = await storeSettings(id)
+      return { tracking: business.tracking, currency: business.currency }
+    },
+    order: async (storeId, id) => {
+      const o = await orders.getOrder(storeId, id)
+      return (
+        o && {
+          orderNo: o.orderNo,
+          total: o.total,
+          phone: o.shipPhone,
+          email: o.customerEmail,
+          items: o.items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+          })),
+        }
+      )
+    },
+    open: (s) => secrets.open(s),
+    sha256: (s) => createHash('sha256').update(s).digest('hex'),
+    send: createTrackingSender({
+      mode: config.trackingTransport,
+      logFile: config.notifyLogFile,
+    }),
+    now: () => new Date(),
+  })
+  for (const s of ['placed', 'confirmed', 'delivered'] as const)
+    bus.on(`order.${s}`, (e) => tracking.onOrderEvent(s, e))
   const courier = createCourier({
     repo: createCourierRepo(db),
     api: createCourierApis({ mode: config.courierTransport }),

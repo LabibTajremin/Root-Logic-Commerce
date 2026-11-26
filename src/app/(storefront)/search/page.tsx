@@ -1,5 +1,6 @@
 import { ProductListing } from '../product-listing'
 import { storefront } from '../storefront'
+import { TrackOnView } from '../ga'
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -31,6 +32,7 @@ export default async function SearchPage({ searchParams }: Props) {
           {t('shop.search')}
         </button>
       </form>
+      {q && <TrackOnView name="search" params={{ search_term: q }} />}
       {q ? (
         <p role="status" className="text-muted">
           {t('shop.results', { n: products.length, q })}

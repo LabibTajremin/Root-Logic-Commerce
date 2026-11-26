@@ -2249,3 +2249,164 @@ test('courier score: delivered vs returned per phone, then hold or ask for a cod
   await page.getByRole('button', { name: 'Save' }).first().click()
   await saved(page)
 })
+
+test('tracking: Meta + TikTok pixels with server events, GTM, GA4, Clarity, verification (H1, H2, H3)', async ({
+  page,
+  a11y,
+  playwright,
+}) => {
+  const name = `Pixel ${uid()}`
+  const serverEvents = (channel: string) =>
+    readFileSync('.e2e/notify.log', 'utf8')
+      .trim()
+      .split('\n')
+      .filter((l) => l.includes(`"channel":"${channel}"`))
+      .join('\n')
+  const queued = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { fbq: { queue: ArrayLike<unknown>[] }; ttq: unknown[][] }
+      // Meta's stub queues `arguments` objects.
+      return {
+        fbq: JSON.stringify(w.fbq.queue.map((a) => Array.from(a))),
+        ttq: JSON.stringify(w.ttq),
+      }
+    })
+  const order = async () => {
+    await page.goto(`/p/${slug(name)}`)
+    await page.getByRole('button', { name: 'Order now' }).click()
+    await page.waitForURL(/\/checkout$/)
+    await fillCheckout(page)
+    await page.getByRole('button', { name: 'Place order' }).click()
+    await page.waitForURL(/\/order\/\d+$/)
+    return (await page.getByTestId('order-no').textContent())!.replace('#', '')
+  }
+  const field = (label: string) => page.getByLabel(label, { exact: true })
+  const save = async () => {
+    await page.getByRole('button', { name: 'Save' }).click()
+    await saved(page)
+  }
+  await signedIn(page)
+  await createProduct(page, { name, price: '450', stock: '9' })
+  await page.goto('/admin/store')
+  await page.getByLabel('Phone', { exact: true }).fill('01711 234567')
+  await save()
+  await page.goto('/admin/seo')
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('G-TEST12345')
+  await save()
+
+  await page.goto('/admin/tracking')
+  await expect(page.getByRole('heading', { level: 1, name: 'Tracking & pixels' })).toBeVisible()
+  await field('Meta Pixel IDs (comma-separated)').fill('11112222, 33334444')
+  await field('Facebook domain verification code').fill('fbverify1')
+  await field('TikTok Pixel ID').fill('CTIKTOK1')
+  await field('TikTok Events API access token').fill('tt-secret')
+  await page.getByLabel('Send Purchase when the order is').nth(1).selectOption('placed')
+  await field('Google Tag Manager container ID').fill('GTM-TEST1')
+  await field('Extra GA4 measurement IDs (comma-separated)').fill('G-EXTRA1')
+  await field('Microsoft Clarity project ID').fill('clar1ty')
+  await field('Google Search Console verification code').fill('gsc-code_1')
+  await save()
+  // No CAPI token yet: Purchase can only go from the browser, at once.
+  await expect(page.getByTestId('meta-fallback')).toBeVisible()
+  await expect(page.getByTestId('ga4-double')).toBeVisible()
+  await expect(page.getByPlaceholder('A token is saved. Leave empty to keep it.')).toHaveCount(1)
+  await a11y()
+  const download = page.waitForEvent('download')
+  await page.getByRole('link', { name: /^Download GTM container/ }).click()
+  const gtm = await download
+  expect(gtm.suggestedFilename()).toBe('rlc-gtm-container.json')
+  expect(readFileSync((await gtm.path())!, 'utf8')).toContain('GTM-TEST1')
+  const anon = await playwright.request.newContext({ baseURL: page.url() })
+  expect((await anon.get('/admin/tracking/gtm-container')).status()).toBe(403)
+  await anon.dispose()
+
+  // Storefront: verification tags, every tool's queue at once, the libraries a moment later.
+  await page.goto('/')
+  await expect(page.locator('meta[name="facebook-domain-verification"]')).toHaveAttribute(
+    'content',
+    'fbverify1',
+  )
+  await expect(page.locator('meta[name="google-site-verification"]')).toHaveAttribute(
+    'content',
+    'gsc-code_1',
+  )
+  for (const src of [
+    'gtag/js?id=G-TEST12345',
+    'gtm.js?id=GTM-TEST1',
+    'connect.facebook.net/en_US/fbevents.js',
+    'analytics.tiktok.com/i18n/pixel/events.js?sdkid=CTIKTOK1',
+    'www.clarity.ms/tag/clar1ty',
+  ])
+    await expect(page.locator(`script[src*="${src}"]`)).toBeAttached({ timeout: 5000 })
+  const boot = await queued()
+  expect(boot.fbq).toContain('["init","11112222"]')
+  expect(boot.fbq).toContain('["init","33334444"]')
+  expect(boot.fbq).toContain('["track","PageView"]')
+  expect(boot.ttq).toContain('["page"]')
+  // A contact tap is an event too (the call itself is not placed from a test).
+  await page.locator('details > summary').filter({ hasText: 'Help' }).click()
+  await page.evaluate(() => document.addEventListener('click', (e) => e.preventDefault()))
+  await page.getByRole('link', { name: 'Call us' }).click()
+  expect((await queued()).fbq).toContain('["track","Contact"')
+
+  // Placed: the browser sends Meta's Purchase; TikTok's browser and server both send (same id).
+  const first = await order()
+  const id1 = `order-${first}`
+  const atOrder = await queued()
+  expect(atOrder.fbq).toContain(`"Purchase"`)
+  expect(atOrder.fbq).toContain(`{"eventID":"${id1}","event_id":"${id1}"}`)
+  expect(atOrder.ttq).toContain(`["track","CompletePayment"`)
+  expect(atOrder.ttq).toContain(id1)
+  expect(
+    await page.evaluate(
+      (id) => (window.dataLayer ?? []).some((e) => (e as { event_id?: string }).event_id === id),
+      id1,
+    ),
+  ).toBe(true)
+  await expect.poll(() => serverEvents('tracking:tiktok')).toContain(id1)
+
+  // With a CAPI token Purchase waits for the confirmation, from the server only.
+  await page.goto('/admin/tracking')
+  await field('Conversions API access token').fill('meta-secret')
+  await field('Test event code').fill('TEST42')
+  await save()
+  await expect(page.getByTestId('meta-fallback')).toHaveCount(0)
+  const second = await order()
+  expect((await queued()).fbq).not.toContain(`order-${second}`)
+  expect(serverEvents('tracking:meta')).not.toContain(`order-${second}`)
+  await page.goto(`/admin/orders?q=${second}`)
+  await page.getByRole('link', { name: new RegExp(`#${second}`) }).click()
+  await page.getByRole('button', { name: 'Confirm order' }).click()
+  await expect(page.getByRole('button', { name: 'Confirm order' })).toHaveCount(0)
+  await expect.poll(() => serverEvents('tracking:meta')).toContain(`order-${second}`)
+  expect(serverEvents('tracking:meta')).toContain('"test_event_code":"TEST42"')
+
+  // GTM only: no pixel script from the shop; tokens removed, ids cleared.
+  await page.goto('/admin/tracking')
+  await page.getByLabel('Who sends Meta events').selectOption('gtm')
+  await page.getByLabel('Remove the saved token').first().check()
+  await page.getByLabel('Remove the saved token').last().check()
+  await save()
+  await expect(page.getByPlaceholder('A token is saved. Leave empty to keep it.')).toHaveCount(0)
+  await page.goto('/')
+  await expect(page.locator('script[src*="gtm.js?id=GTM-TEST1"]')).toBeAttached({ timeout: 5000 })
+  expect(await page.evaluate(() => 'fbq' in window)).toBe(false)
+
+  await page.goto('/admin/tracking')
+  for (const l of [
+    'Meta Pixel IDs (comma-separated)',
+    'Facebook domain verification code',
+    'Test event code',
+    'TikTok Pixel ID',
+    'Google Tag Manager container ID',
+    'Extra GA4 measurement IDs (comma-separated)',
+    'Microsoft Clarity project ID',
+    'Google Search Console verification code',
+  ])
+    await field(l).fill('')
+  await page.getByLabel('Who sends Meta events').selectOption('site')
+  await save()
+  await page.goto('/admin/seo')
+  await page.getByLabel('Google Analytics 4 Measurement ID').fill('')
+  await save()
+})
