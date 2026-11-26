@@ -1928,6 +1928,7 @@ test('couriers: accounts, send an order, webhook updates, bulk send (E1, E2)', a
   request,
   a11y,
 }) => {
+  test.setTimeout(60_000) // three couriers, webhooks for each, then a bulk send
   const name = `Parcel ${uid()}`
   const phone = `013${Date.now().toString().slice(-8)}`
   await signedIn(page)
