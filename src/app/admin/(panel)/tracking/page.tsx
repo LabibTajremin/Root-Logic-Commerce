@@ -124,6 +124,15 @@ export default async function TrackingPage() {
             </a>
           )}
         </Card>
+        <Card className="flex flex-col gap-2">
+          <h2 className="font-semibold">{t('tracking.feeds')}</h2>
+          <p className="text-sm text-muted">{t('tracking.feedsHelp')}</p>
+          {['/feeds/products.xml', '/feeds/products.csv'].map((f) => (
+            <a key={f} href={f} className="w-fit font-semibold underline">
+              {f}
+            </a>
+          ))}
+        </Card>
         <button className="min-h-11 w-fit rounded-control bg-button px-4 font-semibold text-button-text">
           {t('common.save')}
         </button>

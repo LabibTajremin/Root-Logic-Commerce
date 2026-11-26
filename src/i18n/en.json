@@ -1245,5 +1245,7 @@
   "tracking.opt_gtm": "GTM web container only",
   "tracking.opt_placed": "Placed",
   "tracking.opt_confirmed": "Confirmed",
-  "tracking.opt_delivered": "Delivered"
+  "tracking.opt_delivered": "Delivered",
+  "tracking.feeds": "Product feeds",
+  "tracking.feedsHelp": "Give these links to Meta Commerce Manager or Google Merchant Center as a scheduled feed. Each variant is its own item; demo products and products without a photo are left out."
 }

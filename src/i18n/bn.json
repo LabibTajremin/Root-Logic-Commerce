@@ -1245,5 +1245,7 @@
   "tracking.opt_gtm": "শুধু GTM ওয়েব কন্টেইনার",
   "tracking.opt_placed": "অর্ডার দেওয়া হলে",
   "tracking.opt_confirmed": "কনফার্ম হলে",
-  "tracking.opt_delivered": "ডেলিভারি হলে"
+  "tracking.opt_delivered": "ডেলিভারি হলে",
+  "tracking.feeds": "প্রোডাক্ট ফিড",
+  "tracking.feedsHelp": "এই লিংকগুলো মেটা কমার্স ম্যানেজার বা গুগল মার্চেন্ট সেন্টারে নির্ধারিত ফিড হিসেবে দিন। প্রতিটি ভ্যারিয়েন্ট আলাদা আইটেম; ডেমো ও ছবি ছাড়া প্রোডাক্ট বাদ যায়।"
 }

@@ -2287,6 +2287,8 @@ test('tracking: Meta + TikTok pixels with server events, GTM, GA4, Clarity, veri
   }
   await signedIn(page)
   await createProduct(page, { name, price: '450', stock: '9' })
+  await editProduct(page, name)
+  await uploadPhoto(page)
   await page.goto('/admin/store')
   await page.getByLabel('Phone', { exact: true }).fill('01711 234567')
   await save()
@@ -2319,6 +2321,15 @@ test('tracking: Meta + TikTok pixels with server events, GTM, GA4, Clarity, veri
   const anon = await playwright.request.newContext({ baseURL: page.url() })
   expect((await anon.get('/admin/tracking/gtm-container')).status()).toBe(403)
   await anon.dispose()
+
+  // H10: catalog feeds, linked from this page.
+  await expect(page.getByRole('link', { name: '/feeds/products.xml' })).toBeVisible()
+  const xml = await (await page.request.get('/feeds/products.xml')).text()
+  expect(xml).toContain(`<title>${name}</title>`)
+  expect(xml).toContain('<g:price>450.00 BDT</g:price>')
+  expect(xml).toMatch(/<g:image_link>http:\/\/[^<]+\/api\/media\/[\w-]+<\/g:image_link>/)
+  const csv = await (await page.request.get('/feeds/products.csv')).text()
+  expect(csv).toContain(`,${name},`)
 
   // Storefront: verification tags, every tool's queue at once, the libraries a moment later.
   await page.goto('/')
