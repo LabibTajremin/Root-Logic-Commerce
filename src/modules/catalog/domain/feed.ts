@@ -12,8 +12,8 @@ export type FeedProduct = {
   stock: number
   sku: string | null
   options: ProductOptions
-  brand: string
-  category: string
+  brandId: string | null
+  categoryId: string | null
   images: string[]
 }
 
@@ -49,11 +49,20 @@ const amount = (minor: number, currency: string) => `${(minor / 100).toFixed(2)}
  * One item per product, or per variant (sharing an item group), in the shape both Meta and
  * Google catalogs read. A product without a photo is left out: neither catalog accepts it.
  */
+type Named = { id: string; name: string }
+export type FeedShop = {
+  variants: FeedVariant[]
+  brands: Named[]
+  categories: Named[]
+  /** The brand of products without one. */
+  shopName: string
+  base: string
+  currency: string
+}
+
 export const feedItems = (
   products: FeedProduct[],
-  variants: FeedVariant[],
-  base: string,
-  currency: string,
+  { variants, brands, categories, shopName, base, currency }: FeedShop,
 ): FeedItem[] =>
   products
     .filter((p) => p.images.length > 0)
@@ -74,8 +83,8 @@ export const feedItems = (
         price: amount(x.compareAtPrice ?? x.price, currency),
         salePrice: x.compareAtPrice === null ? null : amount(x.price, currency),
         availability: x.stock > 0 ? 'in stock' : 'out of stock',
-        brand: p.brand,
-        productType: p.category,
+        brand: brands.find((b) => b.id === p.brandId)?.name ?? shopName,
+        productType: categories.find((c) => c.id === p.categoryId)?.name ?? '',
       })
       const mine = variants.filter((v) => v.productId === p.id)
       if (mine.length === 0) return [item({ ...p, id: p.sku ?? p.id }, p.name, null)]

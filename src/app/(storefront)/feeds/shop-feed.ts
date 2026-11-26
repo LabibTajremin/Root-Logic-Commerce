@@ -20,15 +20,15 @@ export const shopFeed = async () => {
     imagesOf(products),
   ])
   const items = feedItems(
-    products.map((p) => ({
-      ...p,
-      brand: brands.find((b) => b.id === p.brandId)?.name ?? store.name,
-      category: allCategories.find((c) => c.id === p.categoryId)?.name ?? '',
-      images: images.get(p.id)!.map((i) => `${base}${i.src}`),
-    })),
-    variants,
-    base,
-    business.currency,
+    products.map((p) => ({ ...p, images: images.get(p.id)!.map((i) => `${base}${i.src}`) })),
+    {
+      variants,
+      brands,
+      categories: allCategories,
+      shopName: store.name,
+      base,
+      currency: business.currency,
+    },
   )
   return { items, shop: { title: store.name, link: base } }
 }
