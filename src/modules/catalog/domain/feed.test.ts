@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { feedCsv, feedItems, feedXml, type FeedProduct } from './feed'
+import { feedCsv, feedItems, feedXml, type FeedProduct, type FeedVariant } from './feed'
 
 const tee: FeedProduct = {
   id: 'p1',
@@ -14,7 +14,6 @@ const tee: FeedProduct = {
   brand: 'Shop',
   category: 'Tops',
   images: ['https://s.test/a.jpg', 'https://s.test/b.jpg'],
-  variants: [],
 }
 
 describe('product feed (H10)', () => {
@@ -33,26 +32,44 @@ describe('product feed (H10)', () => {
           sku: 'POLO',
           options: [{ name: 'Size', values: ['S', 'M'] }],
           images: ['https://s.test/c.jpg'],
-          variants: [
-            {
-              id: 'v1',
-              options: { Size: 'S' },
-              price: 50000,
-              compareAtPrice: null,
-              stock: 2,
-              sku: 'POLO-S',
-            },
-            {
-              id: 'v2',
-              options: { Size: 'M' },
-              price: 50000,
-              compareAtPrice: 70000,
-              stock: 0,
-              sku: null,
-            },
-          ],
+        },
+        {
+          ...tee,
+          id: 'p4',
+          slug: 'cap',
+          name: 'Cap',
+          options: [{ name: 'Colour', values: ['Red'] }],
         },
       ],
+      [
+        {
+          productId: 'p3',
+          id: 'v1',
+          options: { Size: 'S' },
+          price: 50000,
+          compareAtPrice: null,
+          stock: 2,
+          sku: 'POLO-S',
+        },
+        {
+          productId: 'p3',
+          id: 'v2',
+          options: { Size: 'M' },
+          price: 50000,
+          compareAtPrice: 70000,
+          stock: 0,
+          sku: null,
+        },
+        {
+          productId: 'p4',
+          id: 'v3',
+          options: { Colour: 'Red' },
+          price: 9000,
+          compareAtPrice: null,
+          stock: 1,
+          sku: null,
+        },
+      ] satisfies FeedVariant[],
       'https://shop.test',
       'BDT',
     )
@@ -77,6 +94,7 @@ describe('product feed (H10)', () => {
         availability: 'in stock',
       },
       { id: 'v2', groupId: 'POLO', title: 'Polo (M)', salePrice: '500.00 BDT' },
+      { id: 'v3', groupId: 'p4', title: 'Cap (Red)' },
     ])
     const xml = feedXml(items, { title: 'Shop <1>', link: 'https://shop.test' })
     expect(xml).toContain('<title>Shop &lt;1&gt;</title>')

@@ -25,8 +25,8 @@ export const shopFeed = async () => {
       brand: brands.find((b) => b.id === p.brandId)?.name ?? store.name,
       category: allCategories.find((c) => c.id === p.categoryId)?.name ?? '',
       images: images.get(p.id)!.map((i) => `${base}${i.src}`),
-      variants: variants.filter((v) => v.productId === p.id),
     })),
+    variants,
     base,
     business.currency,
   )

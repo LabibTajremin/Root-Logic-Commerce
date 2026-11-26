@@ -15,14 +15,17 @@ export type FeedProduct = {
   brand: string
   category: string
   images: string[]
-  variants: {
-    id: string
-    options: VariantOptions
-    price: number
-    compareAtPrice: number | null
-    stock: number
-    sku: string | null
-  }[]
+}
+
+/** A variant row, matched to its product by `productId`. */
+export type FeedVariant = {
+  productId: string
+  id: string
+  options: VariantOptions
+  price: number
+  compareAtPrice: number | null
+  stock: number
+  sku: string | null
 }
 
 export type FeedItem = {
@@ -46,7 +49,12 @@ const amount = (minor: number, currency: string) => `${(minor / 100).toFixed(2)}
  * One item per product, or per variant (sharing an item group), in the shape both Meta and
  * Google catalogs read. A product without a photo is left out: neither catalog accepts it.
  */
-export const feedItems = (products: FeedProduct[], base: string, currency: string): FeedItem[] =>
+export const feedItems = (
+  products: FeedProduct[],
+  variants: FeedVariant[],
+  base: string,
+  currency: string,
+): FeedItem[] =>
   products
     .filter((p) => p.images.length > 0)
     .flatMap((p) => {
@@ -69,8 +77,9 @@ export const feedItems = (products: FeedProduct[], base: string, currency: strin
         brand: p.brand,
         productType: p.category,
       })
-      if (p.variants.length === 0) return [item({ ...p, id: p.sku ?? p.id }, p.name, null)]
-      return p.variants.map((v) =>
+      const mine = variants.filter((v) => v.productId === p.id)
+      if (mine.length === 0) return [item({ ...p, id: p.sku ?? p.id }, p.name, null)]
+      return mine.map((v) =>
         item(
           { ...v, id: v.sku ?? v.id },
           `${p.name} (${variantLabel(p.options, v.options)})`,
