@@ -112,6 +112,15 @@ describe('container', () => {
           sms: { ...business.messages.sms, enabled: true },
           email: { ...business.messages.email, enabled: true },
         },
+        tracking: {
+          ...business.tracking,
+          meta: {
+            ...business.tracking.meta,
+            pixelIds: ['11112222'],
+            capiToken: c.secrets.seal('meta-token'),
+            trigger: 'placed',
+          },
+        },
       },
       version,
     )
@@ -137,7 +146,7 @@ describe('container', () => {
       { ...shopRules, zones },
     )
     // Events for an order that no longer exists are ignored by every subscriber.
-    for (const ev of ['order.confirmed', 'order.delivered'] as const)
+    for (const ev of ['order.placed', 'order.confirmed', 'order.delivered'] as const)
       await c.bus.emit(ev, {
         storeId: store,
         orderId: '00000000-0000-4000-8000-000000000000',
@@ -148,6 +157,10 @@ describe('container', () => {
     expect(log).toContain(`we got your order #${o.orderNo} (৳560)`)
     expect(log).toContain('"to":"r@x.test"')
     expect(log).toContain('"to":"owner@x.test"')
+    // H1: the server sends Purchase with the opened token and hashed contacts.
+    expect(log).toContain('"channel":"tracking:meta"')
+    expect(log).toContain(`"event_id":"order-${o.orderNo}"`)
+    expect(log).toContain('"access_token":"meta-token"')
   })
 
   it('counts views and delivered revenue, and sends live messages through the store’s channels', async () => {

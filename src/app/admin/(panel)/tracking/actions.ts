@@ -4,7 +4,7 @@ import { currentSettings } from '@/server/request'
 import { act, type ActionState } from '../act'
 
 const list = (v: FormDataEntryValue | null) =>
-  String(v ?? '')
+  String(v)
     .split(/[\s,]+/)
     .filter(Boolean)
 
