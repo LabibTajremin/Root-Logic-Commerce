@@ -49,6 +49,7 @@ const KEYS = [
   'draftRestored',
   'zoneDetected',
   'thanaHint',
+  'phoneHint',
   'shareLocation',
   'locationAdded',
   'locationFailed',

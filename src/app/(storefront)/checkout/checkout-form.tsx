@@ -40,8 +40,9 @@ type Zone = { id: string; label: string; charge: number }
 const Input = ({
   id,
   label,
+  hint,
   ...rest
-}: { id: string; label?: string } & ComponentProps<'input'>) => (
+}: { id: string; label?: string; hint?: string } & ComponentProps<'input'>) => (
   <div className="flex flex-col gap-1.5">
     <label htmlFor={id} className="text-sm font-semibold">
       {label}
@@ -50,8 +51,14 @@ const Input = ({
       id={id}
       name={id}
       className="min-h-11 rounded-control border border-line bg-surface px-3"
+      aria-describedby={hint && `${id}-hint`}
       {...rest}
     />
+    {hint && (
+      <p id={`${id}-hint`} className="text-xs text-muted">
+        {hint}
+      </p>
+    )}
   </div>
 )
 
@@ -213,6 +220,7 @@ export const CheckoutForm = ({
             id="phone"
             data-kept
             label={L.phone}
+            hint={L.phoneHint}
             required
             type="tel"
             inputMode="tel"

@@ -21,7 +21,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
   ])
   const money = (minor: number) => formatMoney(minor, { currency: business.currency })
   const t = (k: string, v?: Record<string, string | number>) => translate(locale, k, v)
-  const [pending, month, recent, low, cats, prods, ga4InAdmin, search, courierOn] =
+  const [pending, month, recent, low, cats, prods, ga4InAdmin, search, courierOn, pages] =
     await Promise.all([
       container.orders.listOrders(store.id, { status: 'PENDING', limit: 1 }),
       container.orders.listOrders(store.id, { from: daysAgo(30), limit: 1 }),
@@ -32,6 +32,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
       container.plans.has(store.id, 'ga4InAdmin'),
       searchParams,
       container.features.isOn(store.id, 'courier'),
+      container.pages.list(store.id),
     ])
   // E5: what couriers charged for parcels sent in the last 30 days.
   const courierCost = courierOn ? await container.courier.chargesSince(store.id, daysAgo(30)) : null
@@ -39,6 +40,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
     { label: t('dash.step.category'), done: cats.length > 0, href: '/admin/categories' },
     { label: t('dash.step.product'), done: prods.length > 0, href: '/admin/products/new' },
     { label: t('dash.step.design'), done: false, href: '/admin/design' },
+    // Shoppers trust a shop they can call and whose return rules they can read before paying.
+    { label: t('dash.step.contact'), done: !!business.contact.phone, href: '/admin/store' },
+    {
+      label: t('dash.step.policies'),
+      done: pages.some((pg) => pg.published),
+      href: '/admin/pages',
+    },
     { label: t('dash.step.order'), done: month.total > 0, href: '/' },
   ]
   return (

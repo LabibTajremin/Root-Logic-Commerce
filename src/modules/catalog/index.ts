@@ -39,3 +39,4 @@ export {
 export { csvColumns, parseCsv, toCsv } from './domain/csv'
 export { demoPacks } from './domain/demo-packs'
 export { feedCsv, feedItems, feedXml, type FeedItem, type FeedProduct } from './domain/feed'
+export { didYouMean, searchProducts, type Searchable } from './domain/search'

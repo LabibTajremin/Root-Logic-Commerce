@@ -2422,3 +2422,39 @@ test('tracking: Meta + TikTok pixels with server events, GTM, GA4, Clarity, veri
   await page.getByLabel('Google Analytics 4 Measurement ID').fill('')
   await save()
 })
+
+test('shop search forgives typos, never dead-ends; checkout says why it needs the phone; setup checklist', async ({
+  page,
+  a11y,
+}) => {
+  const name = `Silk Shawl ${uid()}`
+  await signedIn(page)
+  await createProduct(page, { name, price: '900', stock: '3', sku: `SH-${Date.now()}` })
+
+  // Words in any order, with a slip, still find it.
+  await page.goto('/search?q=shawll%20silk')
+  await expect(page.getByRole('link', { name }).first()).toBeVisible()
+  // Nothing fits: tips, a corrected search, the categories and what is new — no dead end.
+  await page.goto('/search?q=silk%20sjawk')
+  const none = page.getByTestId('no-results')
+  await expect(none).toContainText('Check the spelling')
+  await expect(none.getByRole('heading', { name: 'New arrivals' })).toBeVisible()
+  await a11y()
+  await none.getByRole('link', { name: 'silk shawl', exact: true }).click()
+  await expect(page).toHaveURL(/q=silk%20shawl/)
+  await expect(page.getByRole('link', { name }).first()).toBeVisible()
+
+  await page.getByRole('link', { name }).first().click()
+  await page.getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await expect(page.getByLabel('Phone number')).toHaveAccessibleDescription(
+    'The courier calls this number before delivery. We never share it.',
+  )
+
+  await page.goto('/admin')
+  for (const step of [
+    'Add your shop phone and address',
+    'Publish your return and delivery policy pages',
+  ])
+    await expect(page.getByRole('link', { name: step })).toBeVisible()
+})
