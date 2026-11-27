@@ -33,28 +33,22 @@ const distance = (a: string, b: string, max: number) => {
 const slips = (w: string) => (/\p{N}/u.test(w) || w.length < 4 ? 0 : w.length < 7 ? 1 : 2)
 
 /** How well one typed word fits one product word: 0 means not at all. */
-const fit = (w: string, t: string) => {
+const fit = (w: string, t: string, typos: boolean) => {
   if (t === w) return 4
   if (t.startsWith(w)) return 3
   if (t.includes(w)) return 2
-  const n = slips(w)
+  const n = typos ? slips(w) : 0
   // A slip anywhere in the word, or in the start of a longer word ("shrt" → "shirts").
   return n > 0 && Math.min(distance(w, t, n), distance(w, t.slice(0, w.length), n)) <= n ? 1 : 0
 }
 
-/**
- * Shop search the way shoppers type: words in any order, in the name, SKU, category or brand,
- * with a typo forgiven. Every typed word must fit; best fits first.
- */
-export const searchProducts = <T extends Searchable>(items: T[], query: string): T[] => {
-  const typed = words(query)
-  if (typed.length === 0) return items
-  return items
+const matches = <T extends Searchable>(items: T[], typed: string[], typos: boolean) =>
+  items
     .map((item, i) => {
       const own = words([item.name, item.sku ?? '', ...item.keywords].join(' '))
       let score = 0
       for (const w of typed) {
-        const best = Math.max(0, ...own.map((t) => fit(w, t)))
+        const best = Math.max(0, ...own.map((t) => fit(w, t, typos)))
         if (best === 0) return null
         score += best
       }
@@ -63,6 +57,17 @@ export const searchProducts = <T extends Searchable>(items: T[], query: string):
     .filter((r) => r !== null)
     .sort((a, b) => b.score - a.score || a.i - b.i)
     .map((r) => r.item)
+
+/**
+ * Shop search the way shoppers type: words in any order, in the name, SKU, category or brand.
+ * Every typed word must fit; best fits first. Typos are forgiven only when the words as typed
+ * find nothing, so an exact word or code never brings in look-alikes.
+ */
+export const searchProducts = <T extends Searchable>(items: T[], query: string): T[] => {
+  const typed = words(query)
+  if (typed.length === 0) return items
+  const exact = matches(items, typed, false)
+  return exact.length > 0 ? exact : matches(items, typed, true)
 }
 
 /** When nothing matched: the query with each unknown word swapped for the nearest shop word. */

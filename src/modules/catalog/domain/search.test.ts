@@ -30,6 +30,10 @@ describe('shop search', () => {
     expect(names('jamdany sare')).toEqual([saree.name])
     expect(names('men')).toEqual([shirt.name, saree.name]) // exact first, then inside "women"
     expect(names('mxn')).toEqual([])
+    // A word that exists brings only its own products, not look-alikes.
+    expect(
+      searchProducts([p('Kurta mwzkalia'), p('Kurta mwzkalib')], 'mwzkalia').map((x) => x.name),
+    ).toEqual(['Kurta mwzkalia'])
     // A code with one character off is a different product.
     expect(names('pj-02')).toEqual([])
     expect(searchProducts([p('Kurta k4etk1'), p('Kurta k4etk9')], 'k4etk1').length).toBe(1)
