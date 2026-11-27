@@ -40,6 +40,11 @@ describe('shop search', () => {
   })
 
   it('ranks the best fit first', () => {
+    // Equal fits keep the shop's own order.
+    expect(searchProducts([p('Red Tea'), p('Green Tea')], 'tea').map((x) => x.name)).toEqual([
+      'Red Tea',
+      'Green Tea',
+    ])
     const items = [p('Sarees pack'), p('Saree')]
     expect(searchProducts(items, 'saree').map((x) => x.name)).toEqual(['Saree', 'Sarees pack'])
   })
