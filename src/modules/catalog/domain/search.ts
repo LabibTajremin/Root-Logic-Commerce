@@ -29,7 +29,8 @@ const distance = (a: string, b: string, max: number) => {
 }
 
 // Short words must be typed right; longer ones may have one slip (one more from 7 letters).
-const slips = (w: string) => (w.length < 4 ? 0 : w.length < 7 ? 1 : 2)
+// Codes and sizes (any digit: SKUs, "42", "xl2") must be exact — a near code is another product.
+const slips = (w: string) => (/\p{N}/u.test(w) || w.length < 4 ? 0 : w.length < 7 ? 1 : 2)
 
 /** How well one typed word fits one product word: 0 means not at all. */
 const fit = (w: string, t: string) => {

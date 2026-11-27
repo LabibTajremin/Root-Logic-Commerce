@@ -30,6 +30,9 @@ describe('shop search', () => {
     expect(names('jamdany sare')).toEqual([saree.name])
     expect(names('men')).toEqual([shirt.name, saree.name]) // exact first, then inside "women"
     expect(names('mxn')).toEqual([])
+    // A code with one character off is a different product.
+    expect(names('pj-02')).toEqual([])
+    expect(searchProducts([p('Kurta k4etk1'), p('Kurta k4etk9')], 'k4etk1').length).toBe(1)
   })
 
   it('ranks the best fit first', () => {
