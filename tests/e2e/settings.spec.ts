@@ -2865,6 +2865,7 @@ test('reels: link and upload sources, cover rules, order, cover-flow carousel, o
   await expect(page.getByTestId('module-reels')).toContainText('On')
   await createProduct(page, { name: tee, price: '450', stock: '5' })
   await createProduct(page, { name: old, price: '200', stock: '5' })
+  await createProduct(page, { name: `Bare ${id}`, price: '100', stock: '5' })
 
   const add = async (fill: () => Promise<void>) => {
     await page.goto('/admin/reels')
@@ -2962,9 +2963,11 @@ test('reels: link and upload sources, cover rules, order, cover-flow carousel, o
   await page.waitForURL(/\/checkout$/)
   await expect(page.getByText(tee).first()).toBeVisible()
 
-  // The product page shows the reels it is in.
+  // The product page shows the reels it is in (none, none shown).
   await page.goto(`/p/${slug(tee)}`)
   await expect(page.getByRole('button', { name: `Play reel: Unboxing ${id}` })).toBeVisible()
+  await page.goto(`/p/${slug(`Bare ${id}`)}`)
+  await expect(page.getByRole('region', { name: 'Watch & shop' })).toHaveCount(0)
   // A product that leaves the shop drops out of its reel.
   await editProduct(page, old)
   await page.locator('#status').selectOption('archived')
@@ -2972,6 +2975,11 @@ test('reels: link and upload sources, cover rules, order, cover-flow carousel, o
   await expect(page).toHaveURL(/\/admin\/products$/)
   await page.goto('/admin/reels')
   await expect(page.getByTestId('reel-1')).toContainText('?')
+  await page.goto('/')
+  await expect(
+    page.getByRole('button', { name: /^Play reel: Reel/ }).filter({ hasNotText: '৳' }),
+  ).toHaveCount(1)
+  await page.goto('/admin/reels')
   await page.getByTestId('reel-1').getByRole('button', { name: 'Remove' }).click()
   await expect(page.getByTestId('reel-2')).toHaveCount(0)
   await page.goto('/admin/layouts')

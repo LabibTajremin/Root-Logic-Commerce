@@ -145,7 +145,7 @@ export const ReelsCarousel = ({ reels, labels }: { reels: ReelView[]; labels: La
           ) : (
             <iframe
               src={open.embed!}
-              title={open.caption || labels.reel}
+              title={`${labels.reel}: ${open.caption}`}
               allow="autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
               className="aspect-[9/16] w-full border-0 bg-black"
