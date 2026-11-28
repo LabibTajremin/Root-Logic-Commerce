@@ -14,7 +14,7 @@ export const securityHeaders = (production: boolean) => {
     "media-src 'self'",
     "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.clarity.ms",
     // 'self': the design editor previews the storefront in an iframe.
-    "frame-src 'self' https://www.youtube-nocookie.com https://www.facebook.com https://www.instagram.com",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.facebook.com https://www.instagram.com https://www.tiktok.com",
     "frame-ancestors 'self'",
     "form-action 'self'",
     "base-uri 'self'",

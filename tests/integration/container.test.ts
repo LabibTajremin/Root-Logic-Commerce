@@ -60,6 +60,7 @@ describe('container', () => {
       'pages',
       'plans',
       'promotions',
+      'reels',
       'reviews',
       'secrets',
       'settings',

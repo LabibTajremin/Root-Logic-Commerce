@@ -3,6 +3,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { createAccess } from '@/modules/access'
 import { createCatalog } from '@/modules/catalog'
 import { createLanding } from '@/modules/landing'
+import { createReels } from '@/modules/promotions'
 import { createInsights } from '@/modules/insights'
 import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
@@ -27,6 +28,7 @@ import { createStock } from '@/modules/stock'
 import type { Db } from '@/infrastructure/db/client'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
 import { createLandingRepo } from '@/infrastructure/db/repositories/landing-repo'
+import { createReelsRepo } from '@/infrastructure/db/repositories/reels-repo'
 import { createBannersRepo } from '@/infrastructure/db/repositories/banners-repo'
 import { createInsightsRepo } from '@/infrastructure/db/repositories/insights-repo'
 import { createMediaRepo } from '@/infrastructure/db/repositories/media-repo'
@@ -197,6 +199,7 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     messaging,
     insights,
     promotions: createPromotions({ repo: createBannersRepo(db) }),
+    reels: createReels({ repo: createReelsRepo(db) }),
     // Per store + client IP, per process (spec §8: rate-limit checkout and tracking).
     limits: {
       checkout: createRateLimiter({ limit: 10, windowMs: 10 * 60_000 }),

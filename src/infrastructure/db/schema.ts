@@ -851,3 +851,16 @@ export const landingPages = pgTable(
   },
   (t) => [uniqueIndex('landing_pages_store_slug_uq').on(t.storeId, t.slug)],
 )
+
+/** B4: reels — an uploaded video or a link, a cover, a caption and the products it shows. */
+export const reels = pgTable('reels', {
+  id: id(),
+  storeId: storeId(),
+  videoId: uuid(),
+  url: text(),
+  coverId: uuid(),
+  caption: text().notNull().default(''),
+  productIds: jsonb().$type<string[]>().notNull().default([]),
+  sortOrder: integer().notNull().default(0),
+  createdAt: createdAt(),
+})

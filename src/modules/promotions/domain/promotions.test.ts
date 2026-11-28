@@ -24,6 +24,18 @@ describe('embeds', () => {
     expect(parseEmbed('https://www.youtube.com/channel/UCx')).toBeNull()
   })
 
+  it('parses TikTok video links; profiles and short links are refused (B4)', () => {
+    expect(parseEmbed('https://www.tiktok.com/@shop.bd/video/7301234567890123456?lang=en')).toEqual(
+      {
+        provider: 'tiktok',
+        src: 'https://www.tiktok.com/embed/v2/7301234567890123456',
+        thumb: null,
+      },
+    )
+    expect(parseEmbed('https://www.tiktok.com/@shop.bd')).toBeNull()
+    expect(parseEmbed('https://vm.tiktok.com/ZMabc/')).toBeNull()
+  })
+
   it('parses Facebook and Instagram video links', () => {
     expect(parseEmbed('https://www.facebook.com/shop/videos/123456/')).toMatchObject({
       provider: 'facebook',

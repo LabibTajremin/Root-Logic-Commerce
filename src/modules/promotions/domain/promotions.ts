@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export type Embed =
   | { provider: 'youtube'; id: string; src: string; thumb: string }
-  | { provider: 'facebook' | 'instagram'; src: string; thumb: null }
+  | { provider: 'facebook' | 'instagram' | 'tiktok'; src: string; thumb: null }
 
 const YT = /^[\w-]{11}$/
 
@@ -36,6 +36,10 @@ export const parseEmbed = (input: string): Embed | null => {
       src: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u.href)}&autoplay=1`,
       thumb: null,
     }
+  // B4: TikTok's own player, by the video's number (share links name the account too).
+  const tt = /^\/@[\w.-]+\/video\/(\d+)/.exec(u.pathname)
+  if (host === 'tiktok.com' && tt)
+    return { provider: 'tiktok', src: `https://www.tiktok.com/embed/v2/${tt[1]}`, thumb: null }
   const ig = /^\/(p|reel|tv)\/([\w-]+)/.exec(u.pathname)
   if (host === 'instagram.com' && ig)
     return {
