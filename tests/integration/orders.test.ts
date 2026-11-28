@@ -1017,6 +1017,7 @@ describe('order rows and the order page (F12)', () => {
     const total = async (o: { id: string }) => (await orders.getOrder(store, o.id))!
     const first = await orders.placeOrder(store, checkout(a.id, 2), rules)
     expect((await total(first)).subtotal).toBe(60000)
+    expect(await orders.flashSold(store, flash)).toEqual(new Map([[a.id, 2]]))
     // A cancelled order gives its units back to the sale.
     await orders.changeStatus(store, first.id, 'CANCELLED', null)
     await orders.placeOrder(store, checkout(a.id, 3), rules)

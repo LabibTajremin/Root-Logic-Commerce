@@ -1,3 +1,4 @@
+import * as client from '../client'
 import { describe, expect, it } from 'vitest'
 import {
   comboPercent,
@@ -45,6 +46,9 @@ describe('combos (A9)', () => {
   it('says how much less a combo costs', () => {
     expect(comboPercent(2000, 1500)).toBe(25)
     expect(comboPercent(1500, 1500)).toBe(0)
+    // The browser's checkout uses the very same rules.
+    expect(client.comboSaving).toBe(comboSaving)
+    expect(client.comboPercent).toBe(comboPercent)
   })
 })
 

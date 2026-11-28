@@ -23,10 +23,10 @@ export default async function FlashSaleAdmin() {
     return <Locked title={t('flash.title')} text={t('flash.locked')} t={t} />
   const sale = business.flashSale
   const products = await catalog.listProducts(store.id, { status: 'active' })
-  const input = (name: string, label: string, value: string, type = 'text') => (
+  const input = (name: string, label: string, value: string, type = 'text', required = false) => (
     <label className="flex flex-col gap-1.5 text-sm font-semibold">
       {label}
-      <input name={name} type={type} defaultValue={value} className={field} />
+      <input name={name} type={type} defaultValue={value} required={required} className={field} />
     </label>
   )
   return (
@@ -34,10 +34,10 @@ export default async function FlashSaleAdmin() {
       <h1 className="font-heading text-3xl">{t('flash.title')}</h1>
       <ActionForm action={saveFlashSale} className="flex flex-col gap-4" saved={t('common.saved')}>
         <Card className="grid gap-3 sm:grid-cols-2">
-          {input('name', t('flash.name'), sale?.name ?? '')}
+          {input('name', t('flash.name'), sale?.name ?? '', 'text', true)}
           {input('cap', t('flash.capLabel'), sale?.cap ? String(sale.cap) : '', 'number')}
-          {input('startsAt', t('flash.starts'), dhaka(sale?.startsAt), 'datetime-local')}
-          {input('endsAt', t('flash.ends'), dhaka(sale?.endsAt), 'datetime-local')}
+          {input('startsAt', t('flash.starts'), dhaka(sale?.startsAt), 'datetime-local', true)}
+          {input('endsAt', t('flash.ends'), dhaka(sale?.endsAt), 'datetime-local', true)}
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="on" defaultChecked={sale?.on ?? true} className="size-5" />
             {t('flash.running')}

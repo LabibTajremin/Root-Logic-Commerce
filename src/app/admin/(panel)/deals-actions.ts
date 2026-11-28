@@ -8,7 +8,7 @@ import type { adminContext } from './context'
 
 type Ctx = Awaited<ReturnType<typeof adminContext>>
 // Every key read is an input of the combo / flash sale forms.
-const str = (f: FormData, k: string) => String(f.get(k) ?? '').trim()
+const str = (f: FormData, k: string) => String(f.get(k)).trim()
 const ROWS = [0, 1, 2, 3, 4, 5, 6, 7]
 
 const save = async (
@@ -57,7 +57,7 @@ export async function removeCombo(_: ActionState, form: FormData) {
 }
 
 // Bangladesh time (UTC+6, no daylight saving): what the owner types is what shoppers see.
-const dhaka = (v: string) => (v ? `${v}:00+06:00` : '')
+const dhaka = (v: string) => `${v}:00+06:00`
 
 /** B11: the one flash sale — window, cap and up to eight products (price or % off each). */
 export async function saveFlashSale(_: ActionState, form: FormData) {
