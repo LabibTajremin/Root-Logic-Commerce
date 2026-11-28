@@ -2667,3 +2667,179 @@ test('landing pages: build from a product, edit blocks, packs and inline order, 
   await prefix('offer')
   await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
 })
+
+test('combos and flash sale: bundle saving at checkout, sale prices, cap, header button, sections (A9, B11)', async ({
+  page,
+  a11y,
+}) => {
+  test.setTimeout(120_000)
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  const id = uid()
+  const [tea, cup, gone, kurti] = [`Tea ${id}`, `Cup ${id}`, `Gone ${id}`, `Kurti ${id}`]
+  const saved = async () =>
+    expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+  // Options read "Name (৳price)": pick by the product's name.
+  const choose = async (select: string, product: string) => {
+    const box = page.getByRole('combobox', { name: select, exact: true })
+    await box.selectOption(
+      (await box.locator('option', { hasText: product }).getAttribute('value'))!,
+    )
+  }
+  await signedIn(page)
+  for (const [path, text] of [
+    ['/admin/combos', /Combos are a paid feature/],
+    ['/admin/flash-sale', /Flash sales are a paid feature/],
+  ] as const) {
+    await page.goto(path)
+    await expect(page.getByText(text)).toBeVisible()
+  }
+  expect((await page.goto('/combos'))!.status()).toBe(404)
+  expect((await page.goto('/flash-sale'))!.status()).toBe(404)
+
+  await page.context().clearCookies()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  for (const feature of ['combos', 'flashSales']) {
+    await page.goto('/admin/plan')
+    await page.getByTestId(`feature-${feature}`).getByRole('button', { name: 'Grant' }).click()
+    await expect(page.getByTestId(`feature-${feature}`)).toContainText('Included')
+    await page.goto('/admin/features')
+    await page.getByTestId(`module-${feature}`).getByRole('button', { name: 'Turn on' }).click()
+    await expect(page.getByTestId(`module-${feature}`)).toContainText('On')
+  }
+  await createProduct(page, { name: tea, price: '500', compareAt: '600', stock: '10' })
+  await editProduct(page, tea)
+  await uploadPhoto(page)
+  await createProduct(page, { name: cup, price: '300', stock: '10' })
+  await createProduct(page, { name: gone, price: '200', stock: '0' })
+  await createProduct(page, { name: kurti, price: '1000', stock: '10' })
+  await page.goto('/admin/layouts')
+  for (const section of ['combos', 'flash-sale']) {
+    const row = page.getByTestId(`section-${section}`)
+    await row.getByRole('button', { name: 'Turn on' }).click()
+    await expect(row).toContainText('On')
+  }
+
+  // A9: two combos — one cheaper than its items, one at full price with a sold-out item.
+  const combo = async (name: string, slug: string, price: string, items: [string, string][]) => {
+    await page.goto('/admin/combos')
+    await page.getByLabel('Combo name').fill(name)
+    await page.getByLabel(/^Short name for the link/).fill(slug)
+    await page.getByLabel('Combo price (৳)').fill(price)
+    for (const [i, [product, qty]] of items.entries()) {
+      await choose(`Product ${i + 1}`, product)
+      await page.getByLabel(`How many of product ${i + 1}`).fill(qty)
+    }
+    await page.getByRole('button', { name: 'Add combo' }).click()
+    await saved()
+  }
+  await page.goto('/admin/combos')
+  await expect(page.getByText('No combos yet')).toBeVisible()
+  await a11y()
+  await combo(`Tea set ${id}`, `tea-${id}`, '900', [
+    [tea, '1'],
+    [cup, '2'],
+  ])
+  await combo(`Plain set ${id}`, `plain-${id}`, '700', [
+    [tea, '1'],
+    [gone, '1'],
+  ])
+  await expect(page.getByTestId(`combo-row-tea-${id}`)).toContainText('18% less')
+
+  await page.goto('/')
+  const card = page.getByTestId(`combo-tea-${id}`).first()
+  await expect(card).toContainText('18% less')
+  await expect(page.getByTestId(`combo-plain-${id}`).first().getByRole('button')).toBeDisabled()
+  await a11y()
+  await page.goto('/combos')
+  await page
+    .getByTestId(`combo-tea-${id}`)
+    .getByRole('button', { name: 'Add combo to cart' })
+    .click()
+  await page.goto('/checkout')
+  await expect(page.getByTestId('checkout-discount')).toContainText('Combo saving')
+  await expect(page.getByTestId('checkout-discount')).toContainText('200')
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+
+  await page.goto('/admin/combos')
+  const plain = page.getByTestId(`combo-row-plain-${id}`)
+  await plain.getByRole('button', { name: 'Turn off' }).click()
+  await expect(plain).toContainText('Off')
+  await plain.getByRole('button', { name: 'Turn on' }).click()
+  await expect(plain).not.toContainText('Off')
+  // An item that leaves the shop hides its combo from shoppers.
+  await editProduct(page, cup)
+  await page.locator('#status').selectOption('archived')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await page.goto('/admin/combos')
+  await expect(page.getByTestId(`combo-row-tea-${id}`)).toContainText('?')
+  await page.goto('/combos')
+  await expect(page.getByTestId(`combo-tea-${id}`)).toHaveCount(0)
+  await page.goto('/admin/combos')
+  for (const slug of [`tea-${id}`, `plain-${id}`])
+    await page.getByTestId(`combo-row-${slug}`).getByRole('button', { name: 'Remove' }).click()
+  await expect(page.getByTestId(`combo-row-tea-${id}`)).toHaveCount(0)
+
+  // B11: a sale running now (Bangladesh time), by price and by percent, capped.
+  const dhaka = (ms: number) => new Date(Date.now() + ms + 6 * 3_600_000).toISOString().slice(0, 16)
+  await page.goto('/admin/flash-sale')
+  await a11y()
+  await page.getByLabel('Sale name').fill(`Weekend ${id}`)
+  await page.getByLabel('Starts (Bangladesh time)').fill(dhaka(-3_600_000))
+  await page.getByLabel('Ends (Bangladesh time)').fill(dhaka(7_200_000))
+  await page.getByLabel('Sale units per product (optional)').fill('5')
+  const pick = (n: number, product: string) => choose(`Product ${n}`, product)
+  await pick(1, tea)
+  await page.getByLabel('Sale price 1 (৳)').fill('400')
+  await pick(2, kurti)
+  await page.getByLabel('% off 2').fill('10')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await saved()
+  await page.reload()
+  await expect(page.getByLabel('Sale price 1 (৳)')).toHaveValue('400')
+  await expect(page.getByLabel('% off 2')).toHaveValue('10')
+
+  await page.goto('/')
+  await expect(page.getByTestId('flash-button')).toBeVisible()
+  await expect(page.getByRole('heading', { name: `Weekend ${id}` })).toBeVisible()
+  await page.getByTestId('flash-button').click()
+  await expect(page.getByRole('heading', { level: 1, name: `Weekend ${id}` })).toBeVisible()
+  await expect(page.getByRole('timer')).toContainText(/Ends in \d+:\d\d:\d\d/)
+  await expect(page.getByText('Only 5 of each at this price')).toBeVisible()
+  await expect(page.getByText('৳400').first()).toBeVisible()
+  await expect(page.getByText('৳900').first()).toBeVisible()
+  await expect(page.getByText('Flash sale', { exact: true }).first()).toBeVisible()
+  await a11y()
+  await page.goto(`/p/${slug(tea)}`)
+  await expect(page.getByText('৳400').first()).toBeVisible()
+
+  // No cap now; then the owner ends the sale and every price is back.
+  await page.goto('/admin/flash-sale')
+  await page.getByLabel('Sale units per product (optional)').fill('')
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await saved()
+  await page.goto('/flash-sale')
+  await expect(page.getByText(/Only \d+ of each/)).toHaveCount(0)
+  await page.goto('/admin/flash-sale')
+  await page.getByRole('button', { name: 'End and remove the sale' }).click()
+  await expect(page.getByRole('button', { name: 'End and remove the sale' })).toHaveCount(0)
+  expect((await page.goto('/flash-sale'))!.status()).toBe(404)
+  await page.goto('/')
+  await expect(page.getByTestId('flash-button')).toHaveCount(0)
+
+  // Combos off: the home section shows nothing even if a combo exists.
+  await combo(`Last set ${id}`, `last-${id}`, '500', [
+    [tea, '1'],
+    [kurti, '1'],
+  ])
+  await page.goto('/admin/features')
+  await page.getByTestId('module-combos').getByRole('button', { name: 'Turn off' }).click()
+  await expect(page.getByTestId('module-combos')).toContainText('Off')
+  await page.goto('/')
+  await expect(page.getByTestId(`combo-last-${id}`)).toHaveCount(0)
+  await page.goto('/admin/layouts')
+  for (const section of ['combos', 'flash-sale'])
+    await page.getByTestId(`section-${section}`).getByRole('button', { name: 'Turn off' }).click()
+})
