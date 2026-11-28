@@ -1,0 +1,13 @@
+pnpm-lock.yaml
+.next
+.next-cov
+coverage
+.coverage
+test-results
+docs
+*.md
+.claude
+.github
+src/infrastructure/db/migrations
+src/themes/registry.gen.ts
+.lh/

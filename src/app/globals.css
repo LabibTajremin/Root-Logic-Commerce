@@ -1,0 +1,295 @@
+@import 'tailwindcss';
+
+/* Theme tokens (Figma "Theme" collection). Defaults = minimal/light; the store's
+   design (site_settings) overrides them at runtime via an inline :root rule. */
+@theme {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-soft: #f4f4f5;
+  --color-text: #18181b;
+  --color-muted: #52525b;
+  --color-line: #e4e4e7;
+  --color-accent: #4f46e5;
+  --color-accent-tint: #eef2ff;
+  /* Accent as text: darkened so any owner-picked accent stays AA on light surfaces. */
+  --color-accent-ink: color-mix(in oklab, var(--color-accent) 60%, black);
+  --color-button: #18181b;
+  --color-button-text: #ffffff;
+  --color-header: #ffffff;
+  --color-header-text: #18181b;
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #b45309;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --font-heading: ui-sans-serif, system-ui, sans-serif;
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Design style switches (site_settings.design.style) — set as data-* on <html>. */
+[data-card='flat'] .rlc-card {
+  border-color: transparent;
+  background: var(--color-soft);
+}
+[data-card='elevated'] .rlc-card {
+  border-color: transparent;
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.18);
+}
+[data-card='glass'] .rlc-card {
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  backdrop-filter: blur(12px);
+}
+[data-motion='subtle'] .rlc-card,
+[data-motion='smooth'] .rlc-card,
+[data-motion='playful'] .rlc-card {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+[data-hover='lift'] .rlc-card:hover {
+  transform: translateY(-3px);
+}
+[data-hover='glow'] .rlc-card:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+[data-hover='zoom'] .rlc-card:hover .rlc-media {
+  transform: scale(1.04);
+}
+.rlc-header {
+  background: color-mix(
+    in srgb,
+    var(--color-header) calc(var(--header-opacity, 1) * 100%),
+    transparent
+  );
+  backdrop-filter: blur(10px);
+}
+[data-sticky='false'] .rlc-header {
+  position: static;
+}
+[data-showcase='list'] {
+  grid-template-columns: 1fr;
+}
+[data-showcase='carousel'] {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+[data-showcase='carousel'] > li {
+  flex: 0 0 min(260px, 70%);
+  scroll-snap-align: start;
+}
+
+/* Logo text switched off: keep the shop name for screen readers only. */
+[data-show-name='false'] .rlc-brand-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Footer presets (J1): centered stacks and centres the columns; minimal keeps only the bottom bar. */
+[data-footer='centered'] .rlc-footer-grid {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+[data-footer='minimal'] .rlc-footer-grid {
+  display: none;
+}
+
+/* B10: leave room above the phone bottom nav so it never covers content. */
+@media (width < 64rem) {
+  [data-bottom-nav='true'] {
+    padding-bottom: 4rem;
+  }
+  /* One cart button per screen: on phones it lives in the bottom nav. */
+  [data-bottom-nav='true'] .rlc-header-cart {
+    display: none;
+  }
+}
+
+/* B1 announcement bar: rotate = each message fades in for its slice; marquee = scrolls by. */
+.rlc-announce[data-mode='rotate'] p {
+  opacity: 0;
+  animation: var(--rotate) calc(var(--n) * 4s) infinite;
+  animation-delay: calc(var(--i) * 4s);
+}
+.rlc-announce[data-mode='marquee'] p {
+  transform: translateX(100%);
+  animation: rlc-marquee calc(var(--n) * 9s) linear infinite;
+  animation-delay: calc(var(--i) * 9s);
+}
+@keyframes rlc-marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rlc-announce p {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+  .rlc-announce p:first-child {
+    opacity: 1;
+  }
+}
+
+/* B3 hero slider: slides sit on top of each other; the active one is shown. */
+.rlc-slider[data-effect='slide'] .rlc-slide {
+  transform: translateX(calc(var(--offset) * 100%));
+  transition: transform 500ms ease;
+}
+.rlc-slider[data-effect='fade'] .rlc-slide {
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.rlc-slider[data-effect='fade'] .rlc-slide[aria-hidden='false'] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rlc-slider .rlc-slide {
+    transition: none;
+  }
+}
+
+/* A3 badge tones (contrast-safe on any theme). */
+.rlc-badge[data-tone='danger'] {
+  background: var(--color-danger);
+  color: #fff;
+}
+.rlc-badge[data-tone='success'] {
+  background: var(--color-success);
+  color: #fff;
+}
+.rlc-badge[data-tone='accent'] {
+  background: var(--color-button);
+  color: var(--color-button-text);
+}
+.rlc-badge[data-tone='neutral'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+/* A4: amber pulled toward the theme text colour stays readable on light and dark surfaces. */
+.rlc-stock-left {
+  color: color-mix(in oklab, var(--color-warning) 45%, var(--color-text));
+}
+/* A12 gallery: picture fit, thumbnails beside on wide screens, hover zoom where hover exists. */
+[data-fit='contain'] .rlc-gallery img {
+  object-fit: contain;
+}
+@media (min-width: 768px) {
+  [data-thumbs='side'] .rlc-gallery {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+  }
+  [data-thumbs='side'] .rlc-thumbs {
+    order: -1;
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+}
+@media (hover: hover) {
+  .rlc-zoom img {
+    transition: transform 0.3s;
+  }
+  .rlc-zoom:hover img {
+    transform: scale(1.5);
+  }
+}
+
+/* H5 landing designs: token sets over the shop's theme (each checked for AA contrast). */
+[data-landing='bold'] {
+  --color-accent: #b91c1c;
+  --color-button: #b91c1c;
+  --color-button-text: #ffffff;
+}
+[data-landing='warm'] {
+  --color-bg: #fffbf5;
+  --color-soft: #fdf2e3;
+  --color-accent: #9a3412;
+  --color-button: #9a3412;
+  --color-button-text: #ffffff;
+}
+[data-landing='night'] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-soft: #1e293b;
+  --color-text: #f8fafc;
+  --color-muted: #cbd5e1;
+  --color-line: #334155;
+  --color-accent: #fbbf24;
+  --color-button: #fbbf24;
+  --color-button-text: #0f172a;
+  --color-success: #4ade80;
+  --color-danger: #fca5a5;
+}
+[data-landing='festive'] {
+  --color-soft: #fdf2f8;
+  --color-accent: #9d174d;
+  --color-button: #9d174d;
+  --color-button-text: #ffffff;
+}
+[data-landing='fresh'] {
+  --color-soft: #f0fdf4;
+  --color-accent: #15803d;
+  --color-button: #15803d;
+  --color-button-text: #ffffff;
+}
+
+/* B4 reels cover-flow (Figma › Reels redesign): turned inward and faded by distance from centre. */
+.rlc-reel-track {
+  perspective: 1500px;
+  scrollbar-width: none;
+}
+.rlc-reel > button {
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease;
+}
+.rlc-reel[data-offset='-1'] > button {
+  transform: rotateY(40deg) scale(0.88);
+}
+.rlc-reel[data-offset='1'] > button {
+  transform: rotateY(-40deg) scale(0.88);
+}
+.rlc-reel[data-offset='-2'] > button {
+  transform: rotateY(50deg) scale(0.78);
+  opacity: 0.92;
+}
+.rlc-reel[data-offset='2'] > button {
+  transform: rotateY(-50deg) scale(0.78);
+  opacity: 0.92;
+}
+.rlc-reel[data-offset='-3'] > button {
+  transform: rotateY(56deg) scale(0.7);
+  opacity: 0.62;
+}
+.rlc-reel[data-offset='3'] > button {
+  transform: rotateY(-56deg) scale(0.7);
+  opacity: 0.62;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rlc-reel > button {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none;
+  }
+}

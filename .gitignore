@@ -2,3 +2,15 @@
 node_modules/
 .env*
 !.env.example
+.next/
+.next-cov/
+coverage/
+.coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+next-env.d.ts
+.e2e/
+.e2e-server.log
+.verify.log
+.lh/

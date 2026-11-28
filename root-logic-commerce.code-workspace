@@ -1,0 +1,14 @@
+{
+  "folders": [
+    { "name": "Storefront", "path": "src/app/(storefront)" },
+    { "name": "Admin Panel", "path": "src/app/admin" },
+    { "name": "Business Logic", "path": "src/modules" },
+    { "name": "Themes", "path": "src/themes" },
+    { "name": "Settings & Config", "path": "." },
+    { "name": "Tests", "path": "tests" },
+  ],
+  "settings": {
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "files.exclude": { "legacy": true },
+  },
+}
