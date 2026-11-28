@@ -11,6 +11,7 @@ import {
   type AddressRule,
   type FreeShippingRule,
 } from '@/modules/orders/client'
+import { comboSaving, type Combo } from '@/modules/deals/client'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
 import { cart, useCart, type CartLine } from '../cart-store'
 import { placeOrder, quoteOrder, saveDraft, type Quote } from './actions'
@@ -85,6 +86,7 @@ export const CheckoutForm = ({
   freeRule,
   address,
   landing,
+  combos,
 }: {
   zones: Zone[]
   labels: Record<string, string>
@@ -96,6 +98,8 @@ export const CheckoutForm = ({
   freeRule: FreeShippingRule
   /** C4/C17: district suggestions and the zone each district means. */
   address: AddressRule
+  /** A9: the shop's combos (empty while the module is off). */
+  combos: Combo[]
   /** H5: a landing page's own order — one product, the pack's quantity and saving; the cart is left alone. */
   landing?: { id: string; line: CartLine; saving: number; setQty: (qty: number) => void }
 }) => {
@@ -165,7 +169,17 @@ export const CheckoutForm = ({
   // A quote is only shown for the cart and zone it was made for; placing re-prices anyway.
   const [quote, setQuote] = useState<{ for: string; q: Quote } | null>(null)
   const shown = quote?.for === payload + zoneId ? quote.q : null
-  const discount = landing ? landing.saving : shown && 'discount' in shown ? shown.discount : 0
+  // A9: combos the cart completes (a coupon quote already counts them).
+  const comboSave = comboSaving(
+    items.map((l) => ({ productId: l.productId, unitPrice: l.price, quantity: l.qty })),
+    combos,
+  )
+  const code = shown && 'couponCode' in shown ? shown.couponCode : null
+  const discount = landing
+    ? landing.saving
+    : shown && 'discount' in shown
+      ? shown.discount
+      : comboSave
   const applyCode = (form: HTMLFormElement) =>
     start(async () => setQuote({ for: payload + zoneId, q: await quoteOrder(new FormData(form)) }))
 
@@ -409,11 +423,7 @@ export const CheckoutForm = ({
         </p>
         {discount > 0 && (
           <p className="flex justify-between text-sm text-success" data-testid="checkout-discount">
-            <span>
-              {landing
-                ? L.packSaving
-                : `${L.discount} (${(shown as { couponCode: string }).couponCode})`}
-            </span>
+            <span>{landing ? L.packSaving : code ? `${L.discount} (${code})` : L.comboSaving}</span>
             <span>−{money(discount)}</span>
           </p>
         )}

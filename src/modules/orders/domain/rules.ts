@@ -1,3 +1,5 @@
+import type { Combo, FlashSale } from '@/modules/deals'
+
 /** C3: when delivery is free. Empty / null parts never match. */
 export type FreeShippingRule = {
   minSubtotal: number | null
@@ -7,11 +9,21 @@ export type FreeShippingRule = {
 /** C7: order value bounds in minor units (null = none). */
 export type OrderLimits = { minOrder: number | null; maxOrder: number | null }
 /** What the shop's checkout settings feed the orders service. */
-export type ShopRules<Z> = { zones: Z[]; freeShipping: FreeShippingRule; limits: OrderLimits }
+export type ShopRules<Z> = {
+  zones: Z[]
+  freeShipping: FreeShippingRule
+  limits: OrderLimits
+  /** A9: bundles that take their saving off the order. */
+  combos: Combo[]
+  /** B11: the running (or planned) flash sale. */
+  flash: FlashSale | null
+}
 
 export const shopRules = {
   freeShipping: { minSubtotal: null, zoneIds: [], productIds: [] } as FreeShippingRule,
   limits: { minOrder: null, maxOrder: null } as OrderLimits,
+  combos: [] as Combo[],
+  flash: null as FlashSale | null,
 }
 
 /** Free delivery, and how much more gets it by subtotal (the cart's progress hint). */

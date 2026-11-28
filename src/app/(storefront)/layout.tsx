@@ -61,6 +61,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     preview,
     pages,
     on,
+    sale,
     t,
   } = await storefront()
   const footerPages = (await pages.published(store.id)).filter((p) => p.inFooter)
@@ -106,6 +107,16 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           categories={categories}
           actions={
             <>
+              {/* B11: the running sale, one tap away from every page. */}
+              {sale && (
+                <Link
+                  href="/flash-sale"
+                  data-testid="flash-button"
+                  className="inline-flex min-h-11 items-center rounded-control bg-danger px-3 text-sm font-semibold text-white"
+                >
+                  {t('flash.button')}
+                </Link>
+              )}
               {business.language.switcher && <LangToggle locale={locale} />}
               {on('wishlist') && <WishlistLink label={t('wishlist.title')} />}
               <span className="rlc-header-cart">

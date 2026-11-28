@@ -1,3 +1,4 @@
+import { comboSaving, flashLive, flashPrice, type FlashSale } from '@/modules/deals'
 import { variantLabel } from '@/modules/catalog'
 import { applyCoupon, type Coupon, type Coupons } from '@/modules/coupons'
 import type { Client, Fraud, FraudRules } from '@/modules/fraud'
@@ -65,6 +66,11 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
         )
       ).map((v) => [v.id, v]),
     )
+    // B11: sale prices while the sale runs and the product's capped units last.
+    const now = new Date()
+    const sold = flashLive(shop.flash, now)
+      ? await repo.soldSince(storeId, [...products.keys()], shop.flash!.startsAt)
+      : new Map<string, number>()
     const lines = items.map(({ productId, variantId, quantity }) => {
       const p = products.get(productId)
       const v = variants.get(variantId ?? '')
@@ -84,7 +90,8 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
         variantId,
         variantLabel: v ? variantLabel(p.options, v.options) : null,
         name: p.name,
-        unitPrice: unit.price,
+        unitPrice:
+          flashPrice(shop.flash, productId, unit.price, now, sold.get(productId)) ?? unit.price,
         unitCost: unit.costPrice,
         quantity,
       }
@@ -139,10 +146,19 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
         if (r.ok && r.discount > discount) [coupon, discount] = [c, r.discount]
       }
     }
+    // A9: combo savings come on top of a coupon (never on a hand-typed discount).
+    if (manual === undefined) discount += comboSaving(lines, shop.combos)
     return { d, zone, lines, coupon, totals: computeTotals(lines, charge, discount) }
   }
 
   return {
+    /** B11: units of each sale product sold since the sale started (its cap). */
+    flashSold: (storeId: string, sale: FlashSale) =>
+      repo.soldSince(
+        storeId,
+        sale.items.map((i) => i.productId),
+        sale.startsAt,
+      ),
     /** C2: what checkout shows before placing (same rules as placing). */
     async quote(storeId: string, input: CheckoutInput, shop: ShopRules<DeliveryZone>) {
       const { coupon, totals } = await price(storeId, input, shop)

@@ -39,6 +39,7 @@ export default async function ProductPage({ params }: Props) {
   const {
     theme,
     view,
+    priceOf,
     imagesOf,
     t,
     allCategories,
@@ -60,7 +61,7 @@ export default async function ProductPage({ params }: Props) {
     variantId: null,
     slug: p.slug,
     name: p.name,
-    price: p.price,
+    price: priceOf(p),
   }
   // B2: the owner's ways to order (WhatsApp / Call only with the shop's numbers).
   const paths = {
@@ -97,7 +98,13 @@ export default async function ProductPage({ params }: Props) {
       price: shown.price,
       compareAt: shown.compareAt,
       stock: x.stock,
-      item: { ...item, id: x.id, variantId: x.id, name: `${p.name} (${label})`, price: x.price },
+      item: {
+        ...item,
+        id: x.id,
+        variantId: x.id,
+        name: `${p.name} (${label})`,
+        price: priceOf({ id: p.id, price: x.price }),
+      },
     }
   })
   const cat = allCategories.find((c) => c.id === p.categoryId)

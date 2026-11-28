@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { translate } from '@/i18n'
 import { cardBadges, stockLeft, type Product } from '@/modules/catalog'
+import { flashLive, flashPrice } from '@/modules/deals'
 import { formatMoney } from '@/modules/shared'
 import { runtime } from '@/server/runtime'
 import { PREVIEW_COOKIE, readPreview } from '@/server/preview'
@@ -32,6 +33,14 @@ export const storefront = cache(async () => {
   const moneyFormat = { banglaDigits: business.banglaDigits, currency: business.currency }
   const money = (minor: number) => formatMoney(minor, moneyFormat)
   const image = (m: MediaRow): ImageView => ({ src: `/api/media/${m.id}`, color: m.dominantColor })
+  // B11: while the sale runs (and its module is on) listed products show their sale price.
+  const now = new Date()
+  const sale =
+    active.has('flashSales') && flashLive(business.flashSale, now) ? business.flashSale : null
+  const sold = sale ? await container.orders.flashSold(store.id, sale) : new Map<string, number>()
+  /** What one unit costs right now. */
+  const priceOf = (p: { id: string; price: number }) =>
+    flashPrice(sale, p.id, p.price, now, sold.get(p.id)) ?? p.price
   /** Every product's images in order, for the given products. */
   const imagesOf = async (products: Product[]) => {
     const rows = await container.media.forProducts(
@@ -42,17 +51,25 @@ export const storefront = cache(async () => {
     for (const r of rows) by.get(r.productId)!.push(image(r.media))
     return by
   }
-  const view = (p: Product, images: ImageView[]): ProductView => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    price: money(p.price),
-    compareAt: p.compareAtPrice === null ? null : money(p.compareAtPrice),
-    badges: cardBadges(p, (pct) => t('shop.save', { pct })),
-    left: stockLeft(p, business.showStockLeft),
-    inStock: p.stock > 0,
-    image: images[0] ?? null,
-  })
+  const view = (p: Product, images: ImageView[]): ProductView => {
+    const price = priceOf(p)
+    // On sale, the usual price becomes the crossed-out one.
+    const was = price < p.price ? (p.compareAtPrice ?? p.price) : p.compareAtPrice
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: money(price),
+      compareAt: was === null ? null : money(was),
+      badges: [
+        ...(price < p.price ? [{ text: t('flash.badge'), tone: 'accent' as const }] : []),
+        ...cardBadges({ ...p, price, compareAtPrice: was }, (pct) => t('shop.save', { pct })),
+      ],
+      left: stockLeft(p, business.showStockLeft),
+      inStock: p.stock > 0,
+      image: images[0] ?? null,
+    }
+  }
   const live = categories.filter((c) => !c.archived)
   return {
     store: {
@@ -73,6 +90,8 @@ export const storefront = cache(async () => {
     t,
     money,
     view,
+    priceOf,
+    sale,
     imagesOf,
     credit: !unbranded,
     categories: live.filter((c) => !c.parentId).map((c) => ({ name: c.name, slug: c.slug })),

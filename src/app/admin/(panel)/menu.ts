@@ -20,6 +20,8 @@ export const menuGroups: MenuGroup[] = [
       { href: '/admin/stock', key: 'nav.stock', icon: 'box' },
       { href: '/admin/promotions', key: 'nav.promotions', icon: 'megaphone' },
       { href: '/admin/landing', key: 'landing.title', icon: 'megaphone' },
+      { href: '/admin/combos', key: 'combos.title', icon: 'box' },
+      { href: '/admin/flash-sale', key: 'flash.title', icon: 'alert' },
       { href: '/admin/coupons', key: 'nav.coupons', icon: 'receipt' },
       { href: '/admin/fraud', key: 'nav.fraud', icon: 'alert' },
       { href: '/admin/couriers', key: 'nav.couriers', icon: 'truck' },

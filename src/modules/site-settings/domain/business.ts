@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { comboSchema, flashSaleSchema } from '@/modules/deals'
 import { landingSettings } from '@/modules/landing'
 import { trackingSchema } from '@/modules/tracking'
 import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
@@ -207,6 +208,9 @@ export const businessSchema = z.object({
   // H1/H2/H3: ad pixels and tags; server tokens are sealed before they are saved.
   tracking: trackingSchema.prefault({}),
   landing: landingSettings.prefault({}),
+  // A9 combos and the B11 flash sale (one at a time).
+  combos: z.array(comboSchema).max(30).default([]),
+  flashSale: flashSaleSchema.nullable().default(null),
 })
 export type Business = z.infer<typeof businessSchema>
 

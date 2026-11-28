@@ -48,6 +48,7 @@ const KEYS = [
   'locationAdded',
   'locationFailed',
   'packSaving',
+  'comboSaving',
 ]
 
 /** What the checkout form needs, shared by checkout and landing pages (H5). */
@@ -66,5 +67,6 @@ export const checkoutProps = async () => {
     coupons: on('coupons'),
     freeRule: business.freeShipping,
     address: business.address,
+    combos: on('combos') ? business.combos : [],
   }
 }

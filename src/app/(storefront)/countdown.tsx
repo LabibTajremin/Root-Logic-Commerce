@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { countdownText } from '@/modules/landing/client'
 
-/** H5: time left on the offer; filled in after hydration so server and browser agree. */
+/** H5/B11: time left on an offer; filled in after hydration so server and browser agree. */
 export const Countdown = ({
   endsAt,
   labels,

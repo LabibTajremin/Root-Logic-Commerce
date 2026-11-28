@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { ResolvedSection, SectionId } from '@/sections/registry'
+import { ComboList } from './combos/combo-list'
+import { Countdown } from './countdown'
 import { sliderPosters } from './hero-posters'
 import { HeroSlider } from './hero-slider'
 import { Poster } from './poster'
@@ -17,6 +19,42 @@ type Render = (p: { ctx: Ctx; settings: Record<string, unknown> }) => ReactNode 
 const wrap = 'mx-auto flex w-full max-w-6xl flex-col gap-4 px-4'
 
 const renderers: Record<SectionId, Render> = {
+  combos: ({ ctx }) =>
+    ctx.on('combos') &&
+    ctx.business.combos.some((c) => c.on) && (
+      <section aria-labelledby="combos-title" className={wrap}>
+        <h2 id="combos-title" className="font-heading text-2xl">
+          {ctx.t('combos.title')}
+        </h2>
+        <ComboList ctx={ctx} limit={3} />
+        <Link href="/combos" className="font-semibold underline">
+          {ctx.t('combos.all')}
+        </Link>
+      </section>
+    ),
+  'flash-sale': async ({ ctx }) => {
+    const { sale, catalog, store, t } = ctx
+    if (!sale) return null
+    const listed = new Set(sale.items.map((i) => i.productId))
+    const products = (await catalog.listProducts(store.id, { status: 'active' }))
+      .filter((p) => listed.has(p.id))
+      .slice(0, 4)
+    return (
+      <section aria-labelledby="flash-title" className={wrap}>
+        <h2 id="flash-title" className="font-heading text-2xl">
+          {sale.name}
+        </h2>
+        <Countdown
+          endsAt={sale.endsAt.toISOString()}
+          labels={{ left: t('flash.endsIn'), ended: t('flash.ended') }}
+        />
+        <ProductGrid products={products} />
+        <Link href="/flash-sale" className="font-semibold underline">
+          {t('flash.all')}
+        </Link>
+      </section>
+    )
+  },
   'promo-banners': () => <PromoBanners />,
   hero: async ({ ctx }) => {
     const { theme, store, design, t } = ctx

@@ -998,4 +998,66 @@ describe('order rows and the order page (F12)', () => {
       await orders.changeStatus(store, id, s, null)
     await expect(orders.editShipping(store, id, ship)).rejects.toThrow('order.locked')
   })
+
+  it('prices flash-sale units until the cap, and takes combo savings (A9, B11)', async () => {
+    const [a, b] = [
+      await product(store, { stock: 20 }),
+      await product(store, { price: 10000, stock: 20 }),
+    ]
+    const now = Date.now()
+    const flash = {
+      on: true,
+      name: 'Friday',
+      startsAt: new Date(now - 60_000),
+      endsAt: new Date(now + 3_600_000),
+      cap: 3,
+      items: [{ productId: a.id, price: 30000, percent: null }],
+    }
+    const rules = { ...zones, flash }
+    const total = async (o: { id: string }) => (await orders.getOrder(store, o.id))!
+    const first = await orders.placeOrder(store, checkout(a.id, 2), rules)
+    expect((await total(first)).subtotal).toBe(60000)
+    // A cancelled order gives its units back to the sale.
+    await orders.changeStatus(store, first.id, 'CANCELLED', null)
+    await orders.placeOrder(store, checkout(a.id, 3), rules)
+    expect((await total(await orders.placeOrder(store, checkout(a.id, 1), rules))).subtotal).toBe(
+      34900,
+    )
+    // After the window the normal price is back.
+    const over = { ...rules, flash: { ...flash, endsAt: new Date(now - 1) } }
+    expect((await total(await orders.placeOrder(store, checkout(a.id, 1), over))).subtotal).toBe(
+      34900,
+    )
+
+    const combo = {
+      id: '00000000-0000-4000-8000-000000000001',
+      name: 'Set',
+      slug: 'set',
+      on: true,
+      items: [
+        { productId: a.id, qty: 1 },
+        { productId: b.id, qty: 1 },
+      ],
+      price: 40000,
+    }
+    const both = {
+      ...checkout(a.id),
+      items: [
+        { productId: a.id, quantity: 1 },
+        { productId: b.id, quantity: 1 },
+      ],
+    }
+    expect(await orders.quote(store, both, { ...zones, combos: [combo] })).toMatchObject({
+      discount: 4900,
+    })
+    // A hand-typed discount (manual orders) replaces every other saving.
+    const manual = await orders.placeOrder(
+      store,
+      both,
+      { ...zones, combos: [combo] },
+      { discount: 100 },
+    )
+    expect((await total(manual)).discount).toBe(100)
+    expect(await createOrdersRepo(db).soldSince(store, [], new Date(0))).toEqual(new Map())
+  })
 })

@@ -3,7 +3,7 @@
 import { authorize } from '@/modules/access'
 import type { OrderSource } from '@/modules/orders'
 import { currentSettings } from '@/server/request'
-import { shopRulesOf } from '@/app/(storefront)/shop-rules'
+import { activeModules, shopRulesOf } from '@/app/(storefront)/shop-rules'
 import { act, type ActionState } from '../../act'
 import { adminContext } from '../../context'
 
@@ -21,7 +21,7 @@ export async function findCustomer(phone: string): Promise<Customer | null> {
 
 // Every key read is an input of the new-order form.
 export async function createManualOrder(_: ActionState, form: FormData) {
-  return act('orders.manage', async ({ orders, store }) => {
+  return act('orders.manage', async ({ orders, store, features }) => {
     const { business } = await currentSettings()
     const f = (k: string) => String(form.get(k))
     const order = await orders.placeOrder(
@@ -36,7 +36,7 @@ export async function createManualOrder(_: ActionState, form: FormData) {
         zoneId: f('zoneId'),
         items: JSON.parse(f('items')),
       },
-      shopRulesOf(business),
+      shopRulesOf(business, activeModules(await features.list(store.id))),
       { source: f('source') as OrderSource, discount: Math.round(Number(f('discount')) * 100) },
     )
     return `/admin/orders/${order.id}`

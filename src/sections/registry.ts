@@ -15,6 +15,9 @@ export const sectionSchemas = {
   'budget-bands': none,
   'trust-strip': none,
   'screenshot-reviews': none,
+  // A9 / B11: shown only while their (paid) modules are on and there is something to show.
+  combos: none,
+  'flash-sale': none,
 } as const
 
 export type SectionId = keyof typeof sectionSchemas

@@ -1,15 +1,16 @@
 'use server'
 
 import { currentSettings } from '@/server/request'
-import { shopRulesOf } from '@/app/(storefront)/shop-rules'
+import { activeModules, shopRulesOf } from '@/app/(storefront)/shop-rules'
 import { act, type ActionState } from '../../act'
 
 // id is an input of the draft forms, so `get` never returns null.
 export async function convertDraft(_: ActionState, form: FormData) {
-  return act('orders.manage', async ({ drafts, orders, store }) => {
+  return act('orders.manage', async ({ drafts, orders, store, features }) => {
     const { business } = await currentSettings()
+    const on = activeModules(await features.list(store.id))
     const order = await drafts.convert(store.id, String(form.get('id')), (input) =>
-      orders.placeOrder(store.id, input, shopRulesOf(business)),
+      orders.placeOrder(store.id, input, shopRulesOf(business, on)),
     )
     return `/admin/orders/${order.id}`
   })

@@ -170,6 +170,26 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
     })
 
   return {
+    async soldSince(storeId, productIds, since) {
+      if (productIds.length === 0) return new Map()
+      const rows = await db
+        .select({
+          productId: orderItems.productId,
+          n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)`.mapWith(Number),
+        })
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(
+          and(
+            eq(orders.storeId, storeId),
+            inArray(orderItems.productId, productIds),
+            gte(orders.createdAt, since),
+            ne(orders.status, 'CANCELLED'),
+          ),
+        )
+        .groupBy(orderItems.productId)
+      return new Map(rows.map((r) => [r.productId!, r.n]))
+    },
     productsForOrder: (storeId, ids) =>
       db
         .select({

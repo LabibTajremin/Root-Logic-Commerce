@@ -73,7 +73,7 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         couponCode: f('couponCode'),
         items,
       },
-      shopRulesOf(business),
+      shopRulesOf(business, on),
       { guard: { client: { ip, deviceId }, rules: business.fraud }, ...fromPage },
     )
     if (risk === 'hold')
@@ -94,7 +94,7 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
 
 /** C2: the discount a code (or, with none typed, the best automatic coupon) gives this cart. */
 export const quoteOrder = async (form: FormData): Promise<Quote> => {
-  const { orders, store, business, t } = await storefront()
+  const { orders, store, business, on, t } = await storefront()
   // Every key read is an input of the checkout form.
   const f = (k: string) => String(form.get(k))
   try {
@@ -111,7 +111,7 @@ export const quoteOrder = async (form: FormData): Promise<Quote> => {
         couponCode: f('couponCode'),
         items: JSON.parse(f('items')),
       },
-      shopRulesOf(business),
+      shopRulesOf(business, on),
     )
     return { discount: q.discount, couponCode: q.couponCode }
   } catch (e) {
