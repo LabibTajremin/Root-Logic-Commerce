@@ -88,3 +88,9 @@ References: Swiper 3D coverflow, visionOS player, Instagram carousel strip. Main
 - `Reel/Overlay player` `84:290` — full-bleed video, story progress bars, shop header + glass close, glass action rail (like/share/mute), caption, glass product sheet with accent "Order now".
 - Bangla demo frames: card props in Bangla (digits too), Shop label "কিনুন".
 - Code (Phase 15 B4): CSS `perspective` on the track + `rotateY/translateZ` per slot, scroll-snap; reduced-motion → flat row, no tilt.
+
+## UX research pass (2026-11-28)
+Mirrors code commit 674a4d8…15b2efa (Baymard/Shopify/Bangladesh trust research).
+- `Public/Search empty` (Core web `97:11324`, Core mobile `100:11610`, mobile on all 5 theme pages): copy "Check the spelling, try fewer words, or browse a category below.", a `Did you mean` line (accent, underlined suggestion), then a `No-results recovery` block: category chips (the page's own header categories, "All" filled) + "New arrivals" with 4 product cards (theme pages reuse their own Home cards).
+- Checkout phone hint everywhere: "The courier calls this number before delivery. We never share it." (Bangla demo web: "ডেলিভারির আগে কুরিয়ার এই নম্বরে ফোন করবে। আমরা নম্বরটি কাউকে দিই না।").
+- `Admin/First-login checklist` web `91:6284` + mobile `102:11318`: 6 steps — added "Add your shop phone and address" and "Publish your return and delivery policy pages" (mobile: "Shop phone & address", "Return & delivery pages").
