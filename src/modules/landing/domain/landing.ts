@@ -21,6 +21,7 @@ export const blockKinds = [
   'checkout',
   'stickyBar',
   'exitPopup',
+  'reels',
 ] as const
 export type BlockKind = (typeof blockKinds)[number]
 
@@ -173,6 +174,7 @@ export const defaultBlocks = (p: ProductFacts, locale: 'en' | 'bn'): LandingBloc
     block('checkout', { title: c.order }),
     block('stickyBar', { title: c.order }),
     block('exitPopup', { text: c.leave }),
+    block('reels'),
   ]
 }
 

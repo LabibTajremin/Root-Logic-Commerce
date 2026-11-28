@@ -11,6 +11,7 @@ import { TrackOnView } from '../../ga'
 import { storefront } from '../../storefront'
 import { Countdown } from '../../countdown'
 import { ExitPopup } from './exit-popup'
+import { Reels } from '../../reels/reels'
 import { LandingOrder } from './landing-order'
 import { ReviewQuotes } from './review-quotes'
 
@@ -294,6 +295,8 @@ export default async function LandingPage(props: Props) {
             {cta(b.title || t('landing.order'))}
           </div>
         )
+      case 'reels':
+        return <Reels key={i} ctx={s} productId={p.id} />
       case 'exitPopup':
         return (
           <ExitPopup

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { ResolvedSection, SectionId } from '@/sections/registry'
 import { ComboList } from './combos/combo-list'
+import { Reels } from './reels/reels'
 import { Countdown } from './countdown'
 import { sliderPosters } from './hero-posters'
 import { HeroSlider } from './hero-slider'
@@ -19,6 +20,7 @@ type Render = (p: { ctx: Ctx; settings: Record<string, unknown> }) => ReactNode 
 const wrap = 'mx-auto flex w-full max-w-6xl flex-col gap-4 px-4'
 
 const renderers: Record<SectionId, Render> = {
+  reels: ({ ctx }) => <Reels ctx={ctx} />,
   combos: ({ ctx }) =>
     ctx.on('combos') &&
     ctx.business.combos.some((c) => c.on) && (

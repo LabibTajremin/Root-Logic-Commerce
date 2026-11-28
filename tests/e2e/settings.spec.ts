@@ -2843,3 +2843,137 @@ test('combos and flash sale: bundle saving at checkout, sale prices, cap, header
   for (const section of ['combos', 'flash-sale'])
     await page.getByTestId(`section-${section}`).getByRole('button', { name: 'Turn off' }).click()
 })
+
+test('reels: link and upload sources, cover rules, order, cover-flow carousel, overlay player with Order now (B4)', async ({
+  page,
+  a11y,
+}) => {
+  test.setTimeout(120_000)
+  const id = uid()
+  const [tee, old] = [`Reel tee ${id}`, `Old ${id}`]
+  const saved = () => expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+  await signedIn(page)
+  await page.goto('/admin/reels')
+  await expect(page.getByText(/Reels are a paid feature/)).toBeVisible()
+  await page.context().clearCookies()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-reels').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-reels')).toContainText('Included')
+  await page.goto('/admin/features')
+  await page.getByTestId('module-reels').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('module-reels')).toContainText('On')
+  await createProduct(page, { name: tee, price: '450', stock: '5' })
+  await createProduct(page, { name: old, price: '200', stock: '5' })
+
+  const add = async (fill: () => Promise<void>) => {
+    await page.goto('/admin/reels')
+    await fill()
+    await page.getByRole('button', { name: 'Add reel' }).click()
+  }
+  const product = async (n: number, name: string) => {
+    const box = page.getByRole('combobox', { name: `Product in the reel ${n}`, exact: true })
+    await box.selectOption((await box.locator('option', { hasText: name }).getAttribute('value'))!)
+  }
+  const mp4 = Buffer.concat([
+    Buffer.from([0, 0, 0, 0x18]),
+    Buffer.from('ftypisom'),
+    Buffer.alloc(64),
+  ])
+  await page.goto('/admin/reels')
+  await expect(page.getByText('No reels yet')).toBeVisible()
+  await a11y()
+  // One source only; Instagram needs a cover.
+  await add(async () => {
+    await page.getByLabel('Reel link').fill('https://www.instagram.com/reel/Cx1abc/')
+    await page
+      .getByLabel(/^Or upload a video/)
+      .setInputFiles({ name: 'r.mp4', mimeType: 'video/mp4', buffer: mp4 })
+  })
+  await expect(page.getByRole('alert').filter({ hasText: 'one of them, not both' })).toBeVisible()
+  await add(async () => page.getByLabel('Reel link').fill('https://www.instagram.com/reel/Cx1abc/'))
+  await expect(page.getByRole('alert').filter({ hasText: 'need a cover photo' })).toBeVisible()
+  await add(async () => {
+    await page.getByLabel('Reel link').fill('https://www.instagram.com/reel/Cx1abc/')
+    await page.getByLabel('Cover photo').setInputFiles(await photo())
+    await page.getByLabel('Caption').fill(`Unboxing ${id}`)
+    await product(1, tee)
+  })
+  await saved()
+  await add(async () => {
+    await page.getByLabel('Reel link').fill('https://www.youtube.com/shorts/dQw4w9WgXcQ')
+    await page.getByLabel('Caption').fill(`Short ${id}`)
+  })
+  await saved()
+  await add(async () => {
+    await page
+      .getByLabel(/^Or upload a video/)
+      .setInputFiles({ name: 'r.mp4', mimeType: 'video/mp4', buffer: mp4 })
+    await product(1, old)
+  })
+  await saved()
+  await expect(page.getByTestId('reel-0')).toContainText('instagram')
+  await expect(page.getByTestId('reel-2')).toContainText('Uploaded video')
+  // Move the upload up one; the first reel cannot go higher.
+  await page.getByRole('button', { name: 'Move reel 3 up' }).click()
+  await expect(page.getByTestId('reel-1')).toContainText('Uploaded video')
+  await page.getByRole('button', { name: 'Move reel 1 up' }).click()
+  await page.getByRole('button', { name: 'Move reel 3 down' }).click()
+  await expect(page.getByTestId('reel-0')).toContainText('instagram')
+
+  await page.goto('/admin/layouts')
+  await page.getByTestId('section-reels').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('section-reels')).toContainText('On')
+
+  // Shopper: cover-flow, dots and arrows, then the player with its product's Order now.
+  await page.goto('/')
+  const reels = page.getByRole('region', { name: 'Watch & shop' })
+  await expect(reels.getByRole('button', { name: /^Play reel/ })).toHaveCount(3)
+  await expect(reels.getByRole('button', { name: 'Reel 1', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await reels.getByRole('button', { name: 'Next reel' }).click()
+  await expect(reels.getByRole('button', { name: 'Reel 2', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await reels.getByRole('button', { name: 'Previous reel' }).click()
+  await expect(reels.getByRole('button', { name: 'Reel 1', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await reels.getByRole('button', { name: 'Reel 3', exact: true }).click()
+  await expect(reels.getByRole('button', { name: 'Reel 3', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+  await a11y()
+  await reels.getByRole('button', { name: `Play reel: Short ${id}` }).click()
+  await expect(page.getByRole('dialog').locator('iframe')).toBeVisible()
+  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await reels.getByRole('button', { name: /^Play reel: Reel ৳/ }).click()
+  await expect(page.getByRole('dialog').locator('video')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await reels.getByRole('button', { name: `Play reel: Unboxing ${id}` }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Order now' }).click()
+  await page.waitForURL(/\/checkout$/)
+  await expect(page.getByText(tee).first()).toBeVisible()
+
+  // The product page shows the reels it is in.
+  await page.goto(`/p/${slug(tee)}`)
+  await expect(page.getByRole('button', { name: `Play reel: Unboxing ${id}` })).toBeVisible()
+  // A product that leaves the shop drops out of its reel.
+  await editProduct(page, old)
+  await page.locator('#status').selectOption('archived')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await page.goto('/admin/reels')
+  await expect(page.getByTestId('reel-1')).toContainText('?')
+  await page.getByTestId('reel-1').getByRole('button', { name: 'Remove' }).click()
+  await expect(page.getByTestId('reel-2')).toHaveCount(0)
+  await page.goto('/admin/layouts')
+  await page.getByTestId('section-reels').getByRole('button', { name: 'Turn off' }).click()
+})

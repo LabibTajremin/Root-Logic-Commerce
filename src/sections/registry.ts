@@ -17,6 +17,7 @@ export const sectionSchemas = {
   'screenshot-reviews': none,
   // A9 / B11: shown only while their (paid) modules are on and there is something to show.
   combos: none,
+  reels: none,
   'flash-sale': none,
 } as const
 

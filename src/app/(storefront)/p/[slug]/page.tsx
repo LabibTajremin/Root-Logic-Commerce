@@ -13,6 +13,7 @@ import { BoughtTogether } from './bought-together'
 import { ProductTabs } from './product-tabs'
 import { Share } from './share'
 import { WishButton } from './wish-button'
+import { Reels } from '../../reels/reels'
 import { ScreenshotStrip } from '../../screenshot-strip'
 import { TrustStrip } from '../../trust-strip'
 import { SizeChartButton } from './size-chart'
@@ -257,6 +258,10 @@ export default async function ProductPage({ params }: Props) {
           />
         </div>
       )}
+      {/* B4: reels that show this product. */}
+      <div className="md:col-span-2">
+        <Reels ctx={await storefront()} productId={p.id} />
+      </div>
       {recs.related.length > 0 && (
         <section aria-labelledby="related" className="flex flex-col gap-4 md:col-span-2">
           <h2 id="related" className="font-heading text-2xl">

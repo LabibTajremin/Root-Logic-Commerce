@@ -253,3 +253,43 @@ body {
   --color-button: #15803d;
   --color-button-text: #ffffff;
 }
+
+/* B4 reels cover-flow (Figma › Reels redesign): turned inward and faded by distance from centre. */
+.rlc-reel-track {
+  perspective: 1500px;
+  scrollbar-width: none;
+}
+.rlc-reel > button {
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease;
+}
+.rlc-reel[data-offset='-1'] > button {
+  transform: rotateY(40deg) scale(0.88);
+}
+.rlc-reel[data-offset='1'] > button {
+  transform: rotateY(-40deg) scale(0.88);
+}
+.rlc-reel[data-offset='-2'] > button {
+  transform: rotateY(50deg) scale(0.78);
+  opacity: 0.92;
+}
+.rlc-reel[data-offset='2'] > button {
+  transform: rotateY(-50deg) scale(0.78);
+  opacity: 0.92;
+}
+.rlc-reel[data-offset='-3'] > button {
+  transform: rotateY(56deg) scale(0.7);
+  opacity: 0.62;
+}
+.rlc-reel[data-offset='3'] > button {
+  transform: rotateY(-56deg) scale(0.7);
+  opacity: 0.62;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rlc-reel > button {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none;
+  }
+}

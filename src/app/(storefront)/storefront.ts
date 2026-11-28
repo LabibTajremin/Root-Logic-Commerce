@@ -105,6 +105,7 @@ export const storefront = cache(async () => {
     otp: container.otp,
     fraud: container.fraud,
     promotions: container.promotions,
+    reels: container.reels,
     limits: container.limits,
   }
 })
