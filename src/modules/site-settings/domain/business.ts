@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { landingSettings } from '@/modules/landing'
 import { trackingSchema } from '@/modules/tracking'
 import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
 
@@ -205,6 +206,7 @@ export const businessSchema = z.object({
     .default(null),
   // H1/H2/H3: ad pixels and tags; server tokens are sealed before they are saved.
   tracking: trackingSchema.prefault({}),
+  landing: landingSettings.prefault({}),
 })
 export type Business = z.infer<typeof businessSchema>
 

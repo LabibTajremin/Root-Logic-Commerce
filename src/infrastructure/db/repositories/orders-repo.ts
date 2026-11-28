@@ -135,6 +135,7 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
           giftWrap: o.giftWrap,
           shipLocation: o.location,
           source: o.source,
+          landingId: o.landingId,
           clientIp: o.client?.ip,
           deviceId: o.client?.deviceId,
           note: o.note,

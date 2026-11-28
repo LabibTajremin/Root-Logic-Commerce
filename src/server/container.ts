@@ -2,6 +2,7 @@ import { createHash, createHmac, randomBytes, randomInt, randomUUID } from 'node
 import { hashPassword } from 'better-auth/crypto'
 import { createAccess } from '@/modules/access'
 import { createCatalog } from '@/modules/catalog'
+import { createLanding } from '@/modules/landing'
 import { createInsights } from '@/modules/insights'
 import { createPromotions } from '@/modules/promotions'
 import { createMedia } from '@/modules/media'
@@ -25,6 +26,7 @@ import { createSiteSettings } from '@/modules/site-settings'
 import { createStock } from '@/modules/stock'
 import type { Db } from '@/infrastructure/db/client'
 import { createCatalogRepo } from '@/infrastructure/db/repositories/catalog-repo'
+import { createLandingRepo } from '@/infrastructure/db/repositories/landing-repo'
 import { createBannersRepo } from '@/infrastructure/db/repositories/banners-repo'
 import { createInsightsRepo } from '@/infrastructure/db/repositories/insights-repo'
 import { createMediaRepo } from '@/infrastructure/db/repositories/media-repo'
@@ -218,6 +220,10 @@ export const createContainer = ({ config, db, onEventError }: Deps) => {
     plans,
     features: createFeatures({ repo: createFeaturesRepo(db), plans }),
     pages: createPages({ repo: createPagesRepo(db) }),
+    landing: createLanding({
+      repo: createLandingRepo(db),
+      product: (storeId, id) => createCatalogRepo(db).getProduct(storeId, id),
+    }),
     reviews: createReviews({
       repo: createReviewsRepo(db),
       // A7: the shopper proves the order with its number + phone, as on tracking.

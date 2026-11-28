@@ -2458,3 +2458,205 @@ test('shop search forgives typos, never dead-ends; checkout says why it needs th
   ])
     await expect(page.getByRole('link', { name: step })).toBeVisible()
 })
+
+test('landing pages: build from a product, edit blocks, packs and inline order, stats, hide, copy, prefix (H5)', async ({
+  page,
+  a11y,
+}) => {
+  test.setTimeout(120_000)
+  test.info().annotations.push({ type: 'allow-status', description: '404' })
+  const id = uid()
+  const [attar, kurta] = [`Attar ${id}`, `Kurta ${id}`]
+  const [lpA, lpB] = [slug(`offer ${id}`), slug(`kurta ${id}`)]
+  const saveBlocks = async () => {
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+  }
+  await signedIn(page)
+  await page.goto('/admin/landing')
+  await expect(page.getByText(/Landing pages are a paid feature/)).toBeVisible()
+  expect((await page.goto(`/offer/${lpA}`))!.status()).toBe(404)
+
+  await page.context().clearCookies()
+  await signedIn(page, e2eEnv.BOOTSTRAP_SUPER_EMAIL, e2eEnv.BOOTSTRAP_SUPER_PASSWORD)
+  await page.goto('/admin/plan')
+  await page.getByTestId('feature-landingPages').getByRole('button', { name: 'Grant' }).click()
+  await expect(page.getByTestId('feature-landingPages')).toContainText('Included')
+  await page.goto('/admin/features')
+  await page.getByTestId('module-landingPages').getByRole('button', { name: 'Turn on' }).click()
+  await expect(page.getByTestId('module-landingPages')).toContainText('On')
+
+  await createProduct(page, {
+    name: attar,
+    price: '1000',
+    compareAt: '1200',
+    stock: '20',
+    description: 'Long lasting rose attar.',
+  })
+  await editProduct(page, attar)
+  await uploadPhoto(page)
+  await uploadPhoto(page, '#7a2e10')
+  await createProduct(page, { name: kurta, price: '900', stock: '5' })
+  await editProduct(page, kurta)
+  await page.getByLabel('Options', { exact: true }).fill('Size: M, L')
+  await page.getByRole('button', { name: 'Apply options' }).click()
+  await expect(page.getByRole('rowheader').first()).toBeVisible()
+
+  // A: filled from the product, night design, video + countdown on.
+  const create = async (product: string, title: string, address: string, design: string) => {
+    await page.goto('/admin/landing')
+    await page
+      .getByRole('combobox', { name: 'Product', exact: true })
+      .selectOption({ label: product })
+    await page
+      .getByRole('combobox', { name: 'Design', exact: true })
+      .first()
+      .selectOption({ label: design })
+    await page.getByLabel('Page title').fill(title)
+    await page.getByLabel(/^Address \(after/).fill(address)
+    await page.getByRole('button', { name: 'Create page' }).click()
+    await page.waitForURL(/\/admin\/landing\/[0-9a-f-]{36}$/)
+  }
+  await create(attar, `Eid ${id}`, lpA, 'Night')
+  await a11y()
+  await expect(page.getByLabel('Top banner — heading')).toHaveValue(attar)
+  await page.getByLabel('Show Video').check()
+  await page
+    .getByLabel('YouTube or Facebook video link')
+    .fill('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+  await page.getByLabel('Offer ends (countdown)').fill('2030-01-01T10:00')
+  await page.getByLabel('Benefits — heading').fill('All you get')
+  // Moving a block saves the page too; the first block cannot go higher.
+  await page.getByRole('button', { name: 'Move Top banner up' }).click()
+  await page.getByRole('button', { name: 'Move Video down' }).click()
+  await expect(page.getByRole('heading', { level: 2 }).nth(2)).toHaveText('Video')
+  await expect(page.getByLabel('Offer ends (countdown)')).toHaveValue('2030-01-01T10:00')
+
+  await page.goto(`/offer/${lpA}`)
+  await expect(page.getByRole('heading', { level: 1, name: attar })).toBeVisible()
+  await expect(page.locator('[data-landing="night"]')).toBeVisible()
+  await expect(page.locator('header').first()).toBeHidden()
+  await expect(page.getByRole('timer')).toContainText(/Offer ends in \d+:\d\d:\d\d/)
+  await expect(page.getByRole('button', { name: 'Play video' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'All you get' })).toBeVisible()
+  await page.getByText('How long does delivery take?').click()
+  await expect(page.getByText('1–2 days in Dhaka')).toBeVisible()
+  await a11y()
+  // Leaving through the top shows the offer once per visit; other mouse-outs never do.
+  const leave = (clientY: number, related: boolean) =>
+    page.evaluate(
+      ([y, r]) =>
+        document.dispatchEvent(
+          new MouseEvent('mouseout', {
+            clientY: y as number,
+            relatedTarget: r ? document.body : null,
+          }),
+        ),
+      [clientY, related] as const,
+    )
+  await leave(200, false)
+  await leave(-5, true)
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await leave(-5, false)
+  await page.getByRole('dialog').getByRole('link', { name: 'Order now' }).click()
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await leave(-5, false)
+  await expect(page.getByRole('dialog')).toBeHidden()
+
+  // Pack of 2 at 5% off, then 3 at 10% (৳300 off); the shopper's cart stays as it was.
+  await page.getByRole('radio', { name: /^2 pcs/ }).check()
+  await expect(page.getByTestId('checkout-discount')).toContainText('Pack saving')
+  await page
+    .getByRole('group', { name: `Quantity: ${attar}` })
+    .getByRole('button', { name: '+' })
+    .click()
+  await expect(page.getByTestId('checkout-discount')).toContainText('300')
+  await fillCheckout(page)
+  await page.getByRole('button', { name: 'Place order' }).click()
+  await page.waitForURL(/\/order\/\d+$/)
+
+  // B: a product with sizes sends shoppers to its own page; owner text overrides defaults.
+  await create(kurta, `Kurta ${id}`, lpB, 'Fresh green')
+  for (const [label, value] of [
+    ['Top banner — heading', ''],
+    ['Price & countdown — heading', ''],
+    ['Order form — heading', ''],
+    ['Sticky order bar — heading', ''],
+    ['Us vs others — heading', 'Side by side'],
+    ['Delivery charges — heading', 'Delivery'],
+    ['Questions (FAQ) — heading', 'Ask us'],
+    ['Guarantee — heading', 'Promise'],
+    ['Delivery charges — text', ''],
+  ])
+    await page.getByRole('textbox', { name: label!, exact: true }).fill(value!)
+  await page.getByLabel('Show Video').check()
+  await page.getByLabel("Show the shop's header and footer").check()
+  await saveBlocks()
+  await page.goto(`/${'offer'}/${lpB}`)
+  await expect(page.locator('header').first()).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: kurta })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Choose size or colour' })).toHaveAttribute(
+    'href',
+    `/p/${slug(kurta)}`,
+  )
+  await expect(page.getByRole('heading', { name: 'Side by side' })).toBeVisible()
+  await expect(page.getByTestId('landing-sticky')).toBeVisible()
+
+  // Stats, search, design filter, hide and show.
+  await page.goto('/admin/landing')
+  const rowA = page.getByTestId(`landing-${lpA}`)
+  await expect(rowA).toContainText('Night')
+  await expect(rowA.getByRole('cell').nth(3)).toHaveText('1')
+  await expect(rowA.getByRole('cell').nth(4)).toHaveText(/%$/)
+  await page.goto('/admin/landing?q=nothing-like-this')
+  await expect(page.getByText('No landing pages yet')).toBeVisible()
+  await page.goto('/admin/landing?design=fresh')
+  await expect(page.getByTestId(`landing-${lpB}`)).toBeVisible()
+  await expect(page.getByTestId(`landing-${lpA}`)).toHaveCount(0)
+  await page.goto('/admin/landing')
+  await rowA.getByRole('button', { name: 'Hide' }).click()
+  await expect(rowA).toContainText('Hidden')
+  expect((await page.goto(`/offer/${lpA}`))!.status()).toBe(404)
+  await page.goto('/admin/landing')
+  await rowA.getByRole('button', { name: 'Show' }).click()
+  await expect(rowA).not.toContainText('Hidden')
+
+  // A hidden copy to try changes on: packs off, then shown; deleted afterwards.
+  await rowA.getByRole('button', { name: 'Copy' }).click()
+  await page.waitForURL(/\/admin\/landing\/[0-9a-f-]{36}$/)
+  await expect(page.getByLabel('Page title')).toHaveValue(`Eid ${id} (copy)`)
+  await page.getByLabel('Show Pack offers').uncheck()
+  await page.getByLabel('Hidden from shoppers').uncheck()
+  await saveBlocks()
+  await page.goto('/admin/landing')
+  // Nobody has seen the copy yet: no conversion to show.
+  await expect(page.getByTestId(`landing-${lpA}-copy`).getByRole('cell').nth(4)).toHaveText('—')
+  await page.goto(`/offer/${lpA}-copy`)
+  await expect(page.getByRole('radio', { name: /pcs/ })).toHaveCount(0)
+  await expect(
+    page.getByRole('group', { name: `Quantity: ${attar}` }).locator('output'),
+  ).toHaveText('1')
+  await page.goto('/admin/landing')
+  await page.getByTestId(`landing-${lpA}-copy`).getByRole('link').click()
+  await page.getByLabel('Yes, delete this page').check()
+  await page.getByRole('button', { name: 'Delete page' }).click()
+  await page.waitForURL(/\/admin\/landing$/)
+  await expect(page.getByTestId(`landing-${lpA}-copy`)).toHaveCount(0)
+
+  // The address prefix: shop paths are refused; a new one moves every page.
+  const prefix = async (value: string) => {
+    await page.goto('/admin/landing')
+    await page.getByLabel(/^Address prefix/).fill(value)
+    await page.getByRole('button', { name: 'Save' }).last().click()
+  }
+  await prefix('checkout')
+  await expect(page.getByRole('alert')).toBeVisible()
+  await prefix('deals')
+  await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+  await page.goto(`/deals/${lpB}`)
+  await expect(page.getByRole('heading', { level: 1, name: kurta })).toBeVisible()
+  expect((await page.goto(`/offer/${lpB}`))!.status()).toBe(404)
+  expect((await page.goto(`/deals/no-such-page`))!.status()).toBe(404)
+  await prefix('offer')
+  await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+})

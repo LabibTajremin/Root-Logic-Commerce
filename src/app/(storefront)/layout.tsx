@@ -92,43 +92,48 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           </form>
         </div>
       )}
-      {on('announcement') && d.announcement.messages.length > 0 && (
-        <AnnouncementBar
-          a={d.announcement}
-          label={t('shop.announcements')}
-          close={t('common.close')}
+      {/* H5: data-chrome = the shop's frame a landing page can hide (contents keeps sticky intact). */}
+      <div data-chrome className="contents">
+        {on('announcement') && d.announcement.messages.length > 0 && (
+          <AnnouncementBar
+            a={d.announcement}
+            label={t('shop.announcements')}
+            close={t('common.close')}
+          />
+        )}
+        <Header
+          store={store}
+          categories={categories}
+          actions={
+            <>
+              {business.language.switcher && <LangToggle locale={locale} />}
+              {on('wishlist') && <WishlistLink label={t('wishlist.title')} />}
+              <span className="rlc-header-cart">
+                <CartButton label={t('shop.cart')} />
+              </span>
+            </>
+          }
         />
-      )}
-      <Header
-        store={store}
-        categories={categories}
-        actions={
-          <>
-            {business.language.switcher && <LangToggle locale={locale} />}
-            {on('wishlist') && <WishlistLink label={t('wishlist.title')} />}
-            <span className="rlc-header-cart">
-              <CartButton label={t('shop.cart')} />
-            </span>
-          </>
-        }
-      />
+      </div>
       <main id="main" className="flex-1">
         {children}
       </main>
-      {business.trust.footer && (
-        <div className="mx-auto w-full max-w-6xl px-4 pb-6">
-          <TrustStrip trust={business.trust} t={t} place="footer" />
-        </div>
-      )}
-      <Footer
-        store={store}
-        categories={categories}
-        text={d.footer.text}
-        credit={credit}
-        labels={k(['shop', 'help', 'track', 'search', 'payWith', 'codShort'])}
-        pages={footerPages}
-        look={d.footer}
-      />
+      <div data-chrome className="contents">
+        {business.trust.footer && (
+          <div className="mx-auto w-full max-w-6xl px-4 pb-6">
+            <TrustStrip trust={business.trust} t={t} place="footer" />
+          </div>
+        )}
+        <Footer
+          store={store}
+          categories={categories}
+          text={d.footer.text}
+          credit={credit}
+          labels={k(['shop', 'help', 'track', 'search', 'payWith', 'codShort'])}
+          pages={footerPages}
+          look={d.footer}
+        />
+      </div>
       <CartDrawer
         labels={{
           ...k(['cart', 'cartEmpty', 'checkout', 'continue', 'subtotal', 'remove', 'qty']),
@@ -157,18 +162,20 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           moneyFormat={moneyFormat}
         />
       )}
-      {on('bottomNav') && (
-        <BottomNav
-          labels={{
-            nav: t('shop.quickNav'),
-            home: t('nav.home'),
-            search: t('shop.search'),
-            track: t('shop.track'),
-            cart: t('shop.cart'),
-          }}
-          items={d.mobileNav}
-        />
-      )}
+      <div data-chrome className="contents">
+        {on('bottomNav') && (
+          <BottomNav
+            labels={{
+              nav: t('shop.quickNav'),
+              home: t('nav.home'),
+              search: t('shop.search'),
+              track: t('shop.track'),
+              cart: t('shop.cart'),
+            }}
+            items={d.mobileNav}
+          />
+        )}
+      </div>
       <Analytics tags={tagsOf(business)} />
     </div>
   )

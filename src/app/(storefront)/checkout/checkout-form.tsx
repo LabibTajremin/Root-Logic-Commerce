@@ -12,7 +12,7 @@ import {
   type FreeShippingRule,
 } from '@/modules/orders/client'
 import { formatMoney, type MoneyFormat } from '@/modules/shared'
-import { cart, useCart } from '../cart-store'
+import { cart, useCart, type CartLine } from '../cart-store'
 import { placeOrder, quoteOrder, saveDraft, type Quote } from './actions'
 
 // C1: this browser's own copy of what was typed (the shop's copy is the server draft).
@@ -84,6 +84,7 @@ export const CheckoutForm = ({
   coupons,
   freeRule,
   address,
+  landing,
 }: {
   zones: Zone[]
   labels: Record<string, string>
@@ -95,8 +96,12 @@ export const CheckoutForm = ({
   freeRule: FreeShippingRule
   /** C4/C17: district suggestions and the zone each district means. */
   address: AddressRule
+  /** H5: a landing page's own order — one product, the pack's quantity and saving; the cart is left alone. */
+  landing?: { id: string; line: CartLine; saving: number; setQty: (qty: number) => void }
 }) => {
-  const items = useCart()
+  const cartItems = useCart()
+  const items = landing ? [landing.line] : cartItems
+  const setQty = landing ? (_: string, qty: number) => landing.setQty(qty) : cart.setQty
   const router = useRouter()
   const [zoneId, setZoneId] = useState(zones[0]!.id)
   const [error, setError] = useState('')
@@ -160,7 +165,7 @@ export const CheckoutForm = ({
   // A quote is only shown for the cart and zone it was made for; placing re-prices anyway.
   const [quote, setQuote] = useState<{ for: string; q: Quote } | null>(null)
   const shown = quote?.for === payload + zoneId ? quote.q : null
-  const discount = shown && 'discount' in shown ? shown.discount : 0
+  const discount = landing ? landing.saving : shown && 'discount' in shown ? shown.discount : 0
   const applyCode = (form: HTMLFormElement) =>
     start(async () => setQuote({ for: payload + zoneId, q: await quoteOrder(new FormData(form)) }))
 
@@ -185,7 +190,7 @@ export const CheckoutForm = ({
       if ('otp' in r) return (setError(''), setOtpTo(r.otp))
       localStorage.removeItem(KEPT)
       router.push(`/order/${r.orderNo}`)
-      cart.clear()
+      if (!landing) cart.clear()
     })
   }
 
@@ -367,7 +372,7 @@ export const CheckoutForm = ({
                 <button
                   type="button"
                   aria-label="−"
-                  onClick={() => cart.setQty(l.id, l.qty - 1)}
+                  onClick={() => setQty(l.id, l.qty - 1)}
                   className="size-9 rounded-control border border-line"
                 >
                   −
@@ -376,18 +381,20 @@ export const CheckoutForm = ({
                 <button
                   type="button"
                   aria-label="+"
-                  onClick={() => cart.setQty(l.id, l.qty + 1)}
+                  onClick={() => setQty(l.id, l.qty + 1)}
                   className="size-9 rounded-control border border-line"
                 >
                   +
                 </button>
-                <button
-                  type="button"
-                  onClick={() => (removing === l.id ? cart.remove(l.id) : setRemoving(l.id))}
-                  className="ms-auto min-h-9 px-2 text-danger underline"
-                >
-                  {removing === l.id ? L.removeSure : L.remove}
-                </button>
+                {!landing && (
+                  <button
+                    type="button"
+                    onClick={() => (removing === l.id ? cart.remove(l.id) : setRemoving(l.id))}
+                    className="ms-auto min-h-9 px-2 text-danger underline"
+                  >
+                    {removing === l.id ? L.removeSure : L.remove}
+                  </button>
+                )}
               </span>
             </li>
           ))}
@@ -403,7 +410,9 @@ export const CheckoutForm = ({
         {discount > 0 && (
           <p className="flex justify-between text-sm text-success" data-testid="checkout-discount">
             <span>
-              {L.discount} ({(shown as { couponCode: string }).couponCode})
+              {landing
+                ? L.packSaving
+                : `${L.discount} (${(shown as { couponCode: string }).couponCode})`}
             </span>
             <span>−{money(discount)}</span>
           </p>
@@ -413,7 +422,8 @@ export const CheckoutForm = ({
           <span data-testid="checkout-total">{money(subtotal + charge - discount)}</span>
         </p>
         <input type="hidden" name="items" value={payload} />
-        {coupons && (
+        {landing && <input type="hidden" name="landingId" value={landing.id} />}
+        {coupons && !landing && (
           <div className="flex flex-col gap-1.5">
             <label htmlFor="couponCode" className="text-sm font-semibold">
               {L.haveCode}

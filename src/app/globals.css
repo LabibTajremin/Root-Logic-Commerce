@@ -214,3 +214,42 @@ body {
     transform: scale(1.5);
   }
 }
+
+/* H5 landing designs: token sets over the shop's theme (each checked for AA contrast). */
+[data-landing='bold'] {
+  --color-accent: #b91c1c;
+  --color-button: #b91c1c;
+  --color-button-text: #ffffff;
+}
+[data-landing='warm'] {
+  --color-bg: #fffbf5;
+  --color-soft: #fdf2e3;
+  --color-accent: #9a3412;
+  --color-button: #9a3412;
+  --color-button-text: #ffffff;
+}
+[data-landing='night'] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-soft: #1e293b;
+  --color-text: #f8fafc;
+  --color-muted: #cbd5e1;
+  --color-line: #334155;
+  --color-accent: #fbbf24;
+  --color-button: #fbbf24;
+  --color-button-text: #0f172a;
+  --color-success: #4ade80;
+  --color-danger: #fca5a5;
+}
+[data-landing='festive'] {
+  --color-soft: #fdf2f8;
+  --color-accent: #9d174d;
+  --color-button: #9d174d;
+  --color-button-text: #ffffff;
+}
+[data-landing='fresh'] {
+  --color-soft: #f0fdf4;
+  --color-accent: #15803d;
+  --color-button: #15803d;
+  --color-button-text: #ffffff;
+}

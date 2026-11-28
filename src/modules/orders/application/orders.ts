@@ -160,6 +160,8 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
       by: {
         source?: OrderSource
         discount?: number
+        /** H5: the landing page it was placed on. */
+        landingId?: string
         guard?: { client: Omit<Client, 'phone'>; rules: FraudRules }
       } = {},
     ) {
@@ -189,6 +191,7 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
         deliveryZone: zone.label,
         paymentMethod: d.paymentMethod,
         source: validate(z.enum(orderSources).default('web'), by.source),
+        landingId: by.landingId ?? null,
         client: client && { ip: client.ip, deviceId: client.deviceId },
         totals,
         coupon: coupon && { id: coupon.id, code: coupon.code, totalLimit: coupon.totalLimit },

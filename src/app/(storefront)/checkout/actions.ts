@@ -19,10 +19,8 @@ const optional = (v: string) => v.trim() || null
 const field = (form: FormData, k: string) => String(form.get(k) ?? '')
 
 export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
-  const [{ orders, drafts, otp, fraud, on, store, business, limits, t }, ip] = await Promise.all([
-    storefront(),
-    currentIp(),
-  ])
+  const [{ orders, drafts, otp, fraud, on, store, business, limits, landing, t }, ip] =
+    await Promise.all([storefront(), currentIp()])
   const f = (k: string) => field(form, k)
   try {
     limits.checkout.assert(`${store.id}:${ip}`)
@@ -53,6 +51,9 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
       path: '/',
       maxAge: 31536000,
     })
+    const items = JSON.parse(f('items')) as { productId: string; quantity: number }[]
+    // H5: an order from a landing page carries the page (its stats) and its pack price.
+    const fromPage = f('landingId') ? await landing.orderTerms(store.id, f('landingId'), items) : {}
     const order = await orders.placeOrder(
       store.id,
       {
@@ -70,10 +71,10 @@ export const placeOrder = async (form: FormData): Promise<PlaceResult> => {
         note: optional(f('note')),
         zoneId: f('zoneId'),
         couponCode: f('couponCode'),
-        items: JSON.parse(f('items')),
+        items,
       },
       shopRulesOf(business),
-      { guard: { client: { ip, deviceId }, rules: business.fraud } },
+      { guard: { client: { ip, deviceId }, rules: business.fraud }, ...fromPage },
     )
     if (risk === 'hold')
       await orders.changeStatus(store.id, order.id, 'ON_HOLD', null, 'system: low courier score')

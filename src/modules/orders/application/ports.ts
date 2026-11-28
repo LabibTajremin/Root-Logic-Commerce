@@ -48,6 +48,8 @@ export type NewOrder = {
   deliveryZone: string
   paymentMethod: string
   source: OrderSource
+  /** H5: set when placed on a landing page. */
+  landingId: string | null
   client: { ip: string; deviceId: string } | null
   totals: { subtotal: number; deliveryCharge: number; discount: number; total: number }
   /** C2: redeemed in the same transaction (the total limit is re-checked there). */

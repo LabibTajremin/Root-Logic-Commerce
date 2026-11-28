@@ -17,6 +17,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import type { ProductContent, ProductOptions, VariantOptions } from '@/modules/catalog'
+import type { LandingBlock, LandingDesign } from '@/modules/landing'
 
 const id = () => uuid().primaryKey().defaultRandom()
 const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow()
@@ -398,6 +399,8 @@ export const orders = pgTable(
     paymentMethod: text().notNull().default('COD'),
     // C15: web, landing, chat, voice, pos, manual, import.
     source: text().$type<OrderSource>().notNull().default('web'),
+    // H5: the landing page the order was placed on (its orders and conversion).
+    landingId: uuid(),
     // D3/D4: who placed a web order (IP and the first-party device cookie).
     clientIp: text(),
     deviceId: text(),
@@ -825,4 +828,26 @@ export const parcelHandoverItems = pgTable(
     scannedAt: createdAt(),
   },
   (t) => [uniqueIndex('parcel_handover_items_uq').on(t.handoverId, t.shipmentId)],
+)
+
+/** H5: product landing pages — blocks in order, each shown or hidden. */
+export const landingPages = pgTable(
+  'landing_pages',
+  {
+    id: id(),
+    storeId: storeId(),
+    slug: text().notNull(),
+    title: text().notNull(),
+    productId: uuid()
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    design: text().$type<LandingDesign>().notNull(),
+    siteChrome: boolean().notNull().default(false),
+    hidden: boolean().notNull().default(false),
+    blocks: jsonb().$type<LandingBlock[]>().notNull(),
+    visits: integer().notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex('landing_pages_store_slug_uq').on(t.storeId, t.slug)],
 )
