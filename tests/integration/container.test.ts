@@ -54,6 +54,7 @@ describe('container', () => {
       'limits',
       'media',
       'messaging',
+      'newsletter',
       'notifications',
       'orders',
       'otp',

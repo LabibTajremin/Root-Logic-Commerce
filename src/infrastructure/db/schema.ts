@@ -864,3 +864,16 @@ export const reels = pgTable('reels', {
   sortOrder: integer().notNull().default(0),
   createdAt: createdAt(),
 })
+
+/** B13: newsletter / offer sign-ups (phone or email) with their consent time. */
+export const subscribers = pgTable(
+  'subscribers',
+  {
+    id: id(),
+    storeId: storeId(),
+    contact: text().notNull(),
+    kind: text().$type<'phone' | 'email'>().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('subscribers_store_contact_uq').on(t.storeId, t.contact)],
+)

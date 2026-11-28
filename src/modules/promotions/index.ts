@@ -9,3 +9,4 @@ export {
 } from './domain/promotions'
 export { createReels, type Reel, type Reels, type ReelsRepo } from './application/reels'
 export { reelInput, type ReelData, type ReelInput } from './domain/reels'
+export { popupKinds, popupSchema, type Popup } from './domain/popups'

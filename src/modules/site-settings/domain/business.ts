@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { comboSchema, flashSaleSchema } from '@/modules/deals'
+import { popupSchema } from '@/modules/promotions'
 import { landingSettings } from '@/modules/landing'
 import { trackingSchema } from '@/modules/tracking'
 import { currencyCodes, dateFormats, type CurrencyCode } from '@/modules/shared'
@@ -211,6 +212,8 @@ export const businessSchema = z.object({
   // A9 combos and the B11 flash sale (one at a time).
   combos: z.array(comboSchema).max(30).default([]),
   flashSale: flashSaleSchema.nullable().default(null),
+  // B8: the owner's popups, first fitting one shows.
+  popups: z.array(popupSchema).max(8).default([]),
 })
 export type Business = z.infer<typeof businessSchema>
 
