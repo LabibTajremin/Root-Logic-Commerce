@@ -50,6 +50,7 @@ describe('container', () => {
       'features',
       'fraud',
       'insights',
+      'landing',
       'limits',
       'media',
       'messaging',
