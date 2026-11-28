@@ -1393,5 +1393,6 @@
   "reels.remove": "Remove",
   "error.reel.source": "Add a link or a video — one of them, not both.",
   "error.reel.link": "That link can't be played. Use a public Facebook, Instagram, TikTok or YouTube video link.",
-  "error.reel.cover": "Facebook, Instagram and TikTok reels need a cover photo."
+  "error.reel.cover": "Facebook, Instagram and TikTok reels need a cover photo.",
+  "proof.text": "{{name}} from {{area}} ordered {{product}}"
 }

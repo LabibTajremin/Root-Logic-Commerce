@@ -165,6 +165,12 @@ export type OrdersRepo = {
   productsForOrder(storeId: string, ids: string[]): Promise<OrderProduct[]>
   variantsForOrder(storeId: string, ids: string[]): Promise<OrderVariant[]>
   create(storeId: string, order: NewOrder): Promise<{ id: string; orderNo: number }>
+  /** B7: confirmed (or further on) orders since `since`, newest first: who, where, what, when. */
+  recentConfirmed(
+    storeId: string,
+    since: Date,
+    limit: number,
+  ): Promise<{ name: string; area: string; product: string; at: Date }[]>
   /** B11: units of each product ordered since `since` (cancelled orders do not count). */
   soldSince(storeId: string, productIds: string[], since: Date): Promise<Map<string, number>>
   get(storeId: string, id: string): Promise<OrderDetail | null>

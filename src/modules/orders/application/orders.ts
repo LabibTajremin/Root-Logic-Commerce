@@ -152,6 +152,14 @@ export const createOrders = ({ repo, bus, coupons, fraud }: Deps) => {
   }
 
   return {
+    /**
+     * B7: real orders only (confirmed by the shop, last 7 days), first names only —
+     * "Rahim from Mirpur ordered Rose Attar".
+     */
+    socialProof: async (storeId: string, now: Date) =>
+      (await repo.recentConfirmed(storeId, new Date(now.getTime() - 7 * 86_400_000), 10)).map(
+        (o) => ({ ...o, name: o.name.trim().split(/\s+/)[0]! }),
+      ),
     /** B11: units of each sale product sold since the sale started (its cap). */
     flashSold: (storeId: string, sale: FlashSale) =>
       repo.soldSince(

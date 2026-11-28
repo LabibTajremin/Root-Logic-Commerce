@@ -170,6 +170,28 @@ export const createOrdersRepo = (db: Db): OrdersRepo => {
     })
 
   return {
+    async recentConfirmed(storeId, since, limit) {
+      const rows = await db
+        .select({
+          id: orders.id,
+          name: orders.shipName,
+          area: orders.shipArea,
+          at: orders.createdAt,
+          // Qualified on purpose: a bare "id" in the subquery would be the item's own id.
+          product: sql<string>`(select oi."name" from "order_items" oi where oi."order_id" = "orders"."id" limit 1)`,
+        })
+        .from(orders)
+        .where(
+          and(
+            eq(orders.storeId, storeId),
+            gte(orders.createdAt, since),
+            inArray(orders.status, ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED']),
+          ),
+        )
+        .orderBy(desc(orders.createdAt))
+        .limit(limit)
+      return rows.map(({ id: _id, ...r }) => r)
+    },
     async soldSince(storeId, productIds, since) {
       if (productIds.length === 0) return new Map()
       const rows = await db

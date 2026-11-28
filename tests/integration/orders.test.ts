@@ -1061,4 +1061,17 @@ describe('order rows and the order page (F12)', () => {
     expect((await total(manual)).discount).toBe(100)
     expect(await createOrdersRepo(db).soldSince(store, [], new Date(0))).toEqual(new Map())
   })
+
+  it('shows only confirmed orders as social proof, by first name (B7)', async () => {
+    const p = await product(store, { name: 'Rose Attar', stock: 9 })
+    const a = await orders.placeOrder(store, checkout(p.id), zones)
+    await orders.placeOrder(store, checkout(p.id, 1, '01812345678'), zones)
+    expect(await orders.socialProof(store, new Date())).toEqual([])
+    await orders.changeStatus(store, a.id, 'CONFIRMED', null)
+    expect(await orders.socialProof(store, new Date())).toEqual([
+      { name: 'Rahima', area: 'Mirpur', product: 'Rose Attar', at: expect.any(Date) },
+    ])
+    // Older than a week: no longer shown.
+    expect(await orders.socialProof(store, new Date(Date.now() + 8 * 86_400_000))).toEqual([])
+  })
 })

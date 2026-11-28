@@ -13,6 +13,6 @@ export {
   type DateFormat,
   type MoneyFormat,
 } from './domain/money'
-export { daysAgo } from './domain/time'
+export { daysAgo, timeAgo } from './domain/time'
 export { isUuid } from './domain/ids'
 export { createRateLimiter } from './domain/rate-limit'

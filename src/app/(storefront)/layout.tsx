@@ -8,6 +8,7 @@ import { LangToggle } from '@/ui/lang-toggle'
 import { trackingPlan } from '@/modules/tracking'
 import type { Business } from '@/modules/site-settings'
 import { Analytics } from './analytics'
+import { SocialProof } from './social-proof'
 import { AnnouncementBar } from './announcement-bar'
 import { BottomNav } from './bottom-nav'
 import { CartButton, CartDrawer } from './cart-drawer'
@@ -187,6 +188,9 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           />
         )}
       </div>
+      {on('socialProof') && (
+        <SocialProof locale={locale} labels={{ text: t('proof.text'), close: t('common.close') }} />
+      )}
       <Analytics tags={tagsOf(business)} />
     </div>
   )
