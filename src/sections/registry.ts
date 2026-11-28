@@ -18,6 +18,8 @@ export const sectionSchemas = {
   // A9 / B11: shown only while their (paid) modules are on and there is something to show.
   combos: none,
   reels: none,
+  // B13: phone/email sign-up with consent.
+  newsletter: none,
   'flash-sale': none,
 } as const
 

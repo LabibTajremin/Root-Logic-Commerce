@@ -106,6 +106,7 @@ export const storefront = cache(async () => {
     fraud: container.fraud,
     promotions: container.promotions,
     reels: container.reels,
+    newsletter: container.newsletter,
     limits: container.limits,
   }
 })

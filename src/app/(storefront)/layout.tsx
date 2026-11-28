@@ -8,6 +8,7 @@ import { LangToggle } from '@/ui/lang-toggle'
 import { trackingPlan } from '@/modules/tracking'
 import type { Business } from '@/modules/site-settings'
 import { Analytics } from './analytics'
+import { Popups } from './popups'
 import { SocialProof } from './social-proof'
 import { AnnouncementBar } from './announcement-bar'
 import { BottomNav } from './bottom-nav'
@@ -63,9 +64,56 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
     pages,
     on,
     sale,
+    catalog,
+    money,
+    priceOf,
     t,
   } = await storefront()
   const footerPages = (await pages.published(store.id)).filter((p) => p.inFooter)
+  const newsletterLabels = {
+    contact: t('newsletter.contact'),
+    consent: t('newsletter.consent'),
+    join: t('newsletter.join'),
+    thanks: t('newsletter.thanks'),
+  }
+  const popupLabels = {
+    ...newsletterLabels,
+    close: t('common.close'),
+    notNow: t('popups.notNow'),
+    buy: t('popups.buy'),
+    keepGoing: t('popups.keepGoing'),
+  }
+  // B8: switched-on popups; a product promo whose product left the shop is dropped.
+  const popupViews = async () => {
+    const live = business.popups.filter((p) => p.on)
+    const products = new Map(
+      (await catalog.listProducts(store.id, { status: 'active' }))
+        .filter((p) => p.options.length === 0)
+        .map((p) => [p.id, p]),
+    )
+    return live.flatMap((p) => {
+      const product = p.productId ? products.get(p.productId) : undefined
+      if (p.kind === 'product' && !product) return []
+      return [
+        {
+          ...p,
+          product: product
+            ? {
+                price: money(priceOf(product)),
+                item: {
+                  id: product.id,
+                  productId: product.id,
+                  variantId: null,
+                  slug: product.slug,
+                  name: product.name,
+                  price: priceOf(product),
+                },
+              }
+            : null,
+        },
+      ]
+    })
+  }
   const { Header, Footer } = theme.slots
   const k = (keys: string[]) => Object.fromEntries(keys.map((x) => [x, t(`shop.${x}`)]))
   return (
@@ -188,6 +236,7 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
           />
         )}
       </div>
+      {on('popups') && <Popups popups={await popupViews()} labels={popupLabels} />}
       {on('socialProof') && (
         <SocialProof locale={locale} labels={{ text: t('proof.text'), close: t('common.close') }} />
       )}

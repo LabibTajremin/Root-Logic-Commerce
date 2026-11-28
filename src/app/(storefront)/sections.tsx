@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { ResolvedSection, SectionId } from '@/sections/registry'
 import { ComboList } from './combos/combo-list'
+import { NewsletterForm } from './newsletter-form'
 import { Reels } from './reels/reels'
 import { Countdown } from './countdown'
 import { sliderPosters } from './hero-posters'
@@ -20,6 +21,22 @@ type Render = (p: { ctx: Ctx; settings: Record<string, unknown> }) => ReactNode 
 const wrap = 'mx-auto flex w-full max-w-6xl flex-col gap-4 px-4'
 
 const renderers: Record<SectionId, Render> = {
+  newsletter: ({ ctx: { t } }) => (
+    <section aria-labelledby="newsletter-title" className={`${wrap} max-w-xl`}>
+      <h2 id="newsletter-title" className="font-heading text-2xl">
+        {t('newsletter.title')}
+      </h2>
+      <p className="text-muted">{t('newsletter.text')}</p>
+      <NewsletterForm
+        labels={{
+          contact: t('newsletter.contact'),
+          consent: t('newsletter.consent'),
+          join: t('newsletter.join'),
+          thanks: t('newsletter.thanks'),
+        }}
+      />
+    </section>
+  ),
   reels: ({ ctx }) => <Reels ctx={ctx} />,
   combos: ({ ctx }) =>
     ctx.on('combos') &&
