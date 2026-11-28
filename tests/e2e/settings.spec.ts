@@ -2591,6 +2591,7 @@ test('landing pages: build from a product, edit blocks, packs and inline order, 
     await page.getByRole('textbox', { name: label!, exact: true }).fill(value!)
   await page.getByLabel('Show Video').check()
   await page.getByLabel("Show the shop's header and footer").check()
+  await page.getByLabel('Offer ends (countdown)').fill('2020-01-01T10:00')
   await saveBlocks()
   await page.goto(`/${'offer'}/${lpB}`)
   await expect(page.locator('header').first()).toBeVisible()
@@ -2601,6 +2602,12 @@ test('landing pages: build from a product, edit blocks, packs and inline order, 
   )
   await expect(page.getByRole('heading', { name: 'Side by side' })).toBeVisible()
   await expect(page.getByTestId('landing-sticky')).toBeVisible()
+  await expect(page.getByRole('timer')).toHaveText('This offer has ended')
+  // Leaving by a shop link (client navigation) stops the timer and the leaving popup.
+  await page.locator('header').first().getByRole('link').first().click()
+  await expect(page).toHaveURL(/\/$/)
+  for (const bad of ['not-an-id', '00000000-0000-4000-8000-000000000000'])
+    expect((await page.goto(`/admin/landing/${bad}`))!.status()).toBe(404)
 
   // Stats, search, design filter, hide and show.
   await page.goto('/admin/landing')

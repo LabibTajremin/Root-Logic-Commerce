@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { countdownText } from './countdown'
+import { countdownText } from '../client'
 
 const labels = { left: 'Ends in', ended: 'Ended' }
 

@@ -8,7 +8,8 @@ export const ReviewQuotes = ({
 }: {
   title: string
   reviews: Quote[]
-  stars: (n: number) => string
+  /** "{{n}} out of 5 stars" — the number is filled in per review. */
+  stars: string
 }) =>
   reviews.length > 0 && (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-8">
@@ -19,7 +20,9 @@ export const ReviewQuotes = ({
             key={v.id}
             className="flex flex-col gap-1 rounded-card border border-line bg-surface p-4"
           >
-            <span aria-label={stars(v.rating)}>{'★'.repeat(v.rating)}</span>
+            <span aria-label={stars.replace('{{n}}', String(v.rating))}>
+              {'★'.repeat(v.rating)}
+            </span>
             <p>{v.body}</p>
             <span className="text-sm text-muted">{v.name}</span>
           </li>

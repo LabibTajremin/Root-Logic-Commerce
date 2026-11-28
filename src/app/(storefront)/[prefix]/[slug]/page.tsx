@@ -210,14 +210,7 @@ export default async function LandingPage(props: Props) {
           )
         )
       case 'reviews':
-        return (
-          <ReviewQuotes
-            key={i}
-            title={b.title}
-            reviews={reviews}
-            stars={(n) => t('landing.stars', { n })}
-          />
-        )
+        return <ReviewQuotes key={i} title={b.title} reviews={reviews} stars={t('landing.stars')} />
       case 'delivery':
         return (
           <Section key={i}>

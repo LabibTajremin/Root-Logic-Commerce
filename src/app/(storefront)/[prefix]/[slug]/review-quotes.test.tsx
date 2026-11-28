@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { ReviewQuotes } from './review-quotes'
 
-const stars = (n: number) => `${n} of 5`
+const stars = '{{n}} of 5'
 
 describe('landing review quotes (H5)', () => {
   it('lists up to six approved reviews, or nothing at all', () => {
